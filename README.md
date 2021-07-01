@@ -6,6 +6,12 @@ A .NET 5.0 cross platform application and library that enables game developers t
 
 The application can be used directly with the input config for ease of use, or the API library could be consumed by your own application developed.
 
+## Prerequisite
+
+- Need to download and install .net 5.0. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime?utm_source=getdotnetcore&utm_medium=referral for download and installation.
+- The product must already exist in partner center before uploading.
+- The branch must already exist in partner center before uploading.
+
 ## Quickstart
 
 - Build the solution from source, or download a release.
