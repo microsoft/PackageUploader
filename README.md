@@ -1,14 +1,15 @@
 # Project
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+**GameStoreBroker**
 
-As the maintainer of this project, please make a few updates:
+A .NET 5.0 cross platform application and library that enables game developers to upload Xbox and PC game packages to [Partner Center](https://partner.microsoft.com/).
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+The application can be used directly with the input config for ease of use, or the API library could be consumed by your own application developed.
+
+## Quickstart
+
+- Build the solution from source, or download a release.
+- ...
 
 ## Contributing
 
