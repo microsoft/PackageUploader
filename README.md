@@ -1,6 +1,4 @@
-# Project
-
-**GameStoreBroker**
+# Project GameStoreBroker
 
 A .NET 5.0 cross platform application and library that enables game developers to upload Xbox and PC game packages to [Partner Center](https://partner.microsoft.com/).
 
@@ -8,14 +6,32 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Prerequisite
 
-- Need to download and install .net 5.0. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime?utm_source=getdotnetcore&utm_medium=referral for download and installation.
+- Download and install .net 5.0. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime?utm_source=getdotnetcore&utm_medium=referral for download and installation.
 - The product must already exist in partner center before uploading.
 - The branch must already exist in partner center before uploading.
-
-## Quickstart
-
 - Build the solution from source, or download a release.
-- ...
+
+## Step 1: Creating your app in Azure.
+
+- Go to https://portal.azure.com and log in with your Azure account.
+- Under Azure services find _App registrations_.
+- Under _App registrations_ click _New registration_.
+  - Enter in your _name_.
+  - Choose your _Supported account types_.
+  - Click _Register_ at the bottom of the page.
+- Under your newly created App navigate to _Client credentials_ and create a _New client secret_. Note the _clientID_, _tenantID_, and your _Secret key_ for future use.
+  
+## Step 2: Add your app in Partner Center and give it the proper permissions.
+
+- 
+
+## Step 3: Configure your wrapper
+
+- 
+
+## Step 4: Fire Away
+
+- 
 
 ## Contributing
 
