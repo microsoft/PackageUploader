@@ -23,7 +23,13 @@ The application can be used directly with the input config for ease of use, or t
   
 ## Step 2: Add your app in Partner Center and give it the proper permissions.
 
-- 
+- Log in to Partner Center with a manager level account. 
+- Click on the _cogs_ wheel on the top right of the page and navigate to _Account settings_.
+- On the left navigation pane click on _User management_ then _Azure AD applications_.
+- Click on _Create Azure AD application_ and search for your Azure created app in the search pane on the right, check the box for your app and click _Next_.
+- On the top tab click on _Customize permissions_.
+- Under _Product-level permissions_ search for your product and apply the _Read/write_ permission under _Publishing_.
+  - **NOTE** We will be changing this with future iterations of the tool to more accurately apply permissions.
 
 ## Step 3: Configure your wrapper
 
