@@ -52,13 +52,23 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Q & A
 
-Question: When will the tool start working with Flight branches? 
+Question: When will the tool start working with Flight branches? <br>
+Answer: We're working on this now and with the new iteration of the wrapper uploading to a flight should work.
 
-Question: Is this only for PC? 
+Question: Is this only for PC? <br>
+Answer: The naming of the action and config is only temporary - this will get changed later. All packages are supported: UWP, MSIXVC, XVC.
 
-Question: Can I use the API directly? 
+Question: Can I use the API directly? <br>
+Answer: You may and documentation will be written however there will be no support. Please reference the document and the wrapper source for call patterns. 
 
-Question: Can I use one App name for multiple products? 
+Question: Can I use one App name for multiple products? <br>
+Answer: In theory this should work, but currently it is not. We're working with the Partner Center Accounts Team to identify the issue. 
+
+Question: Will this have delta uploads? <br>
+Answer: Delta uploads was out of scope for the initial target of the project - however this has been commited for future implementation.
+
+Question: Will I need to do anything different for delta uploads to work? <br>
+Answer: You will not - this will all be done at the service layer and client shouldn't have to be touched. 
 
 ## Contributing
 
