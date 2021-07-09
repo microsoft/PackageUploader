@@ -76,6 +76,9 @@ Answer: We will indeed! Deleting/removing packages, moving packages between bran
 Question: Could I use this wrapper to automate and update other parts of partner center apart from uploads? <br>
 Answer: Unfortunately not right now and our only scope was uploads. The API teams are working to further expand this out to other parts of partner center. 
 
+Question: I don't like the secret key in the config - can we change it? <br>
+Answer: We will be changing this most likely, potentially inputting at runtime. 
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
