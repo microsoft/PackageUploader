@@ -79,6 +79,9 @@ Answer: Unfortunately not right now and our only scope was uploads. The API team
 Question: I don't like the secret key in the config - can we change it? <br>
 Answer: We will be changing this most likely, potentially inputting at runtime. 
 
+Question: If I want to change how the wrapper works who do I reach out to? <br>
+Answer: It's completely open source and you can change the wrapper as you wish! Use, adjust and contribute! 
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
