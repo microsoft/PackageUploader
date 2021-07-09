@@ -33,11 +33,26 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Step 3: Configure your wrapper
 
-- 
+- Navigate to the root of your wrapper directory.
+- Edit the _UploadPcPackageTest.json_ with your favorite editor and update the following fields:
+  - bigId (From Partner Center)
+  - branchFriendlyName (From Partner Center)
+  - flightName (From Partner Center - if you're doing a flight)
+  - packageFilePath (Location of the game package)
+  - clientId (From Azure Portal)
+  - tenantId (From Azure Portal)
+  - clientSecret (From Azure Portal)
+  - Save
 
 ## Step 4: Fire Away
 
 - 
+
+## Q & A
+
+Question: When will the tool start working with Flight branches? 
+
+Question: 
 
 ## Contributing
 
