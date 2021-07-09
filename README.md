@@ -46,13 +46,19 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Step 4: Fire Away
 
-- 
+- Open _powershell_ via the start menu.
+- Navigate to the root of your wrapper directory and run the following command:
+  -  .\GameStoreBroker.Application.exe UploadPcPackage --ConfigFile .\UploadPcPackageTest.json
 
 ## Q & A
 
 Question: When will the tool start working with Flight branches? 
 
-Question: 
+Question: Is this only for PC? 
+
+Question: Can I use the API directly? 
+
+Question: Can I use one App name for multiple products? 
 
 ## Contributing
 
