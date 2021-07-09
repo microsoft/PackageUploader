@@ -70,6 +70,12 @@ Answer: Delta uploads was out of scope for the initial target of the project - h
 Question: Will I need to do anything different for delta uploads to work? <br>
 Answer: You will not - this will all be done at the service layer and client shouldn't have to be touched. 
 
+Question: Will the wrapper support other actions? <br>
+Answer: We will indeed! Deleting/removing packages, moving packages between branches and publishing will all be added.
+
+Question: Could I use this wrapper to automate and update other parts of partner center apart from uploads? <br>
+Answer: Unfortunately not right now and our only scope was uploads. The API teams are working to further expand this out to other parts of partner center. 
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
