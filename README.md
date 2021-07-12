@@ -2,11 +2,11 @@
 
 A .NET 5.0 cross platform application and library that enables game developers to upload Xbox and PC game packages to [Partner Center](https://partner.microsoft.com/).
 
-The application can be used directly with the input config for ease of use, or the API library could be consumed by your own application developed.
+The application can be used directly with the input config for ease of use, or the API library could be consumed by your own application.
 
 ## Prerequisite
 
-- Download and install .net 5.0. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime?utm_source=getdotnetcore&utm_medium=referral for download and installation.
+- Download and install the .NET Runtime. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime?utm_source=getdotnetcore&utm_medium=referral for download and installation.
 - The product must already exist in partner center before uploading.
 - The branch must already exist in partner center before uploading.
 - Build the solution from source, or download a release.
