@@ -6,9 +6,9 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Prerequisite
 
-- Download and install the .NET 5.0 Runtime. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime?utm_source=getdotnetcore&utm_medium=referral for download and installation.
+- Download and install the .NET 5.0 Runtime. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime for download and installation.
 - The product must already exist in partner center before uploading.
-- The branch must already exist in partner center before uploading.
+- The branch/sandbox must already exist in partner center before uploading.
 - Build the solution from source, or download a release.
 
 ## Step 1: Creating your app in Azure.
