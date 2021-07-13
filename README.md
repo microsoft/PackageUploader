@@ -42,7 +42,7 @@ The application can be used directly with the input config for ease of use, or t
 - Navigate to the root of your wrapper directory.
 - Edit the _UploadPcPackageTest.json_ with your favorite editor and update the following fields:
   - bigId (From Partner Center)
-  - branchFriendlyName (From Partner Center)
+  - branchFriendlyName (name of the branch/sandbox from Partner Center)
   - flightName (From Partner Center - if you're doing a flight)
   - packageFilePath (Location of the game package)
   - clientId (From Azure Portal)
