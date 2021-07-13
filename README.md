@@ -47,14 +47,13 @@ The application can be used directly with the input config for ease of use, or t
   - packageFilePath (Location of the game package)
   - clientId (From Azure Portal)
   - tenantId (From Azure Portal)
-  - clientSecret (From Azure Portal)
   - Save
 
 ## Step 4: Fire Away
 
 - Open _powershell_ via the start menu.
 - Navigate to the root of your wrapper directory and run the following command:
-  -  .\GameStoreBroker.Application.exe UploadPcPackage --ConfigFile .\UploadPcPackageTest.json
+  -  .\GameStoreBroker.Application.exe UploadPcPackage -c .\UploadPcPackageTest.json -s *secretkey*
 
 ## Q & A
 
