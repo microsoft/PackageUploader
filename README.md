@@ -30,6 +30,7 @@ The application can be used directly with the input config for ease of use, or t
 - On the top tab click on _Customize permissions_.
 - Under _Product-level permissions_ search for your product and apply the _Read/write_ permission under _Publishing_.
   - **NOTE** We will be changing this with future iterations of the tool to more accurately apply permissions.
+  - TONY TO ADD - A BLURB ABOUT ADDING THE PROPER FOLKS TO MAINTAIN THE APP GOING FORWARD.
 
 
 - Tony to update - update permissions
