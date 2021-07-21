@@ -16,18 +16,19 @@ namespace GameStoreBroker.ClientApi
     {
         public IngestionHttpClient(ILogger logger, AadAuthInfo user) : base(logger)
         {
-            var client = new HttpClient
+            var httpClient = new HttpClient
             {
+                BaseAddress = new Uri("https://api.partner.microsoft.com/v1.0/ingestion/"),
                 Timeout = TimeSpan.FromMinutes(10),
-                BaseAddress = _baseUri
             };
-            client.DefaultRequestHeaders.Add("Client-Request-ID", "");
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+            httpClient.DefaultRequestHeaders.Add("Client-Request-ID", "");
+            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 
             var userToken = GetUserTokenAsync(user).GetAwaiter().GetResult();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userToken);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userToken);
 
-            _httpClient = client;
+            _httpClient = httpClient;
         }
 
         private async Task<string> GetUserTokenAsync(AadAuthInfo user)
@@ -51,7 +52,5 @@ namespace GameStoreBroker.ClientApi
 
             return result.AccessToken;
         }
-
-        private readonly Uri _baseUri = new Uri("https://api.partner.microsoft.com/v1.0/ingestion/");
     }
 }
