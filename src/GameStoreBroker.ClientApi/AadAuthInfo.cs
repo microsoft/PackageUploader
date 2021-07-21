@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi
 {
-    internal sealed class AadAuthInfo
+    public sealed class AadAuthInfo
     {
         public string TenantId { get; set; }
         public string ClientId { get; set; }

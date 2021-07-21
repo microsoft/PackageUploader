@@ -7,26 +7,28 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace GameStoreBroker.ClientApi.Http
 {
-    internal abstract class HttpRestClient : IHttpRestClient, IDisposable
+    public abstract class HttpRestClient : IHttpRestClient, IDisposable
     {
-        private string _clientRequestId;
-        private ILogger _logger;
-        protected HttpClient _httpClient;
+        private readonly string _clientRequestId;
+        private readonly ILogger _logger;
+        private readonly HttpClient _httpClient;
 
-        public HttpRestClient(ILogger logger)
+        public HttpRestClient(ILogger logger, HttpClient httpClient)
         {
             _clientRequestId = "";
             _logger = logger;
+            _httpClient = httpClient;
         }
 
         public async Task<T> GetAsync<T>(string subUrl)
         {
             try
             {
-                await LogRequestVerboseAsync("GET " + subUrl, _clientRequestId).ConfigureAwait(false);
+                LogRequestVerboseAsync("GET " + subUrl, _clientRequestId);
 
                 using HttpResponseMessage response = await _httpClient.GetAsync(subUrl).ConfigureAwait(false);
                 var serverRequestId = GetRequestIdFromHeader(response);
@@ -36,7 +38,7 @@ namespace GameStoreBroker.ClientApi.Http
                     var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     T result = JsonConvert.DeserializeObject<T>(responseString, _jsonSetting);
 
-                    await LogResponseVerboseAsync(result, serverRequestId).ConfigureAwait(false);
+                    LogResponseVerboseAsync(result, serverRequestId);
 
                     return result;
                 }
@@ -49,8 +51,7 @@ namespace GameStoreBroker.ClientApi.Http
             }
             catch (Exception ex)
             {
-                await LogExceptionAsync(ex).ConfigureAwait(false);
-
+                LogExceptionAsync(ex);
                 throw;
             }
         }
@@ -65,34 +66,34 @@ namespace GameStoreBroker.ClientApi.Http
             return string.Empty;
         }
 
-        private async Task LogRequestVerboseAsync(string requestUrl, object requestBody = null)
+        private void LogRequestVerboseAsync(string requestUrl, object requestBody = null)
         {
-            await _logger.LogVerboseAsync(requestUrl).ConfigureAwait(false);
-            await _logger.LogVerboseAsync(LogHeader).ConfigureAwait(false);
-            await _logger.LogVerboseAsync($"{requestUrl} [ClientRequestId: {_clientRequestId}]").ConfigureAwait(false);
+            _logger.LogTrace(requestUrl);
+            _logger.LogTrace(LogHeader);
+            _logger.LogTrace($"{requestUrl} [ClientRequestId: {_clientRequestId}]");
             if (requestBody != null)
             {
-                await _logger.LogVerboseAsync("Request Body:").ConfigureAwait(false);
+                _logger.LogTrace("Request Body:");
                 var json = JsonConvert.SerializeObject(requestBody, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
-                await _logger.LogVerboseAsync(json).ConfigureAwait(false);
+                _logger.LogTrace(json);
             }
-            await _logger.LogVerboseAsync(string.Empty).ConfigureAwait(false);
+            _logger.LogTrace(string.Empty);
         }
 
-        private async Task LogResponseVerboseAsync(object obj, string serverRequestId)
+        private void LogResponseVerboseAsync(object obj, string serverRequestId)
         {
-            await _logger.LogVerboseAsync($"Response Body: [RequestId: {serverRequestId}]").ConfigureAwait(false);
+            _logger.LogTrace($"Response Body: [RequestId: {serverRequestId}]");
             var json = obj == null ? string.Empty : JsonConvert.SerializeObject(obj, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
-            await _logger.LogVerboseAsync(json).ConfigureAwait(false);
-            await _logger.LogVerboseAsync(LogHeader).ConfigureAwait(false);
+            _logger.LogTrace(json);
+            _logger.LogTrace(LogHeader);
         }
 
-        private async Task LogExceptionAsync(Exception ex)
+        private void LogExceptionAsync(Exception ex)
         {
-            await _logger.LogErrorAsync("Exception:").ConfigureAwait(false);
+            _logger.LogError(ex, "Exception:");
             var json = JsonConvert.SerializeObject(ex, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
-            await _logger.LogErrorAsync(json).ConfigureAwait(false);
-            await _logger.LogErrorAsync(LogHeader).ConfigureAwait(false);
+            _logger.LogError(json);
+            _logger.LogError(LogHeader);
         }
 
         public void Dispose()

@@ -7,12 +7,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace GameStoreBroker.ClientApi.Xfus
 {
-    internal sealed class XfusHttpClient : HttpRestClient
+    public sealed class XfusHttpClient : HttpRestClient
     {
-        public XfusHttpClient(ILogger logger) : base(logger)
+        public XfusHttpClient(ILogger<XfusHttpClient> logger, HttpClient httpClient) : base(logger, httpClient)
         {
             // will be config driven when features implemented
 
@@ -21,18 +22,13 @@ namespace GameStoreBroker.ClientApi.Xfus
             //httpClient.DefaultRequestHeaders.Add("Tenant", config.Tenant);
             //var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(xfusUploadInfo.Token));
 
-            var httpClient = new HttpClient
-            {
-                BaseAddress = new Uri("/api/v2/assets/"),
-                Timeout = TimeSpan.FromSeconds(10)
-            };
+            httpClient.BaseAddress = new Uri("/api/v2/assets/");
+            httpClient.Timeout = TimeSpan.FromSeconds(10);
 
             var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes("mytoken"));
 
             httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
             httpClient.DefaultRequestHeaders.Add("Tenant", "Xfus");
-
-            _httpClient = httpClient;
         }
     }
 }
