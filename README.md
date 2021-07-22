@@ -44,6 +44,7 @@ The application can be used directly with the input config for ease of use, or t
 - Edit the _UploadPcPackageTest.json_ with your favorite editor and update the following fields:
   - bigId (From Partner Center)
   - branchFriendlyName (name of the branch/sandbox from Partner Center)
+    - XBOX RECOMMEND: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
   - flightName (From Partner Center - if you're doing a flight)
   - packageFilePath (Location of the game package)
   - clientId (From Azure Portal)
