@@ -4,10 +4,8 @@
 // </copyright>
 // ---------------------------------------------------------------------------------------------------------------------
 
-namespace GameStoreBroker.ClientApi.ExternalModels
+namespace GameStoreBroker.ClientApi.Models
 {
-    using Newtonsoft.Json;
-
     /// <summary>
     /// GameProduct Model
     /// </summary>

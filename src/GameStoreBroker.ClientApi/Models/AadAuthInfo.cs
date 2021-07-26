@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace GameStoreBroker.Api
+namespace GameStoreBroker.ClientApi.Models
 {
     public class AadAuthInfo
     {

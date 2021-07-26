@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace GameStoreBroker.ClientApi.IngestionModels
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
     internal sealed class TypeValuePair
     {

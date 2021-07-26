@@ -2,14 +2,13 @@
 
 using GameStoreBroker.Client.Schema;
 using GameStoreBroker.ClientApi;
-using GameStoreBroker.ClientApi.ExternalModels;
+using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Rare.SiteReliability.StampManager;
 
 namespace GameStoreBroker.Application.Commands
 {

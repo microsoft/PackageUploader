@@ -1,8 +1,9 @@
-﻿using System;
-using GameStoreBroker.ClientApi;
+﻿using GameStoreBroker.ClientApi;
+using Karambolo.Extensions.Logging.File;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
@@ -12,7 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Karambolo.Extensions.Logging.File;
 
 namespace GameStoreBroker.Application
 {
@@ -24,7 +24,7 @@ namespace GameStoreBroker.Application
         {
             return await BuildCommandLine()
                 .UseHost(hostBuilder => hostBuilder
-                    .ConfigureLogging((_, logging) =>
+                    .ConfigureLogging((host, logging) =>
                     {
                         logging.ClearProviders();
                         logging.SetMinimumLevel(LogLevel.Warning);

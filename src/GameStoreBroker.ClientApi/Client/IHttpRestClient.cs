@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi.Http
+namespace GameStoreBroker.ClientApi.Client
 {
     public interface IHttpRestClient
     {

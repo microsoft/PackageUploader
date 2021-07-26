@@ -1,9 +1,6 @@
-﻿// Copyright (C) Microsoft. All rights reserved.
-
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using GameStoreBroker.Api;
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.Client.Schema;
 using Microsoft.Extensions.DependencyInjection;

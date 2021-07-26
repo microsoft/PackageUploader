@@ -1,17 +1,9 @@
-﻿using GameStoreBroker.ClientApi.Http;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
 using Microsoft.Extensions.Logging;
 
-namespace GameStoreBroker.ClientApi.Xfus
+namespace GameStoreBroker.ClientApi.Client.Xfus
 {
-    public sealed class XfusHttpClient : HttpRestClient
+    internal sealed class XfusHttpClient : HttpRestClient, IXfusHttpClient
     {
         public XfusHttpClient(ILogger<XfusHttpClient> logger, HttpClient httpClient) : base(logger, httpClient)
         {

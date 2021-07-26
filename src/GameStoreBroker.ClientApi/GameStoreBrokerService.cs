@@ -1,7 +1,7 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
-using GameStoreBroker.Api;
-using GameStoreBroker.ClientApi.ExternalModels;
+using GameStoreBroker.ClientApi.Client.Ingestion;
+using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi
 {
-    internal class GameStoreBrokerService : IGameStoreBrokerService
+    public class GameStoreBrokerService : IGameStoreBrokerService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<GameStoreBrokerService> _logger;
@@ -22,23 +22,39 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GameProduct> GetProductByBigId(AadAuthInfo aadAuthInfo, string bigId)
         {
-            if (string.IsNullOrEmpty(bigId))
+            if (bigId == null)
+            {
                 throw new ArgumentNullException(nameof(bigId));
+            }
 
-            var ingestionHttpClient = _serviceProvider.GetRequiredService<IngestionHttpClient>();
+            if (string.IsNullOrWhiteSpace(bigId))
+            {
+                throw new ArgumentException(null, nameof(bigId));
+            }
+
+            var ingestionHttpClient = _serviceProvider.GetRequiredService<IIngestionHttpClient>();
             await ingestionHttpClient.Authorize(aadAuthInfo).ConfigureAwait(false);
 
+            _logger.LogDebug("Requesting game product by BigId");
             return await ingestionHttpClient.GetGameProductByBigIdAsync(bigId);
         }
 
         public async Task<GameProduct> GetProductByProductId(AadAuthInfo aadAuthInfo, string productId)
         {
-            if (string.IsNullOrEmpty(productId))
+            if (productId == null)
+            {
                 throw new ArgumentNullException(nameof(productId));
+            }
 
-            var ingestionHttpClient = _serviceProvider.GetRequiredService<IngestionHttpClient>();
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException(null, nameof(productId));
+            }
+
+            var ingestionHttpClient = _serviceProvider.GetRequiredService<IIngestionHttpClient>();
             await ingestionHttpClient.Authorize(aadAuthInfo).ConfigureAwait(false);
-            
+
+            _logger.LogDebug("Requesting game product by ProductId");
             return await ingestionHttpClient.GetGameProductByLongIdAsync(productId);
         }
     }

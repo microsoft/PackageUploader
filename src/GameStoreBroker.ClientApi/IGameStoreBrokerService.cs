@@ -1,8 +1,7 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
-using GameStoreBroker.Api;
-using GameStoreBroker.ClientApi.ExternalModels;
 using System.Threading.Tasks;
+using GameStoreBroker.ClientApi.Models;
 
 namespace GameStoreBroker.ClientApi
 {

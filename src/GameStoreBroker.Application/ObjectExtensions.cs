@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Rare.SiteReliability.StampManager
+namespace GameStoreBroker.Application
 {
     public static class ObjectExtensions
     {

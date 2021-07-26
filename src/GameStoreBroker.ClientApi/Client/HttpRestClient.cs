@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
-namespace GameStoreBroker.ClientApi.Http
+namespace GameStoreBroker.ClientApi.Client
 {
     public abstract class HttpRestClient : IHttpRestClient, IDisposable
     {

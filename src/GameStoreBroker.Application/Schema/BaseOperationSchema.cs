@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GameStoreBroker.Api;
+using GameStoreBroker.ClientApi.Models;
 using Newtonsoft.Json;
 
 namespace GameStoreBroker.Application.Schema

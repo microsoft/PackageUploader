@@ -1,21 +1,17 @@
-﻿using GameStoreBroker.Api;
-using GameStoreBroker.ClientApi.ExternalModels;
-using GameStoreBroker.ClientApi.Http;
-using GameStoreBroker.ClientApi.IngestionModels;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+using GameStoreBroker.ClientApi.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace GameStoreBroker.ClientApi
+namespace GameStoreBroker.ClientApi.Client.Ingestion
 {
-    internal sealed class IngestionHttpClient : HttpRestClient
+    internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
     {
-        public bool Authorized;
-
         public IngestionHttpClient(ILogger<IngestionHttpClient> logger, HttpClient httpClient) : base(logger, httpClient)
         {
             httpClient.BaseAddress = new Uri("https://api.partner.microsoft.com/v1.0/ingestion/");
@@ -29,10 +25,9 @@ namespace GameStoreBroker.ClientApi
         {
             var userToken = await GetUserTokenAsync(user);
             HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userToken);
-            Authorized = true;
         }
 
-        private async Task<string> GetUserTokenAsync(AadAuthInfo user)
+        private static async Task<string> GetUserTokenAsync(AadAuthInfo user)
         {
             const string aadAuthorityBaseUrl = "https://login.microsoftonline.com/";
             const string aadResourceForCaller = "https://api.partner.microsoft.com";
