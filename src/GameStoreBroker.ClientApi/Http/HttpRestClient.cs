@@ -88,9 +88,6 @@ namespace GameStoreBroker.ClientApi.Http
         private void LogExceptionAsync(Exception ex)
         {
             _logger.LogError(ex, "Exception:");
-            //var json = JsonConvert.SerializeObject(ex, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
-            //_logger.LogError(json);
-            //_logger.LogError(LogHeader);
         }
 
         public void Dispose()

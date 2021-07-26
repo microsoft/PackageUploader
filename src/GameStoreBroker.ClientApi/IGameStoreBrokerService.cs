@@ -2,7 +2,6 @@
 
 using GameStoreBroker.Api;
 using GameStoreBroker.ClientApi.ExternalModels;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi

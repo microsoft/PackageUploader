@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using GameStoreBroker.Api;
+﻿using GameStoreBroker.Api;
 using GameStoreBroker.ClientApi.ExternalModels;
 using GameStoreBroker.ClientApi.Http;
 using GameStoreBroker.ClientApi.IngestionModels;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Newtonsoft.Json;
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi
 {
@@ -27,9 +23,6 @@ namespace GameStoreBroker.ClientApi
 
             httpClient.DefaultRequestHeaders.Add("Client-Request-ID", "");
             httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-
-            //var userToken = GetUserTokenAsync(user).GetAwaiter().GetResult();
-            //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userToken);
         }
 
         public async Task Authorize(AadAuthInfo user)
@@ -95,12 +88,6 @@ namespace GameStoreBroker.ClientApi
             };
 
             return gameProduct;
-        }
-
-        public async Task<GamePackage> GetPackageByIdAsync(string productId, string packageId)
-        {
-            var result = await GetAsync<GamePackage>($"products/{productId}/packages/{packageId}");
-            return result;
         }
     }
 }

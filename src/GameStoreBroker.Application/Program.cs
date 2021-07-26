@@ -41,7 +41,7 @@ namespace GameStoreBroker.Application
                             {
                                 TimestampFormat = LogTimestampFormat,
                             };
-                            options.RootPath = Path.GetTempPath(); //AppContext.BaseDirectory;
+                            options.RootPath = Path.GetTempPath();
                             options.Files = new [] { new LogFileOptions
                             {
                                 Path = $"GameStoreBroker_{DateTime.Now:yyyyMMddhhmmss}.log",
@@ -74,14 +74,6 @@ namespace GameStoreBroker.Application
                 {
                     configFile, clientSecret, verbose,
                 }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(GetProduct)),
-                //new Command("UploadPcPackage", "Uploads a msix, appaxupload, package to a product.")
-                //{
-                //    configFile, clientSecret, verbose,
-                //}.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(UploadPcPackage)),
-                //new Command("UploadXboxPackage", "Uploads a msixxvc, xvc and related assets to a product.")
-                //{
-                //    configFile, clientSecret, verbose,
-                //}.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(UploadXboxPackage)),
             };
 
             rootCommand.Description = "GameStoreBroker description.";
@@ -90,11 +82,5 @@ namespace GameStoreBroker.Application
 
         private static async Task<int> GetProduct(IHost host, Options options, CancellationToken ct) => 
             await new Commands.GetProduct(host, options).Run(ct).ConfigureAwait(false);
-
-        private static async Task<int> UploadPcPackage(IHost host, Options options, CancellationToken ct) =>
-            await new Commands.UploadPcPackage(host, options).Run(ct).ConfigureAwait(false);
-
-        private static async Task<int> UploadXboxPackage(IHost host, Options options, CancellationToken ct) =>
-            await new Commands.UploadXboxPackage(host, options).Run(ct).ConfigureAwait(false);
     }
 }
