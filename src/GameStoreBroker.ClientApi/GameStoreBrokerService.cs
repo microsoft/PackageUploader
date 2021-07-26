@@ -1,30 +1,46 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
-using System.Threading.Tasks;
-using GameStoreBroker.ClientApi.Xfus;
+using GameStoreBroker.Api;
+using GameStoreBroker.ClientApi.ExternalModels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi
 {
-	public class GameStoreBrokerService
-	{
-		private readonly ILogger<GameStoreBrokerService> _logger;
-		private readonly IngestionHttpClient _ingestionHttpClient;
-		private readonly XfusHttpClient _xfusHttpClient;
+    internal class GameStoreBrokerService : IGameStoreBrokerService
+    {
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<GameStoreBrokerService> _logger;
 
-		public GameStoreBrokerService(ILogger<GameStoreBrokerService> logger, IngestionHttpClient ingestionHttpClient, XfusHttpClient xfusHttpClient)
-		{
-			_logger = logger;
-			_ingestionHttpClient = ingestionHttpClient;
-			_xfusHttpClient = xfusHttpClient;
-		}
+        public GameStoreBrokerService(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+            _logger = serviceProvider.GetRequiredService<ILogger<GameStoreBrokerService>>();
+        }
 
-		public async Task<bool> UploadGame()
-		{
-			await Task.Delay(0);
-			_logger.LogInformation("Uploading...");
-			return true;
-		}
+        public async Task<GameProduct> GetProductByBigId(AadAuthInfo aadAuthInfo, string bigId)
+        {
+            if (string.IsNullOrEmpty(bigId))
+                throw new ArgumentNullException(nameof(bigId));
 
-	}
+            var ingestionHttpClient = _serviceProvider.GetRequiredService<IngestionHttpClient>();
+            await ingestionHttpClient.Authorize(aadAuthInfo).ConfigureAwait(false);
+
+            return await ingestionHttpClient.GetGameProductByBigIdAsync(bigId);
+        }
+
+        public async Task<GameProduct> GetProductByProductId(AadAuthInfo aadAuthInfo, string productId)
+        {
+            if (string.IsNullOrEmpty(productId))
+                throw new ArgumentNullException(nameof(productId));
+
+            var ingestionHttpClient = _serviceProvider.GetRequiredService<IngestionHttpClient>();
+            await ingestionHttpClient.Authorize(aadAuthInfo).ConfigureAwait(false);
+            
+            return await ingestionHttpClient.GetGameProductByLongIdAsync(productId);
+        }
+    }
 }

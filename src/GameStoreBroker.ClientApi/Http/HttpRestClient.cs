@@ -1,13 +1,10 @@
-﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace GameStoreBroker.ClientApi.Http
 {
@@ -15,13 +12,13 @@ namespace GameStoreBroker.ClientApi.Http
     {
         private readonly string _clientRequestId;
         private readonly ILogger _logger;
-        private readonly HttpClient _httpClient;
+        protected readonly HttpClient HttpClient;
 
-        public HttpRestClient(ILogger logger, HttpClient httpClient)
+        protected HttpRestClient(ILogger logger, HttpClient httpClient)
         {
             _clientRequestId = "";
             _logger = logger;
-            _httpClient = httpClient;
+            HttpClient = httpClient;
         }
 
         public async Task<T> GetAsync<T>(string subUrl)
@@ -30,13 +27,13 @@ namespace GameStoreBroker.ClientApi.Http
             {
                 LogRequestVerboseAsync("GET " + subUrl, _clientRequestId);
 
-                using HttpResponseMessage response = await _httpClient.GetAsync(subUrl).ConfigureAwait(false);
+                using var response = await HttpClient.GetAsync(subUrl).ConfigureAwait(false);
                 var serverRequestId = GetRequestIdFromHeader(response);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    T result = JsonConvert.DeserializeObject<T>(responseString, _jsonSetting);
+                    var result = JsonConvert.DeserializeObject<T>(responseString, _jsonSetting);
 
                     LogResponseVerboseAsync(result, serverRequestId);
 
@@ -70,7 +67,7 @@ namespace GameStoreBroker.ClientApi.Http
         {
             _logger.LogTrace(requestUrl);
             _logger.LogTrace(LogHeader);
-            _logger.LogTrace($"{requestUrl} [ClientRequestId: {_clientRequestId}]");
+            _logger.LogTrace("{requestUrl} [ClientRequestId: {_clientRequestId}]", requestUrl, _clientRequestId);
             if (requestBody != null)
             {
                 _logger.LogTrace("Request Body:");
@@ -82,7 +79,7 @@ namespace GameStoreBroker.ClientApi.Http
 
         private void LogResponseVerboseAsync(object obj, string serverRequestId)
         {
-            _logger.LogTrace($"Response Body: [RequestId: {serverRequestId}]");
+            _logger.LogTrace("Response Body: [RequestId: {serverRequestId}]", serverRequestId);
             var json = obj == null ? string.Empty : JsonConvert.SerializeObject(obj, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
             _logger.LogTrace(json);
             _logger.LogTrace(LogHeader);
@@ -91,14 +88,14 @@ namespace GameStoreBroker.ClientApi.Http
         private void LogExceptionAsync(Exception ex)
         {
             _logger.LogError(ex, "Exception:");
-            var json = JsonConvert.SerializeObject(ex, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
-            _logger.LogError(json);
-            _logger.LogError(LogHeader);
+            //var json = JsonConvert.SerializeObject(ex, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
+            //_logger.LogError(json);
+            //_logger.LogError(LogHeader);
         }
 
         public void Dispose()
         {
-            ((IDisposable)_httpClient).Dispose();
+            ((IDisposable)HttpClient).Dispose();
         }
 
         private readonly JsonSerializerSettings _jsonSetting = new();

@@ -22,13 +22,13 @@ namespace GameStoreBroker.ClientApi.Xfus
             //httpClient.DefaultRequestHeaders.Add("Tenant", config.Tenant);
             //var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(xfusUploadInfo.Token));
 
-            httpClient.BaseAddress = new Uri("/api/v2/assets/");
-            httpClient.Timeout = TimeSpan.FromSeconds(10);
+            //httpClient.BaseAddress = new Uri("/api/v2/assets/");
+            //httpClient.Timeout = TimeSpan.FromSeconds(10);
 
-            var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes("mytoken"));
+            //var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes("mytoken"));
 
-            httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
-            httpClient.DefaultRequestHeaders.Add("Tenant", "Xfus");
+            //httpClient.DefaultRequestHeaders.Add("Authorization", authToken);
+            //httpClient.DefaultRequestHeaders.Add("Tenant", "Xfus");
         }
     }
 }
