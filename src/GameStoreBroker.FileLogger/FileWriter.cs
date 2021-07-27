@@ -7,11 +7,11 @@ using System.Text;
 
 namespace GameStoreBroker.FileLogger
 {
-    internal class LogFile : IFile
+    internal class FileWriter : IFileWriter
     {
         private readonly TextWriter _textWriter;
 
-        public LogFile(FileWriterOptions options)
+        public FileWriter(FileWriterOptions options)
         {
             var path = options.Path ?? $"Log_{DateTime.Now:yyyyMMddhhmmss}.txt";
 

@@ -35,7 +35,7 @@ namespace GameStoreBroker.FileLogger
         /// </summary>
         /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
         /// <param name="configure">A delegate to configure the <see cref="FileLogger"/>.</param>
-        /// <param name="configureFile">A delegate to configure the <see cref="LogFile"/>.</param>
+        /// <param name="configureFile">A delegate to configure the <see cref="FileWriter"/>.</param>
         public static ILoggingBuilder AddFile(this ILoggingBuilder builder, Action<FileLoggerOptions> configure, Action<FileWriterOptions> configureFile)
         {
             if (configure == null)
@@ -72,7 +72,7 @@ namespace GameStoreBroker.FileLogger
         /// </summary>
         /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
         /// <param name="configure">A delegate to configure the <see cref="FileLogger"/> options for the built-in default log formatter.</param>
-        /// <param name="configureFile">A delegate to configure the <see cref="LogFile"/> options.</param>
+        /// <param name="configureFile">A delegate to configure the <see cref="FileWriter"/> options.</param>
         public static ILoggingBuilder AddSimpleFile(this ILoggingBuilder builder, Action<SimpleFileFormatterOptions> configure, Action<FileWriterOptions> configureFile)
         {
             return builder.AddFileWithFormatter(FileFormatterNames.Simple, configure, configureFile);
@@ -100,7 +100,7 @@ namespace GameStoreBroker.FileLogger
         /// </summary>
         /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
         /// <param name="configure">A delegate to configure the <see cref="FileLogger"/> options for the built-in json log formatter.</param>
-        /// <param name="configureFile">A delegate to configure the <see cref="LogFile"/> options.</param>
+        /// <param name="configureFile">A delegate to configure the <see cref="FileWriter"/> options.</param>
         public static ILoggingBuilder AddJsonFile(this ILoggingBuilder builder, Action<JsonFileFormatterOptions> configure, Action<FileWriterOptions> configureFile)
         {
             return builder.AddFileWithFormatter(FileFormatterNames.Json, configure, configureFile);

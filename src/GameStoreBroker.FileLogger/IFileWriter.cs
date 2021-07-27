@@ -5,7 +5,7 @@ using System;
 
 namespace GameStoreBroker.FileLogger
 {
-    internal interface IFile : IDisposable
+    internal interface IFileWriter : IDisposable
     {
         void Write(string message);
     }

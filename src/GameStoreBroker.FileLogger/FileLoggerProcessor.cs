@@ -14,7 +14,7 @@ namespace GameStoreBroker.FileLogger
         private readonly BlockingCollection<LogMessageEntry> _messageQueue = new BlockingCollection<LogMessageEntry>(MaxQueuedMessages);
         private readonly Thread _outputThread;
 
-        public IFile File;
+        public IFileWriter FileWriter;
 
         public FileLoggerProcessor()
         {
@@ -53,7 +53,7 @@ namespace GameStoreBroker.FileLogger
         // for testing
         internal virtual void WriteMessage(LogMessageEntry entry)
         {
-            File.Write(entry.Message);
+            FileWriter.Write(entry.Message);
         }
 
         private void ProcessLogQueue()
@@ -84,8 +84,8 @@ namespace GameStoreBroker.FileLogger
 
             try
             {
-                File?.Dispose();
                 _outputThread.Join(1500); // with timeout in-case it is locked
+                FileWriter?.Dispose();
             }
             catch (ThreadStateException) { }
         }

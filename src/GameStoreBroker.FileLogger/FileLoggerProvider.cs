@@ -28,7 +28,7 @@ namespace GameStoreBroker.FileLogger
         /// Creates an instance of <see cref="FileLoggerProvider"/>.
         /// </summary>
         /// <param name="options">The options to create <see cref="FileLogger"/> instances with.</param>
-        /// <param name="fileWriterOptions">The options to create <see cref="LogFile"/> instance with.</param>
+        /// <param name="fileWriterOptions">The options to create <see cref="FileWriter"/> instance with.</param>
         public FileLoggerProvider(IOptionsMonitor<FileLoggerOptions> options, IOptionsMonitor<FileWriterOptions> fileWriterOptions)
             : this(options, fileWriterOptions, Enumerable.Empty<FileFormatter>()) { }
 
@@ -36,7 +36,7 @@ namespace GameStoreBroker.FileLogger
         /// Creates an instance of <see cref="FileLoggerProvider"/>.
         /// </summary>
         /// <param name="options">The options to create <see cref="FileLogger"/> instances with.</param>
-        /// <param name="fileWriterOptions">The options to create <see cref="LogFile"/> instance with.</param>
+        /// <param name="fileWriterOptions">The options to create <see cref="FileWriter"/> instance with.</param>
         /// <param name="formatters">Log formatters added for <see cref="FileLogger"/> instances.</param>
         public FileLoggerProvider(IOptionsMonitor<FileLoggerOptions> options, IOptionsMonitor<FileWriterOptions> fileWriterOptions, IEnumerable<FileFormatter> formatters)
         {
@@ -49,7 +49,7 @@ namespace GameStoreBroker.FileLogger
             
             _messageQueue = new FileLoggerProcessor
             {
-                File = new LogFile(fileWriterOptions.CurrentValue)
+                FileWriter = new FileWriter(fileWriterOptions.CurrentValue)
             };
         }
 
