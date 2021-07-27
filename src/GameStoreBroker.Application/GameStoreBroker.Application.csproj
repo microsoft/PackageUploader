@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Karambolo.Extensions.Logging.File" Version="3.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
     <PackageReference Include="System.CommandLine.Hosting" Version="0.3.0-alpha.21216.1" />
@@ -14,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameStoreBroker.ClientApi\GameStoreBroker.ClientApi.csproj" />
+    <ProjectReference Include="..\GameStoreBroker.FileLogger\GameStoreBroker.FileLogger.csproj" />
   </ItemGroup>
 
   <ItemGroup>

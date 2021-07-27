@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -8,11 +7,14 @@ using Newtonsoft.Json;
 
 namespace GameStoreBroker.ClientApi.Client
 {
-    public abstract class HttpRestClient : IHttpRestClient, IDisposable
+    public abstract class HttpRestClient : IHttpRestClient
     {
         private readonly string _clientRequestId;
         private readonly ILogger _logger;
         protected readonly HttpClient HttpClient;
+
+        private readonly JsonSerializerSettings _jsonSetting = new JsonSerializerSettings();
+        private readonly JsonSerializerSettings _logJsonSettings = new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
         {
@@ -25,7 +27,7 @@ namespace GameStoreBroker.ClientApi.Client
         {
             try
             {
-                LogRequestVerboseAsync("GET " + subUrl, _clientRequestId);
+                LogRequestVerbose("GET " + subUrl, _clientRequestId);
 
                 using var response = await HttpClient.GetAsync(subUrl).ConfigureAwait(false);
                 var serverRequestId = GetRequestIdFromHeader(response);
@@ -35,7 +37,7 @@ namespace GameStoreBroker.ClientApi.Client
                     var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var result = JsonConvert.DeserializeObject<T>(responseString, _jsonSetting);
 
-                    LogResponseVerboseAsync(result, serverRequestId);
+                    LogResponseVerbose(result, serverRequestId);
 
                     return result;
                 }
@@ -48,14 +50,14 @@ namespace GameStoreBroker.ClientApi.Client
             }
             catch (Exception ex)
             {
-                LogExceptionAsync(ex);
+                LogException(ex);
                 throw;
             }
         }
 
         private static string GetRequestIdFromHeader(HttpResponseMessage response)
         {
-            if (response.Headers.TryGetValues("Request-ID", out IEnumerable<string> headerValues))
+            if (response.Headers.TryGetValues("Request-ID", out var headerValues))
             {
                 return headerValues.FirstOrDefault();
             }
@@ -63,39 +65,25 @@ namespace GameStoreBroker.ClientApi.Client
             return string.Empty;
         }
 
-        private void LogRequestVerboseAsync(string requestUrl, object requestBody = null)
+        private void LogRequestVerbose(string requestUrl, string clientRequestId, object requestBody = null)
         {
-            _logger.LogTrace(requestUrl);
-            _logger.LogTrace(LogHeader);
-            _logger.LogTrace("{requestUrl} [ClientRequestId: {_clientRequestId}]", requestUrl, _clientRequestId);
+            _logger.LogTrace("{requestUrl} [ClientRequestId: {_clientRequestId}]", requestUrl, clientRequestId);
             if (requestBody != null)
             {
                 _logger.LogTrace("Request Body:");
-                var json = JsonConvert.SerializeObject(requestBody, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
-                _logger.LogTrace(json);
+                _logger.LogTrace(requestBody.ToJson(settings: _logJsonSettings));
             }
-            _logger.LogTrace(string.Empty);
         }
 
-        private void LogResponseVerboseAsync(object obj, string serverRequestId)
+        private void LogResponseVerbose(object obj, string serverRequestId)
         {
             _logger.LogTrace("Response Body: [RequestId: {serverRequestId}]", serverRequestId);
-            var json = obj == null ? string.Empty : JsonConvert.SerializeObject(obj, new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore });
-            _logger.LogTrace(json);
-            _logger.LogTrace(LogHeader);
+            _logger.LogTrace(obj.ToJson(settings: _logJsonSettings));
         }
 
-        private void LogExceptionAsync(Exception ex)
+        private void LogException(Exception ex)
         {
             _logger.LogError(ex, "Exception:");
         }
-
-        public void Dispose()
-        {
-            ((IDisposable)HttpClient).Dispose();
-        }
-
-        private readonly JsonSerializerSettings _jsonSetting = new();
-        private const string LogHeader = "------------------------------------------------------------------------------------------";
     }
 }

@@ -1,5 +1,5 @@
 ﻿using GameStoreBroker.ClientApi;
-using Karambolo.Extensions.Logging.File;
+using GameStoreBroker.FileLogger;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,28 +24,25 @@ namespace GameStoreBroker.Application
         {
             return await BuildCommandLine()
                 .UseHost(hostBuilder => hostBuilder
-                    .ConfigureLogging((host, logging) =>
+                    .ConfigureLogging((_, logging) =>
                     {
                         logging.ClearProviders();
                         logging.SetMinimumLevel(LogLevel.Warning);
                         logging.AddFilter("GameStoreBroker", args.Contains("-v") || args.Contains("--Verbose") ? LogLevel.Trace : LogLevel.Information);
+                        logging.AddSimpleFile(options =>
+                        {
+                            options.IncludeScopes = true;
+                            options.SingleLine = true;
+                            options.TimestampFormat = LogTimestampFormat;
+                        }, file =>
+                        {
+                            file.Path = Path.Combine(Path.GetTempPath(), $"GameStoreBroker_{DateTime.Now:yyyyMMddhhmmss}.log");
+                        });
                         logging.AddSimpleConsole(options =>
                         {
                             options.IncludeScopes = true;
                             options.SingleLine = true;
                             options.TimestampFormat = LogTimestampFormat;
-                        });
-                        logging.AddFile(options =>
-                        {
-                            options.TextBuilder = new CustomFileLogEntryTextBuilder
-                            {
-                                TimestampFormat = LogTimestampFormat,
-                            };
-                            options.RootPath = Path.GetTempPath();
-                            options.Files = new [] { new LogFileOptions
-                            {
-                                Path = $"GameStoreBroker_{DateTime.Now:yyyyMMddhhmmss}.log",
-                            }};
                         });
                     })
                     .ConfigureServices((_, services) =>

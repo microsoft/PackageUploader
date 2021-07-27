@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace GameStoreBroker.Application
+namespace GameStoreBroker.ClientApi
 {
     internal static class ObjectExtensions
     {
