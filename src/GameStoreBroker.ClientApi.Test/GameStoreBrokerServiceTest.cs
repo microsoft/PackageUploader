@@ -17,6 +17,9 @@ namespace GameStoreBroker.ClientApi.Test
         private const string TestBigId = "TestBigId";
         private const string TestProductId = "TestProductId";
 
+        private const string TestUnauthorizedBigId = "TestUnauthorizedBigId";
+        private const string TestUnauthorizedProductId = "TestUnauthorizedProductId";
+
         private GameProduct _testProduct;
         private GameStoreBrokerService _gameStoreBrokerService;
         private AadAuthInfo _aadAuthInfo;
@@ -33,12 +36,20 @@ namespace GameStoreBroker.ClientApi.Test
             var logger = new NullLogger<GameStoreBrokerService>();
 
             var ingestionClient = new Mock<IIngestionHttpClient>();
-            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(TestBigId))
-                .ReturnsAsync(_testProduct);
-            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(It.IsNotIn(TestBigId)))
-                .ThrowsAsync(new HttpRequestException(string.Empty, null, HttpStatusCode.NotFound));
             ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(TestProductId))
                 .ReturnsAsync(_testProduct);
+            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(TestBigId))
+                .ReturnsAsync(_testProduct);
+
+            ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(TestUnauthorizedProductId))
+                .ThrowsAsync(new HttpRequestException(string.Empty, null, HttpStatusCode.Unauthorized));
+            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(TestUnauthorizedBigId))
+                .ThrowsAsync(new HttpRequestException(string.Empty, null, HttpStatusCode.Unauthorized));
+
+            ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(It.IsNotIn(TestProductId, TestUnauthorizedProductId)))
+                .ReturnsAsync((GameProduct)null);
+            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(It.IsNotIn(TestBigId, TestUnauthorizedBigId)))
+                .ReturnsAsync((GameProduct)null);
 
             var sp = new Mock<IServiceProvider>();
             sp.Setup(p => p.GetService(typeof(ILogger<GameStoreBrokerService>))).Returns(logger);
@@ -55,21 +66,21 @@ namespace GameStoreBroker.ClientApi.Test
         }
 
         [TestMethod]
-        public async Task GetProductByBigIdTest()
-        {
-            var productResult = await _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, TestBigId);
-
-            Assert.IsNotNull(productResult);
-            Assert.AreEqual(TestBigId, productResult.BigId);
-        }
-
-        [TestMethod]
         public async Task GetProductByProductIdTest()
         {
             var productResult = await _gameStoreBrokerService.GetProductByProductId(_aadAuthInfo, TestProductId);
 
             Assert.IsNotNull(productResult);
             Assert.AreEqual(TestProductId, productResult.ProductId);
+        }
+
+        [TestMethod]
+        public async Task GetProductByBigIdTest()
+        {
+            var productResult = await _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, TestBigId);
+
+            Assert.IsNotNull(productResult);
+            Assert.AreEqual(TestBigId, productResult.BigId);
         }
 
         [TestMethod]
@@ -102,15 +113,29 @@ namespace GameStoreBroker.ClientApi.Test
         }
 
         [TestMethod]
-        public async Task GetProductByBigIdNotFoundTest()
+        public async Task GetProductByProductIdNotFoundTest()
         {
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, "BigIdNotFound"));
+            var productResult = await _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, "ProductIdNotFound");
+            Assert.IsNull(productResult);
         }
 
         [TestMethod]
-        public async Task GetProductByProductIdNotFoundTest()
+        public async Task GetProductByBigIdNotFoundTest()
         {
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, "ProductIdNotFound"));
+            var productResult = await _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, "BigIdNotFound");
+            Assert.IsNull(productResult);
+        }
+        
+        [TestMethod]
+        public async Task GetProductByProductIdUnauthorizedTest()
+        {
+            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _gameStoreBrokerService.GetProductByProductId(_aadAuthInfo, TestUnauthorizedProductId));
+        }
+
+        [TestMethod]
+        public async Task GetProductByBigIdUnauthorizedTest()
+        {
+            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, TestUnauthorizedBigId));
         }
     }
 }

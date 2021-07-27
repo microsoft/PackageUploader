@@ -1,13 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+﻿using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
+[assembly: InternalsVisibleTo("GameStoreBroker.ClientApi.Test")]
 namespace GameStoreBroker.ClientApi.Client.Ingestion
 {
     internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
@@ -51,17 +54,28 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
         public async Task<GameProduct> GetGameProductByLongIdAsync(string longId)
         {
-            var ingestionGameProduct = await GetAsync<IngestionGameProduct>($"products/{longId}");
-
-            var gameProduct = new GameProduct
+            try
             {
-                ProductId = ingestionGameProduct.Id,
-                BigId = ingestionGameProduct.ExternalIds.FirstOrDefault(id => id.Type.Equals("StoreId", StringComparison.OrdinalIgnoreCase))?.Value,
-                ProductName = ingestionGameProduct.Name,
-                IsJaguar = ingestionGameProduct.IsModularPublishing.HasValue && ingestionGameProduct.IsModularPublishing.Value
-            };
+                var ingestionGameProduct = await GetAsync<IngestionGameProduct>($"products/{longId}");
 
-            return gameProduct;
+                var gameProduct = new GameProduct
+                {
+                    ProductId = ingestionGameProduct.Id,
+                    BigId = ingestionGameProduct.ExternalIds.FirstOrDefault(id => id.Type.Equals("StoreId", StringComparison.OrdinalIgnoreCase))?.Value,
+                    ProductName = ingestionGameProduct.Name,
+                    IsJaguar = ingestionGameProduct.IsModularPublishing.HasValue && ingestionGameProduct.IsModularPublishing.Value
+                };
+
+                return gameProduct;
+            }
+            catch (HttpRequestException e)
+            {
+                if (e.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+                throw;
+            }
         }
 
         public async Task<GameProduct> GetGameProductByBigIdAsync(string bigId)
