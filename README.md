@@ -2,13 +2,13 @@
 
 A .NET 5.0 cross platform application and library that enables game developers to upload Xbox and PC game packages to [Partner Center](https://partner.microsoft.com/).
 
-The application can be used directly with the input config for ease of use, or the API library could be consumed by your own application developed.
+The application can be used directly with the input config for ease of use, or the API library could be consumed by your own application.
 
 ## Prerequisite
 
-- Download and install .net 5.0. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime?utm_source=getdotnetcore&utm_medium=referral for download and installation.
+- Download and install the .NET 5.0 Runtime. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime for download and installation.
 - The product must already exist in partner center before uploading.
-- The branch must already exist in partner center before uploading.
+- The branch/sandbox must already exist in partner center before uploading.
 - Build the solution from source, or download a release.
 
 ## Step 1: Creating your app in Azure.
@@ -20,6 +20,8 @@ The application can be used directly with the input config for ease of use, or t
   - Choose your _Supported account types_.
   - Click _Register_ at the bottom of the page.
 - Under your newly created App navigate to _Client credentials_ and create a _New client secret_. Note the _clientID_, _tenantID_, and your _Secret key_ for future use.
+- It is recommended that you add your team as backup to maintain your app going forward.
+  - Navigate into the app, on the left under _manage_ find _owners_ and _add_ your back up.
   
 ## Step 2: Add your app in Partner Center and give it the proper permissions.
 
@@ -30,14 +32,69 @@ The application can be used directly with the input config for ease of use, or t
 - On the top tab click on _Customize permissions_.
 - Under _Product-level permissions_ search for your product and apply the _Read/write_ permission under _Publishing_.
   - **NOTE** We will be changing this with future iterations of the tool to more accurately apply permissions.
+  - TONY TO ADD - A BLURB ABOUT ADDING THE PROPER FOLKS TO MAINTAIN THE APP GOING FORWARD.
+
+
+- Tony to update - update permissions
+
+
 
 ## Step 3: Configure your wrapper
 
-- 
+- Navigate to the root of your wrapper directory.
+- Edit the _UploadPcPackageTest.json_ with your favorite editor and update the following fields:
+  - bigId (From Partner Center)
+  - branchFriendlyName (name of the branch/sandbox from Partner Center)
+  - flightName (From Partner Center - if you're doing a flight)
+  - packageFilePath (Location of the game package)
+  - clientId (From Azure Portal)
+  - tenantId (From Azure Portal)
+  - Save
 
 ## Step 4: Fire Away
 
-- 
+- Open _powershell_ via the start menu.
+- Navigate to the root of your wrapper directory and run the following command:
+  -  .\GameStoreBroker.Application.exe UploadPcPackage -c .\UploadPcPackageTest.json -s *secretkey*
+
+- Extra parameters to pass:
+  - -c, --ConfigFile Required. The location of json config file
+  - -s, --ClientSecret Required. The client secret of the AAD app.
+  - -v, --Verbose (Default: false) Log verbose messages such as http calls.
+  - --help Display this help screen.
+  - --version Display version information.
+
+## Q & A
+
+Question: When will the tool start working with Flight branches? <br>
+Answer: We're working on this now and with the new iteration of the wrapper uploading to a flight should work.
+
+Question: Is this only for PC? <br>
+Answer: The naming of the action and config is only temporary - this will get changed later. All packages are supported: UWP, MSIXVC, XVC.
+
+Question: Can I use the API directly? <br>
+Answer: You may and documentation will be written however there will be no support. Please reference the document and the wrapper source for call patterns. 
+
+Question: Can I use one App name for multiple products? <br>
+Answer: In theory this should work, but currently it is not. We're working with the Partner Center Accounts Team to identify the issue. 
+
+Question: Will this have delta uploads? <br>
+Answer: Delta uploads was out of scope for the initial target of the project - however this has been commited for future implementation.
+
+Question: Will I need to do anything different for delta uploads to work? <br>
+Answer: You will not - this will all be done at the service layer and client shouldn't have to be touched. 
+
+Question: Will the wrapper support other actions? <br>
+Answer: We will indeed! Deleting/removing packages, moving packages between branches and publishing will all be added.
+
+Question: Could I use this wrapper to automate and update other parts of partner center apart from uploads? <br>
+Answer: Unfortunately not right now and our only scope was uploads. The API teams are working to further expand this out to other parts of partner center. 
+
+Question: I don't like the secret key in the config - can we change it? <br>
+Answer: We will be changing this most likely, potentially inputting at runtime. 
+
+Question: If I want to change how the wrapper works who do I reach out to? <br>
+Answer: It's completely open source and you can change the wrapper as you wish! Use, adjust and contribute! 
 
 ## Contributing
 
