@@ -59,21 +59,22 @@ namespace GameStoreBroker.Application
         private static CommandLineBuilder BuildCommandLine()
         {
             // Options
-            var configFile = new Option<string>(new[] {"-c", "--ConfigFile"}, "The location of json config file");
+            var configFile = new Option<string>(new[] {"-c", "--ConfigFile"}, "The location of json config file").SetIsRequired(true);
             var clientSecret = new Option<string>(new[] {"-s", "--ClientSecret"}, "The client secret of the AAD app.");
             var verbose = new Option<bool>(new[] {"-v", "--Verbose"}, "Log verbose messages such as http calls.");
 
             // Root Command
             var rootCommand = new RootCommand
             {
-                verbose,
                 new Command("GetProduct", "Gets metadata of the product.")
                 {
-                    configFile, clientSecret, verbose,
+                    configFile,
+                    clientSecret,
                 }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(GetProduct)),
             };
-
+            rootCommand.AddGlobalOption(verbose);
             rootCommand.Description = "GameStoreBroker description.";
+
             return new CommandLineBuilder(rootCommand);
         }
 

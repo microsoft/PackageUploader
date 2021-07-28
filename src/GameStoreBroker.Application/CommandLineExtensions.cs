@@ -12,5 +12,11 @@ namespace GameStoreBroker.Application
             command.Handler = handler;
             return command;
         }
+
+        public static Option SetIsRequired(this Option argument, bool isRequired)
+        {
+            argument.IsRequired = isRequired;
+            return argument;
+        }
     }
 }
