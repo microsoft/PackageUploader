@@ -10,7 +10,6 @@ using System.CommandLine.Hosting;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,16 +18,18 @@ namespace GameStoreBroker.Application
     internal static class Program
     {
         private const string LogTimestampFormat = "yyyy-MM-dd hh:mm:ss.fff ";
+        private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls.");
 
         private static async Task<int> Main(string[] args)
         {
             return await BuildCommandLine()
                 .UseHost(hostBuilder => hostBuilder
-                    .ConfigureLogging((_, logging) =>
+                    .ConfigureLogging((ctx, logging) =>
                     {
+                        var invocationContext = ctx.GetInvocationContext();
                         logging.ClearProviders();
                         logging.SetMinimumLevel(LogLevel.Warning);
-                        logging.AddFilter("GameStoreBroker", args.Contains("-v") || args.Contains("--Verbose") ? LogLevel.Trace : LogLevel.Information);
+                        logging.AddFilter("GameStoreBroker", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
                         logging.AddSimpleFile(options =>
                         {
                             options.IncludeScopes = true;
@@ -61,7 +62,6 @@ namespace GameStoreBroker.Application
             // Options
             var configFile = new Option<string>(new[] {"-c", "--ConfigFile"}, "The location of json config file").SetIsRequired(true);
             var clientSecret = new Option<string>(new[] {"-s", "--ClientSecret"}, "The client secret of the AAD app.");
-            var verbose = new Option<bool>(new[] {"-v", "--Verbose"}, "Log verbose messages such as http calls.");
 
             // Root Command
             var rootCommand = new RootCommand
@@ -72,9 +72,8 @@ namespace GameStoreBroker.Application
                     clientSecret,
                 }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(GetProduct)),
             };
-            rootCommand.AddGlobalOption(verbose);
+            rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.Description = "GameStoreBroker description.";
-
             return new CommandLineBuilder(rootCommand);
         }
 
