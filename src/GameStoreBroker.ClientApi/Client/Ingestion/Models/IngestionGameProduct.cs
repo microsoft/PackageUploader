@@ -1,22 +1,22 @@
 // Copyright (C) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
     internal sealed class IngestionGameProduct
     {
-        [JsonProperty(PropertyName = "id")]
-        public string Id { get; internal set; }
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
 
-        [JsonProperty(PropertyName = "name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty(PropertyName = "isModularPublishing")]
+        [JsonPropertyName("isModularPublishing")]
         public bool? IsModularPublishing { get; set; }
 
-        [JsonProperty(PropertyName = "externalIDs")]
+        [JsonPropertyName("externalIDs")]
         public IList<TypeValuePair> ExternalIds { get; set; }
     }
 }

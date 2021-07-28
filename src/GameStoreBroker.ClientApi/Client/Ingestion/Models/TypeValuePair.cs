@@ -1,15 +1,15 @@
 // Copyright (C) Microsoft. All rights reserved.
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
     internal sealed class TypeValuePair
     {
-        [JsonProperty(PropertyName = "type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [JsonProperty(PropertyName = "value")]
+        [JsonPropertyName("value")]
         public string Value { get; set; }
     }
 }

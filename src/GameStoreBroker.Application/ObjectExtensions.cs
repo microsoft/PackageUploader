@@ -7,6 +7,11 @@ namespace GameStoreBroker.Application
 {
     internal static class ObjectExtensions
     {
+        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions()
+        {
+            IgnoreNullValues = true,
+        };
+
         public static string ToJson<T>(this T value, JsonSerializerOptions jsonSerializerOptions = null) where T : class
         {
             if (value == null)
@@ -16,7 +21,7 @@ namespace GameStoreBroker.Application
 
             try
             {
-                var serializedObject = JsonSerializer.Serialize(value, jsonSerializerOptions);
+                var serializedObject = JsonSerializer.Serialize(value, jsonSerializerOptions ?? DefaultJsonSerializerOptions);
                 return serializedObject;
             }
             catch (Exception ex)
