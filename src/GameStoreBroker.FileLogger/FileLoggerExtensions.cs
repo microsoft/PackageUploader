@@ -35,12 +35,25 @@ namespace GameStoreBroker.FileLogger
         /// </summary>
         /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
         /// <param name="configure">A delegate to configure the <see cref="FileLogger"/>.</param>
+        public static ILoggingBuilder AddFile(this ILoggingBuilder builder, Action<FileLoggerOptions> configure) =>
+            AddFile(builder, configure, _ => { });
+
+        /// <summary>
+        /// Adds a file logger named 'File' to the factory.
+        /// </summary>
+        /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
+        /// <param name="configure">A delegate to configure the <see cref="FileLogger"/>.</param>
         /// <param name="configureFile">A delegate to configure the <see cref="FileWriter"/>.</param>
         public static ILoggingBuilder AddFile(this ILoggingBuilder builder, Action<FileLoggerOptions> configure, Action<FileWriterOptions> configureFile)
         {
             if (configure == null)
             {
                 throw new ArgumentNullException(nameof(configure));
+            }
+
+            if (configureFile == null)
+            {
+                throw new ArgumentNullException(nameof(configureFile));
             }
 
             builder.AddFile();
@@ -126,7 +139,7 @@ namespace GameStoreBroker.FileLogger
 
         private static ILoggingBuilder AddFormatterWithName(this ILoggingBuilder builder, string name)
         {
-            return builder.AddFile(options => options.FormatterName = name, _ => { });
+            return builder.AddFile(options => options.FormatterName = name);
         }
 
         /// <summary>
