@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.Client
 {
-    public interface IHttpRestClient
+    internal interface IHttpRestClient
     {
         Task<T> GetAsync<T>(string subUrl);
     }

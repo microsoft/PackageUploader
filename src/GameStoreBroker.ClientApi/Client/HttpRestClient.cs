@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace GameStoreBroker.ClientApi.Client
 {
-    public abstract class HttpRestClient : IHttpRestClient
+    internal abstract class HttpRestClient : IHttpRestClient
     {
         private readonly string _clientRequestId;
         private readonly ILogger _logger;
