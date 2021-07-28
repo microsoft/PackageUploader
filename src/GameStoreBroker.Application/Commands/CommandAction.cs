@@ -1,23 +1,22 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using GameStoreBroker.Application.Schema;
-using GameStoreBroker.Client.Schema;
+﻿using GameStoreBroker.Application.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GameStoreBroker.Application.Commands
 {
-    internal abstract class Action
+    internal abstract class CommandAction
     {
         private readonly Options _options;
-        private readonly ILogger<Action> _logger;
+        private readonly ILogger<CommandAction> _logger;
 
-        protected Action(IHost host, Options options)
+        protected CommandAction(IHost host, Options options)
         {
             _options = options;
-            _logger = host.Services.GetRequiredService<ILogger<Action>>();
+            _logger = host.Services.GetRequiredService<ILogger<CommandAction>>();
         }
 
         protected async Task<T> GetSchema<T>() where T : BaseOperationSchema

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.Application.Commands
 {
-    internal class GetProduct : Action
+    internal class GetProduct : CommandAction
     {
         private readonly IHost _host;
 
