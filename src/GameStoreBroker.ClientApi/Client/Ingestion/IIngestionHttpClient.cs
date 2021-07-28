@@ -1,6 +1,7 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using GameStoreBroker.ClientApi.Models;
 
@@ -11,7 +12,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
     internal interface IIngestionHttpClient
     {
         Task Authorize(AadAuthInfo user);
-        Task<GameProduct> GetGameProductByLongIdAsync(string longId);
-        Task<GameProduct> GetGameProductByBigIdAsync(string bigId);
+        Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct);
+        Task<GameProduct> GetGameProductByBigIdAsync(string bigId, CancellationToken ct);
     }
 }

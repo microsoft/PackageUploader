@@ -1,8 +1,13 @@
-﻿using GameStoreBroker.Application.Schema;
+﻿// Copyright (C) Microsoft. All rights reserved.
+
+using GameStoreBroker.Application.Schema;
+using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,9 +24,14 @@ namespace GameStoreBroker.Application.Commands
             _logger = host.Services.GetRequiredService<ILogger<CommandAction>>();
         }
 
-        protected async Task<T> GetSchema<T>() where T : BaseOperationSchema
+        protected async Task<T> GetSchemaAsync<T>(CancellationToken ct) where T : BaseOperationSchema
         {
-            var schema = await new SchemaReader<T>().DeserializeFile(_options.ConfigFile).ConfigureAwait(false);
+            if (!_options.ConfigFile.Exists)
+            {
+                throw new FileNotFoundException("ConfigFile does not exist.", _options.ConfigFile.FullName);
+            }
+
+            var schema = await DeserializeJsonFileAsync<T>(_options.ConfigFile.FullName, ct).ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(_options.ClientSecret))
             {
@@ -31,12 +41,28 @@ namespace GameStoreBroker.Application.Commands
             return schema;
         }
 
-        public async Task<int> Run(CancellationToken ct)
+        protected static AadAuthInfo GetAadAuthInfo(AadAuthInfoSchema aadAuthInfoSchema)
+        {
+            if (aadAuthInfoSchema == null)
+            {
+                throw new ArgumentNullException(nameof(aadAuthInfoSchema));
+            }
+
+            var aadAuthInfo = new AadAuthInfo
+            {
+                TenantId = aadAuthInfoSchema.TenantId,
+                ClientId = aadAuthInfoSchema.ClientId,
+                ClientSecret = aadAuthInfoSchema.ClientSecret,
+            };
+            return aadAuthInfo;
+        }
+
+        public async Task<int> RunAsync(CancellationToken ct)
         {
             try
             {
                 _logger.LogDebug("GameStoreBroker is running.");
-                await Process(ct).ConfigureAwait(false);
+                await ProcessAsync(ct).ConfigureAwait(false);
                 _logger.LogInformation("GameStoreBroker has finished running.");
                 return 0;
             }
@@ -52,6 +78,18 @@ namespace GameStoreBroker.Application.Commands
             }
         }
 
-        protected abstract Task Process(CancellationToken ct);
+        protected abstract Task ProcessAsync(CancellationToken ct);
+
+        private static async Task<T> DeserializeJsonFileAsync<T>(string fileName, CancellationToken ct)
+        {
+            if (fileName == null)
+            {
+                throw new ArgumentNullException(nameof(fileName));
+            }
+
+            await using var openStream = File.OpenRead(fileName);
+            var deserializedObject = await JsonSerializer.DeserializeAsync<T>(openStream, cancellationToken: ct).ConfigureAwait(false);
+            return deserializedObject;
+        }
     }
 }

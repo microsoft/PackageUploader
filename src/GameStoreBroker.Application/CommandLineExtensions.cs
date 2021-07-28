@@ -13,12 +13,6 @@ namespace GameStoreBroker.Application
             return command;
         }
 
-        public static Option SetIsRequired(this Option argument, bool isRequired)
-        {
-            argument.IsRequired = isRequired;
-            return argument;
-        }
-
         public static T GetOptionValue<T>(this InvocationContext invocationContext, Option<T> option)
         {
             return invocationContext.ParseResult.ValueForOption(option);

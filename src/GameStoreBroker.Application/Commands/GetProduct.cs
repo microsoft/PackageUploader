@@ -1,6 +1,6 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
-using GameStoreBroker.Client.Schema;
+using GameStoreBroker.Application.Schema;
 using GameStoreBroker.ClientApi;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +21,7 @@ namespace GameStoreBroker.Application.Commands
             _host = host;
         }
 
-        protected override async Task Process(CancellationToken ct)
+        protected override async Task ProcessAsync(CancellationToken ct)
         {
             using var scope = _host.Services.CreateScope();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<GetProduct>>();
@@ -29,16 +29,17 @@ namespace GameStoreBroker.Application.Commands
 
             logger.LogInformation("Starting GetProduct process");
 
-            var schema = await GetSchema<GetProductOperationSchema>().ConfigureAwait(false);
+            var schema = await GetSchemaAsync<GetProductOperationSchema>(ct).ConfigureAwait(false);
+            var aadAuthInfo = GetAadAuthInfo(schema.AadAuthInfo);
 
             GameProduct product;
             if (!string.IsNullOrWhiteSpace(schema.BigId))
             {
-                product = await storeBroker.GetProductByBigId(schema.AadAuthInfo, schema.BigId).ConfigureAwait(false);
+                product = await storeBroker.GetProductByBigIdAsync(aadAuthInfo, schema.BigId, ct).ConfigureAwait(false);
             }
             else if (!string.IsNullOrWhiteSpace(schema.ProductId))
             {
-                product = await storeBroker.GetProductByProductId(schema.AadAuthInfo, schema.ProductId).ConfigureAwait(false);
+                product = await storeBroker.GetProductByProductIdAsync(aadAuthInfo, schema.ProductId, ct).ConfigureAwait(false);
             }
             else
             {

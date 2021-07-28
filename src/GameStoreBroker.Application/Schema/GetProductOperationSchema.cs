@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GameStoreBroker.Application.Schema;
+// Copyright (C) Microsoft. All rights reserved.
 
-namespace GameStoreBroker.Client.Schema
+namespace GameStoreBroker.Application.Schema
 {
-    public class GetProductOperationSchema : BaseOperationSchema
+    internal class GetProductOperationSchema : BaseOperationSchema
     {
     }
 }

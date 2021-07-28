@@ -1,4 +1,6 @@
-﻿using GameStoreBroker.ClientApi;
+﻿// Copyright (C) Microsoft. All rights reserved.
+
+using GameStoreBroker.ClientApi;
 using GameStoreBroker.FileLogger;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -60,7 +62,10 @@ namespace GameStoreBroker.Application
         private static CommandLineBuilder BuildCommandLine()
         {
             // Options
-            var configFile = new Option<string>(new[] {"-c", "--ConfigFile"}, "The location of json config file").SetIsRequired(true);
+            var configFile = new Option<FileInfo>(new[] {"-c", "--ConfigFile"}, "The location of json config file")
+            {
+                IsRequired = true,
+            };
             var clientSecret = new Option<string>(new[] {"-s", "--ClientSecret"}, "The client secret of the AAD app.");
 
             // Root Command
@@ -70,14 +75,14 @@ namespace GameStoreBroker.Application
                 {
                     configFile,
                     clientSecret,
-                }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(GetProduct)),
+                }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(GetProductAsync)),
             };
             rootCommand.AddGlobalOption(VerboseOption);
-            rootCommand.Description = "GameStoreBroker description.";
+            rootCommand.Description = "Application that enables game developers to upload Xbox and PC game packages to Partner Center.";
             return new CommandLineBuilder(rootCommand);
         }
 
-        private static async Task<int> GetProduct(IHost host, Options options, CancellationToken ct) => 
-            await new Commands.GetProduct(host, options).Run(ct).ConfigureAwait(false);
+        private static async Task<int> GetProductAsync(IHost host, Options options, CancellationToken ct) => 
+            await new Commands.GetProduct(host, options).RunAsync(ct).ConfigureAwait(false);
     }
 }

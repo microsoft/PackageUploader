@@ -1,3 +1,5 @@
+// Copyright (C) Microsoft. All rights reserved.
+
 using Newtonsoft.Json;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models

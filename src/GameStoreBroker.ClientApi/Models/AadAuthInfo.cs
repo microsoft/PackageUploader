@@ -1,16 +1,13 @@
-using Newtonsoft.Json;
+// Copyright (C) Microsoft. All rights reserved.
 
 namespace GameStoreBroker.ClientApi.Models
 {
-    public class AadAuthInfo
+    public sealed class AadAuthInfo
     {
-        [JsonProperty(PropertyName = "tenantId")]
         public string TenantId { get; set; }
 
-        [JsonProperty(PropertyName = "clientId")]
         public string ClientId { get; set; }
 
-        [JsonProperty(PropertyName = "clientSecret")]
         public string ClientSecret { get; set; }
     }
 }

@@ -1,11 +1,13 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿// Copyright (C) Microsoft. All rights reserved.
+
+using System;
+using System.Text.Json;
 
 namespace GameStoreBroker.Application
 {
     internal static class ObjectExtensions
     {
-        public static string ToJson<T>(this T value, Formatting formatting = Formatting.None, JsonSerializerSettings settings = null) where T : class
+        public static string ToJson<T>(this T value, JsonSerializerOptions jsonSerializerOptions = null) where T : class
         {
             if (value == null)
             {
@@ -14,8 +16,8 @@ namespace GameStoreBroker.Application
 
             try
             {
-                var json = JsonConvert.SerializeObject(value, formatting, settings);
-                return json;
+                var serializedObject = JsonSerializer.Serialize(value, jsonSerializerOptions);
+                return serializedObject;
             }
             catch (Exception ex)
             {

@@ -1,6 +1,9 @@
-﻿using System;
+﻿// Copyright (C) Microsoft. All rights reserved.
+
+using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -23,18 +26,18 @@ namespace GameStoreBroker.ClientApi.Client
             HttpClient = httpClient;
         }
 
-        public async Task<T> GetAsync<T>(string subUrl)
+        public async Task<T> GetAsync<T>(string subUrl, CancellationToken ct)
         {
             try
             {
                 LogRequestVerbose("GET " + subUrl, _clientRequestId);
 
-                using var response = await HttpClient.GetAsync(subUrl).ConfigureAwait(false);
+                using var response = await HttpClient.GetAsync(subUrl, ct).ConfigureAwait(false);
                 var serverRequestId = GetRequestIdFromHeader(response);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var responseString = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
                     var result = JsonConvert.DeserializeObject<T>(responseString, _jsonSetting);
 
                     LogResponseVerbose(result, serverRequestId);

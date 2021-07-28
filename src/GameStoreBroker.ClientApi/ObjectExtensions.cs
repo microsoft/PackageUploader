@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (C) Microsoft. All rights reserved.
+
+using System;
 using Newtonsoft.Json;
 
 namespace GameStoreBroker.ClientApi

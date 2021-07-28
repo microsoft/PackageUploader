@@ -1,25 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GameStoreBroker.ClientApi.Models;
-using Newtonsoft.Json;
+// Copyright (C) Microsoft. All rights reserved.
+
+using System.Text.Json.Serialization;
 
 namespace GameStoreBroker.Application.Schema
 {
-    public abstract class BaseOperationSchema
+    internal abstract class BaseOperationSchema
     {
-        [JsonProperty(PropertyName = "operationName")]
+        [JsonPropertyName("operationName")]
         public string OperationName { get; set; }
-
-        [JsonProperty(PropertyName = "productId")]
+        
+        [JsonPropertyName("productId")]
         public string ProductId { get; set; }
-
-        [JsonProperty(PropertyName = "bigId")]
+        
+        [JsonPropertyName("bigId")]
         public string BigId { get; set; }
-
-        [JsonProperty(PropertyName = "aadAuthInfo")]
-        public AadAuthInfo AadAuthInfo { get; set; }
+        
+        [JsonPropertyName("aadAuthInfo")]
+        public AadAuthInfoSchema AadAuthInfo { get; set; }
     }
 }

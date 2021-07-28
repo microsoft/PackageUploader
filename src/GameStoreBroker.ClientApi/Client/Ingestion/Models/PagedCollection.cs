@@ -1,3 +1,5 @@
+// Copyright (C) Microsoft. All rights reserved.
+
 using System.Collections.Generic;
 using Newtonsoft.Json;
 

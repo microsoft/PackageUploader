@@ -7,6 +7,7 @@ using Moq;
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.Test
@@ -36,19 +37,19 @@ namespace GameStoreBroker.ClientApi.Test
             var logger = new NullLogger<GameStoreBrokerService>();
 
             var ingestionClient = new Mock<IIngestionHttpClient>();
-            ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(TestProductId))
+            ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(TestProductId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_testProduct);
-            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(TestBigId))
+            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(TestBigId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(_testProduct);
 
-            ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(TestUnauthorizedProductId))
+            ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(TestUnauthorizedProductId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new HttpRequestException(string.Empty, null, HttpStatusCode.Unauthorized));
-            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(TestUnauthorizedBigId))
+            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(TestUnauthorizedBigId, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new HttpRequestException(string.Empty, null, HttpStatusCode.Unauthorized));
 
-            ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(It.IsNotIn(TestProductId, TestUnauthorizedProductId)))
+            ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(It.IsNotIn(TestProductId, TestUnauthorizedProductId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((GameProduct)null);
-            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(It.IsNotIn(TestBigId, TestUnauthorizedBigId)))
+            ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(It.IsNotIn(TestBigId, TestUnauthorizedBigId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((GameProduct)null);
 
             var sp = new Mock<IServiceProvider>();
@@ -68,7 +69,7 @@ namespace GameStoreBroker.ClientApi.Test
         [TestMethod]
         public async Task GetProductByProductIdTest()
         {
-            var productResult = await _gameStoreBrokerService.GetProductByProductId(_aadAuthInfo, TestProductId);
+            var productResult = await _gameStoreBrokerService.GetProductByProductIdAsync(_aadAuthInfo, TestProductId, CancellationToken.None);
 
             Assert.IsNotNull(productResult);
             Assert.AreEqual(TestProductId, productResult.ProductId);
@@ -77,7 +78,7 @@ namespace GameStoreBroker.ClientApi.Test
         [TestMethod]
         public async Task GetProductByBigIdTest()
         {
-            var productResult = await _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, TestBigId);
+            var productResult = await _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, TestBigId, CancellationToken.None);
 
             Assert.IsNotNull(productResult);
             Assert.AreEqual(TestBigId, productResult.BigId);
@@ -86,12 +87,13 @@ namespace GameStoreBroker.ClientApi.Test
         [TestMethod]
         public async Task GetProductByProductIdNullTest()
         {
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _gameStoreBrokerService.GetProductByProductId(_aadAuthInfo, null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _gameStoreBrokerService.GetProductByProductIdAsync(_aadAuthInfo, null, CancellationToken.None));
         }
+
         [TestMethod]
         public async Task GetProductByBigIdNullTest()
         {
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, null, CancellationToken.None));
         }
 
         [TestMethod]
@@ -100,7 +102,7 @@ namespace GameStoreBroker.ClientApi.Test
         [DataRow("     ")]
         public async Task GetProductByProductIdEmptyTest(string productId)
         {
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _gameStoreBrokerService.GetProductByProductId(_aadAuthInfo, productId));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _gameStoreBrokerService.GetProductByProductIdAsync(_aadAuthInfo, productId, CancellationToken.None));
         }
 
         [TestMethod]
@@ -109,33 +111,33 @@ namespace GameStoreBroker.ClientApi.Test
         [DataRow("     ")]
         public async Task GetProductByBigIdEmptyTest(string bigId)
         {
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, bigId));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, bigId, CancellationToken.None));
         }
 
         [TestMethod]
         public async Task GetProductByProductIdNotFoundTest()
         {
-            var productResult = await _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, "ProductIdNotFound");
+            var productResult = await _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, "ProductIdNotFound", CancellationToken.None);
             Assert.IsNull(productResult);
         }
 
         [TestMethod]
         public async Task GetProductByBigIdNotFoundTest()
         {
-            var productResult = await _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, "BigIdNotFound");
+            var productResult = await _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, "BigIdNotFound", CancellationToken.None);
             Assert.IsNull(productResult);
         }
         
         [TestMethod]
         public async Task GetProductByProductIdUnauthorizedTest()
         {
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _gameStoreBrokerService.GetProductByProductId(_aadAuthInfo, TestUnauthorizedProductId));
+            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _gameStoreBrokerService.GetProductByProductIdAsync(_aadAuthInfo, TestUnauthorizedProductId, CancellationToken.None));
         }
 
         [TestMethod]
         public async Task GetProductByBigIdUnauthorizedTest()
         {
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _gameStoreBrokerService.GetProductByBigId(_aadAuthInfo, TestUnauthorizedBigId));
+            await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, TestUnauthorizedBigId, CancellationToken.None));
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
+using System.IO;
+
 namespace GameStoreBroker.Application
 {
     internal class Options
     {
-        public string ConfigFile { get; set; }
+        public FileInfo ConfigFile { get; set; }
         public string ClientSecret { get; set; }
     }
 }

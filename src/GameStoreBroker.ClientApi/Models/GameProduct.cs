@@ -1,8 +1,4 @@
-// ---------------------------------------------------------------------------------------------------------------------
-// <copyright file="GameProduct.cs" company="Microsoft Corporation">
-//   Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-// ---------------------------------------------------------------------------------------------------------------------
+// Copyright (C) Microsoft. All rights reserved.
 
 namespace GameStoreBroker.ClientApi.Models
 {

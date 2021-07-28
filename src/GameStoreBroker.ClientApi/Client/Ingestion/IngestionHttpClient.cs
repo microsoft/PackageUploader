@@ -1,4 +1,6 @@
-﻿using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+﻿// Copyright (C) Microsoft. All rights reserved.
+
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -8,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("GameStoreBroker.ClientApi.Test")]
@@ -52,11 +55,11 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             return result.AccessToken;
         }
 
-        public async Task<GameProduct> GetGameProductByLongIdAsync(string longId)
+        public async Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct)
         {
             try
             {
-                var ingestionGameProduct = await GetAsync<IngestionGameProduct>($"products/{longId}");
+                var ingestionGameProduct = await GetAsync<IngestionGameProduct>($"products/{longId}", ct);
 
                 var gameProduct = new GameProduct
                 {
@@ -78,9 +81,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             }
         }
 
-        public async Task<GameProduct> GetGameProductByBigIdAsync(string bigId)
+        public async Task<GameProduct> GetGameProductByBigIdAsync(string bigId, CancellationToken ct)
         {
-            var ingestionGameProducts = await GetAsync<PagedCollection<IngestionGameProduct>>($"products?externalId={bigId}");
+            var ingestionGameProducts = await GetAsync<PagedCollection<IngestionGameProduct>>($"products?externalId={bigId}", ct);
             var ingestionGameProduct = ingestionGameProducts.Value.FirstOrDefault();
 
             if (ingestionGameProduct == null)
