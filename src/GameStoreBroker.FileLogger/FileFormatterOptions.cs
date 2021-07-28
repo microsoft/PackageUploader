@@ -22,10 +22,5 @@ namespace GameStoreBroker.FileLogger
         /// Gets or sets indication whether or not UTC timezone should be used to for timestamps in logging messages. Defaults to <c>false</c>.
         /// </summary>
         public bool UseUtcTimestamp { get; set; }
-
-        /// <summary>
-        /// Gets or sets the FileWriter options
-        /// </summary>
-        public FileWriterOptions FileWriter { get; set; }
     }
 }
