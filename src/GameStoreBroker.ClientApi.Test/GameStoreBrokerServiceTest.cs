@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using GameStoreBroker.ClientApi.Exceptions;
 
 namespace GameStoreBroker.ClientApi.Test
 {
@@ -48,9 +49,9 @@ namespace GameStoreBroker.ClientApi.Test
                 .ThrowsAsync(new HttpRequestException(string.Empty, null, HttpStatusCode.Unauthorized));
 
             ingestionClient.Setup(p => p.GetGameProductByLongIdAsync(It.IsNotIn(TestProductId, TestUnauthorizedProductId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((GameProduct)null);
+                .ThrowsAsync(new ProductNotFoundException(string.Empty));
             ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(It.IsNotIn(TestBigId, TestUnauthorizedBigId), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((GameProduct)null);
+                .ThrowsAsync(new ProductNotFoundException(string.Empty));
 
             var sp = new Mock<IServiceProvider>();
             sp.Setup(p => p.GetService(typeof(ILogger<GameStoreBrokerService>))).Returns(logger);
@@ -117,15 +118,13 @@ namespace GameStoreBroker.ClientApi.Test
         [TestMethod]
         public async Task GetProductByProductIdNotFoundTest()
         {
-            var productResult = await _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, "ProductIdNotFound", CancellationToken.None);
-            Assert.IsNull(productResult);
+            await Assert.ThrowsExceptionAsync<ProductNotFoundException>(() => _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, "ProductIdNotFound", CancellationToken.None));
         }
 
         [TestMethod]
         public async Task GetProductByBigIdNotFoundTest()
         {
-            var productResult = await _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, "BigIdNotFound", CancellationToken.None);
-            Assert.IsNull(productResult);
+            await Assert.ThrowsExceptionAsync<ProductNotFoundException>(() => _gameStoreBrokerService.GetProductByBigIdAsync(_aadAuthInfo, "BigIdNotFound", CancellationToken.None));
         }
         
         [TestMethod]
