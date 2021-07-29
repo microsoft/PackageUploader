@@ -10,6 +10,7 @@ The application can be used directly with the input config for ease of use, or t
 - The product must already exist in partner center before uploading.
 - The branch/sandbox must already exist in partner center before uploading.
 - Build the solution from source, or download a release.
+- The product needs to be published at least once manually through UX.
 
 ## Step 1: Creating your app in Azure.
 
