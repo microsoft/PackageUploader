@@ -17,7 +17,7 @@ namespace GameStoreBroker.ClientApi.Client
         private readonly ILogger _logger;
         protected readonly HttpClient HttpClient;
 
-        private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
+        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions();
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
         {
@@ -36,7 +36,7 @@ namespace GameStoreBroker.ClientApi.Client
                 response.EnsureSuccessStatusCode();
 
                 var serverRequestId = GetRequestIdFromHeader(response);
-                var result = await response.Content.ReadFromJsonAsync<T>(_jsonSerializerOptions, ct).ConfigureAwait(false);
+                var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
 
                 LogResponseVerbose(result, serverRequestId);
 

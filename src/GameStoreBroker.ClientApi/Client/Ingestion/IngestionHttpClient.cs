@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using GameStoreBroker.ClientApi.Exceptions;
 
 [assembly: InternalsVisibleTo("GameStoreBroker.ClientApi.Test")]
 namespace GameStoreBroker.ClientApi.Client.Ingestion
@@ -75,7 +76,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             {
                 if (e.StatusCode == HttpStatusCode.NotFound)
                 {
-                    return null;
+                    throw new ProductNotFoundException($"Product with product id '{longId}' not found.", e);
                 }
                 throw;
             }
@@ -88,7 +89,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             if (ingestionGameProduct == null)
             {
-                return null;
+                throw new ProductNotFoundException($"Product with big id {bigId} not found.");
             }
 
             var gameProduct = new GameProduct

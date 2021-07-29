@@ -27,7 +27,7 @@ namespace GameStoreBroker.Application.Commands
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<GetProduct>>();
             var storeBroker = scope.ServiceProvider.GetRequiredService<IGameStoreBrokerService>();
 
-            logger.LogInformation("Starting GetProduct process");
+            logger.LogInformation("Starting GetProduct process.");
 
             var schema = await GetSchemaAsync<GetProductOperationSchema>(ct).ConfigureAwait(false);
             var aadAuthInfo = GetAadAuthInfo(schema.AadAuthInfo);

@@ -1,6 +1,9 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text.Json;
 
 namespace GameStoreBroker.Application
@@ -28,6 +31,17 @@ namespace GameStoreBroker.Application
             {
                 return $"Could not serialize object to json - {ex.Message}";
             }
+        }
+
+        public static bool IsValid<T>(this T objectToValidate, out IEnumerable<string> validationErrors)
+        {
+            validationErrors = null;
+            var validationResults = new List<ValidationResult>();
+
+            var isValid = Validator.TryValidateObject(objectToValidate, new ValidationContext(objectToValidate), validationResults, true);
+
+            validationErrors = validationResults.Select(x => x.ErrorMessage);
+            return isValid;
         }
     }
 }

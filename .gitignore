@@ -349,4 +349,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 /src/GameStoreBroker.Application/GetProductTest.json
+/src/GameStoreBroker.Application/InvalidJsonTest.json
 /src/GameStoreBroker.Application/Properties/launchSettings.json

@@ -18,6 +18,8 @@ namespace GameStoreBroker.Application.Commands
         private readonly Options _options;
         private readonly ILogger<CommandAction> _logger;
 
+        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions();
+
         protected CommandAction(IHost host, Options options)
         {
             _options = options;
@@ -32,6 +34,7 @@ namespace GameStoreBroker.Application.Commands
             }
 
             var schema = await DeserializeJsonFileAsync<T>(_options.ConfigFile.FullName, ct).ConfigureAwait(false);
+            ValidateSchema(schema);
 
             if (!string.IsNullOrWhiteSpace(_options.ClientSecret))
             {
@@ -63,7 +66,6 @@ namespace GameStoreBroker.Application.Commands
             {
                 _logger.LogDebug("GameStoreBroker is running.");
                 await ProcessAsync(ct).ConfigureAwait(false);
-                _logger.LogInformation("GameStoreBroker has finished running.");
                 return 0;
             }
             catch (TaskCanceledException)
@@ -73,8 +75,13 @@ namespace GameStoreBroker.Application.Commands
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Exception thrown.");
+                _logger.LogError(e.Message);
+                _logger.LogTrace(e, "Exception thrown.");
                 return 1;
+            }
+            finally
+            {
+                _logger.LogInformation("GameStoreBroker has finished running.");
             }
         }
 
@@ -88,8 +95,21 @@ namespace GameStoreBroker.Application.Commands
             }
 
             await using var openStream = File.OpenRead(fileName);
-            var deserializedObject = await JsonSerializer.DeserializeAsync<T>(openStream, cancellationToken: ct).ConfigureAwait(false);
+            var deserializedObject = await JsonSerializer.DeserializeAsync<T>(openStream, DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
             return deserializedObject;
+        }
+
+        private static void ValidateSchema<T>(T schema)
+        {
+            if (schema == null)
+            {
+                throw new ArgumentNullException(nameof(schema));
+            }
+
+            if (!schema.IsValid(out var errorMessages))
+            {
+                throw new Exception("Errors found in json file: " + string.Join(", ", errorMessages) + ".");
+            }
         }
     }
 }
