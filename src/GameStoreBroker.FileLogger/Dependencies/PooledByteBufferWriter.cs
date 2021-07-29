@@ -3,9 +3,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -147,7 +145,7 @@ namespace System.Text.Json
                     newSize = currentLength + sizeHint;
                     if ((uint)newSize > int.MaxValue)
                     {
-                        ThrowHelper.ThrowOutOfMemoryException_BufferMaximumSizeExceeded((uint)newSize);
+                        throw new OutOfMemoryException($"Cannot allocate a buffer of size {(uint)newSize}.");
                     }
                 }
 
@@ -166,16 +164,6 @@ namespace System.Text.Json
 
             Debug.Assert(_rentedBuffer.Length - _index > 0);
             Debug.Assert(_rentedBuffer.Length - _index >= sizeHint);
-        }
-    }
-
-    internal static partial class ThrowHelper
-    {
-        [DoesNotReturn]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowOutOfMemoryException_BufferMaximumSizeExceeded(uint capacity)
-        {
-            throw new OutOfMemoryException(SR.Format(@"Cannot allocate a buffer of size {0}.", capacity));
         }
     }
 }
