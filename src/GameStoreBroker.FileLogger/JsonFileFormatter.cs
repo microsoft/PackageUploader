@@ -1,5 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -16,11 +16,10 @@ namespace GameStoreBroker.FileLogger
 {
     internal class JsonFileFormatter : FileFormatter, IDisposable
     {
-        private IDisposable _optionsReloadToken;
+        private readonly IDisposable _optionsReloadToken;
         private const int DefaultBufferSize = 1024;
 
-        public JsonFileFormatter(IOptionsMonitor<JsonFileFormatterOptions> options)
-            : base (FileFormatterNames.Json)
+        public JsonFileFormatter(IOptionsMonitor<JsonFileFormatterOptions> options) : base (FileFormatterNames.Json)
         {
             ReloadLoggerOptions(options.CurrentValue);
             _optionsReloadToken = options.OnChange(ReloadLoggerOptions);

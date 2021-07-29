@@ -1,5 +1,5 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 using System;
 using System.IO;
@@ -15,12 +15,7 @@ namespace GameStoreBroker.FileLogger
 
         internal FileLogger(string name, FileLoggerProcessor loggerProcessor)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            _name = name;
+            _name = name ?? throw new ArgumentNullException(nameof(name));
             _queueProcessor = loggerProcessor;
         }
 
@@ -43,7 +38,7 @@ namespace GameStoreBroker.FileLogger
                 throw new ArgumentNullException(nameof(formatter));
             }
             _stringWriter ??= new StringWriter();
-            LogEntry<TState> logEntry = new LogEntry<TState>(logLevel, _name, eventId, state, exception, formatter);
+            var logEntry = new LogEntry<TState>(logLevel, _name, eventId, state, exception, formatter);
             Formatter.Write(in logEntry, ScopeProvider, _stringWriter);
 
             var sb = _stringWriter.GetStringBuilder();

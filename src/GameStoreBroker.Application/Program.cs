@@ -1,4 +1,5 @@
-﻿// Copyright (C) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 using GameStoreBroker.Application.Operations;
 using GameStoreBroker.ClientApi;
