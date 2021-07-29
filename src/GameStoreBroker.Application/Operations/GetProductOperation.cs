@@ -10,13 +10,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Commands
+namespace GameStoreBroker.Application.Operations
 {
-    internal class GetProduct : CommandAction
+    internal class GetProductOperation : Operation
     {
         private readonly IHost _host;
 
-        public GetProduct(IHost host, Options options) : base(host, options)
+        public GetProductOperation(IHost host, Options options) : base(host, options)
         {
             _host = host;
         }
@@ -24,10 +24,10 @@ namespace GameStoreBroker.Application.Commands
         protected override async Task ProcessAsync(CancellationToken ct)
         {
             using var scope = _host.Services.CreateScope();
-            var logger = scope.ServiceProvider.GetRequiredService<ILogger<GetProduct>>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<GetProductOperation>>();
             var storeBroker = scope.ServiceProvider.GetRequiredService<IGameStoreBrokerService>();
 
-            logger.LogInformation("Starting GetProduct process.");
+            logger.LogInformation("Starting GetProduct operation.");
 
             var schema = await GetSchemaAsync<GetProductOperationSchema>(ct).ConfigureAwait(false);
             var aadAuthInfo = GetAadAuthInfo(schema.AadAuthInfo);

@@ -1,5 +1,6 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
+using GameStoreBroker.Application.Operations;
 using GameStoreBroker.ClientApi;
 using GameStoreBroker.FileLogger;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,7 +63,7 @@ namespace GameStoreBroker.Application
         private static CommandLineBuilder BuildCommandLine()
         {
             // Options
-            var configFile = new Option<FileInfo>(new[] {"-c", "--ConfigFile"}, "The location of json config file")
+            var configFile = new Option<FileInfo>(new[] {"-c", "--ConfigFile"}, "The location of the json config file")
             {
                 IsRequired = true,
             };
@@ -83,6 +84,6 @@ namespace GameStoreBroker.Application
         }
 
         private static async Task<int> GetProductAsync(IHost host, Options options, CancellationToken ct) => 
-            await new Commands.GetProduct(host, options).RunAsync(ct).ConfigureAwait(false);
+            await new GetProductOperation(host, options).RunAsync(ct).ConfigureAwait(false);
     }
 }

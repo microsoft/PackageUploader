@@ -11,19 +11,19 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Commands
+namespace GameStoreBroker.Application.Operations
 {
-    internal abstract class CommandAction
+    internal abstract class Operation
     {
         private readonly Options _options;
-        private readonly ILogger<CommandAction> _logger;
+        private readonly ILogger<Operation> _logger;
 
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions();
 
-        protected CommandAction(IHost host, Options options)
+        protected Operation(IHost host, Options options)
         {
             _options = options;
-            _logger = host.Services.GetRequiredService<ILogger<CommandAction>>();
+            _logger = host.Services.GetRequiredService<ILogger<Operation>>();
         }
 
         protected async Task<T> GetSchemaAsync<T>(CancellationToken ct) where T : BaseOperationSchema
