@@ -52,6 +52,11 @@ namespace GameStoreBroker.Application.Operations
                 throw new ArgumentNullException(nameof(aadAuthInfoSchema));
             }
 
+            if (string.IsNullOrWhiteSpace(aadAuthInfoSchema.ClientSecret))
+            {
+                throw new Exception("ClientSecret not provided.");
+            }
+
             var aadAuthInfo = new AadAuthInfo
             {
                 TenantId = aadAuthInfoSchema.TenantId,
