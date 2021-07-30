@@ -14,6 +14,7 @@ namespace GameStoreBroker.Application
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions()
         {
             IgnoreNullValues = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
         public static string ToJson<T>(this T value, JsonSerializerOptions jsonSerializerOptions = null) where T : class
