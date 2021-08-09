@@ -23,6 +23,7 @@ namespace GameStoreBroker.Application
     {
         private const string LogTimestampFormat = "yyyy-MM-dd hh:mm:ss.fff ";
         private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls.");
+        private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file.");
 
         private static async Task<int> Main(string[] args)
         {
@@ -41,7 +42,9 @@ namespace GameStoreBroker.Application
                             options.TimestampFormat = LogTimestampFormat;
                         }, file =>
                         {
-                            file.Path = Path.Combine(Path.GetTempPath(), $"GameStoreBroker_{DateTime.Now:yyyyMMddhhmmss}.log");
+                            var logFile = invocationContext.GetOptionValue(LogFileOption);
+                            file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"GameStoreBroker_{DateTime.Now:yyyyMMddhhmmss}.log");
+                            file.Append = true;
                         });
                         logging.AddSimpleConsole(options =>
                         {
@@ -64,7 +67,7 @@ namespace GameStoreBroker.Application
         private static CommandLineBuilder BuildCommandLine()
         {
             // Options
-            var configFile = new Option<FileInfo>(new[] {"-c", "--ConfigFile"}, "The location of the json config file")
+            var configFile = new Option<FileInfo>(new[] {"-c", "--ConfigFile"}, "The location of the json config file.")
             {
                 IsRequired = true,
             };
@@ -80,6 +83,7 @@ namespace GameStoreBroker.Application
                 }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(GetProductAsync)),
             };
             rootCommand.AddGlobalOption(VerboseOption);
+            rootCommand.AddGlobalOption(LogFileOption);
             rootCommand.Description = "Application that enables game developers to upload Xbox and PC game packages to Partner Center.";
             return new CommandLineBuilder(rootCommand);
         }

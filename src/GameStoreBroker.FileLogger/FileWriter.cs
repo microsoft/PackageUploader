@@ -21,7 +21,7 @@ namespace GameStoreBroker.FileLogger
                 Directory.CreateDirectory(directory);
             }
 
-            Stream outputStream = File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
+            Stream outputStream = File.Open(path, options.Append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read);
             _textWriter = new StreamWriter(outputStream, options.Encoding ?? new UTF8Encoding(false));
         }
 
