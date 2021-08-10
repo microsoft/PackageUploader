@@ -32,15 +32,16 @@ namespace GameStoreBroker.Application.Operations
 
             var schema = await GetSchemaAsync<GetProductOperationSchema>(ct).ConfigureAwait(false);
             var aadAuthInfo = GetAadAuthInfo(schema.AadAuthInfo);
+            var accessTokenProvider = new AccessTokenProvider(aadAuthInfo);
 
             GameProduct product;
             if (!string.IsNullOrWhiteSpace(schema.BigId))
             {
-                product = await storeBroker.GetProductByBigIdAsync(aadAuthInfo, schema.BigId, ct).ConfigureAwait(false);
+                product = await storeBroker.GetProductByBigIdAsync(accessTokenProvider, schema.BigId, ct).ConfigureAwait(false);
             }
             else if (!string.IsNullOrWhiteSpace(schema.ProductId))
             {
-                product = await storeBroker.GetProductByProductIdAsync(aadAuthInfo, schema.ProductId, ct).ConfigureAwait(false);
+                product = await storeBroker.GetProductByProductIdAsync(accessTokenProvider, schema.ProductId, ct).ConfigureAwait(false);
             }
             else
             {

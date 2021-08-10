@@ -9,7 +9,7 @@ namespace GameStoreBroker.ClientApi
 {
     public interface IGameStoreBrokerService
     {
-        Task<GameProduct> GetProductByBigIdAsync(AadAuthInfo aadAuthInfo, string bigId, CancellationToken ct);
-        Task<GameProduct> GetProductByProductIdAsync(AadAuthInfo aadAuthInfo, string productId, CancellationToken ct);
+        Task<GameProduct> GetProductByBigIdAsync(IAccessTokenProvider accessTokenProvider, string bigId, CancellationToken ct);
+        Task<GameProduct> GetProductByProductIdAsync(IAccessTokenProvider accessTokenProvider, string productId, CancellationToken ct);
     }
 }

@@ -22,7 +22,7 @@ namespace GameStoreBroker.ClientApi
             _logger = serviceProvider.GetRequiredService<ILogger<GameStoreBrokerService>>();
         }
 
-        public async Task<GameProduct> GetProductByBigIdAsync(AadAuthInfo aadAuthInfo, string bigId, CancellationToken ct)
+        public async Task<GameProduct> GetProductByBigIdAsync(IAccessTokenProvider accessTokenProvider, string bigId, CancellationToken ct)
         {
             if (bigId == null)
             {
@@ -35,13 +35,13 @@ namespace GameStoreBroker.ClientApi
             }
 
             var ingestionHttpClient = _serviceProvider.GetRequiredService<IIngestionHttpClient>();
-            await ingestionHttpClient.Authorize(aadAuthInfo).ConfigureAwait(false);
+            await ingestionHttpClient.Authorize(accessTokenProvider).ConfigureAwait(false);
 
             _logger.LogDebug("Requesting game product by BigId");
             return await ingestionHttpClient.GetGameProductByBigIdAsync(bigId, ct).ConfigureAwait(false);
         }
 
-        public async Task<GameProduct> GetProductByProductIdAsync(AadAuthInfo aadAuthInfo, string productId, CancellationToken ct)
+        public async Task<GameProduct> GetProductByProductIdAsync(IAccessTokenProvider accessTokenProvider, string productId, CancellationToken ct)
         {
             if (productId == null)
             {
@@ -54,7 +54,7 @@ namespace GameStoreBroker.ClientApi
             }
 
             var ingestionHttpClient = _serviceProvider.GetRequiredService<IIngestionHttpClient>();
-            await ingestionHttpClient.Authorize(aadAuthInfo).ConfigureAwait(false);
+            await ingestionHttpClient.Authorize(accessTokenProvider).ConfigureAwait(false);
 
             _logger.LogDebug("Requesting game product by ProductId");
             return await ingestionHttpClient.GetGameProductByLongIdAsync(productId, ct).ConfigureAwait(false);
