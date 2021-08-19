@@ -48,8 +48,8 @@ The application can be used directly with the input config for ease of use, or t
   - packageFilePath (Location of the game package)
   - ekbFilePath (Location of the EKB file)
   - subvalFilePath (Location of the SubVal File)
-  - SymbolsFilePath (Location of Symbole File - if applicable)
-  - discLayoutFilePath (Location of Disc Layout File - if applicable)
+  - SymbolsFilePath (Location of Symbole File - optional)
+  - discLayoutFilePath (Location of Disc Layout File - optional)
   - clientId (From Azure Portal)
   - tenantId (From Azure Portal)
   - Save
