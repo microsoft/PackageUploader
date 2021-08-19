@@ -40,12 +40,16 @@ The application can be used directly with the input config for ease of use, or t
 ## Step 3: Configure your wrapper
 
 - Navigate to the root of your wrapper directory.
-- Edit the _UploadPcPackageTest.json_ with your favorite editor and update the following fields:
+- Edit the _UploadGamecoreConfig.json_ with your favorite editor and update the following fields:
   - bigId (From Partner Center)
   - branchFriendlyName (name of the branch/sandbox from Partner Center)
     - XBOX RECOMMEND: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
   - flightName (From Partner Center - if you're doing a flight)
   - packageFilePath (Location of the game package)
+  - ekbFilePath (Location of the EKB file)
+  - subvalFilePath (Location of the SubVal File)
+  - SymbolsFilePath (Location of Symbole File - if applicable)
+  - discLayoutFilePath (Location of Disc Layout File - if applicable)
   - clientId (From Azure Portal)
   - tenantId (From Azure Portal)
   - Save
@@ -54,7 +58,7 @@ The application can be used directly with the input config for ease of use, or t
 
 - Open _powershell_ via the start menu.
 - Navigate to the root of your wrapper directory and run the following command:
-  -  .\GameStoreBroker.Application.exe UploadPcPackage -c .\UploadPcPackageTest.json -s *secretkey*
+  -  .\GameStoreBroker.Application.exe UploadPcPackage -c .\UploadGamecoreConfig.json -s *secretkey*
 
 - Extra parameters to pass:
   - -c, --ConfigFile Required. The location of json config file
@@ -64,12 +68,6 @@ The application can be used directly with the input config for ease of use, or t
   - --version Display version information.
 
 ## Q & A
-
-Question: When will the tool start working with Flight branches? <br>
-Answer: We're working on this now and with the new iteration of the wrapper uploading to a flight should work.
-
-Question: Is this only for PC? <br>
-Answer: The naming of the action and config is only temporary - this will get changed later. All packages are supported: UWP, MSIXVC, XVC.
 
 Question: Can I use the API directly? <br>
 Answer: You may and documentation will be written however there will be no support. Please reference the document and the wrapper source for call patterns. 
@@ -84,13 +82,10 @@ Question: Will I need to do anything different for delta uploads to work? <br>
 Answer: You will not - this will all be done at the service layer and client shouldn't have to be touched. 
 
 Question: Will the wrapper support other actions? <br>
-Answer: We will indeed! Deleting/removing packages, moving packages between branches and publishing will all be added.
+Answer: We will indeed! Deleting/removing packages.
 
 Question: Could I use this wrapper to automate and update other parts of partner center apart from uploads? <br>
 Answer: Unfortunately not right now and our only scope was uploads. The API teams are working to further expand this out to other parts of partner center. 
-
-Question: I don't like the secret key in the config - can we change it? <br>
-Answer: We will be changing this most likely, potentially inputting at runtime. 
 
 Question: If I want to change how the wrapper works who do I reach out to? <br>
 Answer: It's completely open source and you can change the wrapper as you wish! Use, adjust and contribute! 
