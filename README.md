@@ -35,8 +35,6 @@ The application can be used directly with the input config for ease of use, or t
   - **NOTE** We will be changing this with future iterations of the tool to more accurately apply permissions.
 
 
-- Tony to update - update permissions
-
 
 
 ## Step 3: Configure your wrapper
