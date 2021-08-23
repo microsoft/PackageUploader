@@ -66,7 +66,7 @@ namespace GameStoreBroker.ClientApi.Client
 
         private void LogRequestVerbose(string requestUrl, string clientRequestId, object requestBody = null)
         {
-            _logger.LogTrace("{requestUrl} [ClientRequestId: {_clientRequestId}]", requestUrl, clientRequestId);
+            _logger.LogTrace("{requestUrl} [ClientRequestId: {clientRequestId}]", requestUrl, clientRequestId);
             if (requestBody != null)
             {
                 _logger.LogTrace("Request Body:");
