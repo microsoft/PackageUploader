@@ -14,7 +14,6 @@ namespace GameStoreBroker.ClientApi.Client
 {
     internal abstract class HttpRestClient : IHttpRestClient
     {
-        private readonly string _clientRequestId;
         private readonly ILogger _logger;
         protected readonly HttpClient HttpClient;
 
@@ -22,7 +21,6 @@ namespace GameStoreBroker.ClientApi.Client
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
         {
-            _clientRequestId = "";
             _logger = logger;
             HttpClient = httpClient;
         }
@@ -31,9 +29,11 @@ namespace GameStoreBroker.ClientApi.Client
         {
             try
             {
-                LogRequestVerbose("GET " + subUrl, _clientRequestId);
-
-                using var response = await HttpClient.GetAsync(subUrl, ct).ConfigureAwait(false);
+                var clientRequestId = Guid.NewGuid().ToString();
+                LogRequestVerbose("GET " + subUrl, clientRequestId);
+                var request = new HttpRequestMessage(HttpMethod.Get, subUrl);
+                request.Headers.Add("Request-ID", clientRequestId);
+                using var response = await HttpClient.SendAsync(request, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
                 var serverRequestId = GetRequestIdFromHeader(response);
