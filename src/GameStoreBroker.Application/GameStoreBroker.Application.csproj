@@ -9,6 +9,7 @@
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>
