@@ -4,6 +4,7 @@
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi
@@ -39,7 +40,7 @@ namespace GameStoreBroker.ClientApi
             _aadAuthInfo = aadAuthInfo;
         }
 
-        public async Task<string> GetAccessToken()
+        public async Task<string> GetAccessToken(CancellationToken ct)
         {
             var authority = AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
             var authenticationContext = new AuthenticationContext(authority, true);

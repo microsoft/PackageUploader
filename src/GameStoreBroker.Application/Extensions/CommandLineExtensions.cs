@@ -4,7 +4,7 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 
-namespace GameStoreBroker.Application
+namespace GameStoreBroker.Application.Extensions
 {
     internal static class CommandLineExtensions
     {

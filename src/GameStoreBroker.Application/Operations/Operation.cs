@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,10 @@ namespace GameStoreBroker.Application.Operations
         private readonly Options _options;
         private readonly ILogger<Operation> _logger;
 
-        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions();
+        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+        };
 
         protected Operation(IHost host, Options options)
         {
@@ -105,7 +109,7 @@ namespace GameStoreBroker.Application.Operations
             return deserializedObject;
         }
 
-        private static void ValidateSchema<T>(T schema)
+        private static void ValidateSchema<T>(T schema) where T : BaseOperationSchema
         {
             if (schema == null)
             {

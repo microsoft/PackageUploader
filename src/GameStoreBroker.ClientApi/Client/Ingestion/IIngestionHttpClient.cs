@@ -12,7 +12,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 {
     internal interface IIngestionHttpClient
     {
-        Task Authorize(IAccessTokenProvider accessTokenProvider);
+        Task Authorize(IAccessTokenProvider accessTokenProvider, CancellationToken ct);
         Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct);
         Task<GameProduct> GetGameProductByBigIdAsync(string bigId, CancellationToken ct);
     }

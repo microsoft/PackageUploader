@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
 
-namespace GameStoreBroker.Application
+namespace GameStoreBroker.Application.Extensions
 {
     internal static class ObjectExtensions
     {

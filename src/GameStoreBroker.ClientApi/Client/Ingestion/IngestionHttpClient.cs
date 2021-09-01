@@ -3,6 +3,7 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Exceptions;
+using GameStoreBroker.ClientApi.Mappers;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using System;
@@ -19,17 +20,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 {
     internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
     {
+        private readonly ILogger<IngestionHttpClient> _logger;
+
         public IngestionHttpClient(ILogger<IngestionHttpClient> logger, HttpClient httpClient) : base(logger, httpClient)
         {
-            httpClient.BaseAddress = new Uri("https://api.partner.microsoft.com/v1.0/ingestion/");
-            httpClient.Timeout = TimeSpan.FromMinutes(10);
-            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            _logger = logger;
         }
 
-        public async Task Authorize(IAccessTokenProvider accessTokenProvider)
+        public async Task Authorize(IAccessTokenProvider accessTokenProvider, CancellationToken ct)
         {
-            var accessToken = await accessTokenProvider.GetAccessToken();
-            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var accessToken = await accessTokenProvider.GetAccessToken(ct);
+            SetAuthorizationHeader(new AuthenticationHeaderValue("Bearer", accessToken));
         }
 
         public async Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct)
@@ -48,14 +49,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             {
                 var ingestionGameProduct = await GetAsync<IngestionGameProduct>($"products/{longId}", ct).ConfigureAwait(false);
 
-                var gameProduct = new GameProduct
-                {
-                    ProductId = ingestionGameProduct.Id,
-                    BigId = ingestionGameProduct.ExternalIds.FirstOrDefault(id => id.Type.Equals("StoreId", StringComparison.OrdinalIgnoreCase))?.Value,
-                    ProductName = ingestionGameProduct.Name,
-                    IsJaguar = ingestionGameProduct.IsModularPublishing.HasValue && ingestionGameProduct.IsModularPublishing.Value
-                };
-
+                var gameProduct = ingestionGameProduct.Map();
                 return gameProduct;
             }
             catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.NotFound)
@@ -84,15 +78,29 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ProductNotFoundException($"Product with big id {bigId} not found.");
             }
 
-            var gameProduct = new GameProduct
+            var gameProduct = ingestionGameProduct.Map();
+            return gameProduct;
+        }
+
+        public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, CancellationToken ct)
+        {
+            var body = new IngestionPackageCreationRequest
             {
-                ProductId = ingestionGameProduct.Id,
-                BigId = ingestionGameProduct.ExternalIds?.FirstOrDefault(id => id.Type.Equals("StoreId", StringComparison.OrdinalIgnoreCase))?.Value,
-                ProductName = ingestionGameProduct.Name,
-                IsJaguar = ingestionGameProduct.IsModularPublishing.HasValue && ingestionGameProduct.IsModularPublishing.Value
+                PackageConfigurationId = currentDraftInstanceId,
+                FileName = fileName,
+                ResourceType = "PackageCreationRequest",
+                MarketGroupId = "default",
             };
 
-            return gameProduct;
+            var gamePackage = await PostAsync<IngestionPackageCreationRequest, GamePackage>($"products/{productId}/packages", body, ct);
+
+            if (!gamePackage.State.Equals("PendingUpload", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception("Package request in Partner Center is not 'PendingUpload'.");
+            }
+
+            _logger.LogInformation("Package id: {packageId}", gamePackage.Id);
+            return gamePackage;
         }
     }
 }

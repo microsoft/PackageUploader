@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Operations;
 using GameStoreBroker.ClientApi;
 using GameStoreBroker.FileLogger;
@@ -81,6 +82,11 @@ namespace GameStoreBroker.Application
                     configFile,
                     clientSecret,
                 }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(GetProductAsync)),
+                new Command("UploadUwpPackage", "Gets metadata of the product.")
+                {
+                    configFile,
+                    clientSecret,
+                }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(UploadUwpPackageAsync)),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);
@@ -90,5 +96,8 @@ namespace GameStoreBroker.Application
 
         private static async Task<int> GetProductAsync(IHost host, Options options, CancellationToken ct) => 
             await new GetProductOperation(host, options).RunAsync(ct).ConfigureAwait(false);
+
+        private static async Task<int> UploadUwpPackageAsync(IHost host, Options options, CancellationToken ct) =>
+            await new UploadUwpPackageOperation(host, options).RunAsync(ct).ConfigureAwait(false);
     }
 }

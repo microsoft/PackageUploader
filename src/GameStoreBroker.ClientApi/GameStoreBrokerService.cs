@@ -6,6 +6,7 @@ using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,7 +36,7 @@ namespace GameStoreBroker.ClientApi
             }
 
             var ingestionHttpClient = _serviceProvider.GetRequiredService<IIngestionHttpClient>();
-            await ingestionHttpClient.Authorize(accessTokenProvider).ConfigureAwait(false);
+            await ingestionHttpClient.Authorize(accessTokenProvider, ct).ConfigureAwait(false);
 
             _logger.LogDebug("Requesting game product by BigId");
             return await ingestionHttpClient.GetGameProductByBigIdAsync(bigId, ct).ConfigureAwait(false);
@@ -54,10 +55,33 @@ namespace GameStoreBroker.ClientApi
             }
 
             var ingestionHttpClient = _serviceProvider.GetRequiredService<IIngestionHttpClient>();
-            await ingestionHttpClient.Authorize(accessTokenProvider).ConfigureAwait(false);
+            await ingestionHttpClient.Authorize(accessTokenProvider, ct).ConfigureAwait(false);
 
             _logger.LogDebug("Requesting game product by ProductId");
             return await ingestionHttpClient.GetGameProductByLongIdAsync(productId, ct).ConfigureAwait(false);
+        }
+
+        public async Task UploadUwpPackageAsync(IAccessTokenProvider accessTokenProvider, GameProduct product, FileInfo packageFile, CancellationToken ct)
+        {
+            if (product == null)
+            {
+                throw new ArgumentNullException(nameof(product));
+            }
+
+            if (packageFile == null)
+            {
+                throw new ArgumentNullException(nameof(packageFile));
+            }
+
+            if (!packageFile.Exists)
+            {
+                throw new FileNotFoundException("Package file not found.", packageFile.FullName);
+            }
+
+            var ingestionHttpClient = _serviceProvider.GetRequiredService<IIngestionHttpClient>();
+            await ingestionHttpClient.Authorize(accessTokenProvider, ct).ConfigureAwait(false);
+
+
         }
     }
 }
