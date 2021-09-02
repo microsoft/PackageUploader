@@ -30,39 +30,44 @@ namespace GameStoreBroker.Application
         {
             return await BuildCommandLine()
                 .UseHost(hostBuilder => hostBuilder
-                    .ConfigureLogging((ctx, logging) =>
-                    {
-                        var invocationContext = ctx.GetInvocationContext();
-                        logging.ClearProviders();
-                        logging.SetMinimumLevel(LogLevel.Warning);
-                        logging.AddFilter("GameStoreBroker", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
-                        logging.AddSimpleFile(options =>
-                        {
-                            options.IncludeScopes = true;
-                            options.SingleLine = true;
-                            options.TimestampFormat = LogTimestampFormat;
-                        }, file =>
-                        {
-                            var logFile = invocationContext.GetOptionValue(LogFileOption);
-                            file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"GameStoreBroker_{DateTime.Now:yyyyMMddhhmmss}.log");
-                            file.Append = true;
-                        });
-                        logging.AddSimpleConsole(options =>
-                        {
-                            options.IncludeScopes = true;
-                            options.SingleLine = true;
-                            options.TimestampFormat = LogTimestampFormat;
-                        });
-                    })
-                    .ConfigureServices((_, services) =>
-                    {
-                        services.AddLogging();
-                        services.AddGameStoreBrokerService();
-                    }))
+                    .ConfigureLogging(ConfigureLogging)
+                    .ConfigureServices(ConfigureServices)
+                    )
                 .UseDefaults()
                 .Build()
                 .InvokeAsync(args)
                 .ConfigureAwait(false);
+        }
+
+        private static void ConfigureLogging(HostBuilderContext ctx, ILoggingBuilder logging)
+        {
+            var invocationContext = ctx.GetInvocationContext();
+            logging.ClearProviders();
+            logging.SetMinimumLevel(LogLevel.Warning);
+            logging.AddFilter("GameStoreBroker", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
+            logging.AddSimpleFile(options =>
+            {
+                options.IncludeScopes = true;
+                options.SingleLine = true;
+                options.TimestampFormat = LogTimestampFormat;
+            }, file =>
+            {
+                var logFile = invocationContext.GetOptionValue(LogFileOption);
+                file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"GameStoreBroker_{DateTime.Now:yyyyMMddhhmmss}.log");
+                file.Append = true;
+            });
+            logging.AddSimpleConsole(options =>
+            {
+                options.IncludeScopes = true;
+                options.SingleLine = true;
+                options.TimestampFormat = LogTimestampFormat;
+            });
+        }
+
+        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
+        {
+            services.AddLogging();
+            services.AddGameStoreBrokerService();
         }
 
         private static CommandLineBuilder BuildCommandLine()
