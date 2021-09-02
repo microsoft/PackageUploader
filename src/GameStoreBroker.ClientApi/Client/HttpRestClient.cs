@@ -86,7 +86,7 @@ namespace GameStoreBroker.ClientApi.Client
                         response.StatusCode == HttpStatusCode.ServiceUnavailable ||
                         response.Headers.Contains("Retry-After"))
                     {
-                        await Task.Delay(new TimeSpan(0, 0, 30));
+                        await Task.Delay(new TimeSpan(0, 0, 30), ct);
                         k--;
                         continue;
                     }
