@@ -50,7 +50,7 @@ namespace GameStoreBroker.ClientApi.Mappers
             {
                 Id = ingestionBranch.Id,
                 Name = ingestionBranch.FriendlyName,
-                CurrentDraftInstanceID = ingestionBranch.CurrentDraftInstanceID,
+                CurrentDraftInstanceId = ingestionBranch.CurrentDraftInstanceId,
             };
         }
     }

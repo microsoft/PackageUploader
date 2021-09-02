@@ -109,8 +109,8 @@ namespace GameStoreBroker.ClientApi
             var ingestionHttpClient = _serviceProvider.GetRequiredService<IIngestionHttpClient>();
             await ingestionHttpClient.Authorize(accessTokenProvider, ct).ConfigureAwait(false);
 
-            _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceID);
-            var package = await ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceID, packageFile.Name, ct).ConfigureAwait(false);
+            _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
+            var package = await ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, ct).ConfigureAwait(false);
 
         }
     }

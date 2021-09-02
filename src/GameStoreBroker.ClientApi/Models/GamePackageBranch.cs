@@ -19,6 +19,6 @@ namespace GameStoreBroker.ClientApi.Models
         /// </summary>
         public string Name { get; set; }
 
-        public string CurrentDraftInstanceID { get; set; }
+        public string CurrentDraftInstanceId { get; set; }
     }
 }
