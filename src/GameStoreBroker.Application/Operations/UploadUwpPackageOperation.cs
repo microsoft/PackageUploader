@@ -4,9 +4,8 @@
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.Application.Services;
 using GameStoreBroker.ClientApi;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,31 +14,28 @@ namespace GameStoreBroker.Application.Operations
 {
     internal class UploadUwpPackageOperation : Operation
     {
-        private readonly IHost _host;
+        private readonly IProductService _productService;
+        private readonly IGameStoreBrokerService _storeBrokerService;
         private readonly ILogger<UploadUwpPackageOperation> _logger;
+        private readonly UploadUwpPackageOperationSchema _config;
 
-        public UploadUwpPackageOperation(IHost host, Options options) : base(host, options)
+        public UploadUwpPackageOperation(IProductService productService, IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationSchema> config) : base(logger)
         {
-            _host = host;
-            _logger = _host.Services.GetRequiredService<ILogger<UploadUwpPackageOperation>>();
+            _productService = productService;
+            _storeBrokerService = storeBrokerService;
+            _logger = logger;
+            _config = config.Value;
         }
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
             _logger.LogInformation("Starting UploadUwpPackage operation.");
-
-            var schema = await GetSchemaAsync<UploadUwpPackageOperationSchema>(ct).ConfigureAwait(false);
-
-            using var scope = _host.Services.CreateScope();
-            var storeBroker = scope.ServiceProvider.GetRequiredService<IGameStoreBrokerService>();
-            var accessTokenProvider = scope.ServiceProvider.GetRequiredService<IAccessTokenProvider>();
-            var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
             
-            var product = await productService.GetProductAsync(schema, ct).ConfigureAwait(false);
-            var packageBranch = await productService.GetGamePackageBranch(product, schema, ct).ConfigureAwait(false);
+            var product = await _productService.GetProductAsync(_config, ct).ConfigureAwait(false);
+            var packageBranch = await _productService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
-            var packageFilePath = new FileInfo(schema.PackageFilePath);
-            await storeBroker.UploadUwpPackageAsync(accessTokenProvider, product, packageBranch, packageFilePath, ct);
+            var packageFilePath = new FileInfo(_config.PackageFilePath);
+            await _storeBrokerService.UploadUwpPackageAsync(product, packageBranch, packageFilePath, ct);
         }
     }
 }

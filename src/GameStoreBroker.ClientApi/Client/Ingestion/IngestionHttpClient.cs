@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Mappers;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
@@ -10,7 +10,6 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,13 +25,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         {
             _logger = logger;
         }
-
-        public async Task Authorize(IAccessTokenProvider accessTokenProvider, CancellationToken ct)
-        {
-            var accessToken = await accessTokenProvider.GetAccessToken(ct);
-            SetAuthorizationHeader(new AuthenticationHeaderValue("Bearer", accessToken));
-        }
-
+        
         public async Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(longId))

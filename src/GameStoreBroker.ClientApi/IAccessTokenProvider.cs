@@ -8,6 +8,6 @@ namespace GameStoreBroker.ClientApi
 {
     public interface IAccessTokenProvider
     {
-        Task<string> GetAccessToken(CancellationToken ct);
+        Task<string> GetAccessToken();
     }
 }

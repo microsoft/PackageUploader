@@ -13,12 +13,10 @@ namespace GameStoreBroker.Application.Services
     internal class ProductService : IProductService
     {
         private readonly IGameStoreBrokerService _storeBroker;
-        private readonly IAccessTokenProvider _accessTokenProvider;
 
-        public ProductService(IGameStoreBrokerService storeBroker, IAccessTokenProvider accessTokenProvider)
+        public ProductService(IGameStoreBrokerService storeBroker)
         {
             _storeBroker = storeBroker;
-            _accessTokenProvider = accessTokenProvider;
         }
 
         public async Task<GameProduct> GetProductAsync(BaseOperationSchema schema, CancellationToken ct)
@@ -30,16 +28,15 @@ namespace GameStoreBroker.Application.Services
 
             if (!string.IsNullOrWhiteSpace(schema.BigId))
             {
-                return await _storeBroker.GetProductByBigIdAsync(_accessTokenProvider, schema.BigId, ct).ConfigureAwait(false);
+                return await _storeBroker.GetProductByBigIdAsync(schema.BigId, ct).ConfigureAwait(false);
             }
-            else if (!string.IsNullOrWhiteSpace(schema.ProductId))
+
+            if (!string.IsNullOrWhiteSpace(schema.ProductId))
             {
-                return await _storeBroker.GetProductByProductIdAsync(_accessTokenProvider, schema.ProductId, ct).ConfigureAwait(false);
+                return await _storeBroker.GetProductByProductIdAsync(schema.ProductId, ct).ConfigureAwait(false);
             }
-            else
-            {
-                throw new Exception("BigId or ProductId needed.");
-            }
+
+            throw new Exception("BigId or ProductId needed.");
         }
 
         public async Task<GamePackageBranch> GetGamePackageBranch(GameProduct product, UploadPackageOperationSchema schema, CancellationToken ct)
@@ -56,12 +53,12 @@ namespace GameStoreBroker.Application.Services
 
             if (!string.IsNullOrWhiteSpace(schema.BranchFriendlyName))
             {
-                return await _storeBroker.GetPackageBranchByFriendlyNameAsync(_accessTokenProvider, product, schema.BranchFriendlyName, ct).ConfigureAwait(false);
+                return await _storeBroker.GetPackageBranchByFriendlyNameAsync(product, schema.BranchFriendlyName, ct).ConfigureAwait(false);
             }
 
             if (!string.IsNullOrWhiteSpace(schema.FlightName))
             {
-                return await _storeBroker.GetPackageBranchByFlightName(_accessTokenProvider, product, schema.FlightName, ct).ConfigureAwait(false);
+                return await _storeBroker.GetPackageBranchByFlightName(product, schema.FlightName, ct).ConfigureAwait(false);
             }
 
             throw new Exception("BranchFriendlyName or FlightName needed.");

@@ -20,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GameStoreBroker.Application.Schema;
 
 namespace GameStoreBroker.Application
 {
@@ -80,6 +81,15 @@ namespace GameStoreBroker.Application
             services.AddLogging();
             services.AddScoped<IProductService, ProductService>();
             services.AddGameStoreBrokerService(context.Configuration);
+
+            services.AddOperation<GetProductOperation, GetProductOperationSchema>(context);
+            services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationSchema>(context);
+        }
+
+        private static void AddOperation<T1, T2>(this IServiceCollection services, HostBuilderContext context) where T1 : Operation where T2 : class
+        {
+            services.AddScoped<T1>();
+            services.AddOptions<T2>().Bind(context.Configuration.GetSection("GameStoreBroker")).ValidateDataAnnotations();
         }
 
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
@@ -91,7 +101,7 @@ namespace GameStoreBroker.Application
                 builder.AddJsonFile(configFilePath.FullName, false, false);
             }
 
-            var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => "aadAuthInfo:clientSecret");
+            var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => "GameStoreBroker:AadAuthInfo:ClientSecret");
             builder.AddCommandLine(args, switchMappings);
         }
 
@@ -103,12 +113,12 @@ namespace GameStoreBroker.Application
                 {
                     ConfigFileOption,
                     ClientSecretOption,
-                }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(GetProductAsync)),
+                }.AddHandler(CommandHandler.Create<IHost, CancellationToken>(RunAsyncOperation<GetProductOperation>)),
                 new Command("UploadUwpPackage", "Gets metadata of the product.")
                 {
                     ConfigFileOption,
                     ClientSecretOption,
-                }.AddHandler(CommandHandler.Create<IHost, Options, CancellationToken>(UploadUwpPackageAsync)),
+                }.AddHandler(CommandHandler.Create<IHost, CancellationToken>(RunAsyncOperation<UploadUwpPackageOperation>)),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);
@@ -116,10 +126,7 @@ namespace GameStoreBroker.Application
             return new CommandLineBuilder(rootCommand);
         }
 
-        private static async Task<int> GetProductAsync(IHost host, Options options, CancellationToken ct) => 
-            await new GetProductOperation(host, options).RunAsync(ct).ConfigureAwait(false);
-
-        private static async Task<int> UploadUwpPackageAsync(IHost host, Options options, CancellationToken ct) =>
-            await new UploadUwpPackageOperation(host, options).RunAsync(ct).ConfigureAwait(false);
+        private static async Task<int> RunAsyncOperation<T>(IHost host, CancellationToken ct) where T : Operation =>
+            await host.Services.GetRequiredService<T>().RunAsync(ct).ConfigureAwait(false);
     }
 }

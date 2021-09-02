@@ -4,9 +4,8 @@
 using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.Application.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,25 +13,23 @@ namespace GameStoreBroker.Application.Operations
 {
     internal class GetProductOperation : Operation
     {
-        private readonly IHost _host;
+        private readonly IProductService _productService;
         private readonly ILogger<GetProductOperation> _logger;
+        private readonly BaseOperationSchema _config;
 
-        public GetProductOperation(IHost host, Options options) : base(host, options)
+        public GetProductOperation(IProductService productService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationSchema> config) : base(logger)
         {
-            _host = host;
-            _logger = _host.Services.GetRequiredService<ILogger<GetProductOperation>>();
+            _productService = productService;
+            _logger = logger;
+            _config = config.Value;
         }
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
             _logger.LogInformation("Starting GetProduct operation.");
 
-            using var scope = _host.Services.CreateScope();
-            var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
+            var product = await _productService.GetProductAsync(_config, ct).ConfigureAwait(false);
 
-            var schema = await GetSchemaAsync<GetProductOperationSchema>(ct).ConfigureAwait(false);
-
-            var product = await productService.GetProductAsync(schema, ct).ConfigureAwait(false);
             _logger.LogInformation("Product: {product}", product.ToJson());
         }
     }

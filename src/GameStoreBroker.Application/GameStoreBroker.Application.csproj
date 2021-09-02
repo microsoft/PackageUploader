@@ -24,4 +24,10 @@
     <ProjectReference Include="..\GameStoreBroker.FileLogger\GameStoreBroker.FileLogger.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="GetProductTest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

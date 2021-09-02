@@ -36,7 +36,7 @@ namespace GameStoreBroker.ClientApi
             }
         }
 
-        public async Task<string> GetAccessToken(CancellationToken ct)
+        public async Task<string> GetAccessToken()
         {
             var authority = AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
             var authenticationContext = new AuthenticationContext(authority, true);
