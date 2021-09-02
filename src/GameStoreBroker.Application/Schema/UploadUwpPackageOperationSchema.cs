@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Schema
 {
-    internal class UploadUwpPackageOperationSchema : BaseOperationSchema
+    internal class UploadUwpPackageOperationSchema : UploadPackageOperationSchema
     {
         public override string GetOperationName() => "UploadUwpPackage";
 

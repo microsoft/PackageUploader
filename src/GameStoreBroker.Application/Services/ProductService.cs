@@ -23,6 +23,11 @@ namespace GameStoreBroker.Application.Operations
 
         public async Task<GameProduct> GetProductAsync(BaseOperationSchema schema, CancellationToken ct)
         {
+            if (schema is null)
+            {
+                throw new ArgumentNullException(nameof(schema), $"{nameof(schema)} cannot be null.");
+            }
+
             if (!string.IsNullOrWhiteSpace(schema.BigId))
             {
                 return await _storeBroker.GetProductByBigIdAsync(_accessTokenProvider, schema.BigId, ct).ConfigureAwait(false);
@@ -34,6 +39,32 @@ namespace GameStoreBroker.Application.Operations
             else
             {
                 throw new Exception("BigId or ProductId needed.");
+            }
+        }
+
+        public async Task<GamePackageBranch> GetGamePackageBranch(GameProduct product, UploadPackageOperationSchema schema, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (schema is null)
+            {
+                throw new ArgumentNullException(nameof(schema), $"{nameof(schema)} cannot be null.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(schema.BranchFriendlyName))
+            {
+                return await _storeBroker.GetPackageBranchByFriendlyNameAsync(_accessTokenProvider, product, schema.BranchFriendlyName, ct).ConfigureAwait(false);
+            }
+            else if (!string.IsNullOrWhiteSpace(schema.FlightName))
+            {
+                return await _storeBroker.GetPackageBranchByFlightName(_accessTokenProvider, product, schema.FlightName, ct).ConfigureAwait(false);
+            }
+            else
+            {
+                throw new Exception("BranchFriendlyName or FlightName needed.");
             }
         }
     }

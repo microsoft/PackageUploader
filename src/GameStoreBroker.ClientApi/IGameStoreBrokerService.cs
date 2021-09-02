@@ -12,6 +12,8 @@ namespace GameStoreBroker.ClientApi
     {
         Task<GameProduct> GetProductByBigIdAsync(IAccessTokenProvider accessTokenProvider, string bigId, CancellationToken ct);
         Task<GameProduct> GetProductByProductIdAsync(IAccessTokenProvider accessTokenProvider, string productId, CancellationToken ct);
-        Task UploadUwpPackageAsync(IAccessTokenProvider accessTokenProvider, GameProduct product, FileInfo packageFile, CancellationToken ct);
+        Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(IAccessTokenProvider accessTokenProvider, GameProduct product, string branchFriendlyName, CancellationToken ct);
+        Task<GamePackageBranch> GetPackageBranchByFlightName(IAccessTokenProvider accessTokenProvider, GameProduct product, string flightName, CancellationToken ct);
+        Task UploadUwpPackageAsync(IAccessTokenProvider accessTokenProvider, GameProduct product, GamePackageBranch packageBranch, FileInfo packageFile, CancellationToken ct);
     }
 }

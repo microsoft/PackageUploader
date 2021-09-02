@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Client.Ingestion;
+using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -12,7 +13,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using GameStoreBroker.ClientApi.Exceptions;
 
 namespace GameStoreBroker.ClientApi.Test
 {

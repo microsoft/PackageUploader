@@ -15,5 +15,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         Task Authorize(IAccessTokenProvider accessTokenProvider, CancellationToken ct);
         Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct);
         Task<GameProduct> GetGameProductByBigIdAsync(string bigId, CancellationToken ct);
+        Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(string productId, string branchFriendlyName, CancellationToken ct);
+        Task<GamePackageBranch> GetPackageBranchByFlightName(string productId, string flightName, CancellationToken ct);
+        Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, CancellationToken ct);
     }
 }

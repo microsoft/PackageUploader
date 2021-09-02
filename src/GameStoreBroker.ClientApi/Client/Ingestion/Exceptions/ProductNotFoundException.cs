@@ -3,9 +3,9 @@
 
 using System;
 
-namespace GameStoreBroker.ClientApi.Exceptions
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Exceptions
 {
-    public class ProductNotFoundException : Exception
+    public class ProductNotFoundException : IngestionClientException
     {
         public ProductNotFoundException(string errorMessage, Exception innerException = null) : base(errorMessage, innerException)
         {

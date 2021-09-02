@@ -69,7 +69,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         /// Xfus upload info
         /// </summary>
         [JsonPropertyName("uploadInfo")]
-        public XfusUploadInfo UploadInfo { get; set; }
+        public IngestionXfusUploadInfo UploadInfo { get; set; }
 
         /// <summary>
         /// file size of the package

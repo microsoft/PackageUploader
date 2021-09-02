@@ -42,12 +42,12 @@ namespace GameStoreBroker.Application.Schema
 
             if (string.IsNullOrWhiteSpace(ProductId) && string.IsNullOrWhiteSpace(BigId))
             {
-                validationResults.Add(new ValidationResult("productId or bigId is required"));
+                validationResults.Add(new ValidationResult("ProductId or BigId is required"));
             }
 
             if (!string.IsNullOrWhiteSpace(ProductId) && !string.IsNullOrWhiteSpace(BigId))
             {
-                validationResults.Add(new ValidationResult("Only one productId or bigId is allowed"));
+                validationResults.Add(new ValidationResult("Only one ProductId or BigId is allowed"));
             }
 
             Validator.TryValidateObject(AadAuthInfo, new ValidationContext(AadAuthInfo), validationResults, true);

@@ -34,9 +34,12 @@ namespace GameStoreBroker.Application.Operations
             var aadAuthInfo = GetAadAuthInfo(schema.AadAuthInfo);
             var accessTokenProvider = new AccessTokenProvider(aadAuthInfo);
 
-            var product = await new ProductService(storeBroker, accessTokenProvider).GetProductAsync(schema, ct).ConfigureAwait(false);
+            var productService = new ProductService(storeBroker, accessTokenProvider);
+            var product = await productService.GetProductAsync(schema, ct).ConfigureAwait(false);
+            var packageBranch = await productService.GetGamePackageBranch(product, schema, ct).ConfigureAwait(false);
+
             var packageFilePath = new FileInfo(schema.PackageFilePath);
-            await storeBroker.UploadUwpPackageAsync(accessTokenProvider, product, packageFilePath, ct);
+            await storeBroker.UploadUwpPackageAsync(accessTokenProvider, product, packageBranch, packageFilePath, ct);
         }
     }
 }
