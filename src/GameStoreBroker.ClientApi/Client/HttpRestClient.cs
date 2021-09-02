@@ -29,7 +29,6 @@ namespace GameStoreBroker.ClientApi.Client
         {
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Always,
         };
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
