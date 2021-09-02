@@ -22,6 +22,9 @@ namespace GameStoreBroker.ClientApi.Client
         private readonly ILogger _logger;
         private readonly HttpClient _httpClient;
 
+        private const int RetryDefaultSeconds = 30;
+        private const int RetryDefaultTimes = 10;
+
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions();
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
@@ -53,10 +56,6 @@ namespace GameStoreBroker.ClientApi.Client
 
                 return result;
             }
-            catch (HttpRequestException)
-            {
-                throw;
-            }
             catch (Exception ex)
             {
                 LogException(ex);
@@ -76,8 +75,8 @@ namespace GameStoreBroker.ClientApi.Client
                 var request = new HttpRequestMessage(HttpMethod.Get, subUrl);
                 request.Headers.Add("Request-ID", clientRequestId);
 
-                var k = 10;
-                while (k > 0)
+                var retryCount = RetryDefaultTimes;
+                while (retryCount > 0)
                 {
                     using var response = await _httpClient.SendAsync(request, ct);
                     var serverRequestId = GetRequestIdFromHeader(response);
@@ -86,8 +85,8 @@ namespace GameStoreBroker.ClientApi.Client
                         response.StatusCode == HttpStatusCode.ServiceUnavailable ||
                         response.Headers.Contains("Retry-After"))
                     {
-                        await Task.Delay(new TimeSpan(0, 0, 30), ct);
-                        k--;
+                        await Task.Delay(GetRetryDelay(response), ct);
+                        retryCount--;
                         continue;
                     }
 
@@ -109,6 +108,37 @@ namespace GameStoreBroker.ClientApi.Client
         }
 
         private static string GenerateClientRequestId() => Guid.NewGuid().ToString();
+
+        private static TimeSpan GetRetryDelay(HttpResponseMessage response)
+        {
+            var delay = TimeSpan.FromSeconds(RetryDefaultSeconds);
+            const string retryAfterHeader = "Retry-After";
+            if (response.Headers.Contains(retryAfterHeader) &&
+                response.Headers.TryGetValues(retryAfterHeader, out var headerValues))
+            {
+                var retryAfter = headerValues.FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(retryAfter))
+                {
+                    if (int.TryParse(retryAfter, out var retryAfterSeconds))
+                    {
+                        delay = TimeSpan.FromSeconds(retryAfterSeconds);
+                    }
+                    else if (DateTime.TryParse(retryAfter, out var retryAfterDateTime))
+                    {
+                        var now = DateTime.Now;
+                        if (retryAfterDateTime > now)
+                        {
+                            delay = retryAfterDateTime - DateTime.Now;
+                        }
+                        else
+                        {
+                            delay = TimeSpan.Zero;
+                        }
+                    }
+                }
+            }
+            return delay;
+        }
 
         private static string GetRequestIdFromHeader(HttpResponseMessage response)
         {
