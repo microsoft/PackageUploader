@@ -25,7 +25,12 @@ namespace GameStoreBroker.ClientApi.Client
         private const int RetryDefaultSeconds = 30;
         private const int RetryDefaultTimes = 10;
 
-        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions();
+        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Always,
+        };
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
         {
@@ -81,9 +86,7 @@ namespace GameStoreBroker.ClientApi.Client
                     using var response = await _httpClient.SendAsync(request, ct);
                     var serverRequestId = GetRequestIdFromHeader(response);
 
-                    if (response.StatusCode == HttpStatusCode.GatewayTimeout ||
-                        response.StatusCode == HttpStatusCode.ServiceUnavailable ||
-                        response.Headers.Contains("Retry-After"))
+                    if (response.StatusCode is HttpStatusCode.GatewayTimeout or HttpStatusCode.ServiceUnavailable || response.Headers.Contains("Retry-After"))
                     {
                         await Task.Delay(GetRetryDelay(response), ct);
                         retryCount--;

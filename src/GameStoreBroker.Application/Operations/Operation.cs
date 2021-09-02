@@ -23,6 +23,7 @@ namespace GameStoreBroker.Application.Operations
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
         {
             PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
         protected Operation(IHost host, Options options)
