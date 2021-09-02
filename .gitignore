@@ -351,3 +351,4 @@ MigrationBackup/
 /src/GameStoreBroker.Application/GetProductTest.json
 /src/GameStoreBroker.Application/InvalidJsonTest.json
 /src/GameStoreBroker.Application/Properties/launchSettings.json
+/src/GameStoreBroker.Application/UploadUwpPackageTest.json
