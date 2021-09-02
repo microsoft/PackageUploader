@@ -82,7 +82,7 @@ Question: Will I need to do anything different for delta uploads to work? <br>
 Answer: You will not - this will all be done at the service layer and client shouldn't have to be touched. 
 
 Question: Will the wrapper support other actions? <br>
-Answer: We will indeed! Deleting/removing packages.
+Answer: We will indeed! Deleting/removing packages along with publishes.
 
 Question: Could I use this wrapper to automate and update other parts of partner center apart from uploads? <br>
 Answer: Unfortunately not right now and our only scope was uploads. The API teams are working to further expand this out to other parts of partner center. 
