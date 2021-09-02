@@ -8,9 +8,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Operations
+namespace GameStoreBroker.Application.Services
 {
-    internal class ProductService
+    internal class ProductService : IProductService
     {
         private readonly IGameStoreBrokerService _storeBroker;
         private readonly IAccessTokenProvider _accessTokenProvider;
@@ -58,14 +58,13 @@ namespace GameStoreBroker.Application.Operations
             {
                 return await _storeBroker.GetPackageBranchByFriendlyNameAsync(_accessTokenProvider, product, schema.BranchFriendlyName, ct).ConfigureAwait(false);
             }
-            else if (!string.IsNullOrWhiteSpace(schema.FlightName))
+
+            if (!string.IsNullOrWhiteSpace(schema.FlightName))
             {
                 return await _storeBroker.GetPackageBranchByFlightName(_accessTokenProvider, product, schema.FlightName, ct).ConfigureAwait(false);
             }
-            else
-            {
-                throw new Exception("BranchFriendlyName or FlightName needed.");
-            }
+
+            throw new Exception("BranchFriendlyName or FlightName needed.");
         }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Models;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Threading;
@@ -15,29 +16,24 @@ namespace GameStoreBroker.ClientApi
         private const string AadAuthorityBaseUrl = "https://login.microsoftonline.com/";
         private const string AadResourceForCaller = "https://api.partner.microsoft.com";
 
-        public AccessTokenProvider(AadAuthInfo aadAuthInfo)
+        public AccessTokenProvider(IOptions<AadAuthInfo> aadAuthInfo)
         {
-            if (aadAuthInfo == null)
-            {
-                throw new ArgumentNullException(nameof(aadAuthInfo));
-            }
+            _aadAuthInfo = aadAuthInfo?.Value ?? throw new ArgumentNullException(nameof(aadAuthInfo), $"{nameof(aadAuthInfo)} cannot be null.");
 
-            if (string.IsNullOrWhiteSpace(aadAuthInfo.TenantId))
+            if (string.IsNullOrWhiteSpace(_aadAuthInfo.TenantId))
             {
                 throw new ArgumentException("TenantId not provided in AadAuthInfo.", nameof(aadAuthInfo));
             }
 
-            if (string.IsNullOrWhiteSpace(aadAuthInfo.ClientId))
+            if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientId))
             {
                 throw new ArgumentException("ClientId not provided in AadAuthInfo.", nameof(aadAuthInfo));
             }
 
-            if (string.IsNullOrWhiteSpace(aadAuthInfo.ClientSecret))
+            if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientSecret))
             {
                 throw new ArgumentException("ClientSecret not provided in AadAuthInfo.", nameof(aadAuthInfo));
             }
-
-            _aadAuthInfo = aadAuthInfo;
         }
 
         public async Task<string> GetAccessToken(CancellationToken ct)

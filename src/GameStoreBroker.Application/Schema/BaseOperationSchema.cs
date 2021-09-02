@@ -16,9 +16,6 @@ namespace GameStoreBroker.Application.Schema
         public string ProductId { get; set; }
         
         public string BigId { get; set; }
-        
-        [Required(ErrorMessage = "aadAuthInfo is required")]
-        public AadAuthInfoSchema AadAuthInfo { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -49,8 +46,6 @@ namespace GameStoreBroker.Application.Schema
             {
                 validationResults.Add(new ValidationResult("Only one ProductId or BigId is allowed"));
             }
-
-            Validator.TryValidateObject(AadAuthInfo, new ValidationContext(AadAuthInfo), validationResults, true);
         }
     }
 }

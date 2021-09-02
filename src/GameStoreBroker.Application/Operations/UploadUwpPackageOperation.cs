@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.Application.Schema;
+using GameStoreBroker.Application.Services;
 using GameStoreBroker.ClientApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,16 +26,15 @@ namespace GameStoreBroker.Application.Operations
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            using var scope = _host.Services.CreateScope();
-            var storeBroker = scope.ServiceProvider.GetRequiredService<IGameStoreBrokerService>();
-
             _logger.LogInformation("Starting UploadUwpPackage operation.");
 
             var schema = await GetSchemaAsync<UploadUwpPackageOperationSchema>(ct).ConfigureAwait(false);
-            var aadAuthInfo = GetAadAuthInfo(schema.AadAuthInfo);
-            var accessTokenProvider = new AccessTokenProvider(aadAuthInfo);
 
-            var productService = new ProductService(storeBroker, accessTokenProvider);
+            using var scope = _host.Services.CreateScope();
+            var storeBroker = scope.ServiceProvider.GetRequiredService<IGameStoreBrokerService>();
+            var accessTokenProvider = scope.ServiceProvider.GetRequiredService<IAccessTokenProvider>();
+            var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
+            
             var product = await productService.GetProductAsync(schema, ct).ConfigureAwait(false);
             var packageBranch = await productService.GetGamePackageBranch(product, schema, ct).ConfigureAwait(false);
 

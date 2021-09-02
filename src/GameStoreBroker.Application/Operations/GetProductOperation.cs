@@ -3,7 +3,7 @@
 
 using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Schema;
-using GameStoreBroker.ClientApi;
+using GameStoreBroker.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,16 +25,14 @@ namespace GameStoreBroker.Application.Operations
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            using var scope = _host.Services.CreateScope();
-            var storeBroker = scope.ServiceProvider.GetRequiredService<IGameStoreBrokerService>();
-
             _logger.LogInformation("Starting GetProduct operation.");
 
-            var schema = await GetSchemaAsync<GetProductOperationSchema>(ct).ConfigureAwait(false);
-            var aadAuthInfo = GetAadAuthInfo(schema.AadAuthInfo);
-            var accessTokenProvider = new AccessTokenProvider(aadAuthInfo);
+            using var scope = _host.Services.CreateScope();
+            var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
 
-            var product = await new ProductService(storeBroker, accessTokenProvider).GetProductAsync(schema, ct).ConfigureAwait(false);
+            var schema = await GetSchemaAsync<GetProductOperationSchema>(ct).ConfigureAwait(false);
+
+            var product = await productService.GetProductAsync(schema, ct).ConfigureAwait(false);
             _logger.LogInformation("Product: {product}", product.ToJson());
         }
     }

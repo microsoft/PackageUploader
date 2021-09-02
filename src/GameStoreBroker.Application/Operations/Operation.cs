@@ -3,7 +3,6 @@
 
 using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Schema;
-using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,33 +41,7 @@ namespace GameStoreBroker.Application.Operations
             var schema = await DeserializeJsonFileAsync<T>(_options.ConfigFile.FullName, ct).ConfigureAwait(false);
             ValidateSchema(schema);
 
-            if (!string.IsNullOrWhiteSpace(_options.ClientSecret))
-            {
-                schema.AadAuthInfo.ClientSecret = _options.ClientSecret;
-            }
-
             return schema;
-        }
-
-        protected static AadAuthInfo GetAadAuthInfo(AadAuthInfoSchema aadAuthInfoSchema)
-        {
-            if (aadAuthInfoSchema == null)
-            {
-                throw new ArgumentNullException(nameof(aadAuthInfoSchema));
-            }
-
-            if (string.IsNullOrWhiteSpace(aadAuthInfoSchema.ClientSecret))
-            {
-                throw new Exception("ClientSecret not provided.");
-            }
-
-            var aadAuthInfo = new AadAuthInfo
-            {
-                TenantId = aadAuthInfoSchema.TenantId,
-                ClientId = aadAuthInfoSchema.ClientId,
-                ClientSecret = aadAuthInfoSchema.ClientSecret,
-            };
-            return aadAuthInfo;
         }
 
         public async Task<int> RunAsync(CancellationToken ct)
