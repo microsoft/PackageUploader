@@ -56,7 +56,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             var ingestionGameProducts = await GetAsync<PagedCollection<IngestionGameProduct>>($"products?externalId={bigId}", ct).ConfigureAwait(false);
             var ingestionGameProduct = ingestionGameProducts.Value.FirstOrDefault();
 
-            if (ingestionGameProduct == null)
+            if (ingestionGameProduct is null)
             {
                 throw new ProductNotFoundException($"Product with big id {bigId} not found.");
             }
@@ -79,9 +79,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             var branches = await GetAsync<PagedCollection<IngestionBranch>>($"products/{productId}/branches/getByModule(module=Package)", ct);
 
-            var ingestionGamePackageBranch = branches.Value.FirstOrDefault(b => b.FriendlyName != null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase));
+            var ingestionGamePackageBranch = branches.Value.FirstOrDefault(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase));
 
-            if (ingestionGamePackageBranch == null)
+            if (ingestionGamePackageBranch is null)
             {
                 throw new PackageBranchNotFoundException($"404 branch not found: {branchFriendlyName}");
             }
@@ -104,9 +104,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             var flights = await GetAsync<PagedCollection<IngestionFlight>>($"products/{productId}/flights", ct);
 
-            var selectedFlight = flights.Value.FirstOrDefault(f => f.Name != null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase));
+            var selectedFlight = flights.Value.FirstOrDefault(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase));
 
-            if (selectedFlight == null)
+            if (selectedFlight is null)
             {
                 throw new PackageBranchNotFoundException($"404 flight not found: {flightName}");
             }

@@ -67,13 +67,13 @@ namespace GameStoreBroker.ClientApi.Client
             }
         }
 
-        public async Task<Tout> PostAsync<Tin, Tout>(string subUrl, Tin body, CancellationToken ct)
+        public async Task<TOut> PostAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
         {
             try
             {
                 var clientRequestId = GenerateClientRequestId();
                 LogRequestVerbose("POST", subUrl, clientRequestId, body);
-                var json = body == null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
+                var json = body is null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
                 using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
 
                 var request = new HttpRequestMessage(HttpMethod.Get, subUrl);
@@ -93,7 +93,7 @@ namespace GameStoreBroker.ClientApi.Client
                     }
 
                     response.EnsureSuccessStatusCode();
-                    var result = await response.Content.ReadFromJsonAsync<Tout>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+                    var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
 
                     LogResponseVerbose(result, serverRequestId);
 
@@ -155,7 +155,7 @@ namespace GameStoreBroker.ClientApi.Client
         private void LogRequestVerbose(string verb, string requestUrl, string clientRequestId, object requestBody = null)
         {
             _logger.LogTrace("{verb} {requestUrl} [ClientRequestId: {clientRequestId}]", verb, requestUrl, clientRequestId);
-            if (requestBody != null)
+            if (requestBody is not null)
             {
                 _logger.LogTrace("Request Body:");
                 _logger.LogTrace(requestBody.ToJson());

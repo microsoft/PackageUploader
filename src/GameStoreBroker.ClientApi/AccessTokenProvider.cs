@@ -44,7 +44,7 @@ namespace GameStoreBroker.ClientApi
             var clientCredential = new ClientCredential(_aadAuthInfo.ClientId, _aadAuthInfo.ClientSecret);
             var result = await authenticationContext.AcquireTokenAsync(AadResourceForCaller, clientCredential).ConfigureAwait(false);
 
-            if (result == null)
+            if (result is null)
             {
                 throw new Exception("Failure while acquiring token.");
             }

@@ -8,7 +8,7 @@ namespace GameStoreBroker.ClientApi.Extensions
 {
     internal static class ObjectExtensions
     {
-        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions()
+        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new ()
         {
             IgnoreNullValues = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -16,7 +16,7 @@ namespace GameStoreBroker.ClientApi.Extensions
 
         public static string ToJson<T>(this T value, JsonSerializerOptions jsonSerializerOptions = null) where T : class
         {
-            if (value == null)
+            if (value is null)
             {
                 return "null";
             }
