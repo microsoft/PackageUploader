@@ -39,7 +39,7 @@ namespace GameStoreBroker.ClientApi.Client
         {
             try
             {
-                var clientRequestId = Guid.NewGuid().ToString();
+                var clientRequestId = GenerateClientRequestId();
                 LogRequestVerbose("GET", subUrl, clientRequestId);
                 var request = new HttpRequestMessage(HttpMethod.Get, subUrl);
                 request.Headers.Add("Request-ID", clientRequestId);
@@ -68,7 +68,7 @@ namespace GameStoreBroker.ClientApi.Client
         {
             try
             {
-                var clientRequestId = Guid.NewGuid().ToString();
+                var clientRequestId = GenerateClientRequestId();
                 LogRequestVerbose("POST", subUrl, clientRequestId, body);
                 var json = body == null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
                 using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
@@ -107,6 +107,8 @@ namespace GameStoreBroker.ClientApi.Client
                 throw;
             }
         }
+
+        private static string GenerateClientRequestId() => Guid.NewGuid().ToString();
 
         private static string GetRequestIdFromHeader(HttpResponseMessage response)
         {
