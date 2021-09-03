@@ -34,17 +34,17 @@ namespace GameStoreBroker.Application.Schema
             var operationName = GetOperationName();
             if (!string.Equals(operationName, OperationName))
             {
-                validationResults.Add(new ValidationResult($"operationName is not {operationName}"));
+                validationResults.Add(new ValidationResult($"operationName is not {operationName}", new [] { nameof(operationName) }));
             }
 
             if (string.IsNullOrWhiteSpace(ProductId) && string.IsNullOrWhiteSpace(BigId))
             {
-                validationResults.Add(new ValidationResult("ProductId or BigId is required"));
+                validationResults.Add(new ValidationResult("ProductId or BigId is required", new[] { nameof(ProductId), nameof(BigId) }));
             }
 
             if (!string.IsNullOrWhiteSpace(ProductId) && !string.IsNullOrWhiteSpace(BigId))
             {
-                validationResults.Add(new ValidationResult("Only one ProductId or BigId is allowed"));
+                validationResults.Add(new ValidationResult("Only one ProductId or BigId is allowed", new[] { nameof(ProductId), nameof(BigId) }));
             }
         }
     }

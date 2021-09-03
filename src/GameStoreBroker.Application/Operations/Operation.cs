@@ -34,7 +34,7 @@ namespace GameStoreBroker.Application.Operations
             {
                 _logger.LogError(e.Message);
                 _logger.LogTrace(e, "Exception thrown.");
-                return 1;
+                return 3;
             }
             finally
             {

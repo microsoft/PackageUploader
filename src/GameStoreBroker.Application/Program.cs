@@ -3,6 +3,7 @@
 
 using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Operations;
+using GameStoreBroker.Application.Schema;
 using GameStoreBroker.Application.Services;
 using GameStoreBroker.ClientApi;
 using GameStoreBroker.FileLogger;
@@ -14,17 +15,14 @@ using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
-using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using GameStoreBroker.Application.Schema;
 
 namespace GameStoreBroker.Application
 {
-    internal static class Program
+    internal class Program
     {
         private const string LogTimestampFormat = "yyyy-MM-dd hh:mm:ss.fff ";
 
@@ -86,12 +84,6 @@ namespace GameStoreBroker.Application
             services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationSchema>(context);
         }
 
-        private static void AddOperation<T1, T2>(this IServiceCollection services, HostBuilderContext context) where T1 : Operation where T2 : class
-        {
-            services.AddScoped<T1>();
-            services.AddOptions<T2>().Bind(context.Configuration.GetSection("GameStoreBroker")).ValidateDataAnnotations();
-        }
-
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
         {
             var invocationContext = context.GetInvocationContext();
@@ -113,20 +105,17 @@ namespace GameStoreBroker.Application
                 {
                     ConfigFileOption,
                     ClientSecretOption,
-                }.AddHandler(CommandHandler.Create<IHost, CancellationToken>(RunAsyncOperation<GetProductOperation>)),
-                new Command("UploadUwpPackage", "Gets metadata of the product.")
+                }.AddOperationHandler<GetProductOperation>(),
+                new Command("UploadUwpPackage", "Uploads UWP game package.")
                 {
                     ConfigFileOption,
                     ClientSecretOption,
-                }.AddHandler(CommandHandler.Create<IHost, CancellationToken>(RunAsyncOperation<UploadUwpPackageOperation>)),
+                }.AddOperationHandler<UploadUwpPackageOperation>(),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);
             rootCommand.Description = "Application that enables game developers to upload Xbox and PC game packages to Partner Center.";
             return new CommandLineBuilder(rootCommand);
         }
-
-        private static async Task<int> RunAsyncOperation<T>(IHost host, CancellationToken ct) where T : Operation =>
-            await host.Services.GetRequiredService<T>().RunAsync(ct).ConfigureAwait(false);
     }
 }

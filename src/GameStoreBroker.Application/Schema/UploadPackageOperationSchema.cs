@@ -12,23 +12,19 @@ namespace GameStoreBroker.Application.Schema
 
         public string FlightName { get; set; }
 
-        public UploadConfigSchema UploadConfig { get; set; }
-
         public int MinutesToWaitForProcessing { get; set; }
 
         protected override void Validate(List<ValidationResult> validationResults)
         {
             if (string.IsNullOrWhiteSpace(BranchFriendlyName) && string.IsNullOrWhiteSpace(FlightName))
             {
-                validationResults.Add(new ValidationResult("BranchFriendlyName or FlightName is required"));
+                validationResults.Add(new ValidationResult("BranchFriendlyName or FlightName is required", new[] { nameof(BranchFriendlyName), nameof(FlightName) }));
             }
 
             if (!string.IsNullOrWhiteSpace(BranchFriendlyName) && !string.IsNullOrWhiteSpace(FlightName))
             {
-                validationResults.Add(new ValidationResult("Only one BranchFriendlyName or FlightName is allowed"));
+                validationResults.Add(new ValidationResult("Only one BranchFriendlyName or FlightName is allowed", new[] { nameof(BranchFriendlyName), nameof(FlightName) }));
             }
-
-            Validator.TryValidateObject(UploadConfig, new ValidationContext(UploadConfig), validationResults, true);
         }
     }
 }
