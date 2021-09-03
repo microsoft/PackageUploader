@@ -25,7 +25,7 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
 {
     internal class XfusUploader : IXfusUploader
     {
-        public static string HttpClientName = "xfus";
+        public const string HttpClientName = "xfus";
 
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
         {
