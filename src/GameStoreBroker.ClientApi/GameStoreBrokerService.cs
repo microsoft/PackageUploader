@@ -100,7 +100,7 @@ namespace GameStoreBroker.ClientApi
             var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, ct).ConfigureAwait(false);
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
-            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct);
+            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
         }
     }
 }
