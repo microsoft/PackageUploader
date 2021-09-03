@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi.Client
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
 {
     internal interface IHttpRestClient
     {

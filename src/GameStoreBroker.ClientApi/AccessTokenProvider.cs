@@ -5,7 +5,6 @@ using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi

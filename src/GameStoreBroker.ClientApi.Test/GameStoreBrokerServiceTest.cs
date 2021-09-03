@@ -3,6 +3,7 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion;
 using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
+using GameStoreBroker.ClientApi.Client.Xfus;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -54,7 +55,9 @@ namespace GameStoreBroker.ClientApi.Test
             ingestionClient.Setup(p => p.GetGameProductByBigIdAsync(It.IsNotIn(TestBigId, TestUnauthorizedBigId), It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new ProductNotFoundException(string.Empty));
 
-            _gameStoreBrokerService = new GameStoreBrokerService(ingestionClient.Object, logger);
+            var xfusUploader = new Mock<IXfusUploader>();
+
+            _gameStoreBrokerService = new GameStoreBrokerService(ingestionClient.Object, xfusUploader.Object, logger);
         }
 
         [TestMethod]

@@ -15,7 +15,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi.Client
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
 {
     internal abstract class HttpRestClient : IHttpRestClient
     {

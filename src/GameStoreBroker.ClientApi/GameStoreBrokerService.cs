@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Client.Ingestion;
+using GameStoreBroker.ClientApi.Client.Xfus;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using System;
@@ -14,11 +15,13 @@ namespace GameStoreBroker.ClientApi
     public class GameStoreBrokerService : IGameStoreBrokerService
     {
         private readonly IIngestionHttpClient _ingestionHttpClient;
+        private readonly IXfusUploader _xfusUploader;
         private readonly ILogger<GameStoreBrokerService> _logger;
 
-        public GameStoreBrokerService(IIngestionHttpClient ingestionHttpClient, ILogger<GameStoreBrokerService> logger)
+        public GameStoreBrokerService(IIngestionHttpClient ingestionHttpClient, IXfusUploader xfusUploader, ILogger<GameStoreBrokerService> logger)
         {
             _ingestionHttpClient = ingestionHttpClient;
+            _xfusUploader = xfusUploader;
             _logger = logger;
         }
 
@@ -96,6 +99,8 @@ namespace GameStoreBroker.ClientApi
             _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
             var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, ct).ConfigureAwait(false);
 
+            _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
+            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct);
         }
     }
 }
