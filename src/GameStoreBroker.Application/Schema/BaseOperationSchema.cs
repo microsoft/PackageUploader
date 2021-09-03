@@ -34,7 +34,7 @@ namespace GameStoreBroker.Application.Schema
             var operationName = GetOperationName();
             if (!string.Equals(operationName, OperationName))
             {
-                validationResults.Add(new ValidationResult($"operationName is not {operationName}", new [] { nameof(OperationName) }));
+                validationResults.Add(new ValidationResult($"OperationName is not {operationName}", new [] { nameof(OperationName) }));
             }
 
             if (string.IsNullOrWhiteSpace(ProductId) && string.IsNullOrWhiteSpace(BigId))
