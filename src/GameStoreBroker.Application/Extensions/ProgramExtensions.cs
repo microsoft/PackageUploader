@@ -43,6 +43,12 @@ namespace GameStoreBroker.Application.Extensions
             return invocationContext.ParseResult.ValueForOption(option);
         }
 
+        public static Option<T> Required<T>(this Option<T> option, bool required = true)
+        {
+            option.IsRequired = required;
+            return option;
+        }
+
         public static void AddOperation<T1, T2>(this IServiceCollection services, HostBuilderContext context) where T1 : Operation where T2 : class
         {
             services.AddScoped<T1>();

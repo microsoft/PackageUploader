@@ -31,11 +31,8 @@ namespace GameStoreBroker.Application
         private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls.");
         private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file.");
         private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app.");
+        private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "The location of the config file.").Required();
         private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "The format of the config file.");
-        private static readonly Option<FileInfo> ConfigFileOption = new (new[] { "-c", "--ConfigFile" }, "The location of the config file.")
-        {
-            IsRequired = true,
-        };
 
         internal enum ConfigFileFormat
         {
