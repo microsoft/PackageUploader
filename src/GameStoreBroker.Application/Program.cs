@@ -30,10 +30,18 @@ namespace GameStoreBroker.Application
         private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls.");
         private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file.");
         private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app.");
-        private static readonly Option<FileInfo> ConfigFileOption = new (new[] { "-c", "--ConfigFile" }, "The location of the json config file.")
+        private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "The format of the config file (default json).");
+        private static readonly Option<FileInfo> ConfigFileOption = new (new[] { "-c", "--ConfigFile" }, "The location of the config file.")
         {
             IsRequired = true,
         };
+
+        internal enum ConfigFileFormat
+        {
+            Json,
+            Xml,
+            Ini,
+        }
 
         private static async Task<int> Main(string[] args)
         {
@@ -87,10 +95,11 @@ namespace GameStoreBroker.Application
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
         {
             var invocationContext = context.GetInvocationContext();
-            var configFilePath = invocationContext.GetOptionValue(ConfigFileOption);
-            if (configFilePath is not null)
+            var configFile = invocationContext.GetOptionValue(ConfigFileOption);
+            if (configFile is not null)
             {
-                builder.AddJsonFile(configFilePath.FullName, false, false);
+                var configFileFormat = invocationContext.GetOptionValue(ConfigFileFormatOption);
+                builder.AddConfigFile(configFile, configFileFormat);
             }
 
             var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => "GameStoreBroker:AadAuthInfo:ClientSecret");

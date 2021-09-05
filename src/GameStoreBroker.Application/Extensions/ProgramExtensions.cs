@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.Application.Operations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,5 +48,14 @@ namespace GameStoreBroker.Application.Extensions
             services.AddScoped<T1>();
             services.AddOptions<T2>().Bind(context.Configuration.GetSection("GameStoreBroker")).ValidateDataAnnotations();
         }
+
+        public static IConfigurationBuilder AddConfigFile(this IConfigurationBuilder builder, FileInfo configFile, Program.ConfigFileFormat configFileFormat) =>
+            configFileFormat switch
+            {
+                Program.ConfigFileFormat.Json => builder.AddJsonFile(configFile.FullName, false, false),
+                Program.ConfigFileFormat.Xml => builder.AddXmlFile(configFile.FullName, false, false),
+                Program.ConfigFileFormat.Ini => builder.AddIniFile(configFile.FullName, false, false),
+                _ => throw new ArgumentOutOfRangeException(),
+            };
     }
 }
