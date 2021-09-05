@@ -6,6 +6,7 @@ using GameStoreBroker.Application.Operations;
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.Application.Services;
 using GameStoreBroker.ClientApi;
+using GameStoreBroker.ClientApi.Models;
 using GameStoreBroker.FileLogger;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -102,7 +103,7 @@ namespace GameStoreBroker.Application
                 builder.AddConfigFile(configFile, configFileFormat);
             }
 
-            var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => "GameStoreBroker:AadAuthInfo:ClientSecret");
+            var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => $"{nameof(AadAuthInfo)}:{nameof(AadAuthInfo.ClientSecret)}");
             builder.AddCommandLine(args, switchMappings);
         }
 

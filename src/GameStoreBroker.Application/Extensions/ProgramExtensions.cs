@@ -46,7 +46,7 @@ namespace GameStoreBroker.Application.Extensions
         public static void AddOperation<T1, T2>(this IServiceCollection services, HostBuilderContext context) where T1 : Operation where T2 : class
         {
             services.AddScoped<T1>();
-            services.AddOptions<T2>().Bind(context.Configuration.GetSection("GameStoreBroker")).ValidateDataAnnotations();
+            services.AddOptions<T2>().Bind(context.Configuration).ValidateDataAnnotations();
         }
 
         public static IConfigurationBuilder AddConfigFile(this IConfigurationBuilder builder, FileInfo configFile, Program.ConfigFileFormat configFileFormat) =>
@@ -55,7 +55,7 @@ namespace GameStoreBroker.Application.Extensions
                 Program.ConfigFileFormat.Json => builder.AddJsonFile(configFile.FullName, false, false),
                 Program.ConfigFileFormat.Xml => builder.AddXmlFile(configFile.FullName, false, false),
                 Program.ConfigFileFormat.Ini => builder.AddIniFile(configFile.FullName, false, false),
-                _ => throw new ArgumentOutOfRangeException(),
+                _ => throw new ArgumentOutOfRangeException(nameof(configFileFormat), "Invalid config file format."),
             };
     }
 }

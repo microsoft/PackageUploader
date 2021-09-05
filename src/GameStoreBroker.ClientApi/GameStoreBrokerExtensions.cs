@@ -33,11 +33,11 @@ namespace GameStoreBroker.ClientApi
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             });
 
-            services.AddOptions<AadAuthInfo>().Bind(config.GetSection("GameStoreBroker").GetSection(nameof(AadAuthInfo))).ValidateDataAnnotations();
+            services.AddOptions<AadAuthInfo>().Bind(config.GetSection(nameof(AadAuthInfo))).ValidateDataAnnotations();
             services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
 
             // Xfus
-            services.AddOptions<UploadConfig>().Bind(config.GetSection("GameStoreBroker").GetSection(nameof(UploadConfig))).ValidateDataAnnotations();
+            services.AddOptions<UploadConfig>().Bind(config.GetSection(nameof(UploadConfig))).ValidateDataAnnotations();
             services.AddScoped<IXfusUploader, XfusUploader>();
             services.AddHttpClient(XfusUploader.HttpClientName, (serviceProvider, httpClient) =>
             {
