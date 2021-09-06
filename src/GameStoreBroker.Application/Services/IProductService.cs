@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.Application.Schema;
-using GameStoreBroker.ClientApi.Models;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using System.Threading;
 using System.Threading.Tasks;
 

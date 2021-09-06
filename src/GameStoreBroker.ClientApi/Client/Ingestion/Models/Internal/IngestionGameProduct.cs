@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
     internal sealed class IngestionGameProduct
     {

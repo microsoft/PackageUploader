@@ -3,7 +3,7 @@
 
 using System.Collections.Concurrent;
 
-namespace GameStoreBroker.ClientApi.Client.Xfus.Models
+namespace GameStoreBroker.ClientApi.Client.Xfus.Models.Internal
 {
     internal sealed class BufferPool
     {

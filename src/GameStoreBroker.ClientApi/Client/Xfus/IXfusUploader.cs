@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Models;
+using GameStoreBroker.ClientApi.Client.Xfus.Models;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;

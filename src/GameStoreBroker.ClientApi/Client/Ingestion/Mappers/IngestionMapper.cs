@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Models;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
+using GameStoreBroker.ClientApi.Client.Xfus.Models;
 using System;
 using System.Linq;
 
-namespace GameStoreBroker.ClientApi.Mappers
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
 {
     internal static class IngestionMapper
     {

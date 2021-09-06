@@ -3,7 +3,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.ClientApi.TokenProvider
+namespace GameStoreBroker.ClientApi.TokenProvider.Models
 {
     public sealed class AadAuthInfo
     {

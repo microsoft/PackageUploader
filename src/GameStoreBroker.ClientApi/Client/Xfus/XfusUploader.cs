@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Client.Xfus.Config;
 using GameStoreBroker.ClientApi.Client.Xfus.Exceptions;
 using GameStoreBroker.ClientApi.Client.Xfus.Models;
-using GameStoreBroker.ClientApi.Models;
+using GameStoreBroker.ClientApi.Client.Xfus.Models.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -20,7 +21,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using GameStoreBroker.ClientApi.Client.Xfus.Config;
 
 namespace GameStoreBroker.ClientApi.Client.Xfus
 {

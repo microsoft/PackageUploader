@@ -3,7 +3,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
     public class IngestionXfusUploadInfo
     {

@@ -3,7 +3,7 @@
 
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.ClientApi;
-using GameStoreBroker.ClientApi.Models;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

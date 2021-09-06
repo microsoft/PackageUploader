@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Client.Ingestion;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Xfus;
-using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;

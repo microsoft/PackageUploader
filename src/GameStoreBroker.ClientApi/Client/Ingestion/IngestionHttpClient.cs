@@ -3,9 +3,9 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion.Client;
 using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
+using GameStoreBroker.ClientApi.Client.Ingestion.Mappers;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Mappers;
-using GameStoreBroker.ClientApi.Models;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;

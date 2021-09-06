@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GameStoreBroker.ClientApi.Client.Xfus.Models
+namespace GameStoreBroker.ClientApi.Client.Xfus.Models.Internal
 {
     /// <summary>
     /// Status information for an upload

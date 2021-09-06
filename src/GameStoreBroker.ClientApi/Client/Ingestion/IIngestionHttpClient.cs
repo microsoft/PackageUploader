@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using System.Threading;
 using System.Threading.Tasks;
-using GameStoreBroker.ClientApi.Models;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion
 {

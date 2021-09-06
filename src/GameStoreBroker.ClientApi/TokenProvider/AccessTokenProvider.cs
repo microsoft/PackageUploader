@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Threading.Tasks;
+using GameStoreBroker.ClientApi.TokenProvider.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
+using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.TokenProvider
 {

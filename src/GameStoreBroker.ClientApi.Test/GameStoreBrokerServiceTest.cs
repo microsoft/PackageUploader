@@ -3,8 +3,8 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion;
 using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Xfus;
-using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;

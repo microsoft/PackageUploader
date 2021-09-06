@@ -6,6 +6,7 @@ using GameStoreBroker.ClientApi.Client.Ingestion.Config;
 using GameStoreBroker.ClientApi.Client.Xfus;
 using GameStoreBroker.ClientApi.Client.Xfus.Config;
 using GameStoreBroker.ClientApi.TokenProvider;
+using GameStoreBroker.ClientApi.TokenProvider.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

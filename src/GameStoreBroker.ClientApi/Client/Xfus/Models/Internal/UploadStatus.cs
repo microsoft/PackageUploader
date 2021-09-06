@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace GameStoreBroker.ClientApi.Client.Xfus.Models
+namespace GameStoreBroker.ClientApi.Client.Xfus.Models.Internal
 {
     /// <summary>
     /// Specifies the state of an asset upload's progress.
