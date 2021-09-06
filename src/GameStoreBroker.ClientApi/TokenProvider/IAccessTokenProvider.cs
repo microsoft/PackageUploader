@@ -3,7 +3,7 @@
 
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi
+namespace GameStoreBroker.ClientApi.TokenProvider
 {
     public interface IAccessTokenProvider
     {

@@ -6,7 +6,7 @@ using GameStoreBroker.Application.Operations;
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.Application.Services;
 using GameStoreBroker.ClientApi;
-using GameStoreBroker.ClientApi.Models;
+using GameStoreBroker.ClientApi.TokenProvider;
 using GameStoreBroker.FileLogger;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

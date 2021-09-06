@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace GameStoreBroker.ClientApi.Models
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Config
 {
     public class IngestionConfig
     {
