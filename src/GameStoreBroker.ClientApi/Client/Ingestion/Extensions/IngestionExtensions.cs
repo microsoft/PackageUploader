@@ -5,9 +5,9 @@ using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Extensions
 {
-    public static class IngestionExtensions
+    internal static class IngestionExtensions
     {
-        public static string GetGamePackageAssetType(this GamePackageAssetType gamePackageAssetType) =>
+        internal static string GetGamePackageAssetType(this GamePackageAssetType gamePackageAssetType) =>
             gamePackageAssetType switch
             {
                 GamePackageAssetType.EkbFile => "EraEkb",
