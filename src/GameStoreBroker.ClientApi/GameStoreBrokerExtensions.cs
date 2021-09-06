@@ -11,9 +11,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
-using System.Net;
+using System.IO;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Mime;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi
 {
@@ -49,21 +53,44 @@ namespace GameStoreBroker.ClientApi
             {
                 var uploadConfig = serviceProvider.GetRequiredService<IOptions<UploadConfig>>().Value;
                 httpClient.Timeout = TimeSpan.FromMilliseconds(uploadConfig.HttpUploadTimeoutMs);
-                ConfigureServicePointManager(uploadConfig);
+
+                // Disable the extra handshake on POST requests.
+                httpClient.DefaultRequestHeaders.ExpectContinue = uploadConfig.Expect100Continue;
+            }).ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+            {
+                var uploadConfig = serviceProvider.GetRequiredService<IOptions<UploadConfig>>().Value;
+                return new SocketsHttpHandler
+                {
+                    // Default connection limit is 2 which is too low for this multi-threaded
+                    // client, we decided to use (12 * # of cores) based on experimentation.
+                    // https://docs.microsoft.com/en-gb/archive/blogs/timomta/controlling-the-number-of-outgoing-connections-from-httpclient-net-core-or-full-framework
+                    MaxConnectionsPerServer = uploadConfig.DefaultConnectionLimit == -1 ? 12 * Environment.ProcessorCount : uploadConfig.DefaultConnectionLimit,
+                    ConnectCallback = (context, ct) => ConnectCallback(context, uploadConfig.UseNagleAlgorithm, ct),
+                };
             });
         }
 
-        private static void ConfigureServicePointManager(UploadConfig uploadConfig)
+        private static async ValueTask<Stream> ConnectCallback(SocketsHttpConnectionContext context, bool useNagleAlgorithm, CancellationToken cancellationToken)
         {
-            // Default connection limit is 2 which is too low for this multi-threaded
-            // client, we decided to use (12 * # of cores) based on experimentation.
-            ServicePointManager.DefaultConnectionLimit = uploadConfig.DefaultConnectionLimit == -1 ? 12 * Environment.ProcessorCount : uploadConfig.DefaultConnectionLimit;
+            var socket = new Socket(SocketType.Stream, ProtocolType.Tcp)
+            {
+                // Turn on/off TCP small packet buffering (a.k.a. Nagle's algorithm)
+                NoDelay = !useNagleAlgorithm,
+            };
 
-            // Disable the extra handshake on POST requests.
-            ServicePointManager.Expect100Continue = uploadConfig.Expect100Continue;
+            try
+            {
+                await socket.ConnectAsync(context.DnsEndPoint, cancellationToken).ConfigureAwait(false);
 
-            // Turn off TCP small packet buffering (a.k.a. Nagle's algorithm)
-            ServicePointManager.UseNagleAlgorithm = uploadConfig.UseNagleAlgorithm;
+                // The stream should take the ownership of the underlying socket,
+                // closing it when it's disposed.
+                return new NetworkStream(socket, ownsSocket: true);
+            }
+            catch
+            {
+                socket.Dispose();
+                throw;
+            }
         }
     }
 }
