@@ -4,6 +4,7 @@
 using GameStoreBroker.ClientApi.Client.Ingestion;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Xfus;
+using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -79,11 +80,16 @@ namespace GameStoreBroker.ClientApi
             return await _ingestionHttpClient.GetPackageBranchByFriendlyNameAsync(product.ProductId, branchFriendlyName, ct).ConfigureAwait(false);
         }
 
-        public async Task UploadUwpPackageAsync(GameProduct product, GamePackageBranch packageBranch, FileInfo packageFile, CancellationToken ct)
+        public async Task UploadUwpPackageAsync(GameProduct product, GamePackageBranch packageBranch, FileInfo packageFile, int minutesToWaitForProcessing, CancellationToken ct)
         {
             if (product is null)
             {
                 throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (packageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
             }
 
             if (packageFile is null)
@@ -101,6 +107,104 @@ namespace GameStoreBroker.ClientApi
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
             await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
+
+            await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, ct).ConfigureAwait(false);
+        }
+
+        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (packageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            if (gameAssets is null)
+            {
+                throw new ArgumentNullException(nameof(gameAssets), $"{nameof(gameAssets)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(gameAssets.PackageFilePath))
+            {
+                throw new ArgumentException($"{nameof(gameAssets.PackageFilePath)} cannot be null or empty.", nameof(gameAssets));
+            }
+
+            var packageFile = new FileInfo(gameAssets.PackageFilePath);
+            if (!packageFile.Exists)
+            {
+                throw new FileNotFoundException("Package file not found.", packageFile.FullName);
+            }
+
+            _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
+            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, ct).ConfigureAwait(false);
+
+            _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
+            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
+
+            await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, ct).ConfigureAwait(false);
+
+            await UploadAsset(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
+            await UploadAsset(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct).ConfigureAwait(false);
+            await UploadAsset(product, package, gameAssets.SubvalFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
+            await UploadAsset(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
+        }
+
+        private async Task UploadAsset(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(assetFilePath))
+            {
+                _logger.LogWarning("No {assetType} asset file path provided, will continue to upload Package on its own.", assetType);
+            }
+            else
+            {
+                var assetFile = new FileInfo(assetFilePath);
+                if (assetFile.Exists)
+                {
+                    var packageAsset = await _ingestionHttpClient.CreatePackageAssetRequestAsync(product.ProductId, processingPackage.Id, assetFile, assetType, ct).ConfigureAwait(false);
+                    await _xfusUploader.UploadFileToXfusAsync(assetFile, packageAsset.UploadInfo, ct).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new FileNotFoundException("Package file not found.", assetFile.FullName);
+                }
+            }
+        }
+
+        private async Task WaitForPackageProcessingAsync(GameProduct product, GamePackage processingPackage, int minutesToWait, CancellationToken ct)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
+            processingPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
+
+            _logger.LogInformation("Will wait {minutesToWait} minutes for package processing, checking every minute.", minutesToWait);
+
+            while (!processingPackage.State.Equals("Processed", StringComparison.OrdinalIgnoreCase) && !processingPackage.State.Equals("ProcessFailed", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation("Still processing, waiting another minute. Will wait a further {minutesToWait} minutes after this.", minutesToWait);
+
+                await Task.Delay(TimeSpan.FromMinutes(1), ct).ConfigureAwait(false);
+
+                processingPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
+
+                if (minutesToWait <= 0)
+                {
+                    break;
+                }
+                minutesToWait--;
+            }
+            
+            if (processingPackage.State.Equals("Processing", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation("Upload complete but still processing in Partner Center.");
+            }
+            else
+            {
+                _logger.LogInformation("Finished uploading and processing.");
+                _logger.LogInformation($"Processed state: {processingPackage.State}");
+            }
         }
     }
 }

@@ -3,11 +3,13 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion.Client;
 using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
+using GameStoreBroker.ClientApi.Client.Ingestion.Extensions;
 using GameStoreBroker.ClientApi.Client.Ingestion.Mappers;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -78,7 +80,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(branchFriendlyName)} cannot be null or empty.", nameof(branchFriendlyName));
             }
 
-            var branches = await GetAsync<PagedCollection<IngestionBranch>>($"products/{productId}/branches/getByModule(module=Package)", ct);
+            var branches = await GetAsync<PagedCollection<IngestionBranch>>($"products/{productId}/branches/getByModule(module=Package)", ct).ConfigureAwait(false);
 
             var ingestionGamePackageBranch = branches.Value.FirstOrDefault(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase));
 
@@ -112,7 +114,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new PackageBranchNotFoundException($"404 flight not found: {flightName}");
             }
 
-            return await GetPackageBranchByFriendlyNameAsync(productId, selectedFlight.Id, ct);
+            var branch = await GetPackageBranchByFriendlyNameAsync(productId, selectedFlight.Id, ct).ConfigureAwait(false);
+            return branch;
         }
 
         public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, CancellationToken ct)
@@ -140,7 +143,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 MarketGroupId = "default",
             };
 
-            var ingestionGamePackage = await PostAsync<IngestionPackageCreationRequest, IngestionGamePackage>($"products/{productId}/packages", body, ct);
+            var ingestionGamePackage = await PostAsync<IngestionPackageCreationRequest, IngestionGamePackage>($"products/{productId}/packages", body, ct).ConfigureAwait(false);
 
             if (!ingestionGamePackage.State.Equals("PendingUpload", StringComparison.OrdinalIgnoreCase))
             {
@@ -151,6 +154,41 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             var gamePackage = ingestionGamePackage.Map();
             return gamePackage;
+        }
+
+        public async Task<GamePackage> GetPackageByIdAsync(string productId, string packageId, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(packageId))
+            {
+                throw new ArgumentException($"{nameof(packageId)} cannot be null or empty.", nameof(packageId));
+            }
+
+            var package = await GetAsync<GamePackage>($"products/{productId}/packages/{packageId}", ct).ConfigureAwait(false);
+            return package;
+        }
+
+        public async Task<GamePackageAsset> CreatePackageAssetRequestAsync(string productId, string packageId, FileInfo fileInfo, GamePackageAssetType packageAssetType, CancellationToken ct)
+        {
+            var body = new IngestionGamePackageAsset
+            {
+                PackageId = packageId,
+                Type = packageAssetType.GetGamePackageAssetType(),
+                ResourceType = "PackageAsset",
+                FileName = fileInfo.Name,
+                BinarySizeInBytes = fileInfo.Length,
+                CreatedDate = fileInfo.CreationTime,
+                Name = fileInfo.Name,
+            };
+
+            var ingestionGamePackageAsset = await PostAsync<IngestionGamePackageAsset, IngestionGamePackageAsset>($"products/{productId}/packages/{packageId}/packageAssets", body, ct).ConfigureAwait(false);
+
+            var gamePackageAsset = ingestionGamePackageAsset.Map();
+            return gamePackageAsset;
         }
     }
 }

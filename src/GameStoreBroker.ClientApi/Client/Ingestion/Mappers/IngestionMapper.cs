@@ -54,5 +54,22 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 CurrentDraftInstanceId = ingestionBranch.CurrentDraftInstanceId,
             };
         }
+
+        public static GamePackageAsset Map(this IngestionGamePackageAsset ingestionGamePackageAsset)
+        {
+            return new GamePackageAsset
+            {
+                Id = ingestionGamePackageAsset.Id,
+                Type = ingestionGamePackageAsset.Type,
+                Name = ingestionGamePackageAsset.Name,
+                IsCommitted = ingestionGamePackageAsset.IsCommitted,
+                PackageId = ingestionGamePackageAsset.PackageId,
+                PackageType = ingestionGamePackageAsset.PackageType,
+                CreatedDate = ingestionGamePackageAsset.CreatedDate,
+                BinarySizeInBytes = ingestionGamePackageAsset.BinarySizeInBytes,
+                UploadInfo = ingestionGamePackageAsset.UploadInfo.Map(),
+                FileName = ingestionGamePackageAsset.FileName,
+            };
+        }
     }
 }

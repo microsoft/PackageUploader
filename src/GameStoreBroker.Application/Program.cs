@@ -88,6 +88,7 @@ namespace GameStoreBroker.Application
 
             services.AddOperation<GetProductOperation, GetProductOperationSchema>(context);
             services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationSchema>(context);
+            services.AddOperation<UploadGamePackageOperation, UploadGamePackageOperationSchema>(context);
         }
 
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
@@ -116,6 +117,10 @@ namespace GameStoreBroker.Application
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
                 }.AddOperationHandler<UploadUwpPackageOperation>(),
+                new Command("UploadGamePackage", "Uploads game package.")
+                {
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                }.AddOperationHandler<UploadGamePackageOperation>(),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);

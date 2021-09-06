@@ -6,20 +6,19 @@ using GameStoreBroker.Application.Services;
 using GameStoreBroker.ClientApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace GameStoreBroker.Application.Operations
 {
-    internal class UploadUwpPackageOperation : Operation
+    internal class UploadGamePackageOperation : Operation
     {
         private readonly IProductService _productService;
         private readonly IGameStoreBrokerService _storeBrokerService;
-        private readonly ILogger<UploadUwpPackageOperation> _logger;
-        private readonly UploadUwpPackageOperationSchema _config;
+        private readonly ILogger<UploadGamePackageOperation> _logger;
+        private readonly UploadGamePackageOperationSchema _config;
 
-        public UploadUwpPackageOperation(IProductService productService, IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationSchema> config) : base(logger)
+        public UploadGamePackageOperation(IProductService productService, IGameStoreBrokerService storeBrokerService, ILogger<UploadGamePackageOperation> logger, IOptions<UploadGamePackageOperationSchema> config) : base(logger)
         {
             _productService = productService;
             _storeBrokerService = storeBrokerService;
@@ -33,9 +32,8 @@ namespace GameStoreBroker.Application.Operations
             
             var product = await _productService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _productService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
-
-            var packageFilePath = new FileInfo(_config.PackageFilePath);
-            await _storeBrokerService.UploadUwpPackageAsync(product, packageBranch, packageFilePath, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            
+            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.XvcAssets, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
     }
 }

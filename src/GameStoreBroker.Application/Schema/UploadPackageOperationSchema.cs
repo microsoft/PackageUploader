@@ -12,7 +12,8 @@ namespace GameStoreBroker.Application.Schema
 
         public string FlightName { get; set; }
 
-        public int MinutesToWaitForProcessing { get; set; }
+        [Range(0, 360)]
+        public int MinutesToWaitForProcessing { get; set; } = 30;
 
         protected override void Validate(List<ValidationResult> validationResults)
         {

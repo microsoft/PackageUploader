@@ -47,6 +47,11 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
 
         public async Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, CancellationToken ct)
         {
+            if (!uploadFile.Exists)
+            {
+                throw new FileNotFoundException("Upload file not found.", uploadFile.FullName);
+            }
+
             var properties = new UploadProperties
             {
                 FileProperties = new FileProperties
