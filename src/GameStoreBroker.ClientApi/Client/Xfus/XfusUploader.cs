@@ -37,10 +37,6 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
         private readonly ILogger<XfusUploader> _logger;
         private readonly UploadConfig _uploadConfig;
 
-        private int _blocksToUpload;
-        private int _blocksLeftToUpload;
-        private int _percentComplete = -1;
-
         public XfusUploader(IHttpClientFactory httpClientFactory, ILogger<XfusUploader> logger, IOptions<UploadConfig> uploadConfig)
         {
             _httpClientFactory = httpClientFactory;
@@ -71,9 +67,8 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
             _logger.LogDebug($"XFUS Asset Initialized. Will upload {new ByteSize(uploadFile.Length)} across {uploadProgress.PendingBlocks.Length} blocks.");
             _logger.LogInformation($"XFUS Asset Initialized. Will upload {uploadFile.Name} at size of {new ByteSize(uploadFile.Length)}.");
 
-            _blocksToUpload = uploadProgress.PendingBlocks.Length;
-            _blocksLeftToUpload = _blocksToUpload;
-            ReportProgress();
+            var progress = new Progress(_logger, uploadProgress.PendingBlocks.Length);
+            progress.ReportProgress();
             long bytesUploaded = 0;
             while (uploadProgress.Status != UploadStatus.Completed)
             {
@@ -89,14 +84,16 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                     // memory usage spikes during the middle of an upload as blocks are created and reused.
                     var maximumBlockSize = (int)uploadProgress.PendingBlocks.Max(x => x.Size);
 
-                    bytesUploaded = await UploadBlocksAsync(httpClient, uploadProgress.PendingBlocks, maximumBlockSize, uploadFile, assetGuid, authToken, xfusUploadInfo.XfusTenant, bytesUploaded, ct).ConfigureAwait(false);
+                    bytesUploaded = await UploadBlocksAsync(httpClient, uploadProgress.PendingBlocks, maximumBlockSize,
+                            uploadFile, assetGuid, authToken, xfusUploadInfo.XfusTenant, bytesUploaded, progress, ct)
+                        .ConfigureAwait(false);
                 }
 
                 try
                 {
                     uploadProgress = await ContinueAssetAsync(httpClient, authToken, xfusUploadInfo.XfusTenant, assetGuid, ct).ConfigureAwait(false);
-                    _blocksLeftToUpload = uploadProgress.PendingBlocks?.Length ?? 0;
-                    ReportProgress();
+                    progress.BlocksLeftToUpload = uploadProgress.PendingBlocks?.Length ?? 0;
+                    progress.ReportProgress();
 
                     if (uploadProgress.Status == UploadStatus.Busy)
                     {
@@ -111,7 +108,10 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                 {
                     if (serverException.IsRetryable || serverException.HttpStatusCode == HttpStatusCode.ServiceUnavailable)
                     {
-                        await Task.Delay(serverException.RetryAfter.TotalMilliseconds > 0 ? serverException.RetryAfter : new TimeSpan(_uploadConfig.HttpTimeoutMs), ct).ConfigureAwait(false);
+                        await Task.Delay(
+                            serverException.RetryAfter.TotalMilliseconds > 0
+                                ? serverException.RetryAfter
+                                : new TimeSpan(_uploadConfig.HttpTimeoutMs), ct).ConfigureAwait(false);
                     }
                 }
             }
@@ -125,7 +125,8 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
             _logger.LogInformation($"{uploadFile.Name} Upload complete in: (HH:MM:SS) {hours}:{minutes}:{seconds}.");
         }
 
-        private async Task<UploadProgress> InitializeAssetAsync(HttpClient httpClient, string authToken, string tenant, Guid assetId, UploadProperties properties, CancellationToken ct)
+        private async Task<UploadProgress> InitializeAssetAsync(HttpClient httpClient, string authToken, string tenant,
+            Guid assetId, UploadProperties properties, CancellationToken ct)
         {
             using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", authToken, tenant, properties);
             using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
@@ -141,7 +142,7 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
         }
 
         private async Task<long> UploadBlocksAsync(HttpClient httpClient, Block[] blockToBeUploaded, int maxBlockSize,
-            FileInfo uploadFile, Guid assetId, string authToken, string tenant, long bytesUploaded, CancellationToken ct)
+            FileInfo uploadFile, Guid assetId, string authToken, string tenant, long bytesUploaded, Progress progress, CancellationToken ct)
         {
             var bufferPool = new BufferPool(maxBlockSize);
             var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _uploadConfig.MaxParallelism };
@@ -165,10 +166,10 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
 
                         await UploadBlockFromPayloadAsync(httpClient, authToken, tenant, block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
 
-                        _blocksLeftToUpload--;
+                        progress.BlocksLeftToUpload--;
                         bytesUploaded += bytesRead;
                         _logger.LogTrace($"Uploaded block {block.Id}. Total uploaded: {new ByteSize(bytesUploaded)} / {new ByteSize(uploadFile.Length)}.");
-                        ReportProgress();
+                        progress.ReportProgress();
                     }
                     // Swallow exceptions so other chunk upload can proceed without ActionBlock terminating
                     // from a midway-failed chunk upload. We'll re-upload failed chunks later on so this is ok.
@@ -238,15 +239,32 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
             return request;
         }
 
-        private void ReportProgress()
+        private class Progress
         {
-            var ratio = (float)_blocksLeftToUpload / (float)_blocksToUpload;
-            var percentage = 100 - (int)Math.Round(100 * ratio);
+            private readonly ILogger _logger;
 
-            if (percentage > _percentComplete)
+            public int BlocksToUpload { get; }
+            public int BlocksLeftToUpload { get; set; }
+            public int PercentComplete { get; private set; }
+
+            public Progress(ILogger logger, int blocksToUpload)
             {
-                _percentComplete = percentage;
-                _logger.LogInformation($"Upload {percentage}% complete.");
+                _logger = logger;
+                BlocksToUpload = blocksToUpload;
+                BlocksLeftToUpload = blocksToUpload;
+                PercentComplete = -1;
+            }
+
+            public void ReportProgress()
+            {
+                var ratio = (float)BlocksLeftToUpload / (float)BlocksToUpload;
+                var percentage = 100 - (int)Math.Round(100 * ratio);
+
+                if (percentage > PercentComplete)
+                {
+                    PercentComplete = percentage;
+                    _logger.LogInformation($"Upload {percentage}% complete.");
+                }
             }
         }
     }
