@@ -9,6 +9,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
     internal interface IHttpRestClient
     {
         Task<T> GetAsync<T>(string subUrl, CancellationToken ct);
-        Task<Tout> PostAsync<Tin, Tout>(string subUrl, Tin body, CancellationToken ct);
+        Task<TOut> PostAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct);
     }
 }
