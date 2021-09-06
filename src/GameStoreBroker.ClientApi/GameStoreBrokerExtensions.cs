@@ -22,11 +22,14 @@ namespace GameStoreBroker.ClientApi
             services.AddScoped<IGameStoreBrokerService, GameStoreBrokerService>();
 
             // Ingestion
-            services.AddHttpClient<IIngestionHttpClient, IngestionHttpClient>((serviceProvider, httpClient) => 
+            services.AddOptions<IngestionConfig>().Bind(config.GetSection(nameof(IngestionConfig))).ValidateDataAnnotations();
+            services.AddHttpClient<IIngestionHttpClient, IngestionHttpClient>((serviceProvider, httpClient) =>
             {
-                httpClient.BaseAddress = new Uri("https://api.partner.microsoft.com/v1.0/ingestion/");
-                httpClient.Timeout = TimeSpan.FromMinutes(10);
                 httpClient.DefaultRequestHeaders.Add("Accept", MediaTypeNames.Application.Json);
+
+                var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
+                httpClient.BaseAddress = new Uri(ingestionConfig.BaseAddress);
+                httpClient.Timeout = TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs);
 
                 var accessTokenProvider = serviceProvider.GetRequiredService<IAccessTokenProvider>();
                 var accessToken = accessTokenProvider.GetAccessToken().GetAwaiter().GetResult();
