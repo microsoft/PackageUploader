@@ -100,7 +100,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                     return result;
                 }
 
-                throw new Exception($"POST '{subUrl}' stuck after 5 mins");
+                throw new Exception($"POST '{subUrl}' stuck after {RetryDefaultSeconds * RetryDefaultTimes} seconds");
             }
             catch (Exception ex)
             {
