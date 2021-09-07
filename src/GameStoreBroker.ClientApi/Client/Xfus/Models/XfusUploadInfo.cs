@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.ComponentModel.DataAnnotations;
+
 namespace GameStoreBroker.ClientApi.Client.Xfus.Models
 {
     public class XfusUploadInfo
@@ -8,12 +11,13 @@ namespace GameStoreBroker.ClientApi.Client.Xfus.Models
         /// <summary>
         /// File name
         /// </summary>
+        [Required()]
         public string FileName { get; set; }
 
         /// <summary>
         /// Xfus asset Id
         /// </summary>
-        public string XfusId { get; set; }
+        public Guid XfusId { get; set; }
 
         /// <summary>
         /// file SAS URI

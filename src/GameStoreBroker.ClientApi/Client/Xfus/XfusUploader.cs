@@ -61,7 +61,6 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                 }
             };
             var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(xfusUploadInfo.Token));
-            var assetGuid = new Guid(xfusUploadInfo.XfusId);
 
             var timer = new Stopwatch();
             timer.Start();
@@ -69,7 +68,7 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
             var httpClient = _httpClientFactory.CreateClient(HttpClientName);
             httpClient.BaseAddress = new Uri(xfusUploadInfo.UploadDomain + "/api/v2/assets/");
 
-            var uploadProgress = await InitializeAssetAsync(httpClient, authToken, xfusUploadInfo.XfusTenant, assetGuid, properties, ct).ConfigureAwait(false);
+            var uploadProgress = await InitializeAssetAsync(httpClient, authToken, xfusUploadInfo.XfusTenant, xfusUploadInfo.XfusId, properties, ct).ConfigureAwait(false);
             _logger.LogDebug($"XFUS Asset Initialized. Will upload {new ByteSize(uploadFile.Length)} across {uploadProgress.PendingBlocks.Length} blocks.");
             _logger.LogInformation($"XFUS Asset Initialized. Will upload {uploadFile.Name} at size of {new ByteSize(uploadFile.Length)}.");
 
@@ -91,13 +90,13 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                     var maximumBlockSize = (int)uploadProgress.PendingBlocks.Max(x => x.Size);
 
                     bytesUploaded = await UploadBlocksAsync(httpClient, uploadProgress.PendingBlocks, maximumBlockSize,
-                            uploadFile, assetGuid, authToken, xfusUploadInfo.XfusTenant, bytesUploaded, progress, ct)
+                            uploadFile, xfusUploadInfo.XfusId, authToken, xfusUploadInfo.XfusTenant, bytesUploaded, progress, ct)
                         .ConfigureAwait(false);
                 }
 
                 try
                 {
-                    uploadProgress = await ContinueAssetAsync(httpClient, authToken, xfusUploadInfo.XfusTenant, assetGuid, ct).ConfigureAwait(false);
+                    uploadProgress = await ContinueAssetAsync(httpClient, authToken, xfusUploadInfo.XfusTenant, xfusUploadInfo.XfusId, ct).ConfigureAwait(false);
                     progress.BlocksLeftToUpload = uploadProgress.PendingBlocks?.Length ?? 0;
                     progress.ReportProgress();
 
