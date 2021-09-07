@@ -80,42 +80,7 @@ namespace GameStoreBroker.ClientApi
             return await _ingestionHttpClient.GetPackageBranchByFriendlyNameAsync(product.ProductId, branchFriendlyName, ct).ConfigureAwait(false);
         }
 
-        public async Task UploadUwpPackageAsync(GameProduct product, GamePackageBranch packageBranch, FileInfo packageFile, int minutesToWaitForProcessing, CancellationToken ct)
-        {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
-            }
-
-            if (packageFile is null)
-            {
-                throw new ArgumentNullException(nameof(packageFile), $"{nameof(packageFile)} cannot be null.");
-            }
-
-            if (!packageFile.Exists)
-            {
-                throw new FileNotFoundException("Package file not found.", packageFile.FullName);
-            }
-
-            _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
-            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, ct).ConfigureAwait(false);
-
-            _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
-            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
-            _logger.LogInformation("Package uploaded.");
-
-            await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
-            _logger.LogInformation("Package processing.");
-
-            await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, ct).ConfigureAwait(false);
-        }
-
-        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
+        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, GameAssets gameAssets, bool uploadAssets, int minutesToWaitForProcessing, CancellationToken ct)
         {
             if (product is null)
             {
@@ -155,10 +120,13 @@ namespace GameStoreBroker.ClientApi
 
             await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, ct).ConfigureAwait(false);
 
-            await UploadAsset(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
-            await UploadAsset(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct).ConfigureAwait(false);
-            await UploadAsset(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
-            await UploadAsset(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
+            if (uploadAssets)
+            {
+                await UploadAsset(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
+                await UploadAsset(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct).ConfigureAwait(false);
+                await UploadAsset(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
+                await UploadAsset(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
+            }
         }
 
         private async Task UploadAsset(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)

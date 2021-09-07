@@ -86,7 +86,7 @@ namespace GameStoreBroker.Application
 
             services.AddOperation<GetProductOperation, GetProductOperationSchema>(context);
             services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationSchema>(context);
-            services.AddOperation<UploadGamePackageOperation, UploadGamePackageOperationSchema>(context);
+            services.AddOperation<UploadXvcPackageOperation, UploadXvcPackageOperationSchema>(context);
         }
 
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
@@ -111,14 +111,14 @@ namespace GameStoreBroker.Application
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
                 }.AddOperationHandler<GetProductOperation>(),
-                new Command("UploadUwpPackage", "Uploads UWP game package.")
+                new Command("UploadUwpPackage", "Uploads Uwp game package.")
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
                 }.AddOperationHandler<UploadUwpPackageOperation>(),
-                new Command("UploadGamePackage", "Uploads game package.")
+                new Command("UploadXvcPackage", "Uploads Xvc game package and assets.")
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
-                }.AddOperationHandler<UploadGamePackageOperation>(),
+                }.AddOperationHandler<UploadXvcPackageOperation>(),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);

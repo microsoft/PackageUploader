@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.Application.Operations
 {
-    internal class UploadGamePackageOperation : Operation
+    internal class UploadXvcPackageOperation : Operation
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
-        private readonly ILogger<UploadGamePackageOperation> _logger;
-        private readonly UploadGamePackageOperationSchema _config;
+        private readonly ILogger<UploadXvcPackageOperation> _logger;
+        private readonly UploadXvcPackageOperationSchema _config;
 
-        public UploadGamePackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadGamePackageOperation> logger, IOptions<UploadGamePackageOperationSchema> config) : base(logger)
+        public UploadXvcPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadXvcPackageOperation> logger, IOptions<UploadXvcPackageOperationSchema> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService;
             _logger = logger;
@@ -31,7 +31,7 @@ namespace GameStoreBroker.Application.Operations
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
             
-            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.GameAssets, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.GameAssets, true, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
     }
 }

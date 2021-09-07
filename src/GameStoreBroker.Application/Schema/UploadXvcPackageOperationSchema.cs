@@ -6,7 +6,7 @@ using GameStoreBroker.ClientApi.Models;
 
 namespace GameStoreBroker.Application.Schema
 {
-    internal class UploadGamePackageOperationSchema : UploadPackageOperationSchema
+    internal class UploadXvcPackageOperationSchema : UploadPackageOperationSchema
     {
         protected override string GetOperationName() => "UploadGamePackage";
 

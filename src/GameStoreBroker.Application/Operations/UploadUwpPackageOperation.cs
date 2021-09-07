@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using GameStoreBroker.ClientApi.Models;
 
 namespace GameStoreBroker.Application.Operations
 {
@@ -32,8 +33,12 @@ namespace GameStoreBroker.Application.Operations
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
-            var packageFilePath = new FileInfo(_config.PackageFilePath);
-            await _storeBrokerService.UploadUwpPackageAsync(product, packageBranch, packageFilePath, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            var gameAssets = new GameAssets
+            {
+                PackageFilePath = _config.PackageFilePath
+            };
+            
+            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, gameAssets, false, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
     }
 }
