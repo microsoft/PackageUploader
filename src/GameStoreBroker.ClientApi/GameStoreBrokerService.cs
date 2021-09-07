@@ -149,7 +149,7 @@ namespace GameStoreBroker.ClientApi
 
             await UploadAsset(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
             await UploadAsset(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct).ConfigureAwait(false);
-            await UploadAsset(product, package, gameAssets.SubvalFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
+            await UploadAsset(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
             await UploadAsset(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
         }
 
