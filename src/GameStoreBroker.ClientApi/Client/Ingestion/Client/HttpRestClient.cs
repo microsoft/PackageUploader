@@ -5,7 +5,6 @@ using GameStoreBroker.ClientApi.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Net.Mime;
@@ -20,9 +19,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
     {
         private readonly ILogger _logger;
         private readonly HttpClient _httpClient;
-
-        private const int RetryDefaultSeconds = 30;
-        private const int RetryDefaultTimes = 10;
 
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
         {
@@ -42,16 +38,15 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             {
                 var clientRequestId = GenerateClientRequestId();
                 LogRequestVerbose("GET", subUrl, clientRequestId);
+                
                 var request = new HttpRequestMessage(HttpMethod.Get, subUrl);
                 request.Headers.Add("Request-ID", clientRequestId);
+
                 using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
-
-                var serverRequestId = GetRequestIdFromHeader(response);
+                
                 var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-
-                LogResponseVerbose(result, serverRequestId);
-
+                LogResponseVerbose(result, GetRequestIdFromHeader(response));
                 return result;
             }
             catch (Exception ex)
@@ -72,6 +67,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             {
                 var clientRequestId = GenerateClientRequestId();
                 LogRequestVerbose("POST", subUrl, clientRequestId, body);
+
                 var json = body is null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
                 using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
 
@@ -79,28 +75,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 request.Headers.Add("Request-ID", clientRequestId);
                 request.Content = content;
 
-                var retryCount = RetryDefaultTimes;
-                while (retryCount > 0)
-                {
-                    using var response = await _httpClient.SendAsync(request, ct);
-                    var serverRequestId = GetRequestIdFromHeader(response);
+                using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
 
-                    if (response.StatusCode is HttpStatusCode.GatewayTimeout or HttpStatusCode.ServiceUnavailable || response.Headers.Contains("Retry-After"))
-                    {
-                        await Task.Delay(GetRetryDelay(response), ct);
-                        retryCount--;
-                        continue;
-                    }
-
-                    response.EnsureSuccessStatusCode();
-                    var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-
-                    LogResponseVerbose(result, serverRequestId);
-
-                    return result;
-                }
-
-                throw new Exception($"POST '{subUrl}' stuck after {RetryDefaultSeconds * RetryDefaultTimes} seconds");
+                var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+                LogResponseVerbose(result, GetRequestIdFromHeader(response));
+                return result;
             }
             catch (Exception ex)
             {
@@ -120,6 +100,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             {
                 var clientRequestId = GenerateClientRequestId();
                 LogRequestVerbose("PUT", subUrl, clientRequestId, body);
+
                 var json = body is null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
                 using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
 
@@ -127,28 +108,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 request.Headers.Add("Request-ID", clientRequestId);
                 request.Content = content;
 
-                var retryCount = RetryDefaultTimes;
-                while (retryCount > 0)
-                {
-                    using var response = await _httpClient.SendAsync(request, ct);
-                    var serverRequestId = GetRequestIdFromHeader(response);
+                using var response = await _httpClient.SendAsync(request, ct);
+                response.EnsureSuccessStatusCode();
 
-                    if (response.StatusCode is HttpStatusCode.GatewayTimeout or HttpStatusCode.ServiceUnavailable || response.Headers.Contains("Retry-After"))
-                    {
-                        await Task.Delay(GetRetryDelay(response), ct);
-                        retryCount--;
-                        continue;
-                    }
-
-                    response.EnsureSuccessStatusCode();
-                    var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-
-                    LogResponseVerbose(result, serverRequestId);
-
-                    return result;
-                }
-
-                throw new Exception($"PUT '{subUrl}' stuck after {RetryDefaultSeconds * RetryDefaultTimes} seconds");
+                var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+                LogResponseVerbose(result, GetRequestIdFromHeader(response));
+                return result;
             }
             catch (Exception ex)
             {
@@ -158,37 +123,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
         }
 
         private static string GenerateClientRequestId() => Guid.NewGuid().ToString();
-
-        private static TimeSpan GetRetryDelay(HttpResponseMessage response)
-        {
-            var delay = TimeSpan.FromSeconds(RetryDefaultSeconds);
-            const string retryAfterHeader = "Retry-After";
-            if (response.Headers.Contains(retryAfterHeader) &&
-                response.Headers.TryGetValues(retryAfterHeader, out var headerValues))
-            {
-                var retryAfter = headerValues.FirstOrDefault();
-                if (!string.IsNullOrWhiteSpace(retryAfter))
-                {
-                    if (int.TryParse(retryAfter, out var retryAfterSeconds))
-                    {
-                        delay = TimeSpan.FromSeconds(retryAfterSeconds);
-                    }
-                    else if (DateTime.TryParse(retryAfter, out var retryAfterDateTime))
-                    {
-                        var now = DateTime.Now;
-                        if (retryAfterDateTime > now)
-                        {
-                            delay = retryAfterDateTime - DateTime.Now;
-                        }
-                        else
-                        {
-                            delay = TimeSpan.Zero;
-                        }
-                    }
-                }
-            }
-            return delay;
-        }
 
         private static string GetRequestIdFromHeader(HttpResponseMessage response)
         {
