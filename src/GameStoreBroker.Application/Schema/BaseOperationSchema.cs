@@ -8,7 +8,7 @@ namespace GameStoreBroker.Application.Schema
 {
     internal abstract class BaseOperationSchema : IValidatableObject
     {
-        public abstract string GetOperationName();
+        protected abstract string GetOperationName();
 
         [Required(ErrorMessage = "operationName is required")]
         public string OperationName { get; set; }
@@ -25,11 +25,11 @@ namespace GameStoreBroker.Application.Schema
             return validationResults;
         }
 
-        protected virtual void Validate(List<ValidationResult> validationResults)
+        protected virtual void Validate(IList<ValidationResult> validationResults)
         {
         }
 
-        protected void ValidateBase(List<ValidationResult> validationResults)
+        private void ValidateBase(IList<ValidationResult> validationResults)
         {
             var operationName = GetOperationName();
             if (!string.Equals(operationName, OperationName))

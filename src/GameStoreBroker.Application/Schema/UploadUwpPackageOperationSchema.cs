@@ -7,7 +7,7 @@ namespace GameStoreBroker.Application.Schema
 {
     internal class UploadUwpPackageOperationSchema : UploadPackageOperationSchema
     {
-        public override string GetOperationName() => "UploadUwpPackage";
+        protected override string GetOperationName() => "UploadUwpPackage";
 
         [Required(ErrorMessage = "PackageFilePath is required")]
         public string PackageFilePath { get; set; }
