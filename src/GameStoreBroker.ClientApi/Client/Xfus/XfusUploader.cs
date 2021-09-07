@@ -30,6 +30,7 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
 
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
         {
+            IgnoreNullValues = true,
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
