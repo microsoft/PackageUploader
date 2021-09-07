@@ -3,7 +3,7 @@
 
 using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Schema;
-using GameStoreBroker.Application.Services;
+using GameStoreBroker.ClientApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Threading;
@@ -13,13 +13,13 @@ namespace GameStoreBroker.Application.Operations
 {
     internal class GetProductOperation : Operation
     {
-        private readonly IProductService _productService;
+        private readonly IGameStoreBrokerService _storeBrokerService;
         private readonly ILogger<GetProductOperation> _logger;
         private readonly BaseOperationSchema _config;
 
-        public GetProductOperation(IProductService productService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationSchema> config) : base(logger)
+        public GetProductOperation(IGameStoreBrokerService storeBrokerService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationSchema> config) : base(logger)
         {
-            _productService = productService;
+            _storeBrokerService = storeBrokerService;
             _logger = logger;
             _config = config.Value;
         }
@@ -28,7 +28,7 @@ namespace GameStoreBroker.Application.Operations
         {
             _logger.LogInformation("Starting GetProduct operation.");
 
-            var product = await _productService.GetProductAsync(_config, ct).ConfigureAwait(false);
+            var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
 
             _logger.LogInformation("Product: {product}", product.ToJson());
         }

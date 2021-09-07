@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Schema;
-using GameStoreBroker.Application.Services;
 using GameStoreBroker.ClientApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,14 +14,12 @@ namespace GameStoreBroker.Application.Operations
 {
     internal class UploadUwpPackageOperation : Operation
     {
-        private readonly IProductService _productService;
         private readonly IGameStoreBrokerService _storeBrokerService;
         private readonly ILogger<UploadUwpPackageOperation> _logger;
         private readonly UploadUwpPackageOperationSchema _config;
 
-        public UploadUwpPackageOperation(IProductService productService, IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationSchema> config) : base(logger)
+        public UploadUwpPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationSchema> config) : base(logger)
         {
-            _productService = productService;
             _storeBrokerService = storeBrokerService;
             _logger = logger;
             _config = config.Value;
@@ -31,8 +29,8 @@ namespace GameStoreBroker.Application.Operations
         {
             _logger.LogInformation("Starting UploadUwpPackage operation.");
             
-            var product = await _productService.GetProductAsync(_config, ct).ConfigureAwait(false);
-            var packageBranch = await _productService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+            var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
+            var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
             var packageFilePath = new FileInfo(_config.PackageFilePath);
             await _storeBrokerService.UploadUwpPackageAsync(product, packageBranch, packageFilePath, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);

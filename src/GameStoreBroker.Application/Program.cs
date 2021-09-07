@@ -4,7 +4,6 @@
 using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Operations;
 using GameStoreBroker.Application.Schema;
-using GameStoreBroker.Application.Services;
 using GameStoreBroker.ClientApi;
 using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
 using GameStoreBroker.FileLogger;
@@ -83,7 +82,6 @@ namespace GameStoreBroker.Application
         private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             services.AddLogging();
-            services.AddScoped<IProductService, ProductService>();
             services.AddGameStoreBrokerService(context.Configuration);
 
             services.AddOperation<GetProductOperation, GetProductOperationSchema>(context);
