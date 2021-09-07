@@ -3,7 +3,6 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion.Config;
 using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider;
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -30,9 +29,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 var accessToken = accessTokenProvider.GetAccessToken().GetAwaiter().GetResult();
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             });
-
-            services.AddOptions<AadAuthInfo>().Bind(config.GetSection(nameof(AadAuthInfo))).ValidateDataAnnotations();
-            services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
         }
     }
 }

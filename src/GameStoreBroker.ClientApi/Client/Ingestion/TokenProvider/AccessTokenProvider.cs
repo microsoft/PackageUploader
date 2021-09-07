@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Config;
 using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -11,12 +12,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 {
     public class AccessTokenProvider : IAccessTokenProvider
     {
+        private readonly AccessTokenProviderConfig _config;
         private readonly AadAuthInfo _aadAuthInfo;
-        private const string AadAuthorityBaseUrl = "https://login.microsoftonline.com/";
-        private const string AadResourceForCaller = "https://api.partner.microsoft.com";
 
-        public AccessTokenProvider(IOptions<AadAuthInfo> aadAuthInfo)
+        public AccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AadAuthInfo> aadAuthInfo)
         {
+            _config = config.Value;
             _aadAuthInfo = aadAuthInfo?.Value ?? throw new ArgumentNullException(nameof(aadAuthInfo), $"{nameof(aadAuthInfo)} cannot be null.");
 
             if (string.IsNullOrWhiteSpace(_aadAuthInfo.TenantId))
@@ -37,11 +38,11 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 
         public async Task<string> GetAccessToken()
         {
-            var authority = AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
+            var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
             var authenticationContext = new AuthenticationContext(authority, true);
 
             var clientCredential = new ClientCredential(_aadAuthInfo.ClientId, _aadAuthInfo.ClientSecret);
-            var result = await authenticationContext.AcquireTokenAsync(AadResourceForCaller, clientCredential).ConfigureAwait(false);
+            var result = await authenticationContext.AcquireTokenAsync(_config.AadResourceForCaller, clientCredential).ConfigureAwait(false);
 
             if (result is null)
             {
