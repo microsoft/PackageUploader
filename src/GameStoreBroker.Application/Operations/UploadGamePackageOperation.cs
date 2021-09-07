@@ -28,7 +28,7 @@ namespace GameStoreBroker.Application.Operations
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            _logger.LogInformation("Starting UploadUwpPackage operation.");
+            _logger.LogInformation("Starting UploadGamePackage operation.");
             
             var product = await _productService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _productService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
