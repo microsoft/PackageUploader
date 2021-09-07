@@ -37,11 +37,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             _httpClient = httpClient;
         }
 
-        protected void SetAuthorizationHeader(AuthenticationHeaderValue authenticationHeaderValue)
-        {
-            _httpClient.DefaultRequestHeaders.Authorization = authenticationHeaderValue;
-        }
-
         public async Task<T> GetAsync<T>(string subUrl, CancellationToken ct)
         {
             try
