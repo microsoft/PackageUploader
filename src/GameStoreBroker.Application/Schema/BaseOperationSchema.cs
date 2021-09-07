@@ -10,7 +10,7 @@ namespace GameStoreBroker.Application.Schema
     {
         protected abstract string GetOperationName();
 
-        [Required(ErrorMessage = "operationName is required")]
+        [Required]
         public string OperationName { get; set; }
         
         public string ProductId { get; set; }
@@ -34,17 +34,17 @@ namespace GameStoreBroker.Application.Schema
             var operationName = GetOperationName();
             if (!string.Equals(operationName, OperationName))
             {
-                validationResults.Add(new ValidationResult($"OperationName is not {operationName}", new [] { nameof(OperationName) }));
+                validationResults.Add(new ValidationResult($"{nameof(OperationName)} field is not {operationName}.", new [] { nameof(OperationName) }));
             }
 
             if (string.IsNullOrWhiteSpace(ProductId) && string.IsNullOrWhiteSpace(BigId))
             {
-                validationResults.Add(new ValidationResult("ProductId or BigId is required", new[] { nameof(ProductId), nameof(BigId) }));
+                validationResults.Add(new ValidationResult($"{nameof(ProductId)} or {nameof(BigId)} field is required.", new[] { nameof(ProductId), nameof(BigId) }));
             }
 
             if (!string.IsNullOrWhiteSpace(ProductId) && !string.IsNullOrWhiteSpace(BigId))
             {
-                validationResults.Add(new ValidationResult("Only one ProductId or BigId is allowed", new[] { nameof(ProductId), nameof(BigId) }));
+                validationResults.Add(new ValidationResult($"Only one {nameof(ProductId)} or {nameof(BigId)} field is allowed.", new[] { nameof(ProductId), nameof(BigId) }));
             }
         }
     }

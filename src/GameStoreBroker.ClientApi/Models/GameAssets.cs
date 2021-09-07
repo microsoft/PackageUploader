@@ -7,7 +7,7 @@ namespace GameStoreBroker.ClientApi.Models
 {
     public class GameAssets
     {
-        [Required(ErrorMessage = "PackageFilePath is required")]
+        [Required]
         public string PackageFilePath { get; set; }
 
         public string EkbFilePath { get; set; }

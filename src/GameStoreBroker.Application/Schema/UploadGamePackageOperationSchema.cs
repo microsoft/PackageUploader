@@ -10,7 +10,7 @@ namespace GameStoreBroker.Application.Schema
     {
         protected override string GetOperationName() => "UploadGamePackage";
 
-        [Required(ErrorMessage = "GameAssets is required")]
+        [Required]
         public GameAssets GameAssets { get; set; }
     }
 }

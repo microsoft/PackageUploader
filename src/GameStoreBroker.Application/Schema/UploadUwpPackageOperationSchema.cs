@@ -9,7 +9,7 @@ namespace GameStoreBroker.Application.Schema
     {
         protected override string GetOperationName() => "UploadUwpPackage";
 
-        [Required(ErrorMessage = "PackageFilePath is required")]
+        [Required]
         public string PackageFilePath { get; set; }
     }
 }

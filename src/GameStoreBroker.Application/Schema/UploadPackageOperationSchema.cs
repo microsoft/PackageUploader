@@ -19,12 +19,12 @@ namespace GameStoreBroker.Application.Schema
         {
             if (string.IsNullOrWhiteSpace(BranchFriendlyName) && string.IsNullOrWhiteSpace(FlightName))
             {
-                validationResults.Add(new ValidationResult("BranchFriendlyName or FlightName is required", new[] { nameof(BranchFriendlyName), nameof(FlightName) }));
+                validationResults.Add(new ValidationResult($"{nameof(BranchFriendlyName)} or {nameof(FlightName)} field is required.", new[] { nameof(BranchFriendlyName), nameof(FlightName) }));
             }
 
             if (!string.IsNullOrWhiteSpace(BranchFriendlyName) && !string.IsNullOrWhiteSpace(FlightName))
             {
-                validationResults.Add(new ValidationResult("Only one BranchFriendlyName or FlightName is allowed", new[] { nameof(BranchFriendlyName), nameof(FlightName) }));
+                validationResults.Add(new ValidationResult($"Only one {nameof(BranchFriendlyName)} or {nameof(FlightName)} field is allowed.", new[] { nameof(BranchFriendlyName), nameof(FlightName) }));
             }
         }
     }
