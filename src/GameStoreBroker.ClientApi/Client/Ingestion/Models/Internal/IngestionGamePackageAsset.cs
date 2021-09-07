@@ -5,7 +5,7 @@ using System;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
-    public class IngestionGamePackageAsset
+    internal class IngestionGamePackageAsset
     {
         /// <summary>
         /// The Id of the package asset.
