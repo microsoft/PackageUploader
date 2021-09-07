@@ -70,8 +70,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 var json = body is null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
                 using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
 
-                var request = new HttpRequestMessage(HttpMethod.Get, subUrl);
+                var request = new HttpRequestMessage(HttpMethod.Post, subUrl);
                 request.Headers.Add("Request-ID", clientRequestId);
+                request.Content = content;
 
                 var retryCount = RetryDefaultTimes;
                 while (retryCount > 0)

@@ -11,16 +11,6 @@ namespace GameStoreBroker.ClientApi.Client.Xfus.Models.Internal
     internal sealed class UploadProgress
     {
         /// <summary>
-        /// Creates an instance of <see cref="UploadProgress"/>
-        /// </summary>
-        public UploadProgress(Block[] pendingBlocks, UploadStatus uploadStatus, TimeSpan requestDelay = default)
-        {
-            this.PendingBlocks = pendingBlocks ?? throw new ArgumentNullException(nameof(pendingBlocks));
-            this.Status = uploadStatus;
-            this.RequestDelay = requestDelay;
-        }
-
-        /// <summary>
         /// Blocks the service is expecting but has not receieved
         /// </summary>
         public Block[] PendingBlocks { get; set; }

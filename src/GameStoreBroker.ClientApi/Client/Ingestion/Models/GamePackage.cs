@@ -7,7 +7,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
     public class GamePackage
     {
-        public string Id { get; internal set; }
+        public string Id { get; set; }
 
         public string State { get; set; }
 

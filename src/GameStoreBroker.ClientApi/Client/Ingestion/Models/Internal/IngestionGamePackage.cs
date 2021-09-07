@@ -14,7 +14,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
         /// <summary>
         /// Resource ID
         /// </summary>
-        public string Id { get; internal set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// Revision Token (to be obsolete)
