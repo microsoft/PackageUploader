@@ -61,6 +61,11 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             }
         }
 
+        public async Task<T> PostAsync<T>(string subUrl, T body, CancellationToken ct)
+        {
+            return await PostAsync<T, T>(subUrl, body, ct);
+        }
+
         public async Task<TOut> PostAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
         {
             try
@@ -96,6 +101,54 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 }
 
                 throw new Exception($"POST '{subUrl}' stuck after {RetryDefaultSeconds * RetryDefaultTimes} seconds");
+            }
+            catch (Exception ex)
+            {
+                LogException(ex);
+                throw;
+            }
+        }
+
+        public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct)
+        {
+            return await PutAsync<T, T>(subUrl, body, ct).ConfigureAwait(false);
+        }
+
+        public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
+        {
+            try
+            {
+                var clientRequestId = GenerateClientRequestId();
+                LogRequestVerbose("PUT", subUrl, clientRequestId, body);
+                var json = body is null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
+                using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
+
+                var request = new HttpRequestMessage(HttpMethod.Put, subUrl);
+                request.Headers.Add("Request-ID", clientRequestId);
+                request.Content = content;
+
+                var retryCount = RetryDefaultTimes;
+                while (retryCount > 0)
+                {
+                    using var response = await _httpClient.SendAsync(request, ct);
+                    var serverRequestId = GetRequestIdFromHeader(response);
+
+                    if (response.StatusCode is HttpStatusCode.GatewayTimeout or HttpStatusCode.ServiceUnavailable || response.Headers.Contains("Retry-After"))
+                    {
+                        await Task.Delay(GetRetryDelay(response), ct);
+                        retryCount--;
+                        continue;
+                    }
+
+                    response.EnsureSuccessStatusCode();
+                    var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+
+                    LogResponseVerbose(result, serverRequestId);
+
+                    return result;
+                }
+
+                throw new Exception($"PUT '{subUrl}' stuck after {RetryDefaultSeconds * RetryDefaultTimes} seconds");
             }
             catch (Exception ex)
             {

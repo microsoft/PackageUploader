@@ -29,6 +29,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 Id = ingestionGamePackage.Id,
                 State = ingestionGamePackage.State,
                 UploadInfo = ingestionGamePackage.UploadInfo.Map(),
+                ODataETag = ingestionGamePackage.ODataETag,
             };
         }
 

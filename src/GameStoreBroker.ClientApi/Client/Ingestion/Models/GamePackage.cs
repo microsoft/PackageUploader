@@ -12,5 +12,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         public string State { get; set; }
 
         public XfusUploadInfo UploadInfo { get; set; }
+
+        public string ODataETag { get; set; }
     }
 }

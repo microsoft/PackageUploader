@@ -107,6 +107,10 @@ namespace GameStoreBroker.ClientApi
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
             await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
+            _logger.LogInformation("Package uploaded.");
+
+            await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
+            _logger.LogInformation("Package processing.");
 
             await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
@@ -144,6 +148,10 @@ namespace GameStoreBroker.ClientApi
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
             await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
+            _logger.LogInformation("Package uploaded.");
+
+            await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
+            _logger.LogInformation("Package processing.");
 
             await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, ct).ConfigureAwait(false);
 
@@ -166,6 +174,7 @@ namespace GameStoreBroker.ClientApi
                 {
                     var packageAsset = await _ingestionHttpClient.CreatePackageAssetRequestAsync(product.ProductId, processingPackage.Id, assetFile, assetType, ct).ConfigureAwait(false);
                     await _xfusUploader.UploadFileToXfusAsync(assetFile, packageAsset.UploadInfo, ct).ConfigureAwait(false);
+                    await _ingestionHttpClient.CommitPackageAssetAsync(product.ProductId, processingPackage.Id, packageAsset.Id, ct).ConfigureAwait(false);
                 }
                 else
                 {

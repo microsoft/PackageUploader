@@ -185,7 +185,58 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 Name = fileInfo.Name,
             };
 
-            var ingestionGamePackageAsset = await PostAsync<IngestionGamePackageAsset, IngestionGamePackageAsset>($"products/{productId}/packages/{packageId}/packageAssets", body, ct).ConfigureAwait(false);
+            var ingestionGamePackageAsset = await PostAsync($"products/{productId}/packages/{packageId}/packageAssets", body, ct).ConfigureAwait(false);
+
+            var gamePackageAsset = ingestionGamePackageAsset.Map();
+            return gamePackageAsset;
+        }
+
+        public async Task<GamePackage> ProcessPackageRequestAsync(string productId, GamePackage gamePackage, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (gamePackage is null)
+            {
+                throw new ArgumentNullException(nameof(gamePackage), $"{nameof(gamePackage)} cannot be null.");
+            }
+
+            var body = new IngestionGamePackage
+            {
+                Id = gamePackage.Id,
+                State = "Uploaded",
+                ResourceType = "GamePackage",
+                ETag = gamePackage.ODataETag,
+                ODataETag = gamePackage.ODataETag
+            };
+
+            var ingestionGamePackage = await PutAsync($"products/{productId}/packages/{gamePackage.Id}", body, ct);
+            var newGamePackage = ingestionGamePackage.Map();
+            return newGamePackage;
+        }
+
+        public async Task<GamePackageAsset> CommitPackageAssetAsync(string productId, string packageId, string packageAssetId, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(packageId))
+            {
+                throw new ArgumentException($"{nameof(packageId)} cannot be null or empty.", nameof(packageId));
+            }
+
+            if (string.IsNullOrWhiteSpace(packageAssetId))
+            {
+                throw new ArgumentException($"{nameof(packageAssetId)} cannot be null or empty.", nameof(packageAssetId));
+            }
+
+            var body = new IngestionGamePackageAsset();
+
+            var ingestionGamePackageAsset = await PutAsync<IngestionGamePackageAsset>($"products/{productId}/packages/{packageId}/packageAssets/{packageAssetId}/commit", body, ct).ConfigureAwait(false);
 
             var gamePackageAsset = ingestionGamePackageAsset.Map();
             return gamePackageAsset;
