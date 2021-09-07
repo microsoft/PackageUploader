@@ -52,23 +52,17 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                 throw new FileNotFoundException("Upload file not found.", uploadFile.FullName);
             }
 
-            var properties = new UploadProperties
-            {
-                FileProperties = new FileProperties
-                {
-                    Name = uploadFile.Name,
-                    Size = uploadFile.Length,
-                }
-            };
-            var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(xfusUploadInfo.Token));
-
             var timer = new Stopwatch();
             timer.Start();
 
             var httpClient = _httpClientFactory.CreateClient(HttpClientName);
             httpClient.BaseAddress = new Uri(xfusUploadInfo.UploadDomain + "/api/v2/assets/");
+            httpClient.DefaultRequestHeaders.Add("Tenant", xfusUploadInfo.XfusTenant);
 
-            var uploadProgress = await InitializeAssetAsync(httpClient, authToken, xfusUploadInfo.XfusTenant, xfusUploadInfo.XfusId, properties, ct).ConfigureAwait(false);
+            var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(xfusUploadInfo.Token));
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authToken);
+
+            var uploadProgress = await InitializeAssetAsync(httpClient, xfusUploadInfo.XfusId, uploadFile, ct).ConfigureAwait(false);
             _logger.LogDebug($"XFUS Asset Initialized. Will upload {new ByteSize(uploadFile.Length)} across {uploadProgress.PendingBlocks.Length} blocks.");
             _logger.LogInformation($"XFUS Asset Initialized. Will upload {uploadFile.Name} at size of {new ByteSize(uploadFile.Length)}.");
 
@@ -90,13 +84,13 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                     var maximumBlockSize = (int)uploadProgress.PendingBlocks.Max(x => x.Size);
 
                     bytesUploaded = await UploadBlocksAsync(httpClient, uploadProgress.PendingBlocks, maximumBlockSize,
-                            uploadFile, xfusUploadInfo.XfusId, authToken, xfusUploadInfo.XfusTenant, bytesUploaded, progress, ct)
+                            uploadFile, xfusUploadInfo.XfusId, bytesUploaded, progress, ct)
                         .ConfigureAwait(false);
                 }
 
                 try
                 {
-                    uploadProgress = await ContinueAssetAsync(httpClient, authToken, xfusUploadInfo.XfusTenant, xfusUploadInfo.XfusId, ct).ConfigureAwait(false);
+                    uploadProgress = await ContinueAssetAsync(httpClient, xfusUploadInfo.XfusId, ct).ConfigureAwait(false);
                     progress.BlocksLeftToUpload = uploadProgress.PendingBlocks?.Length ?? 0;
                     progress.ReportProgress();
 
@@ -130,10 +124,18 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
             _logger.LogInformation($"{uploadFile.Name} Upload complete in: (HH:MM:SS) {hours}:{minutes}:{seconds}.");
         }
 
-        private async Task<UploadProgress> InitializeAssetAsync(HttpClient httpClient, string authToken, string tenant,
-            Guid assetId, UploadProperties properties, CancellationToken ct)
+        private async Task<UploadProgress> InitializeAssetAsync(HttpClient httpClient, Guid assetId, FileInfo uploadFile, CancellationToken ct)
         {
-            using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", authToken, tenant, properties);
+            var properties = new UploadProperties
+            {
+                FileProperties = new FileProperties
+                {
+                    Name = uploadFile.Name,
+                    Size = uploadFile.Length,
+                }
+            };
+
+            using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", properties);
             using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
 
             var response = await httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
@@ -142,12 +144,12 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                 throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
             }
 
-            var uploadProgress = await response.Content.ReadFromJsonAsync<UploadProgress>(DefaultJsonSerializerOptions, ct);
+            var uploadProgress = await response.Content.ReadFromJsonAsync<UploadProgress>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
             return uploadProgress;
         }
 
         private async Task<long> UploadBlocksAsync(HttpClient httpClient, Block[] blockToBeUploaded, int maxBlockSize,
-            FileInfo uploadFile, Guid assetId, string authToken, string tenant, long bytesUploaded, Progress progress, CancellationToken ct)
+            FileInfo uploadFile, Guid assetId, long bytesUploaded, Progress progress, CancellationToken ct)
         {
             var bufferPool = new BufferPool(maxBlockSize);
             var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _uploadConfig.MaxParallelism };
@@ -169,7 +171,7 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                         // when trying to send http request.
                         Array.Resize(ref buffer, bytesRead);
 
-                        await UploadBlockFromPayloadAsync(httpClient, authToken, tenant, block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
+                        await UploadBlockFromPayloadAsync(httpClient, block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
 
                         progress.BlocksLeftToUpload--;
                         bytesUploaded += bytesRead;
@@ -198,46 +200,42 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
             return bytesUploaded;
         }
 
-        private static async Task UploadBlockFromPayloadAsync(HttpClient httpClient, string uploadToken, string tenant, long contentLength, Guid assetId, long blockId, byte[] payload, CancellationToken ct)
+        private static async Task UploadBlockFromPayloadAsync(HttpMessageInvoker httpClient, long contentLength, Guid assetId, long blockId, byte[] payload, CancellationToken ct)
         {
-            using var req = CreateStreamRequest(HttpMethod.Put, $"{assetId}/blocks/{blockId}/source/payload", uploadToken, tenant, payload, contentLength);
+            using var req = CreateStreamRequest(HttpMethod.Put, $"{assetId}/blocks/{blockId}/source/payload", payload, contentLength);
 
-            var response = await httpClient.SendAsync(req, ct);
+            var response = await httpClient.SendAsync(req, ct).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
             }
         }
 
-        private static async Task<UploadProgress> ContinueAssetAsync(HttpClient httpClient, string uploadToken, string tenant, Guid assetId, CancellationToken ct)
+        private static async Task<UploadProgress> ContinueAssetAsync(HttpMessageInvoker httpClient, Guid assetId, CancellationToken ct)
         {
-            using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", uploadToken, tenant, string.Empty);
+            using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", string.Empty);
 
-            var response = await httpClient.SendAsync(req, ct);
+            var response = await httpClient.SendAsync(req, ct).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
                 throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
             }
             
-            var uploadProgress = await response.Content.ReadFromJsonAsync<UploadProgress>(DefaultJsonSerializerOptions, ct);
+            var uploadProgress = await response.Content.ReadFromJsonAsync<UploadProgress>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
             return uploadProgress;
         }
 
-        private static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, string token, string tenant, T content)
+        private static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, T content)
         {
             var request = new HttpRequestMessage(method, url);
-            request.Headers.TryAddWithoutValidation("Authorization", token);
-            request.Headers.Add("Tenant", tenant);
             request.Content = new StringContent(JsonSerializer.Serialize(content, DefaultJsonSerializerOptions));
             request.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Json);
             return request;
         }
 
-        private static HttpRequestMessage CreateStreamRequest(HttpMethod method, string url, string token, string tenant, byte[] content, long contentLength)
+        private static HttpRequestMessage CreateStreamRequest(HttpMethod method, string url, byte[] content, long contentLength)
         {
             var request = new HttpRequestMessage(method, url);
-            request.Headers.TryAddWithoutValidation("Authorization", token);
-            request.Headers.Add("Tenant", tenant);
             request.Content = new ByteArrayContent(content);
             request.Content.Headers.ContentLength = contentLength;
             request.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Octet);

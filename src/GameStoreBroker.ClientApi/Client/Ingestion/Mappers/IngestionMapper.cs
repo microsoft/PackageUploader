@@ -37,7 +37,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             return new XfusUploadInfo
             {
                 FileName = ingestionXfusUploadInfo.FileName,
-                XfusId = ingestionXfusUploadInfo.XfusId,
+                XfusId = new Guid(ingestionXfusUploadInfo.XfusId),
                 FileSasUri = ingestionXfusUploadInfo.FileSasUri,
                 Token = ingestionXfusUploadInfo.Token,
                 UploadDomain = ingestionXfusUploadInfo.UploadDomain,

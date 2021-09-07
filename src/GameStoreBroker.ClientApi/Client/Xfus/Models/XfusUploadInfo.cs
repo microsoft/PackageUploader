@@ -11,7 +11,6 @@ namespace GameStoreBroker.ClientApi.Client.Xfus.Models
         /// <summary>
         /// File name
         /// </summary>
-        [Required()]
         public string FileName { get; set; }
 
         /// <summary>
