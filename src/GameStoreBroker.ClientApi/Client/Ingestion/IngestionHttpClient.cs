@@ -236,7 +236,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             var body = new IngestionGamePackageAsset();
 
-            var ingestionGamePackageAsset = await PutAsync<IngestionGamePackageAsset>($"products/{productId}/packages/{packageId}/packageAssets/{packageAssetId}/commit", body, ct).ConfigureAwait(false);
+            var ingestionGamePackageAsset = await PutAsync($"products/{productId}/packages/{packageId}/packageAssets/{packageAssetId}/commit", body, ct).ConfigureAwait(false);
 
             var gamePackageAsset = ingestionGamePackageAsset.Map();
             return gamePackageAsset;
