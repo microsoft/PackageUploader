@@ -33,7 +33,7 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentException($"{nameof(bigId)} cannot be null or empty.", nameof(bigId));
             }
 
-            _logger.LogDebug("Requesting game product by BigId");
+            _logger.LogDebug("Requesting game product by BigId '{bigId}'.", bigId);
             return await _ingestionHttpClient.GetGameProductByBigIdAsync(bigId, ct).ConfigureAwait(false);
         }
 
@@ -44,7 +44,7 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
             }
 
-            _logger.LogDebug("Requesting game product by ProductId");
+            _logger.LogDebug("Requesting game product by ProductId '{productId}'.", productId);
             return await _ingestionHttpClient.GetGameProductByLongIdAsync(productId, ct).ConfigureAwait(false);
         }
 
