@@ -93,7 +93,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             return gamePackageBranch;
         }
 
-        public async Task<GamePackageBranch> GetPackageBranchByFlightName(string productId, string flightName, CancellationToken ct)
+        public async Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(string productId, string flightName, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(productId))
             {

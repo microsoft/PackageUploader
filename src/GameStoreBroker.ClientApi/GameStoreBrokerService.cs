@@ -61,7 +61,7 @@ namespace GameStoreBroker.ClientApi
             }
 
             _logger.LogDebug("Requesting game package branch by flight name '{flightName}'.", flightName);
-            return await _ingestionHttpClient.GetPackageBranchByFlightName(product.ProductId, flightName, ct).ConfigureAwait(false);
+            return await _ingestionHttpClient.GetPackageBranchByFlightNameAsync(product.ProductId, flightName, ct).ConfigureAwait(false);
         }
 
         public async Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(GameProduct product, string branchFriendlyName, CancellationToken ct)
