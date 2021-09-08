@@ -51,7 +51,7 @@ namespace GameStoreBroker.Application.Extensions
 
             if (!string.IsNullOrWhiteSpace(schema.FlightName))
             {
-                return await storeBroker.GetPackageBranchByFlightName(product, schema.FlightName, ct).ConfigureAwait(false);
+                return await storeBroker.GetPackageBranchByFlightNameAsync(product, schema.FlightName, ct).ConfigureAwait(false);
             }
 
             throw new Exception("BranchFriendlyName or FlightName needed.");
