@@ -43,7 +43,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 var gameProduct = ingestionGameProduct.Map();
                 return gameProduct;
             }
-            catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.NotFound)
             {
                 throw new ProductNotFoundException($"Product with product id '{longId}' not found.", e);
             }
