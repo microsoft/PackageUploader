@@ -4,12 +4,11 @@
 using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.ClientApi;
+using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using GameStoreBroker.ClientApi.Models;
 
 namespace GameStoreBroker.Application.Operations
 {
