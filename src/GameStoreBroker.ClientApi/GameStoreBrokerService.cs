@@ -113,23 +113,23 @@ namespace GameStoreBroker.ClientApi
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
             await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
-            _logger.LogInformation("Package uploaded.");
+            _logger.LogDebug("Package file '{fileName}' uploaded.", packageFile.Name);
 
-            await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
-            _logger.LogInformation("Package processing.");
+            package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
+            _logger.LogInformation("Package is uploaded and is in processing.");
 
-            await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, ct).ConfigureAwait(false);
+            await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
 
             if (uploadAssets)
             {
-                await UploadAsset(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
-                await UploadAsset(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct).ConfigureAwait(false);
-                await UploadAsset(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
-                await UploadAsset(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
+                await UploadAssetAsync(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
+                await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct).ConfigureAwait(false);
+                await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
+                await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
             }
         }
 
-        private async Task UploadAsset(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
+        private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(assetFilePath))
             {
@@ -146,42 +146,36 @@ namespace GameStoreBroker.ClientApi
                 }
                 else
                 {
-                    throw new FileNotFoundException("Package file not found.", assetFile.FullName);
+                    throw new FileNotFoundException("Package asset file not found.", assetFile.FullName);
                 }
             }
         }
 
-        private async Task WaitForPackageProcessingAsync(GameProduct product, GamePackage processingPackage, int minutesToWait, CancellationToken ct)
+        private async Task WaitForPackageProcessingAsync(GameProduct product, GamePackage processingPackage, int minutesToWait, int checkIntervalMinutes, CancellationToken ct)
         {
             await Task.Delay(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
             processingPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
+            
+            var checkIntervalTimeSpan = TimeSpan.FromMinutes(checkIntervalMinutes);
+            _logger.LogInformation("Will wait {minutesToWait} minute(s) for package processing, checking every {checkIntervalMinutes} minute(s).", minutesToWait, checkIntervalMinutes);
 
-            _logger.LogInformation("Will wait {minutesToWait} minutes for package processing, checking every minute.", minutesToWait);
-
-            while (!processingPackage.State.Equals("Processed", StringComparison.OrdinalIgnoreCase) && !processingPackage.State.Equals("ProcessFailed", StringComparison.OrdinalIgnoreCase))
+            while (processingPackage.State is GamePackageState.InProcessing or GamePackageState.Uploaded or GamePackageState.Unknown && minutesToWait <= 0)
             {
-                _logger.LogInformation("Still processing, waiting another minute. Will wait a further {minutesToWait} minutes after this.", minutesToWait);
+                _logger.LogInformation("Package still in processing, waiting another {checkIntervalMinutes} minute(s). Will wait a further {minutesToWait} minute(s) after this.", checkIntervalMinutes, minutesToWait);
 
-                await Task.Delay(TimeSpan.FromMinutes(1), ct).ConfigureAwait(false);
+                await Task.Delay(checkIntervalTimeSpan, ct).ConfigureAwait(false);
 
                 processingPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
 
-                if (minutesToWait <= 0)
-                {
-                    break;
-                }
-                minutesToWait--;
+                minutesToWait -= checkIntervalMinutes;
             }
-            
-            if (processingPackage.State.Equals("Processing", StringComparison.OrdinalIgnoreCase))
+
+            _logger.LogInformation(processingPackage.State switch
             {
-                _logger.LogInformation("Upload complete but still processing in Partner Center.");
-            }
-            else
-            {
-                _logger.LogInformation("Finished uploading and processing.");
-                _logger.LogInformation($"Processed state: {processingPackage.State}");
-            }
+                GamePackageState.InProcessing => "Package still in processing.",
+                GamePackageState.Processed => "Package processed.",
+                _ => $"Package state: {processingPackage.State}",
+            });
         }
     }
 }

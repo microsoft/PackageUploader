@@ -27,10 +27,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             return new GamePackage
             {
                 Id = ingestionGamePackage.Id,
-                State = ingestionGamePackage.State,
+                State = ingestionGamePackage.GetState(),
                 UploadInfo = ingestionGamePackage.UploadInfo.Map(),
                 ODataETag = ingestionGamePackage.ODataETag,
             };
+        }
+
+        public static GamePackageState GetState(this IngestionGamePackage ingestionGamePackage)
+        {
+            return Enum.TryParse(ingestionGamePackage.State, true, out GamePackageState gamePackageState)
+                ? gamePackageState
+                : GamePackageState.Unknown;
         }
 
         public static XfusUploadInfo Map(this IngestionXfusUploadInfo ingestionXfusUploadInfo)
