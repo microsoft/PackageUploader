@@ -24,7 +24,7 @@ namespace GameStoreBroker.Application
 {
     internal class Program
     {
-        private const string LogTimestampFormat = "yyyy-MM-dd hh:mm:ss.fff ";
+        private const string LogTimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
 
         // Options
         private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls.");
@@ -68,7 +68,7 @@ namespace GameStoreBroker.Application
             }, file =>
             {
                 var logFile = invocationContext.GetOptionValue(LogFileOption);
-                file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"GameStoreBroker_{DateTime.Now:yyyyMMddhhmmss}.log");
+                file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"GameStoreBroker_{DateTime.Now:yyyyMMddHHmmss}.log");
                 file.Append = true;
             });
             logging.AddSimpleConsole(options =>
