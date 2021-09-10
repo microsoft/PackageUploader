@@ -1,13 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.Application.Schema;
 using GameStoreBroker.ClientApi;
-using GameStoreBroker.ClientApi.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
+using Microsoft.Extensions.Options;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,40 +13,24 @@ namespace GameStoreBroker.Application.Operations
 {
     internal class GetProductOperation : Operation
     {
-        private readonly IHost _host;
+        private readonly IGameStoreBrokerService _storeBrokerService;
+        private readonly ILogger<GetProductOperation> _logger;
+        private readonly BaseOperationSchema _config;
 
-        public GetProductOperation(IHost host, Options options) : base(host, options)
+        public GetProductOperation(IGameStoreBrokerService storeBrokerService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationSchema> config) : base(logger)
         {
-            _host = host;
+            _storeBrokerService = storeBrokerService;
+            _logger = logger;
+            _config = config.Value;
         }
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            using var scope = _host.Services.CreateScope();
-            var logger = scope.ServiceProvider.GetRequiredService<ILogger<GetProductOperation>>();
-            var storeBroker = scope.ServiceProvider.GetRequiredService<IGameStoreBrokerService>();
+            _logger.LogInformation("Starting GetProduct operation.");
 
-            logger.LogInformation("Starting GetProduct operation.");
+            var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
 
-            var schema = await GetSchemaAsync<GetProductOperationSchema>(ct).ConfigureAwait(false);
-            var aadAuthInfo = GetAadAuthInfo(schema.AadAuthInfo);
-            var accessTokenProvider = new AccessTokenProvider(aadAuthInfo);
-
-            GameProduct product;
-            if (!string.IsNullOrWhiteSpace(schema.BigId))
-            {
-                product = await storeBroker.GetProductByBigIdAsync(accessTokenProvider, schema.BigId, ct).ConfigureAwait(false);
-            }
-            else if (!string.IsNullOrWhiteSpace(schema.ProductId))
-            {
-                product = await storeBroker.GetProductByProductIdAsync(accessTokenProvider, schema.ProductId, ct).ConfigureAwait(false);
-            }
-            else
-            {
-                throw new Exception("BigId or ProductId needed.");
-            }
-
-            logger.LogInformation("Product: {product}", product.ToJson());
+            _logger.LogInformation("Product: {product}", product.ToJson());
         }
     }
 }

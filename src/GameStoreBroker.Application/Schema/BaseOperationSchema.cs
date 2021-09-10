@@ -3,27 +3,19 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace GameStoreBroker.Application.Schema
 {
     internal abstract class BaseOperationSchema : IValidatableObject
     {
-        public abstract string GetOperationName();
+        protected abstract string GetOperationName();
 
-        [Required(ErrorMessage = "operationName is required")]
-        [JsonPropertyName("operationName")]
+        [Required]
         public string OperationName { get; set; }
         
-        [JsonPropertyName("productId")]
         public string ProductId { get; set; }
         
-        [JsonPropertyName("bigId")]
         public string BigId { get; set; }
-        
-        [Required(ErrorMessage = "aadAuthInfo is required")]
-        [JsonPropertyName("aadAuthInfo")]
-        public AadAuthInfoSchema AadAuthInfo { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -33,29 +25,27 @@ namespace GameStoreBroker.Application.Schema
             return validationResults;
         }
 
-        protected virtual void Validate(List<ValidationResult> validationResults)
+        protected virtual void Validate(IList<ValidationResult> validationResults)
         {
         }
 
-        protected void ValidateBase(List<ValidationResult> validationResults)
+        private void ValidateBase(IList<ValidationResult> validationResults)
         {
             var operationName = GetOperationName();
             if (!string.Equals(operationName, OperationName))
             {
-                validationResults.Add(new ValidationResult($"operationName is not {operationName}"));
+                validationResults.Add(new ValidationResult($"{nameof(OperationName)} field is not {operationName}.", new [] { nameof(OperationName) }));
             }
 
             if (string.IsNullOrWhiteSpace(ProductId) && string.IsNullOrWhiteSpace(BigId))
             {
-                validationResults.Add(new ValidationResult("productId or bigId is required"));
+                validationResults.Add(new ValidationResult($"{nameof(ProductId)} or {nameof(BigId)} field is required.", new[] { nameof(ProductId), nameof(BigId) }));
             }
 
             if (!string.IsNullOrWhiteSpace(ProductId) && !string.IsNullOrWhiteSpace(BigId))
             {
-                validationResults.Add(new ValidationResult("Only one productId or bigId is allowed"));
+                validationResults.Add(new ValidationResult($"Only one {nameof(ProductId)} or {nameof(BigId)} field is allowed.", new[] { nameof(ProductId), nameof(BigId) }));
             }
-
-            Validator.TryValidateObject(AadAuthInfo, new ValidationContext(AadAuthInfo), validationResults, true);
         }
     }
 }

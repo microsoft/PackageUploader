@@ -2,18 +2,21 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Client.Ingestion;
+using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider;
 using GameStoreBroker.ClientApi.Client.Xfus;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GameStoreBroker.ClientApi
 {
-    public static class GameStoreBrokerExtensions
+    public static class IngestionExtensions
     {
-        public static void AddGameStoreBrokerService(this IServiceCollection services)
+        public static void AddGameStoreBrokerService(this IServiceCollection services, IConfiguration config)
         {
-            services.AddHttpClient<IIngestionHttpClient, IngestionHttpClient>();
-            services.AddHttpClient<IXfusHttpClient, XfusHttpClient>();
             services.AddScoped<IGameStoreBrokerService, GameStoreBrokerService>();
+            services.AddIngestionService(config);
+            services.AddAccessTokenProvider(config);
+            services.AddXfusService(config);
         }
     }
 }
