@@ -29,8 +29,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
         {
-            _logger = logger;
-            _httpClient = httpClient;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         public async Task<T> GetAsync<T>(string subUrl, CancellationToken ct)
@@ -90,10 +90,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             }
         }
 
-        public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct)
-        {
-            return await PutAsync(subUrl, body, null, ct).ConfigureAwait(false);
-        }
+        public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct) =>
+            await PutAsync(subUrl, body, null, ct).ConfigureAwait(false);
 
         public async Task<T> PutAsync<T>(string subUrl, T body, IDictionary<string, string> customHeaders, CancellationToken ct)
         {

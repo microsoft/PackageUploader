@@ -7,6 +7,7 @@ using GameStoreBroker.ClientApi;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,9 +21,9 @@ namespace GameStoreBroker.Application.Operations
 
         public UploadUwpPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationSchema> config) : base(logger)
         {
-            _storeBrokerService = storeBrokerService;
-            _logger = logger;
-            _config = config.Value;
+            _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         }
 
         protected override async Task ProcessAsync(CancellationToken ct)
