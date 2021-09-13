@@ -37,7 +37,7 @@ namespace GameStoreBroker.Application.Operations
                 PackageFilePath = _config.PackageFilePath
             };
             
-            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, gameAssets, false, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, gameAssets, false, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
     }
 }

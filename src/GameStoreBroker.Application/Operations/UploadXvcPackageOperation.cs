@@ -31,7 +31,7 @@ namespace GameStoreBroker.Application.Operations
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
             
-            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.GameAssets, true, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.GameAssets, true, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
     }
 }

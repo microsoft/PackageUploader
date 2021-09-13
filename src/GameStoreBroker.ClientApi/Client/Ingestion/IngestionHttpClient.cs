@@ -118,7 +118,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             return branch;
         }
 
-        public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, CancellationToken ct)
+        public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(productId))
             {
@@ -135,12 +135,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(fileName)} cannot be null or empty.", nameof(fileName));
             }
 
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
             var body = new IngestionPackageCreationRequest
             {
                 PackageConfigurationId = currentDraftInstanceId,
                 FileName = fileName,
                 ResourceType = "PackageCreationRequest",
-                MarketGroupId = "default",
+                MarketGroupId = marketGroupId,
             };
 
             var ingestionGamePackage = await PostAsync<IngestionPackageCreationRequest, IngestionGamePackage>($"products/{productId}/packages", body, ct).ConfigureAwait(false);

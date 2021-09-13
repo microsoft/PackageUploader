@@ -80,7 +80,7 @@ namespace GameStoreBroker.ClientApi
             return await _ingestionHttpClient.GetPackageBranchByFriendlyNameAsync(product.ProductId, branchFriendlyName, ct).ConfigureAwait(false);
         }
 
-        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, GameAssets gameAssets, bool uploadAssets, int minutesToWaitForProcessing, CancellationToken ct)
+        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, GameAssets gameAssets, bool uploadAssets, int minutesToWaitForProcessing, CancellationToken ct)
         {
             if (product is null)
             {
@@ -90,6 +90,11 @@ namespace GameStoreBroker.ClientApi
             if (packageBranch is null)
             {
                 throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
             }
 
             if (gameAssets is null)
@@ -109,7 +114,7 @@ namespace GameStoreBroker.ClientApi
             }
 
             _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
-            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, ct).ConfigureAwait(false);
+            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupId, ct).ConfigureAwait(false);
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
             await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);

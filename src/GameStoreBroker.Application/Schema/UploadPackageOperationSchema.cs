@@ -12,6 +12,9 @@ namespace GameStoreBroker.Application.Schema
 
         public string FlightName { get; set; }
 
+        [Required]
+        public string MarketGroupId { get; set; } = "default";
+
         [Range(0, 360)]
         public int MinutesToWaitForProcessing { get; set; } = 30;
 
