@@ -134,9 +134,20 @@ namespace GameStoreBroker.ClientApi
             }
         }
 
-        public Task RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct)
+        public async Task RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (packageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            _logger.LogDebug("Removing game packages in product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
+            await _ingestionHttpClient.RemovePackagesAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
         }
 
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)

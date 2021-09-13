@@ -246,5 +246,20 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             var gamePackageAsset = ingestionGamePackageAsset.Map();
             return gamePackageAsset;
         }
+
+        public async Task RemovePackagesAsync(string productId, string currentDraftInstanceId, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
+            }
+
+            throw new NotImplementedException();
+        }
     }
 }
