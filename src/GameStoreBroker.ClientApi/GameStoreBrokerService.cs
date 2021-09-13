@@ -134,6 +134,11 @@ namespace GameStoreBroker.ClientApi
             }
         }
 
+        public Task RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(assetFilePath))

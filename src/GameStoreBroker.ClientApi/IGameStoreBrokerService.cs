@@ -15,6 +15,6 @@ namespace GameStoreBroker.ClientApi
         Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(GameProduct product, string branchFriendlyName, CancellationToken ct);
         Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct);
         Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, GameAssets gameAssets, bool uploadAssets, int minutesToWaitForProcessing, CancellationToken ct);
-
+        Task RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct);
     }
 }
