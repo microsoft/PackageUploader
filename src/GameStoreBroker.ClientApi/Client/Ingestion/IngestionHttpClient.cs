@@ -27,7 +27,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
         public IngestionHttpClient(ILogger<IngestionHttpClient> logger, HttpClient httpClient) : base(logger, httpClient)
         {
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
         public async Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct)
@@ -248,7 +248,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             return gamePackageAsset;
         }
 
-        public async Task RemovePackagesAsync(string productId, string currentDraftInstanceId, CancellationToken ct)
+        public async Task RemovePackagesAsync(string productId, string currentDraftInstanceId, string marketGroupId, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(productId))
             {
@@ -275,7 +275,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 // Blanking all package ids for each market group package
                 foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
                 {
-                    marketGroupPackage.PackageIds = new List<string>();
+                    if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        marketGroupPackage.PackageIds = new List<string>();
+                    }
                 }
             }
 

@@ -19,6 +19,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         Task<GamePackageAsset> CreatePackageAssetRequestAsync(string productId, string packageId, FileInfo fileInfo, GamePackageAssetType packageAssetType, CancellationToken ct);
         Task<GamePackage> ProcessPackageRequestAsync(string productId, GamePackage gamePackage, CancellationToken ct);
         Task<GamePackageAsset> CommitPackageAssetAsync(string productId, string packageId, string packageAssetId, CancellationToken ct);
-        Task RemovePackagesAsync(string productId, string currentDraftInstanceId, CancellationToken ct);
+        Task RemovePackagesAsync(string productId, string currentDraftInstanceId, string marketGroupId, CancellationToken ct);
     }
 }
