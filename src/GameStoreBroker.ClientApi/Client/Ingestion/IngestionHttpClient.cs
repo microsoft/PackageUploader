@@ -9,6 +9,7 @@ using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -269,6 +270,15 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             // ODataEtag needs to be added to If-Match header on http client still.
             packageSet.ETag = packageSet.ODataETag;
+
+            if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
+            {
+                // Blanking all package ids for each market group package
+                foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
+                {
+                    marketGroupPackage.PackageIds = new List<string>();
+                }
+            }
 
             await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, ct);
         }
