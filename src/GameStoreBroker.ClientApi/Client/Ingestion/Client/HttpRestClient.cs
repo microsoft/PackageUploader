@@ -4,6 +4,7 @@
 using GameStoreBroker.ClientApi.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -91,10 +92,20 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
 
         public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct)
         {
-            return await PutAsync<T, T>(subUrl, body, ct).ConfigureAwait(false);
+            return await PutAsync(subUrl, body, null, ct).ConfigureAwait(false);
+        }
+
+        public async Task<T> PutAsync<T>(string subUrl, T body, IDictionary<string, string> customHeaders, CancellationToken ct)
+        {
+            return await PutAsync<T, T>(subUrl, body, customHeaders, ct).ConfigureAwait(false);
         }
 
         public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
+        {
+            return await PutAsync<TIn, TOut>(subUrl, body, null, ct).ConfigureAwait(false);
+        }
+
+        public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, IDictionary<string, string> customHeaders, CancellationToken ct)
         {
             try
             {
@@ -106,6 +117,15 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
 
                 var request = new HttpRequestMessage(HttpMethod.Put, subUrl);
                 request.Headers.Add("Request-ID", clientRequestId);
+
+                if (customHeaders is not null && customHeaders.Any())
+                {
+                    foreach (var (name, value) in customHeaders)
+                    {
+                        request.Headers.Add(name, value);
+                    }
+                }
+
                 request.Content = content;
 
                 using var response = await _httpClient.SendAsync(request, ct);

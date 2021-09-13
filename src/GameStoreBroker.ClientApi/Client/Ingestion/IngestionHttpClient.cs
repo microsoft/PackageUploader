@@ -268,7 +268,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
             }
 
-            // ODataEtag needs to be added to If-Match header on http client still.
             packageSet.ETag = packageSet.ODataETag;
 
             if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
@@ -280,7 +279,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 }
             }
 
-            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, ct);
+            // ODataEtag needs to be added to If-Match header on http client still.
+            var customHeaders = new Dictionary<string, string>
+            {
+                { "If-Match", packageSet.ODataETag},
+            };
+
+            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
         }
     }
 }
