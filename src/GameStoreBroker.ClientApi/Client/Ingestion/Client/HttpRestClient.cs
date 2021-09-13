@@ -90,8 +90,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             }
         }
 
-        public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct) =>
-            await PutAsync(subUrl, body, null, ct).ConfigureAwait(false);
+        public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct)
+        {
+            return await PutAsync(subUrl, body, null, ct).ConfigureAwait(false);
+        }
 
         public async Task<T> PutAsync<T>(string subUrl, T body, IDictionary<string, string> customHeaders, CancellationToken ct)
         {
