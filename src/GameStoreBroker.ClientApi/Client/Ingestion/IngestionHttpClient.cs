@@ -259,7 +259,18 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
             }
 
-            throw new NotImplementedException();
+            var packageSets = await GetAsync<PagedCollection<IngestionPackageSet>>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+
+            var packageSet = packageSets.Value.FirstOrDefault();
+            if (packageSet is null)
+            {
+                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
+            }
+
+            // ODataEtag needs to be added to If-Match header on http client still.
+            packageSet.ETag = packageSet.ODataETag;
+
+            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, ct);
         }
     }
 }
