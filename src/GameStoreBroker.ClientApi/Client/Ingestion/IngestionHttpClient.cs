@@ -61,7 +61,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             if (ingestionGameProduct is null)
             {
-                throw new ProductNotFoundException($"Product with big id {bigId} not found.");
+                throw new ProductNotFoundException($"Product with big id '{bigId}' not found.");
             }
 
             var gameProduct = ingestionGameProduct.Map();
@@ -86,7 +86,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             if (ingestionGamePackageBranch is null)
             {
-                throw new PackageBranchNotFoundException($"404 branch not found: {branchFriendlyName}");
+                throw new PackageBranchNotFoundException($"Package branch with friendly name '{branchFriendlyName}' not found.");
             }
 
             var gamePackageBranch = ingestionGamePackageBranch.Map();
@@ -111,7 +111,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             if (selectedFlight is null)
             {
-                throw new PackageBranchNotFoundException($"404 flight not found: {flightName}");
+                throw new PackageBranchNotFoundException($"Package branch with flight name '{flightName}' not found.");
             }
 
             var branch = await GetPackageBranchByFriendlyNameAsync(productId, selectedFlight.Id, ct).ConfigureAwait(false);
