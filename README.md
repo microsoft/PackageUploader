@@ -6,7 +6,6 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Prerequisite
 
-- Download and install the .NET 5.0 Runtime. Go here https://dotnet.microsoft.com/download/dotnet/5.0/runtime for download and installation.
 - The product must already exist in partner center before uploading.
 - The branch/sandbox must already exist in partner center before uploading.
 - Build the solution from source, or download a release.
@@ -34,38 +33,50 @@ The application can be used directly with the input config for ease of use, or t
 - Under _Product-level permissions_ search for your product and apply the _Read/write_ permission under _Publishing_.
   - **NOTE** We will be changing this with future iterations of the tool to more accurately apply permissions.
 
+## Step 3: Configure your wrapper using a config file
 
+- Create or edit the configuration file with your favorite editor and update the following fields
 
+### To Upload Xvc Package:
 
-## Step 3: Configure your wrapper
-
-- Navigate to the root of your wrapper directory.
-- Edit the _UploadGamecoreConfig.json_ with your favorite editor and update the following fields:
-  - bigId (From Partner Center)
-  - branchFriendlyName (name of the branch/sandbox from Partner Center)
-    - XBOX RECOMMEND: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
-  - flightName (From Partner Center - if you're doing a flight)
+- operationName (UploadXvcPackage)
+- productId or bigId (From Partner Center)
+- branchFriendlyName (name of the branch/sandbox from Partner Center) or flightName (name of the flight from Partner Center)
+  - XBOX RECOMMEND: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
+- gameAssets:
   - packageFilePath (Location of the game package)
   - ekbFilePath (Location of the EKB file)
   - subvalFilePath (Location of the SubVal File)
   - SymbolsFilePath (Location of Symbole File - optional)
   - discLayoutFilePath (Location of Disc Layout File - optional)
+- aadAuthInfo:
   - clientId (From Azure Portal)
   - tenantId (From Azure Portal)
-  - Save
+
+### To Upload Uwp Package:
+
+- operationName (UploadUwpPackage)
+- productId or bigId (From Partner Center)
+- branchFriendlyName (name of the branch/sandbox from Partner Center) or flightName (name of the flight from Partner Center)
+  - XBOX RECOMMEND: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
+- packageFilePath (Location of the Uwp game package)
+- aadAuthInfo:
+  - clientId (From Azure Portal)
+  - tenantId (From Azure Portal)
 
 ## Step 4: Fire Away
 
 - Open _powershell_ via the start menu.
-- Navigate to the root of your wrapper directory and run the following command:
-  -  .\GameStoreBroker.Application.exe UploadPcPackage -c .\UploadGamecoreConfig.json -s *secretkey*
+- Navigate to the root of your wrapper directory and run the following command to upload an Xvc package:
+  -  ```.\GameStoreBroker.exe UploadXvcPackage -c *config file path* -s *secret key*```
 
 - Extra parameters to pass:
-  - -c, --ConfigFile Required. The location of json config file
-  - -s, --ClientSecret Required. The client secret of the AAD app.
-  - -v, --Verbose (Default: false) Log verbose messages such as http calls.
-  - --help Display this help screen.
-  - --version Display version information.
+  - -c, --ConfigFile <ConfigFile> (REQUIRED)  The location of the config file.
+  - -f, --ConfigFileFormat <Ini|Json|Xml>     The format of the config file. [default: Json]
+  - -s, --ClientSecret <ClientSecret>         The client secret of the AAD app.
+  - -v, --Verbose                             Log verbose messages such as http calls.
+  - -l, --LogFile <LogFile>                   The location of the log file.
+  - -?, -h, --help                            Show help and usage information
 
 ## Q & A
 
