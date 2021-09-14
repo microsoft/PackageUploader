@@ -66,7 +66,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             {
                 var response = await GetAsync<PagedCollection<T>>(nextLink, ct);
 
-                if (response.Value == null)
+                if (response.Value is null)
                 {
                     yield break;
                 }
