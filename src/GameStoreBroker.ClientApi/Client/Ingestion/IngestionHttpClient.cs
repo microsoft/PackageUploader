@@ -57,8 +57,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(bigId)} cannot be null or empty.", nameof(bigId));
             }
 
-            var ingestionGameProducts = await GetAsync<PagedCollection<IngestionGameProduct>>($"products?externalId={bigId}", ct).ConfigureAwait(false);
-            var ingestionGameProduct = ingestionGameProducts.Value.FirstOrDefault();
+            var ingestionGameProducts = GetAsyncEnumerable<IngestionGameProduct>($"products?externalId={bigId}", ct);
+            var ingestionGameProduct = await ingestionGameProducts.FirstOrDefaultAsync(ct).ConfigureAwait(false);
 
             if (ingestionGameProduct is null)
             {
@@ -81,9 +81,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(branchFriendlyName)} cannot be null or empty.", nameof(branchFriendlyName));
             }
 
-            var branches = await GetAsync<PagedCollection<IngestionBranch>>($"products/{productId}/branches/getByModule(module=Package)", ct).ConfigureAwait(false);
+            var branches = GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct);
 
-            var ingestionGamePackageBranch = branches.Value.FirstOrDefault(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase));
+            var ingestionGamePackageBranch = await branches.FirstOrDefaultAsync(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
 
             if (ingestionGamePackageBranch is null)
             {
@@ -106,9 +106,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(flightName)} cannot be null or empty.", nameof(flightName));
             }
 
-            var flights = await GetAsync<PagedCollection<IngestionFlight>>($"products/{productId}/flights", ct);
+            var flights = GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct);
 
-            var selectedFlight = flights.Value.FirstOrDefault(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase));
+            var selectedFlight = await flights.FirstOrDefaultAsync(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
 
             if (selectedFlight is null)
             {
@@ -260,9 +260,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
             }
 
-            var packageSets = await GetAsync<PagedCollection<IngestionPackageSet>>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+            var packageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
 
-            var packageSet = packageSets.Value.FirstOrDefault();
+            var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
             if (packageSet is null)
             {
                 throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");

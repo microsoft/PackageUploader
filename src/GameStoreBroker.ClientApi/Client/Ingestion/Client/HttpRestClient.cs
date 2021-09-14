@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using GameStoreBroker.ClientApi.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Net.Mime;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -55,6 +57,31 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 LogException(ex);
                 throw;
             }
+        }
+
+        public async IAsyncEnumerable<T> GetAsyncEnumerable<T>(string subUrl, [EnumeratorCancellation] CancellationToken ct)
+        {
+            var nextLink = subUrl;
+            do
+            {
+                var response = await GetAsync<PagedCollection<T>>(nextLink, ct);
+
+                if (response.Value == null)
+                {
+                    yield break;
+                }
+
+                foreach (var value in response.Value)
+                {
+                    if (ct.IsCancellationRequested)
+                    {
+                        yield break;
+                    }
+                    yield return value;
+                }
+
+                nextLink = response.NextLink;
+            } while (!string.IsNullOrWhiteSpace(nextLink) && !ct.IsCancellationRequested);
         }
 
         public async Task<T> PostAsync<T>(string subUrl, T body, CancellationToken ct)
