@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Client.Ingestion.Extensions;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
-using GameStoreBroker.ClientApi.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
