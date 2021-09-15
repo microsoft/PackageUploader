@@ -13,7 +13,9 @@ namespace GameStoreBroker.ClientApi.Models
         [Required]
         public string EkbFilePath { get; set; }
 
+        [Required]
         public string SubValFilePath { get; set; }
+
         public string SymbolsFilePath { get; set; }
         public string DiscLayoutFilePath { get; set; }
     }
