@@ -27,8 +27,8 @@ namespace GameStoreBroker.Application.Operations
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            _logger.LogInformation("Starting UploadXvcPackage operation.");
-            
+            _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
+
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 

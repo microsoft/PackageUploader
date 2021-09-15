@@ -27,7 +27,7 @@ namespace GameStoreBroker.Application.Operations
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            _logger.LogInformation("Starting GetProduct operation.");
+            _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
 
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
 

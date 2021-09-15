@@ -8,7 +8,7 @@ namespace GameStoreBroker.Application.Schema
 {
     internal class UploadXvcPackageOperationSchema : UploadPackageOperationSchema
     {
-        protected override string GetOperationName() => "UploadXvcPackage";
+        internal override string GetOperationName() => "UploadXvcPackage";
 
         [Required]
         public GameAssets GameAssets { get; set; }
