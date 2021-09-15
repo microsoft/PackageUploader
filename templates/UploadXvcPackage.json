@@ -1,25 +1,23 @@
 {
-  "operationName": "UploadXvcPackage", // Required
+  "operationName": "UploadXvcPackage",
 
-  // Required only one of the following:
-  "productId": "{{productId}}",
-  "bigId": "{{bigId}}",
+  "productId": "{{ productId or bigId required }}",
+  "bigId": "{{ productId or bigId required }}",
 
-  // Required only one of the following:
-  "flightName": "{{flightName}}",
-  "branchFriendlyName": "{{branchFriendlyName}}",
+  "flightName": "{{ flightName or branchFriendlyName required }}",
+  "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
 
   "gameAssets": {
-    "packageFilePath": "{{packageFilePath}}", // Required
-    "ekbFilePath": "{{ekbFilePath}}", // Required
-    "subValFilePath": "{{subValFilePath}}", // Required
-    "symbolsFilePath": "{{symbolsFilePath}}", // Optional
-    "discLayoutFilePath": "{{discLayoutFilePath}}" // Optional
+    "packageFilePath": "{{ required }}",
+    "ekbFilePath": "{{ required }}",
+    "subValFilePath": "{{ required }}",
+    "symbolsFilePath": "{{ optional }}",
+    "discLayoutFilePath": "{{ optional }}"
   },
-  "minutesToWaitForProcessing": 60, // Optional
+  "minutesToWaitForProcessing": 60,
   "aadAuthInfo": {
-    "tenantId": "{{tenantId}}", // Required
-    "clientId": "{{clientId}}", // Required
-    "clientSecret": "{{clientSecret}}" // XBOX RECOMMENDS using the command line parameter (-s, --ClientSecret) instead of this
+    "tenantId": "{{ required }}",
+    "clientId": "{{ required }}",
+    "clientSecret": "{{ XBOX RECOMMENDS using the command line parameter --ClientSecret instead }}"
   }
 }
