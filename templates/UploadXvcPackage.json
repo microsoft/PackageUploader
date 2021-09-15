@@ -1,0 +1,25 @@
+{
+  "operationName": "UploadXvcPackage", // Required
+
+  // Required only one of the following:
+  "productId": "{{productId}}",
+  "bigId": "{{bigId}}",
+
+  // Required only one of the following:
+  "flightName": "{{flightName}}",
+  "branchFriendlyName": "{{branchFriendlyName}}",
+
+  "gameAssets": {
+    "packageFilePath": "{{packageFilePath}}", // Required
+    "ekbFilePath": "{{ekbFilePath}}", // Required
+    "subValFilePath": "{{subValFilePath}}", // Required
+    "symbolsFilePath": "{{symbolsFilePath}}", // Optional
+    "discLayoutFilePath": "{{discLayoutFilePath}}" // Optional
+  },
+  "minutesToWaitForProcessing": 60, // Optional
+  "aadAuthInfo": {
+    "tenantId": "{{tenantId}}", // Required
+    "clientId": "{{clientId}}", // Required
+    "clientSecret": "{{clientSecret}}" // XBOX RECOMMENDS using the command line parameter (-s, --ClientSecret) instead of this
+  }
+}
