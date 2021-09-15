@@ -168,8 +168,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(packageId)} cannot be null or empty.", nameof(packageId));
             }
 
-            var package = await GetAsync<GamePackage>($"products/{productId}/packages/{packageId}", ct).ConfigureAwait(false);
-            return package;
+            var ingestionGamePackage = await GetAsync<IngestionGamePackage>($"products/{productId}/packages/{packageId}", ct).ConfigureAwait(false);
+
+            var gamePackage = ingestionGamePackage.Map();
+            return gamePackage;
         }
 
         public async Task<GamePackageAsset> CreatePackageAssetRequestAsync(string productId, string packageId, FileInfo fileInfo, GamePackageAssetType packageAssetType, CancellationToken ct)
