@@ -3,7 +3,7 @@
 
 namespace GameStoreBroker.Application.Schema
 {
-    internal class RemovePackagesOperationSchema : PackageBranchOperationSchema
+    internal class RemovePackagesOperationConfig : PackageBranchOperationConfig
     {
         internal override string GetOperationName() => "RemovePackages";
 

@@ -16,9 +16,9 @@ namespace GameStoreBroker.Application.Operations
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
         private readonly ILogger<RemovePackagesOperation> _logger;
-        private readonly RemovePackagesOperationSchema _config;
+        private readonly RemovePackagesOperationConfig _config;
 
-        public RemovePackagesOperation(IGameStoreBrokerService storeBrokerService, ILogger<RemovePackagesOperation> logger, IOptions<RemovePackagesOperationSchema> config) : base(logger)
+        public RemovePackagesOperation(IGameStoreBrokerService storeBrokerService, ILogger<RemovePackagesOperation> logger, IOptions<RemovePackagesOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

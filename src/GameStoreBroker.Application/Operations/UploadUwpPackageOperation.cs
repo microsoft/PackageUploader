@@ -17,9 +17,9 @@ namespace GameStoreBroker.Application.Operations
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
         private readonly ILogger<UploadUwpPackageOperation> _logger;
-        private readonly UploadUwpPackageOperationSchema _config;
+        private readonly UploadUwpPackageOperationConfig _config;
 
-        public UploadUwpPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationSchema> config) : base(logger)
+        public UploadUwpPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

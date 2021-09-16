@@ -84,10 +84,10 @@ namespace GameStoreBroker.Application
             services.AddLogging();
             services.AddGameStoreBrokerService(context.Configuration);
 
-            services.AddOperation<GetProductOperation, GetProductOperationSchema>(context);
-            services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationSchema>(context);
-            services.AddOperation<UploadXvcPackageOperation, UploadXvcPackageOperationSchema>(context);
-            services.AddOperation<RemovePackagesOperation, RemovePackagesOperationSchema>(context);
+            services.AddOperation<GetProductOperation, GetProductOperationConfig>(context);
+            services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationConfig>(context);
+            services.AddOperation<UploadXvcPackageOperation, UploadXvcPackageOperationConfig>(context);
+            services.AddOperation<RemovePackagesOperation, RemovePackagesOperationConfig>(context);
         }
 
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)

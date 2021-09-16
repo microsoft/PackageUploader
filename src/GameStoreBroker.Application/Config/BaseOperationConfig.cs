@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Schema
 {
-    internal abstract class BaseOperationSchema : IValidatableObject
+    internal abstract class BaseOperationConfig : IValidatableObject
     {
         internal abstract string GetOperationName();
 

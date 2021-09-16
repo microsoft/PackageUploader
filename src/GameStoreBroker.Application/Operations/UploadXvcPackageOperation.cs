@@ -16,9 +16,9 @@ namespace GameStoreBroker.Application.Operations
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
         private readonly ILogger<UploadXvcPackageOperation> _logger;
-        private readonly UploadXvcPackageOperationSchema _config;
+        private readonly UploadXvcPackageOperationConfig _config;
 
-        public UploadXvcPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadXvcPackageOperation> logger, IOptions<UploadXvcPackageOperationSchema> config) : base(logger)
+        public UploadXvcPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadXvcPackageOperation> logger, IOptions<UploadXvcPackageOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

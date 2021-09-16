@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Schema
 {
-    internal abstract class UploadPackageOperationSchema : PackageBranchOperationSchema
+    internal abstract class UploadPackageOperationConfig : PackageBranchOperationConfig
     {
         [Required]
         public string MarketGroupId { get; set; } = "default";

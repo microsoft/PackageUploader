@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Schema
 {
-    internal abstract class PackageBranchOperationSchema : BaseOperationSchema
+    internal abstract class PackageBranchOperationConfig : BaseOperationConfig
     {
         public string BranchFriendlyName { get; set; }
         public string FlightName { get; set; }

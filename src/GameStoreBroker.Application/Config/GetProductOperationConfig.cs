@@ -3,7 +3,7 @@
 
 namespace GameStoreBroker.Application.Schema
 {
-    internal class GetProductOperationSchema : BaseOperationSchema
+    internal class GetProductOperationConfig : BaseOperationConfig
     {
         internal override string GetOperationName() => "GetProduct";
     }
