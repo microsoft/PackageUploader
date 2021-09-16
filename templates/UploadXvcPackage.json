@@ -18,6 +18,10 @@
   },
   "minutesToWaitForProcessing": 60,
 
+  "availabilityDateConfig": {
+    "availabilityDate": "{{ if blank it will disable the availability date for this package in Partner Center }}"
+  },
+
   "aadAuthInfo": {
     "tenantId": "{{ required }}",
     "clientId": "{{ required }}",

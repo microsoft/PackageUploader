@@ -12,6 +12,14 @@
   "packageFilePath": "{{ required }}",
   "minutesToWaitForProcessing": 60,
 
+  "availabilityDateConfig": {
+    "availabilityDate": "{{ if blank it will disable the availability date in Partner Center for this branch }}"
+  },
+
+  "mandatoryDateConfig": {
+    "mandatoryDate": "{{ if blank it will disable the mandatory date in Partner Center for this branch }}"
+  },
+
   "aadAuthInfo": {
     "tenantId": "{{ required }}",
     "clientId": "{{ required }}",
