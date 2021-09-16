@@ -7,16 +7,7 @@
   "flightName": "{{ flightName or branchFriendlyName required }}",
   "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
 
-  "marketGroupId": "{{ default value is 'default' }}",
-
-  "gameAssets": {
-    "packageFilePath": "{{ required }}",
-    "ekbFilePath": "{{ required }}",
-    "subValFilePath": "{{ required }}",
-    "symbolsFilePath": "{{ optional }}",
-    "discLayoutFilePath": "{{ optional }}"
-  },
-  "minutesToWaitForProcessing": 60,
+  "marketGroupId": "{{ optional - if informed it will only delete packages in the specified one }}",
 
   "aadAuthInfo": {
     "tenantId": "{{ required }}",

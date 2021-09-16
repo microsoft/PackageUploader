@@ -7,8 +7,11 @@
   "flightName": "{{ flightName or branchFriendlyName required }}",
   "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
 
+  "marketGroupId": "{{ default value is 'default' }}",
+
   "packageFilePath": "{{ required }}",
   "minutesToWaitForProcessing": 60,
+
   "aadAuthInfo": {
     "tenantId": "{{ required }}",
     "clientId": "{{ required }}",
