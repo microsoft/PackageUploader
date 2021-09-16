@@ -32,7 +32,7 @@ namespace GameStoreBroker.Application.Extensions
             throw new Exception("BigId or ProductId needed.");
         }
 
-        public static async Task<GamePackageBranch> GetGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, UploadPackageOperationSchema schema, CancellationToken ct)
+        public static async Task<GamePackageBranch> GetGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, PackageBranchOperationSchema schema, CancellationToken ct)
         {
             if (product is null)
             {

@@ -6,6 +6,7 @@ using GameStoreBroker.Application.Schema;
 using GameStoreBroker.ClientApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,19 +20,19 @@ namespace GameStoreBroker.Application.Operations
 
         public UploadXvcPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadXvcPackageOperation> logger, IOptions<UploadXvcPackageOperationSchema> config) : base(logger)
         {
-            _storeBrokerService = storeBrokerService;
-            _logger = logger;
-            _config = config.Value;
+            _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         }
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            _logger.LogInformation("Starting UploadXvcPackage operation.");
+            _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
             
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
             
-            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.GameAssets, true, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.GameAssets, true, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
     }
 }

@@ -7,6 +7,7 @@ using GameStoreBroker.ClientApi;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,15 +21,15 @@ namespace GameStoreBroker.Application.Operations
 
         public UploadUwpPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationSchema> config) : base(logger)
         {
-            _storeBrokerService = storeBrokerService;
-            _logger = logger;
-            _config = config.Value;
+            _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         }
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            _logger.LogInformation("Starting UploadUwpPackage operation.");
-            
+            _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
+
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
@@ -37,7 +38,7 @@ namespace GameStoreBroker.Application.Operations
                 PackageFilePath = _config.PackageFilePath
             };
             
-            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, gameAssets, false, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, gameAssets, false, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
     }
 }

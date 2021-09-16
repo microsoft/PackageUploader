@@ -41,9 +41,9 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
 
         public XfusUploader(IHttpClientFactory httpClientFactory, ILogger<XfusUploader> logger, IOptions<UploadConfig> uploadConfig)
         {
-            _httpClientFactory = httpClientFactory;
-            _logger = logger;
-            _uploadConfig = uploadConfig.Value;
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _uploadConfig = uploadConfig?.Value ?? throw new ArgumentNullException(nameof(uploadConfig));
         }
 
         public async Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, CancellationToken ct)

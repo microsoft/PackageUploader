@@ -21,9 +21,9 @@ namespace GameStoreBroker.ClientApi
 
         public GameStoreBrokerService(IIngestionHttpClient ingestionHttpClient, IXfusUploader xfusUploader, ILogger<GameStoreBrokerService> logger)
         {
-            _ingestionHttpClient = ingestionHttpClient;
-            _xfusUploader = xfusUploader;
-            _logger = logger;
+            _ingestionHttpClient = ingestionHttpClient ?? throw new ArgumentNullException(nameof(ingestionHttpClient));
+            _xfusUploader = xfusUploader ?? throw new ArgumentNullException(nameof(xfusUploader));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<GameProduct> GetProductByBigIdAsync(string bigId, CancellationToken ct)
@@ -80,7 +80,7 @@ namespace GameStoreBroker.ClientApi
             return await _ingestionHttpClient.GetPackageBranchByFriendlyNameAsync(product.ProductId, branchFriendlyName, ct).ConfigureAwait(false);
         }
 
-        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, GameAssets gameAssets, bool uploadAssets, int minutesToWaitForProcessing, CancellationToken ct)
+        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, GameAssets gameAssets, bool uploadAssets, int minutesToWaitForProcessing, CancellationToken ct)
         {
             if (product is null)
             {
@@ -90,6 +90,11 @@ namespace GameStoreBroker.ClientApi
             if (packageBranch is null)
             {
                 throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
             }
 
             if (gameAssets is null)
@@ -109,7 +114,7 @@ namespace GameStoreBroker.ClientApi
             }
 
             _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
-            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, ct).ConfigureAwait(false);
+            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupId, ct).ConfigureAwait(false);
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
             await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
@@ -127,6 +132,22 @@ namespace GameStoreBroker.ClientApi
                 await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
                 await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
             }
+        }
+
+        public async Task RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (packageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            _logger.LogDebug("Removing game packages in product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
+            await _ingestionHttpClient.RemovePackagesAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, ct).ConfigureAwait(false);
         }
 
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)

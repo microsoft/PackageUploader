@@ -12,13 +12,13 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.Application.Operations
 {
-    internal class GetProductOperation : Operation
+    internal class RemovePackagesOperation : Operation
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
-        private readonly ILogger<GetProductOperation> _logger;
-        private readonly BaseOperationSchema _config;
+        private readonly ILogger<RemovePackagesOperation> _logger;
+        private readonly RemovePackagesOperationSchema _config;
 
-        public GetProductOperation(IGameStoreBrokerService storeBrokerService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationSchema> config) : base(logger)
+        public RemovePackagesOperation(IGameStoreBrokerService storeBrokerService, ILogger<RemovePackagesOperation> logger, IOptions<RemovePackagesOperationSchema> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -30,8 +30,9 @@ namespace GameStoreBroker.Application.Operations
             _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
 
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
+            var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
-            _logger.LogInformation("Product: {product}", product.ToJson());
+            await _storeBrokerService.RemovePackagesAsync(product, packageBranch, _config.MarketGroupId, ct).ConfigureAwait(false);
         }
     }
 }

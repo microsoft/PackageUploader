@@ -8,7 +8,7 @@ namespace GameStoreBroker.Application.Schema
 {
     internal abstract class BaseOperationSchema : IValidatableObject
     {
-        protected abstract string GetOperationName();
+        internal abstract string GetOperationName();
 
         [Required]
         public string OperationName { get; set; }

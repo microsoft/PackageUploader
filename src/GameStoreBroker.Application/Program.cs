@@ -87,6 +87,7 @@ namespace GameStoreBroker.Application
             services.AddOperation<GetProductOperation, GetProductOperationSchema>(context);
             services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationSchema>(context);
             services.AddOperation<UploadXvcPackageOperation, UploadXvcPackageOperationSchema>(context);
+            services.AddOperation<RemovePackagesOperation, RemovePackagesOperationSchema>(context);
         }
 
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
@@ -119,6 +120,10 @@ namespace GameStoreBroker.Application
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
                 }.AddOperationHandler<UploadXvcPackageOperation>(),
+                new Command("RemovePackages", "Removes all game packages and assets from a branch.")
+                {
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                }.AddOperationHandler<RemovePackagesOperation>(),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);

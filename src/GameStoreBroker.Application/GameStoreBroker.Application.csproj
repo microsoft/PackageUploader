@@ -1,6 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <AssemblyName>GameStoreBroker</AssemblyName>
+    <Copyright>© Microsoft Corporation</Copyright>
+    <RuntimeFrameworkVersion>5.0.10</RuntimeFrameworkVersion>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>

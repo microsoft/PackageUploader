@@ -9,6 +9,7 @@ using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -26,7 +27,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
         public IngestionHttpClient(ILogger<IngestionHttpClient> logger, HttpClient httpClient) : base(logger, httpClient)
         {
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
         public async Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct)
@@ -56,12 +57,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(bigId)} cannot be null or empty.", nameof(bigId));
             }
 
-            var ingestionGameProducts = await GetAsync<PagedCollection<IngestionGameProduct>>($"products?externalId={bigId}", ct).ConfigureAwait(false);
-            var ingestionGameProduct = ingestionGameProducts.Value.FirstOrDefault();
+            var ingestionGameProducts = GetAsyncEnumerable<IngestionGameProduct>($"products?externalId={bigId}", ct);
+            var ingestionGameProduct = await ingestionGameProducts.FirstOrDefaultAsync(ct).ConfigureAwait(false);
 
             if (ingestionGameProduct is null)
             {
-                throw new ProductNotFoundException($"Product with big id {bigId} not found.");
+                throw new ProductNotFoundException($"Product with big id '{bigId}' not found.");
             }
 
             var gameProduct = ingestionGameProduct.Map();
@@ -80,13 +81,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(branchFriendlyName)} cannot be null or empty.", nameof(branchFriendlyName));
             }
 
-            var branches = await GetAsync<PagedCollection<IngestionBranch>>($"products/{productId}/branches/getByModule(module=Package)", ct).ConfigureAwait(false);
+            var branches = GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct);
 
-            var ingestionGamePackageBranch = branches.Value.FirstOrDefault(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase));
+            var ingestionGamePackageBranch = await branches.FirstOrDefaultAsync(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
 
             if (ingestionGamePackageBranch is null)
             {
-                throw new PackageBranchNotFoundException($"404 branch not found: {branchFriendlyName}");
+                throw new PackageBranchNotFoundException($"Package branch with friendly name '{branchFriendlyName}' not found.");
             }
 
             var gamePackageBranch = ingestionGamePackageBranch.Map();
@@ -105,20 +106,20 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(flightName)} cannot be null or empty.", nameof(flightName));
             }
 
-            var flights = await GetAsync<PagedCollection<IngestionFlight>>($"products/{productId}/flights", ct);
+            var flights = GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct);
 
-            var selectedFlight = flights.Value.FirstOrDefault(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase));
+            var selectedFlight = await flights.FirstOrDefaultAsync(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
 
             if (selectedFlight is null)
             {
-                throw new PackageBranchNotFoundException($"404 flight not found: {flightName}");
+                throw new PackageBranchNotFoundException($"Package branch with flight name '{flightName}' not found.");
             }
 
             var branch = await GetPackageBranchByFriendlyNameAsync(productId, selectedFlight.Id, ct).ConfigureAwait(false);
             return branch;
         }
 
-        public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, CancellationToken ct)
+        public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(productId))
             {
@@ -135,12 +136,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(fileName)} cannot be null or empty.", nameof(fileName));
             }
 
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
             var body = new IngestionPackageCreationRequest
             {
                 PackageConfigurationId = currentDraftInstanceId,
                 FileName = fileName,
                 ResourceType = "PackageCreationRequest",
-                MarketGroupId = "default",
+                MarketGroupId = marketGroupId,
             };
 
             var ingestionGamePackage = await PostAsync<IngestionPackageCreationRequest, IngestionGamePackage>($"products/{productId}/packages", body, ct).ConfigureAwait(false);
@@ -242,6 +248,49 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             var gamePackageAsset = ingestionGamePackageAsset.Map();
             return gamePackageAsset;
+        }
+
+        public async Task RemovePackagesAsync(string productId, string currentDraftInstanceId, string marketGroupId, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
+            }
+
+            var packageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+
+            var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+            if (packageSet is null)
+            {
+                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
+            }
+
+            packageSet.ETag = packageSet.ODataETag;
+
+            if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
+            {
+                // Blanking all package ids for each market group package
+                foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
+                {
+                    if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        marketGroupPackage.PackageIds = new List<string>();
+                    }
+                }
+            }
+
+            // ODataEtag needs to be added to If-Match header on http client still.
+            var customHeaders = new Dictionary<string, string>
+            {
+                { "If-Match", packageSet.ODataETag},
+            };
+
+            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
         }
     }
 }

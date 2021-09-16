@@ -4,7 +4,7 @@
 using System;
 using System.Text.Json;
 
-namespace GameStoreBroker.ClientApi.Extensions
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Extensions
 {
     internal static class ObjectExtensions
     {
