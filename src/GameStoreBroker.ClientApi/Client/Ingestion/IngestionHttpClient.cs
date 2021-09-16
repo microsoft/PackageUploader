@@ -274,12 +274,165 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
             {
-                // Blanking all package ids for each market group package
                 foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
                 {
                     if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
                     {
+                        // Blanking all package ids for each market group package
                         marketGroupPackage.PackageIds = new List<string>();
+                        marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
+                    }
+                }
+            }
+
+            // ODataEtag needs to be added to If-Match header on http client still.
+            var customHeaders = new Dictionary<string, string>
+            {
+                { "If-Match", packageSet.ODataETag},
+            };
+
+            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
+        }
+
+        public async Task SetAvailabilityDateXvcPackage(string productId, string currentDraftInstanceId, string marketGroupId, string packageId, DateTime? availabilityDate, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
+            var packageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+
+            var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+            if (packageSet is null)
+            {
+                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
+            }
+            
+            packageSet.ETag = packageSet.ODataETag;
+
+            if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
+            {
+                foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
+                {
+                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Setting the availability date
+                        if (marketGroupPackage.PackageAvailabilityDates is null)
+                        {
+                            marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
+                        }
+                        marketGroupPackage.PackageAvailabilityDates[packageId] = availabilityDate;
+                    }
+                }
+            }
+
+            // ODataEtag needs to be added to If-Match header on http client still.
+            var customHeaders = new Dictionary<string, string>
+            {
+                { "If-Match", packageSet.ODataETag},
+            };
+
+            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
+        }
+
+        public async Task SetAvailabilityDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
+            var packageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+
+            var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+            if (packageSet is null)
+            {
+                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
+            }
+
+            packageSet.ETag = packageSet.ODataETag;
+
+            if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
+            {
+                foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
+                {
+                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Setting the availability date
+                        marketGroupPackage.AvailabilityDate = availabilityDate;
+                    }
+                }
+            }
+
+            // ODataEtag needs to be added to If-Match header on http client still.
+            var customHeaders = new Dictionary<string, string>
+            {
+                { "If-Match", packageSet.ODataETag},
+            };
+
+            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
+        }
+
+        public async Task SetMandatoryDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
+            var packageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+
+            var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+            if (packageSet is null)
+            {
+                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
+            }
+
+            packageSet.ETag = packageSet.ODataETag;
+
+            if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
+            {
+                foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
+                {
+                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Setting the mandatory date
+                        marketGroupPackage.MandatoryUpdateInfo = new IngestionMandatoryUpdateInfo
+                        {
+                            EffectiveDate = mandatoryDate,
+                            IsEnabled = mandatoryDate is not null,
+                        };
                     }
                 }
             }

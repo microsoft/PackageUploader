@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,5 +21,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         Task<GamePackage> ProcessPackageRequestAsync(string productId, GamePackage gamePackage, CancellationToken ct);
         Task<GamePackageAsset> CommitPackageAssetAsync(string productId, string packageId, string packageAssetId, CancellationToken ct);
         Task RemovePackagesAsync(string productId, string currentDraftInstanceId, string marketGroupId, CancellationToken ct);
+        Task SetAvailabilityDateXvcPackage(string productId, string currentDraftInstanceId, string marketGroupId, string packageId, DateTime? availabilityDate, CancellationToken ct);
+        Task SetAvailabilityDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? availabilityDate, CancellationToken ct);
+        Task SetMandatoryDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct);
     }
 }

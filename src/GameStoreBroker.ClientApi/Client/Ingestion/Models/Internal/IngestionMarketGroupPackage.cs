@@ -29,6 +29,16 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
         public List<string> PackageIds { get; set; }
 
         /// <summary>
+        /// Mandatory update
+        /// </summary>
+        public IngestionMandatoryUpdateInfo MandatoryUpdateInfo { get; set; }
+
+        /// <summary>
+        /// Schedule release date per region
+        /// </summary>
+        public DateTime? AvailabilityDate { get; set; }
+
+        /// <summary>
         /// Dictionary of per region, per package scheduled release dates for XVC and MSIXVC packages
         /// </summary>
         public Dictionary<string, DateTime?> PackageAvailabilityDates { get; set; }
