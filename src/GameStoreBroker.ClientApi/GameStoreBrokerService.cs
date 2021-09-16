@@ -80,7 +80,7 @@ namespace GameStoreBroker.ClientApi
             return await _ingestionHttpClient.GetPackageBranchByFriendlyNameAsync(product.ProductId, branchFriendlyName, ct).ConfigureAwait(false);
         }
 
-        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
+        public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
         {
             if (product is null)
             {
@@ -118,7 +118,7 @@ namespace GameStoreBroker.ClientApi
             package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
             _logger.LogInformation("Package is uploaded and is in processing.");
 
-            await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
+            package = await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
 
             if (gameAssets is not null)
             {
@@ -127,6 +127,8 @@ namespace GameStoreBroker.ClientApi
                 await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
                 await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
             }
+
+            return package;
         }
 
         public async Task RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, CancellationToken ct)
@@ -167,7 +169,7 @@ namespace GameStoreBroker.ClientApi
             }
         }
 
-        private async Task WaitForPackageProcessingAsync(GameProduct product, GamePackage processingPackage, int minutesToWait, int checkIntervalMinutes, CancellationToken ct)
+        private async Task<GamePackage> WaitForPackageProcessingAsync(GameProduct product, GamePackage processingPackage, int minutesToWait, int checkIntervalMinutes, CancellationToken ct)
         {
             await Task.Delay(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
             processingPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
@@ -192,6 +194,8 @@ namespace GameStoreBroker.ClientApi
                 GamePackageState.Processed => "Package processed.",
                 _ => $"Package state: {processingPackage.State}",
             });
+
+            return processingPackage;
         }
     }
 }
