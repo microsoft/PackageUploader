@@ -3,6 +3,7 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Models;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,5 +17,8 @@ namespace GameStoreBroker.ClientApi
         Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct);
         Task<GamePackage> UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct);
         Task RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, CancellationToken ct);
+        Task SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupId, DateTime? availabilityDate, CancellationToken ct);
+        Task SetUwpAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? availabilityDate, CancellationToken ct);
+        Task SetUwpMandatoryDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct);
     }
 }

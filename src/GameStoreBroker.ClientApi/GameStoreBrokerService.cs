@@ -147,6 +147,74 @@ namespace GameStoreBroker.ClientApi
             await _ingestionHttpClient.RemovePackagesAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, ct).ConfigureAwait(false);
         }
 
+        public async Task SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (packageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            if (gamePackage is null)
+            {
+                throw new ArgumentNullException(nameof(gamePackage), $"{nameof(gamePackage)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
+            _logger.LogDebug("Setting the availability date to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId, gamePackage.Id);
+            await _ingestionHttpClient.SetAvailabilityDateXvcPackage(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, gamePackage.Id, availabilityDate, ct).ConfigureAwait(false);
+        }
+
+        public async Task SetUwpAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (packageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
+            _logger.LogDebug("Setting the availability date in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
+            await _ingestionHttpClient.SetAvailabilityDateUwpPackage(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, availabilityDate, ct).ConfigureAwait(false);
+        }
+
+        public async Task SetUwpMandatoryDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (packageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
+            _logger.LogDebug("Setting the mandatory date in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
+            await _ingestionHttpClient.SetMandatoryDateUwpPackage(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, mandatoryDate, ct).ConfigureAwait(false);
+        }
+
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(assetFilePath))
