@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Schema;
+using GameStoreBroker.Application.Config;
 using GameStoreBroker.ClientApi;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using System;

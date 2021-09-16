@@ -4,7 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using GameStoreBroker.ClientApi.Models;
 
-namespace GameStoreBroker.Application.Schema
+namespace GameStoreBroker.Application.Config
 {
     internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
     {

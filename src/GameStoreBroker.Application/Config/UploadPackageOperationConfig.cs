@@ -3,7 +3,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.Application.Schema
+namespace GameStoreBroker.Application.Config
 {
     internal abstract class UploadPackageOperationConfig : PackageBranchOperationConfig
     {
