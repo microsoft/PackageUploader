@@ -8,8 +8,5 @@ namespace GameStoreBroker.Application.Config
     internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig
     {
         internal override string GetOperationName() => "UploadUwpPackage";
-
-        [Required]
-        public string PackageFilePath { get; set; }
     }
 }

@@ -12,5 +12,8 @@ namespace GameStoreBroker.Application.Config
 
         [Range(0, 360)]
         public int MinutesToWaitForProcessing { get; set; } = 30;
+
+        [Required]
+        public string PackageFilePath { get; set; }
     }
 }
