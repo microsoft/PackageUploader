@@ -32,7 +32,20 @@ namespace GameStoreBroker.Application.Operations
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
-            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.PackageFilePath, null, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.PackageFilePath, null, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
+
+            if (_config.AvailabilityDateConfig is not null)
+            {
+                await _storeBrokerService.SetUwpAvailabilityDateAsync(product, packageBranch, _config.MarketGroupId, _config.AvailabilityDateConfig.AvailabilityDate, ct).ConfigureAwait(false);
+                _logger.LogInformation("Availability date set");
+            }
+
+            if (_config.MandatoryDateConfig is not null)
+            {
+                await _storeBrokerService.SetUwpAvailabilityDateAsync(product, packageBranch, _config.MarketGroupId, _config.MandatoryDateConfig.MandatoryDate, ct).ConfigureAwait(false);
+                _logger.LogInformation("Mandatory date set");
+            }
         }
     }
 }

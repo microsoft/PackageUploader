@@ -15,5 +15,7 @@ namespace GameStoreBroker.Application.Config
 
         [Required]
         public string PackageFilePath { get; set; }
+
+        public AvailabilityDateConfig AvailabilityDateConfig { get; set; }
     }
 }
