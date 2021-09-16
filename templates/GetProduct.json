@@ -6,7 +6,6 @@
 
   "aadAuthInfo": {
     "tenantId": "{{ required }}",
-    "clientId": "{{ required }}",
-    "clientSecret": "{{ XBOX RECOMMENDS using the command line parameter --ClientSecret instead }}"
+    "clientId": "{{ required }}"
   }
 }
