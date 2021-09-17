@@ -11,7 +11,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         /// <summary>
         /// Product Id, aka. LongId - looks like a long number
         /// </summary>
-        public string ProductId { get; internal set; }
+        public string ProductId { get; set; }
 
         /// <summary>
         /// Big Id, combination of letters/numbers usually begining with 9
