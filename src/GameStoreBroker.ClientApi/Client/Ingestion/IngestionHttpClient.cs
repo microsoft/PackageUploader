@@ -269,9 +269,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             {
                 throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
             }
-
-            packageSet.ETag = packageSet.ODataETag;
-
+            
             if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
             {
                 foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
@@ -285,13 +283,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 }
             }
 
-            // ODataEtag needs to be added to If-Match header on http client still.
-            var customHeaders = new Dictionary<string, string>
-            {
-                { "If-Match", packageSet.ODataETag},
-            };
-
-            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
+            await PutPackageSetAsync(productId, packageSet, ct).ConfigureAwait(false);
         }
 
         public async Task SetAvailabilityDateXvcPackage(string productId, string currentDraftInstanceId, string marketGroupId, string packageId, DateTime? availabilityDate, CancellationToken ct)
@@ -335,7 +327,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 }
             }
 
-            await PutPackageSetAsync(productId, packageSet, ct);
+            await PutPackageSetAsync(productId, packageSet, ct).ConfigureAwait(false);
         }
 
         public async Task SetAvailabilityDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
@@ -375,7 +367,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 }
             }
 
-            await PutPackageSetAsync(productId, packageSet, ct);
+            await PutPackageSetAsync(productId, packageSet, ct).ConfigureAwait(false);
         }
 
         public async Task SetMandatoryDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct)
@@ -419,7 +411,95 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 }
             }
 
-            await PutPackageSetAsync(productId, packageSet, ct);
+            await PutPackageSetAsync(productId, packageSet, ct).ConfigureAwait(false);
+        }
+
+        public async Task ImportPackages(string productId, string originCurrentDraftInstanceId, string destinationCurrentDraftInstanceId, string marketGroupId, bool overwrite, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(originCurrentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(originCurrentDraftInstanceId)} cannot be null or empty.", nameof(originCurrentDraftInstanceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(destinationCurrentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(destinationCurrentDraftInstanceId)} cannot be null or empty.", nameof(destinationCurrentDraftInstanceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
+            var originPackageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={originCurrentDraftInstanceId})", ct);
+
+            var originPackageSet = await originPackageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+            if (originPackageSet is null)
+            {
+                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{originCurrentDraftInstanceId}' not found.");
+            }
+
+            var destinationPackageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={destinationCurrentDraftInstanceId})", ct);
+
+            var destinationPackageSet = await destinationPackageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
+            if (destinationPackageSet is null)
+            {
+                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{destinationCurrentDraftInstanceId}' not found.");
+            }
+
+            if (originPackageSet.MarketGroupPackages is not null && originPackageSet.MarketGroupPackages.Any())
+            {
+                foreach (var originMarketGroupPackage in originPackageSet.MarketGroupPackages)
+                {
+                    if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(originMarketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var destinationMarketGroupPackage = destinationPackageSet.MarketGroupPackages.SingleOrDefault(m => string.Equals(m.MarketGroupId, originMarketGroupPackage.MarketGroupId));
+                        if (destinationMarketGroupPackage is not null)
+                        {
+                            if (overwrite)
+                            {
+                                var originalPackageAvailabilityDates = destinationMarketGroupPackage.PackageAvailabilityDates;
+                                destinationMarketGroupPackage.PackageIds = originMarketGroupPackage.PackageIds;
+                                destinationMarketGroupPackage.PackageAvailabilityDates = originMarketGroupPackage.PackageAvailabilityDates;
+                                foreach (var (packageId, _) in destinationMarketGroupPackage.PackageAvailabilityDates)
+                                {
+                                    if (originalPackageAvailabilityDates.ContainsKey(packageId))
+                                    {
+                                        // If the package was already there, we keep the availability date
+                                        originMarketGroupPackage.PackageAvailabilityDates[packageId] = originalPackageAvailabilityDates[packageId];
+                                    }
+                                    else
+                                    {
+                                        // If the package was not there, we blank the availability date
+                                        originMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                foreach (var packageId in originMarketGroupPackage.PackageIds.Where(packageId => !destinationMarketGroupPackage.PackageIds.Contains(packageId)))
+                                {
+                                    destinationMarketGroupPackage.PackageIds.Add(packageId);
+                                }
+                                foreach (var (packageId, _) in originMarketGroupPackage.PackageAvailabilityDates)
+                                {
+                                    if (!originMarketGroupPackage.PackageAvailabilityDates.ContainsKey(packageId))
+                                    {
+                                        originMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            await PutPackageSetAsync(productId, destinationPackageSet, ct).ConfigureAwait(false);
         }
 
         private async Task PutPackageSetAsync(string productId, IngestionPackageSet packageSet, CancellationToken ct)
@@ -432,7 +512,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 { "If-Match", packageSet.ODataETag},
             };
 
-            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
+            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct).ConfigureAwait(false);
         }
     }
 }

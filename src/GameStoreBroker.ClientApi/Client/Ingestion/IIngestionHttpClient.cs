@@ -24,5 +24,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         Task SetAvailabilityDateXvcPackage(string productId, string currentDraftInstanceId, string marketGroupId, string packageId, DateTime? availabilityDate, CancellationToken ct);
         Task SetAvailabilityDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? availabilityDate, CancellationToken ct);
         Task SetMandatoryDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct);
+        Task ImportPackages(string productId, string originCurrentDraftInstanceId, string destinationCurrentDraftInstanceId, string marketGroupId, bool overwrite, CancellationToken ct);
     }
 }
