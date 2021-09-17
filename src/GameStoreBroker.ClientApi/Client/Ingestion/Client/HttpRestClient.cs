@@ -46,10 +46,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 request.Headers.Add("Request-ID", clientRequestId);
 
                 using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+                await LogResponseVerbose(response, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
-                
+
                 var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                LogResponseVerbose(result, GetRequestIdFromHeader(response));
                 return result;
             }
             catch (Exception ex)
@@ -104,10 +104,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 request.Content = content;
 
                 using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+                await LogResponseVerbose(response, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
                 var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                LogResponseVerbose(result, GetRequestIdFromHeader(response));
                 return result;
             }
             catch (Exception ex)
@@ -156,10 +156,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 request.Content = content;
 
                 using var response = await _httpClient.SendAsync(request, ct);
+                await LogResponseVerbose(response, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
                 var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                LogResponseVerbose(result, GetRequestIdFromHeader(response));
                 return result;
             }
             catch (Exception ex)
@@ -191,10 +191,16 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             }
         }
 
-        private void LogResponseVerbose(object obj, string serverRequestId)
+        private async Task LogResponseVerbose(HttpResponseMessage response, CancellationToken ct)
         {
-            _logger.LogTrace("Response Body: [RequestId: {serverRequestId}]", serverRequestId);
-            _logger.LogTrace(obj.ToJson());
+            var serverRequestId = GetRequestIdFromHeader(response);
+            var responseBody = await response.Content.ReadAsStringAsync(ct);
+            _logger.LogTrace("Response StatusCode {statusCode} Body: [RequestId: {serverRequestId}]", response.StatusCode, serverRequestId);
+            if (response.ReasonPhrase is not null)
+            {
+                _logger.LogTrace("Response reason phrase: {reasonPhrase}", response.ReasonPhrase);
+            }
+            _logger.LogTrace(responseBody);
         }
 
         private void LogException(Exception ex)
