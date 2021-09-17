@@ -318,8 +318,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             {
                 throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
             }
-            
-            packageSet.ETag = packageSet.ODataETag;
 
             if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
             {
@@ -337,13 +335,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 }
             }
 
-            // ODataEtag needs to be added to If-Match header on http client still.
-            var customHeaders = new Dictionary<string, string>
-            {
-                { "If-Match", packageSet.ODataETag},
-            };
-
-            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
+            await PutPackageSetAsync(productId, packageSet, ct);
         }
 
         public async Task SetAvailabilityDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
@@ -371,8 +363,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
             }
 
-            packageSet.ETag = packageSet.ODataETag;
-
             if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
             {
                 foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
@@ -385,13 +375,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 }
             }
 
-            // ODataEtag needs to be added to If-Match header on http client still.
-            var customHeaders = new Dictionary<string, string>
-            {
-                { "If-Match", packageSet.ODataETag},
-            };
-
-            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
+            await PutPackageSetAsync(productId, packageSet, ct);
         }
 
         public async Task SetMandatoryDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct)
@@ -419,8 +403,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
             }
 
-            packageSet.ETag = packageSet.ODataETag;
-
             if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
             {
                 foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
@@ -436,6 +418,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                     }
                 }
             }
+
+            await PutPackageSetAsync(productId, packageSet, ct);
+        }
+
+        private async Task PutPackageSetAsync(string productId, IngestionPackageSet packageSet, CancellationToken ct)
+        {
+            packageSet.ETag = packageSet.ODataETag;
 
             // ODataEtag needs to be added to If-Match header on http client still.
             var customHeaders = new Dictionary<string, string>
