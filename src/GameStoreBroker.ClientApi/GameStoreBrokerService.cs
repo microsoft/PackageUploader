@@ -215,6 +215,32 @@ namespace GameStoreBroker.ClientApi
             await _ingestionHttpClient.SetMandatoryDateUwpPackage(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, mandatoryDate, ct).ConfigureAwait(false);
         }
 
+        public async Task ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (originPackageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(originPackageBranch), $"{nameof(originPackageBranch)} cannot be null.");
+            }
+
+            if (destinationPackageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(destinationPackageBranch), $"{nameof(destinationPackageBranch)} cannot be null.");
+            }
+
+            if (string.Equals(originPackageBranch.CurrentDraftInstanceId, destinationPackageBranch.CurrentDraftInstanceId, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException($"{nameof(originPackageBranch)} cannot be equal to {nameof(destinationPackageBranch)}.", nameof(originPackageBranch));
+            }
+
+            _logger.LogDebug("Importing game packages in product id '{productId}' from draft id '{originCurrentDraftInstanceID}' to draft id '{destinationCurrentDraftInstanceID}'. Overwriting: {overwrite}.", product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationPackageBranch.CurrentDraftInstanceId, overwrite);
+            await _ingestionHttpClient.ImportPackages(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationPackageBranch.CurrentDraftInstanceId, marketGroupId, overwrite, ct).ConfigureAwait(false);
+        }
+
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(assetFilePath))

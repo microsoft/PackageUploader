@@ -431,14 +431,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(destinationCurrentDraftInstanceId)} cannot be null or empty.", nameof(destinationCurrentDraftInstanceId));
             }
 
-            if (string.IsNullOrWhiteSpace(marketGroupId))
-            {
-                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
-            }
-
             if (string.Equals(originCurrentDraftInstanceId, destinationCurrentDraftInstanceId, StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentException($"{nameof(originCurrentDraftInstanceId)} cannot be equal to {nameof(originCurrentDraftInstanceId)}.", nameof(marketGroupId));
+                throw new ArgumentException($"{nameof(originCurrentDraftInstanceId)} cannot be equal to {nameof(originCurrentDraftInstanceId)}.", nameof(originCurrentDraftInstanceId));
             }
 
             var originPackageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={originCurrentDraftInstanceId})", ct);

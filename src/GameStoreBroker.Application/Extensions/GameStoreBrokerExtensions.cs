@@ -56,5 +56,30 @@ namespace GameStoreBroker.Application.Extensions
 
             throw new Exception("BranchFriendlyName or FlightName needed.");
         }
+
+        public static async Task<GamePackageBranch> GetDestinationGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, ImportPackagesOperationConfig schema, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (schema is null)
+            {
+                throw new ArgumentNullException(nameof(schema), $"{nameof(schema)} cannot be null.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(schema.DestinationBranchFriendlyName))
+            {
+                return await storeBroker.GetPackageBranchByFriendlyNameAsync(product, schema.DestinationBranchFriendlyName, ct).ConfigureAwait(false);
+            }
+
+            if (!string.IsNullOrWhiteSpace(schema.DestinationFlightName))
+            {
+                return await storeBroker.GetPackageBranchByFlightNameAsync(product, schema.DestinationFlightName, ct).ConfigureAwait(false);
+            }
+
+            throw new Exception("DestinationBranchFriendlyName or DestinationFlightName needed.");
+        }
     }
 }
