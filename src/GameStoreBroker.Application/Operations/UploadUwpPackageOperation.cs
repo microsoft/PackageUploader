@@ -43,7 +43,7 @@ namespace GameStoreBroker.Application.Operations
 
             if (_config.MandatoryDateConfig is not null)
             {
-                await _storeBrokerService.SetUwpAvailabilityDateAsync(product, packageBranch, _config.MarketGroupId, _config.MandatoryDateConfig.MandatoryDate, ct).ConfigureAwait(false);
+                await _storeBrokerService.SetUwpMandatoryDateAsync(product, packageBranch, _config.MarketGroupId, _config.MandatoryDateConfig.MandatoryDate, ct).ConfigureAwait(false);
                 _logger.LogInformation("Mandatory date set");
             }
         }

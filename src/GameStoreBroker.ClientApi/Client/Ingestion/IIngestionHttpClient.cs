@@ -20,10 +20,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         Task<GamePackageAsset> CreatePackageAssetRequestAsync(string productId, string packageId, FileInfo fileInfo, GamePackageAssetType packageAssetType, CancellationToken ct);
         Task<GamePackage> ProcessPackageRequestAsync(string productId, GamePackage gamePackage, CancellationToken ct);
         Task<GamePackageAsset> CommitPackageAssetAsync(string productId, string packageId, string packageAssetId, CancellationToken ct);
-        Task RemovePackagesAsync(string productId, string currentDraftInstanceId, string marketGroupId, CancellationToken ct);
-        Task SetAvailabilityDateXvcPackage(string productId, string currentDraftInstanceId, string marketGroupId, string packageId, DateTime? availabilityDate, CancellationToken ct);
-        Task SetAvailabilityDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? availabilityDate, CancellationToken ct);
-        Task SetMandatoryDateUwpPackage(string productId, string currentDraftInstanceId, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct);
-        Task ImportPackages(string productId, string originCurrentDraftInstanceId, string destinationCurrentDraftInstanceId, string marketGroupId, bool overwrite, CancellationToken ct);
+        Task<GamePackageConfiguration> GetPackageConfigurationAsync(string productId, string currentDraftInstanceId, CancellationToken ct);
+        Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(string productId, GamePackageConfiguration gamePackageConfiguration, CancellationToken ct);
     }
 }

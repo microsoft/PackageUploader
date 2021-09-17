@@ -7,7 +7,9 @@ using GameStoreBroker.ClientApi.Client.Xfus;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -144,7 +146,23 @@ namespace GameStoreBroker.ClientApi
             }
 
             _logger.LogDebug("Removing game packages in product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
-            await _ingestionHttpClient.RemovePackagesAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, ct).ConfigureAwait(false);
+
+            var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+
+            // Blanking all package ids for each market group package
+            if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+            {
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
+                {
+                    if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        marketGroupPackage.PackageIds = new List<string>();
+                        marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
+                    }
+                }
+            }
+
+            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         }
 
         public async Task SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
@@ -169,8 +187,77 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
             }
 
-            _logger.LogDebug("Setting the availability date to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId, gamePackage.Id);
-            await _ingestionHttpClient.SetAvailabilityDateXvcPackage(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, gamePackage.Id, availabilityDate, ct).ConfigureAwait(false);
+            _logger.LogDebug("Setting the availability date to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
+
+            var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+
+            // Setting the availability date
+            if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+            {
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
+                {
+                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (marketGroupPackage.PackageAvailabilityDates is null)
+                        {
+                            marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
+                        }
+                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = availabilityDate;
+                    }
+                }
+            }
+
+            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+        }
+
+        public async Task SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (packageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(marketGroupId))
+            {
+                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+            }
+
+            _logger.LogDebug("Setting the availability date to all Xvc packages in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
+
+            var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+
+            // Setting the availability date to all Xvc packages
+            if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+            {
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
+                {
+                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (marketGroupPackage.PackageAvailabilityDates is null)
+                        {
+                            marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
+                            foreach (var packageId in marketGroupPackage.PackageIds)
+                            {
+                                marketGroupPackage.PackageAvailabilityDates.TryAdd(packageId, availabilityDate);
+                            }
+                        }
+                        else
+                        {
+                            foreach (var (packageId, _) in marketGroupPackage.PackageAvailabilityDates)
+                            {
+                                marketGroupPackage.PackageAvailabilityDates[packageId] = availabilityDate;
+                            }
+                        }
+                    }
+                }
+            }
+
+            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         }
 
         public async Task SetUwpAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
@@ -191,7 +278,22 @@ namespace GameStoreBroker.ClientApi
             }
 
             _logger.LogDebug("Setting the availability date in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
-            await _ingestionHttpClient.SetAvailabilityDateUwpPackage(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, availabilityDate, ct).ConfigureAwait(false);
+
+            var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+
+            // Setting the availability date
+            if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+            {
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
+                {
+                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        marketGroupPackage.AvailabilityDate = availabilityDate;
+                    }
+                }
+            }
+
+            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         }
 
         public async Task SetUwpMandatoryDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct)
@@ -212,7 +314,26 @@ namespace GameStoreBroker.ClientApi
             }
 
             _logger.LogDebug("Setting the mandatory date in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
-            await _ingestionHttpClient.SetMandatoryDateUwpPackage(product.ProductId, packageBranch.CurrentDraftInstanceId, marketGroupId, mandatoryDate, ct).ConfigureAwait(false);
+
+            var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+
+            // Setting the mandatory date
+            if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+            {
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
+                {
+                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        marketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
+                        {
+                            EffectiveDate = mandatoryDate,
+                            IsEnabled = mandatoryDate is not null,
+                        };
+                    }
+                }
+            }
+
+            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         }
 
         public async Task ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, CancellationToken ct)
@@ -238,7 +359,63 @@ namespace GameStoreBroker.ClientApi
             }
 
             _logger.LogDebug("Importing game packages in product id '{productId}' from draft id '{originCurrentDraftInstanceID}' to draft id '{destinationCurrentDraftInstanceID}'. Overwriting: {overwrite}.", product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationPackageBranch.CurrentDraftInstanceId, overwrite);
-            await _ingestionHttpClient.ImportPackages(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationPackageBranch.CurrentDraftInstanceId, marketGroupId, overwrite, ct).ConfigureAwait(false);
+
+            var originPackageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, originPackageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+            var destinationPackageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, destinationPackageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+
+            // Importing packages from originMarketGroupPackage to destinationPackageConfiguration
+            if (originPackageConfiguration.MarketGroupPackages is not null && originPackageConfiguration.MarketGroupPackages.Any())
+            {
+                foreach (var originMarketGroupPackage in originPackageConfiguration.MarketGroupPackages)
+                {
+                    if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(originMarketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var destinationMarketGroupPackage = destinationPackageConfiguration.MarketGroupPackages.SingleOrDefault(m => string.Equals(m.MarketGroupId, originMarketGroupPackage.MarketGroupId));
+                        if (destinationMarketGroupPackage is not null)
+                        {
+                            if (overwrite)
+                            {
+                                var originalPackageAvailabilityDates = destinationMarketGroupPackage.PackageAvailabilityDates;
+                                destinationMarketGroupPackage.PackageIds = originMarketGroupPackage.PackageIds;
+                                destinationMarketGroupPackage.PackageAvailabilityDates = originMarketGroupPackage.PackageAvailabilityDates;
+                                if (destinationMarketGroupPackage.PackageAvailabilityDates is not null)
+                                {
+                                    foreach (var (packageId, _) in destinationMarketGroupPackage.PackageAvailabilityDates)
+                                    {
+                                        if (originalPackageAvailabilityDates.ContainsKey(packageId))
+                                        {
+                                            // If the package was already there, we keep the availability date
+                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = originalPackageAvailabilityDates[packageId];
+                                        }
+                                        else
+                                        {
+                                            // If the package was not there, we blank the availability date
+                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var packageIdsToAdd = originMarketGroupPackage.PackageIds.Where(packageId => !destinationMarketGroupPackage.PackageIds.Contains(packageId)).ToList();
+                                if (packageIdsToAdd.Any())
+                                {
+                                    destinationMarketGroupPackage.PackageIds.AddRange(packageIdsToAdd);
+                                    if (destinationMarketGroupPackage.PackageAvailabilityDates is not null)
+                                    {
+                                        foreach (var packageId in packageIdsToAdd)
+                                        {
+                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, destinationPackageConfiguration, ct).ConfigureAwait(false);
         }
 
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
