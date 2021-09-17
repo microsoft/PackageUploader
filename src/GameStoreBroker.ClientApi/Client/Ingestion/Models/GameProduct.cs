@@ -14,7 +14,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         public string ProductId { get; set; }
 
         /// <summary>
-        /// Big Id, combination of letters/numbers usually begining with 9
+        /// Big Id, combination of letters/numbers usually beginning with 9
         /// </summary>
         public string BigId { get; set; }
 
@@ -24,7 +24,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         public string ProductName { get; set; }
 
         /// <summary>
-        /// Flag of if product is modular-pubishing (Jaguar) or not
+        /// Flag of if product is modular-publishing (Jaguar) or not
         /// </summary>
         public bool IsJaguar { get; set; }
     }
