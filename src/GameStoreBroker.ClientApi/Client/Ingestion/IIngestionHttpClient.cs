@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
