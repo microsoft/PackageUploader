@@ -33,22 +33,8 @@ namespace GameStoreBroker.Application.Operations
             var originPackageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
             var destinationPackageBranch = await _storeBrokerService.GetDestinationGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
-            await _storeBrokerService.ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, _config.MarketGroupId, _config.Overwrite, ct).ConfigureAwait(false);
-
-            if (_config.AvailabilityDateConfig is not null)
-            {
-                await _storeBrokerService.SetXvcAvailabilityDateAsync(product, destinationPackageBranch, _config.MarketGroupId, _config.AvailabilityDateConfig.AvailabilityDate, ct).ConfigureAwait(false);
-                _logger.LogInformation("Availability date for Xvc packages set");
-
-                await _storeBrokerService.SetUwpAvailabilityDateAsync(product, destinationPackageBranch, _config.MarketGroupId, _config.AvailabilityDateConfig.AvailabilityDate, ct).ConfigureAwait(false);
-                _logger.LogInformation("Availability date for Uwp packages set");
-            }
-
-            if (_config.MandatoryDateConfig is not null)
-            {
-                await _storeBrokerService.SetUwpMandatoryDateAsync(product, destinationPackageBranch, _config.MarketGroupId, _config.MandatoryDateConfig.MandatoryDate, ct).ConfigureAwait(false);
-                _logger.LogInformation("Mandatory date for Uwp packages set");
-            }
+            var gamePackageDates = _config.GetGamePackageDates();
+            await _storeBrokerService.ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, _config.MarketGroupId, _config.Overwrite, gamePackageDates, ct).ConfigureAwait(false);
         }
     }
 }

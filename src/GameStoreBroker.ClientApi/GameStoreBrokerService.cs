@@ -133,7 +133,7 @@ namespace GameStoreBroker.ClientApi
             return package;
         }
 
-        public async Task RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, CancellationToken ct)
+        public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, CancellationToken ct)
         {
             if (product is null)
             {
@@ -162,10 +162,11 @@ namespace GameStoreBroker.ClientApi
                 }
             }
 
-            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+            var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+            return result;
         }
 
-        public async Task SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
+        public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupId, GamePackageDate availabilityDate, CancellationToken ct)
         {
             if (product is null)
             {
@@ -182,9 +183,9 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentNullException(nameof(gamePackage), $"{nameof(gamePackage)} cannot be null.");
             }
 
-            if (string.IsNullOrWhiteSpace(marketGroupId))
+            if (availabilityDate is null)
             {
-                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+                throw new ArgumentNullException(nameof(availabilityDate), $"{nameof(availabilityDate)} cannot be null.");
             }
 
             _logger.LogDebug("Setting the availability date to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
@@ -196,72 +197,34 @@ namespace GameStoreBroker.ClientApi
             {
                 foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
                 {
-                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    if (marketGroupPackage.PackageIds.Contains(gamePackage.Id))
                     {
-                        if (marketGroupPackage.PackageAvailabilityDates is null)
+                        if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
                         {
-                            marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
-                        }
-                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = availabilityDate;
-                    }
-                }
-            }
-
-            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
-        }
-
-        public async Task SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
-        {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
-            }
-
-            if (string.IsNullOrWhiteSpace(marketGroupId))
-            {
-                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
-            }
-
-            _logger.LogDebug("Setting the availability date to all Xvc packages in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
-
-            var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-
-            // Setting the availability date to all Xvc packages
-            if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
-            {
-                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
-                {
-                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (marketGroupPackage.PackageAvailabilityDates is null)
-                        {
-                            marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
-                            foreach (var packageId in marketGroupPackage.PackageIds)
+                            if (availabilityDate.IsEnabled)
                             {
-                                marketGroupPackage.PackageAvailabilityDates.TryAdd(packageId, availabilityDate);
+                                if (marketGroupPackage.PackageAvailabilityDates is null)
+                                {
+                                    marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
+                                }
+                                marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = availabilityDate.EffectiveDate;
                             }
-                        }
-                        else
-                        {
-                            foreach (var (packageId, _) in marketGroupPackage.PackageAvailabilityDates)
+                            else if (marketGroupPackage.PackageAvailabilityDates is not null)
                             {
-                                marketGroupPackage.PackageAvailabilityDates[packageId] = availabilityDate;
+                                marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = null;
                             }
                         }
                     }
                 }
             }
 
-            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+            var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+            return result;
         }
 
-        public async Task SetUwpAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? availabilityDate, CancellationToken ct)
+        public async Task<GamePackageConfiguration> SetUwpPackageDatesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, GamePackageDates gamePackageDates, CancellationToken ct)
         {
+
             if (product is null)
             {
                 throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
@@ -272,71 +235,52 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
             }
 
-            if (string.IsNullOrWhiteSpace(marketGroupId))
+            if (gamePackageDates is null)
             {
-                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
+                throw new ArgumentNullException(nameof(gamePackageDates), $"{nameof(gamePackageDates)} cannot be null.");
             }
 
-            _logger.LogDebug("Setting the availability date in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
+            _logger.LogDebug("Setting the package dates in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
 
             var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
 
-            // Setting the availability date
             if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
             {
                 foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
                 {
-                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
+                    if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
                     {
-                        marketGroupPackage.AvailabilityDate = availabilityDate;
-                    }
-                }
-            }
-
-            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
-        }
-
-        public async Task SetUwpMandatoryDateAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, DateTime? mandatoryDate, CancellationToken ct)
-        {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
-            }
-
-            if (string.IsNullOrWhiteSpace(marketGroupId))
-            {
-                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
-            }
-
-            _logger.LogDebug("Setting the mandatory date in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
-
-            var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-
-            // Setting the mandatory date
-            if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
-            {
-                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
-                {
-                    if (string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        marketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
+                        // Setting the availability date
+                        if (gamePackageDates.AvailabilityDate is not null)
                         {
-                            EffectiveDate = mandatoryDate,
-                            IsEnabled = mandatoryDate is not null,
-                        };
+                                marketGroupPackage.AvailabilityDate = gamePackageDates.AvailabilityDate.IsEnabled
+                                    ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                    : null;
+                        }
+
+                        // Setting the mandatory date
+                        if (gamePackageDates.MandatoryDate is not null)
+                        {
+                            marketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
+                            {
+                                IsEnabled = gamePackageDates.MandatoryDate.IsEnabled,
+                                EffectiveDate = gamePackageDates.MandatoryDate.EffectiveDate,
+                            };
+                        }
                     }
                 }
             }
 
-            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+            var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+            return result;
         }
 
-        public async Task ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, CancellationToken ct)
+        public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, CancellationToken ct)
+        {
+            return await ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, marketGroupId, overwrite, null, ct);
+        }
+
+        public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, GamePackageDates gamePackageDates, CancellationToken ct)
         {
             if (product is null)
             {
@@ -389,8 +333,17 @@ namespace GameStoreBroker.ClientApi
                                         }
                                         else
                                         {
-                                            // If the package was not there, we blank the availability date
-                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                            // If the package was not there, we set the availability date
+                                            if (gamePackageDates?.AvailabilityDate is not null)
+                                            {
+                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gamePackageDates.AvailabilityDate.IsEnabled
+                                                    ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                                    : null;
+                                            }
+                                            else
+                                            {
+                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                            }
                                         }
                                     }
                                 }
@@ -405,8 +358,61 @@ namespace GameStoreBroker.ClientApi
                                     {
                                         foreach (var packageId in packageIdsToAdd)
                                         {
-                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                            if (gamePackageDates?.AvailabilityDate is not null)
+                                            {
+                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gamePackageDates.AvailabilityDate.IsEnabled
+                                                    ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                                    : null;
+                                            }
+                                            else
+                                            {
+                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                            }
                                         }
+                                    }
+                                }
+                            }
+
+                            // Setting Uwp package dates
+                            if (gamePackageDates is not null)
+                            {
+                                if (overwrite)
+                                {
+                                    if (gamePackageDates.AvailabilityDate is not null)
+                                    {
+                                        destinationMarketGroupPackage.AvailabilityDate = gamePackageDates.AvailabilityDate.IsEnabled
+                                            ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                            : null;
+                                    }
+                                    if (gamePackageDates.MandatoryDate is not null)
+                                    {
+                                        destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
+                                        {
+                                            IsEnabled = gamePackageDates.MandatoryDate.IsEnabled,
+                                            EffectiveDate = gamePackageDates.MandatoryDate.EffectiveDate,
+                                        };
+                                    }
+                                }
+                                else
+                                {
+                                    if (gamePackageDates.AvailabilityDate is not null &&
+                                        !destinationMarketGroupPackage.AvailabilityDate.HasValue)
+                                    {
+                                        destinationMarketGroupPackage.AvailabilityDate =
+                                            gamePackageDates.AvailabilityDate.IsEnabled
+                                                ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                                : null;
+                                    }
+
+                                    if (gamePackageDates.MandatoryDate is not null &&
+                                        (destinationMarketGroupPackage.MandatoryUpdateInfo is null ||
+                                         !destinationMarketGroupPackage.MandatoryUpdateInfo.IsEnabled))
+                                    {
+                                        destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
+                                        {
+                                            IsEnabled = gamePackageDates.MandatoryDate.IsEnabled,
+                                            EffectiveDate = gamePackageDates.MandatoryDate.EffectiveDate,
+                                        };
                                     }
                                 }
                             }
@@ -415,7 +421,8 @@ namespace GameStoreBroker.ClientApi
                 }
             }
 
-            await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, destinationPackageConfiguration, ct).ConfigureAwait(false);
+            var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, destinationPackageConfiguration, ct).ConfigureAwait(false);
+            return result;
         }
 
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
