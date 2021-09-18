@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using GameStoreBroker.ClientApi.Client.Xfus.Models;
 using System;
 using System.Linq;
-using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
 {
