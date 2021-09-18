@@ -197,7 +197,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
                 return;
 
             var serverRequestId = GetRequestIdFromHeaders(response.Headers);
-            _logger.LogTrace("Response {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
+            _logger.LogTrace("Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
             var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
             _logger.LogTrace("Response Body:");
             _logger.LogTrace(responseBody);
