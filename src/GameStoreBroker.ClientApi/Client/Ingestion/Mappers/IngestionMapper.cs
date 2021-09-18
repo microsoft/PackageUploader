@@ -67,7 +67,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
         public static GamePackageBranch Map(this IngestionBranch ingestionBranch) =>
             ingestionBranch is null ? null : new()
             {
-                Id = ingestionBranch.Id,
                 Name = ingestionBranch.FriendlyName,
                 CurrentDraftInstanceId = ingestionBranch.CurrentDraftInstanceId,
             };
@@ -87,16 +86,16 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 FileName = ingestionGamePackageAsset.FileName,
             };
 
-        public static GamePackageConfiguration Map(this IngestionPackageSet ingestionPackageSet) =>
-            ingestionPackageSet is null ? null : new()
+        public static GamePackageConfiguration Map(this IngestionGamePackageConfiguration ingestionGamePackageConfiguration) =>
+            ingestionGamePackageConfiguration is null ? null : new()
             {
-                MarketGroupPackages = ingestionPackageSet.MarketGroupPackages?.Select(x => x.Map()).ToList(),
-                ODataETag = ingestionPackageSet.ODataETag,
-                Id = ingestionPackageSet.Id,
-                BranchName = ingestionPackageSet.BranchName,
-                BranchId = ingestionPackageSet.BranchId,
-                CreatedDate = ingestionPackageSet.CreatedDate,
-                ModifiedDate = ingestionPackageSet.ModifiedDate,
+                MarketGroupPackages = ingestionGamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList(),
+                ODataETag = ingestionGamePackageConfiguration.ODataETag,
+                Id = ingestionGamePackageConfiguration.Id,
+                BranchName = ingestionGamePackageConfiguration.BranchName,
+                BranchId = ingestionGamePackageConfiguration.BranchId,
+                CreatedDate = ingestionGamePackageConfiguration.CreatedDate,
+                ModifiedDate = ingestionGamePackageConfiguration.ModifiedDate,
             };
 
         private static GameMarketGroupPackage Map(this IngestionMarketGroupPackage ingestionMarketGroupPackage) =>
@@ -119,18 +118,18 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 EffectiveDate = ingestionMandatoryUpdateInfo.EffectiveDate,
             };
 
-        public static IngestionPackageSet Merge(this IngestionPackageSet ingestionPackageSet, GamePackageConfiguration gamePackageConfiguration)
+        public static IngestionGamePackageConfiguration Merge(this IngestionGamePackageConfiguration ingestionGamePackageConfiguration, GamePackageConfiguration gamePackageConfiguration)
         {
             if (gamePackageConfiguration is not null)
             {
-                if (!string.Equals(ingestionPackageSet.Id, gamePackageConfiguration.Id))
+                if (!string.Equals(ingestionGamePackageConfiguration.Id, gamePackageConfiguration.Id))
                 {
                     throw new IngestionClientException("Error trying to merge GamePackageConfiguration. Id is not the same.");
                 }
-                ingestionPackageSet.MarketGroupPackages = gamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList();
-                ingestionPackageSet.ETag = gamePackageConfiguration.ODataETag;
+                ingestionGamePackageConfiguration.MarketGroupPackages = gamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList();
+                ingestionGamePackageConfiguration.ETag = gamePackageConfiguration.ODataETag;
             }
-            return ingestionPackageSet;
+            return ingestionGamePackageConfiguration;
         }
 
         private static IngestionMarketGroupPackage Map(this GameMarketGroupPackage gameMarketGroupPackage) =>

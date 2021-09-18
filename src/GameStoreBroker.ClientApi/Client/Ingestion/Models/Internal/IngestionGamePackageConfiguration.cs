@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
-    internal class IngestionPackageSet
+    internal class IngestionGamePackageConfiguration : IngestionResource
     {
         /// <summary>
-        /// Resource type [PackageConfiguration, AzureVmPackageConfiguration, AzureContainerImagePackageConfiguration]
+        /// Resource type [GamePackageConfiguration]
         /// </summary>
         public string ResourceType { get; set; }
         
@@ -40,24 +39,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
         public DateTime ModifiedDate { get; set; }
 
         /// <summary>
+        /// Gradual Rollout information
+        /// </summary>
+        public IngestionGradualRolloutInfo GradualRolloutInfo { get; set; }
+
+        /// <summary>
         /// List of market groups
         /// </summary>
         public List<IngestionMarketGroupPackage> MarketGroupPackages { get; set; }
-
-        /// <summary>
-        /// ETag
-        /// </summary>
-        public string ETag { get; set; }
-
-        /// <summary>
-        /// ETag
-        /// </summary>
-        [JsonPropertyName("@odata.etag")]
-        public string ODataETag { get; set; }
-
-        /// <summary>
-        /// Resource ID
-        /// </summary>
-        public string Id { get; set; }
     }
 }

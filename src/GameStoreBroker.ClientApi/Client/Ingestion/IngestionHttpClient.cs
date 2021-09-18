@@ -256,7 +256,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
             }
 
-            var packageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+            var packageSets = GetAsyncEnumerable<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
 
             var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
             if (packageSet is null)
@@ -280,7 +280,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentNullException(nameof(gamePackageConfiguration), $"{nameof(gamePackageConfiguration)} cannot be null.");
             }
 
-            var packageSet = await GetAsync<IngestionPackageSet>($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", ct);
+            var packageSet = await GetAsync<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", ct);
             
             if (packageSet is null)
             {

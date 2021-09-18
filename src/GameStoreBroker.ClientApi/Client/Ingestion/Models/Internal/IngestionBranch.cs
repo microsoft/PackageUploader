@@ -6,9 +6,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
     internal class IngestionBranch
     {
         /// <summary>
-        /// Branch Id
+        /// Resource type [Branch]
         /// </summary>
-        public string Id { get; set; }
+        public string ResourceType { get; set; }
 
         /// <summary>
         /// Friendly Name
@@ -16,7 +16,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
         public string FriendlyName { get; set; }
 
         /// <summary>
-        /// Friendly Name
+        /// Branch type [Main, Private]
+        /// </summary>
+        public string Type { get; set; }
+
+        /// <summary>
+        /// Module type [Listing, Property, Package, Availability]
+        /// </summary>
+        public string Module { get; set; }
+
+        /// <summary>
+        /// Branch current draft instance ID. Service set only
         /// </summary>
         public string CurrentDraftInstanceId { get; set; }
     }
