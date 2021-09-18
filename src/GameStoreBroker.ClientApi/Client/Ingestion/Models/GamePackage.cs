@@ -7,12 +7,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
     public class GamePackage
     {
-        public string Id { get; set; }
+        public string Id { get; internal init; }
 
-        public GamePackageState State { get; set; }
+        public GamePackageState State { get; internal init; }
 
-        public XfusUploadInfo UploadInfo { get; set; }
+        public XfusUploadInfo UploadInfo { get; internal init; }
 
-        public string ODataETag { get; set; }
+        public string ODataETag { get; internal init; }
     }
 }

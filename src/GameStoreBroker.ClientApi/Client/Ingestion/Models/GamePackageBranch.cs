@@ -11,14 +11,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         /// <summary>
         /// LongId
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; internal init; }
 
         /// <summary>
         /// Collection of external Id
         /// Type: AzurePublisherId, AzureOfferId, ExternalAzureProductId
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; internal init; }
 
-        public string CurrentDraftInstanceId { get; set; }
+        public string CurrentDraftInstanceId { get; internal init; }
     }
 }

@@ -11,12 +11,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         /// <summary>
         /// Id of market group
         /// </summary>
-        public string MarketGroupId { get; set; }
+        public string MarketGroupId { get; internal init; }
         
         /// <summary>
         /// Name of market group
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; internal init; }
 
         /// <summary>
         /// List of markets
