@@ -41,8 +41,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
         {
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, subUrl);
-                request.Headers.Add("Request-ID", GenerateClientRequestId());
+                var request = CreateJsonRequestMessage(HttpMethod.Get, subUrl);
 
                 await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
                 using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
@@ -93,11 +92,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
         {
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, subUrl)
-                {
-                    Content = JsonContent.Create(body, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions),
-                };
-                request.Headers.Add("Request-ID", GenerateClientRequestId());
+                var request = CreateJsonRequestMessage(HttpMethod.Post, subUrl, body);
 
                 await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
                 using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
@@ -133,19 +128,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
         {
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Put, subUrl)
-                {
-                    Content = JsonContent.Create(body, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions),
-                };
-                request.Headers.Add("Request-ID", GenerateClientRequestId());
-
-                if (customHeaders is not null && customHeaders.Any())
-                {
-                    foreach (var (name, value) in customHeaders)
-                    {
-                        request.Headers.Add(name, value);
-                    }
-                }
+                var request = CreateJsonRequestMessage(HttpMethod.Put, subUrl, body, customHeaders);
 
                 await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
                 using var response = await _httpClient.SendAsync(request, ct);
@@ -162,7 +145,31 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             }
         }
 
-        private static string GenerateClientRequestId() => Guid.NewGuid().ToString();
+        private static HttpRequestMessage CreateJsonRequestMessage(HttpMethod method, string requestUri) =>
+            CreateJsonRequestMessage(method, requestUri, (object) null, null);
+
+        private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue) =>
+            CreateJsonRequestMessage(method, requestUri, inputValue, null);
+
+        private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, IDictionary<string, string> customHeaders)
+        {
+            var request = new HttpRequestMessage(method, requestUri);
+            if (inputValue is not null)
+            {
+                request.Content = JsonContent.Create(inputValue, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions);
+            }
+            request.Headers.Add("Request-ID", Guid.NewGuid().ToString());
+
+            if (customHeaders is not null && customHeaders.Any())
+            {
+                foreach (var (name, value) in customHeaders)
+                {
+                    request.Headers.Add(name, value);
+                }
+            }
+
+            return request;
+        }
 
         private static string GetRequestIdFromHeaders(HttpHeaders headers) =>
             headers.TryGetValues("Request-ID", out var headerValues)
