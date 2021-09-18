@@ -13,7 +13,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
     internal static class IngestionMapper
     {
         public static GameProduct Map(this IngestionGameProduct ingestionGameProduct) =>
-            new()
+            ingestionGameProduct is null ? null : new()
             {
                 ProductId = ingestionGameProduct.Id,
                 BigId = ingestionGameProduct.ExternalIds?.FirstOrDefault(id => id.Type.Equals("StoreId", StringComparison.OrdinalIgnoreCase))?.Value,
@@ -22,7 +22,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             };
 
         public static GamePackage Map(this IngestionGamePackage ingestionGamePackage) =>
-            new()
+            ingestionGamePackage is null ? null : new()
             {
                 Id = ingestionGamePackage.Id,
                 State = ingestionGamePackage.GetState(),
@@ -31,12 +31,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             };
 
         private static GamePackageState GetState(this IngestionGamePackage ingestionGamePackage) =>
+            ingestionGamePackage.State is null ? GamePackageState.Unknown :
             Enum.TryParse(ingestionGamePackage.State, true, out GamePackageState gamePackageState)
                 ? gamePackageState
                 : GamePackageState.Unknown;
 
         private static XfusUploadInfo Map(this IngestionXfusUploadInfo ingestionXfusUploadInfo) =>
-            new()
+            ingestionXfusUploadInfo is null ? null : new()
             {
                 XfusId = new Guid(ingestionXfusUploadInfo.XfusId),
                 Token = ingestionXfusUploadInfo.Token,
@@ -45,7 +46,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             };
 
         public static GamePackageBranch Map(this IngestionBranch ingestionBranch) =>
-            new()
+            ingestionBranch is null ? null : new()
             {
                 Id = ingestionBranch.Id,
                 Name = ingestionBranch.FriendlyName,
@@ -53,7 +54,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             };
 
         public static GamePackageAsset Map(this IngestionGamePackageAsset ingestionGamePackageAsset) =>
-            new()
+            ingestionGamePackageAsset is null ? null : new()
             {
                 Id = ingestionGamePackageAsset.Id,
                 Type = ingestionGamePackageAsset.Type,
@@ -68,7 +69,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             };
 
         public static GamePackageConfiguration Map(this IngestionPackageSet ingestionPackageSet) =>
-            new()
+            ingestionPackageSet is null ? null : new()
             {
                 MarketGroupPackages = ingestionPackageSet.MarketGroupPackages?.Select(x => x.Map()).ToList(),
                 ODataETag = ingestionPackageSet.ODataETag,
@@ -79,12 +80,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 ModifiedDate = ingestionPackageSet.ModifiedDate,
             };
 
-        private static GameMarketGroupPackage Map(this IngestionMarketGroupPackage ingestionMarketGroupPackage)
-        {
-            if (ingestionMarketGroupPackage is null)
-                return null;
-
-            return new GameMarketGroupPackage
+        private static GameMarketGroupPackage Map(this IngestionMarketGroupPackage ingestionMarketGroupPackage) =>
+            ingestionMarketGroupPackage is null ? null : new()
             {
                 MarketGroupId = ingestionMarketGroupPackage.MarketGroupId,
                 Name = ingestionMarketGroupPackage.Name,
@@ -94,20 +91,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 AvailabilityDate = ingestionMarketGroupPackage.AvailabilityDate,
                 PackageAvailabilityDates = ingestionMarketGroupPackage.PackageAvailabilityDates,
             };
-        }
 
-        private static GameMandatoryUpdateInfo Map(this IngestionMandatoryUpdateInfo ingestionMandatoryUpdateInfo)
-        {
-            if (ingestionMandatoryUpdateInfo is null)
-                return null;
-
-            return new GameMandatoryUpdateInfo
+        private static GameMandatoryUpdateInfo Map(this IngestionMandatoryUpdateInfo ingestionMandatoryUpdateInfo) =>
+            ingestionMandatoryUpdateInfo is null ? null : new()
             {
                 IsEnabled = ingestionMandatoryUpdateInfo.IsEnabled,
                 MandatoryVersion = ingestionMandatoryUpdateInfo.MandatoryVersion,
                 EffectiveDate = ingestionMandatoryUpdateInfo.EffectiveDate,
             };
-        }
 
         public static IngestionPackageSet Merge(this IngestionPackageSet ingestionPackageSet, GamePackageConfiguration gamePackageConfiguration)
         {
@@ -123,12 +114,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             return ingestionPackageSet;
         }
 
-        private static IngestionMarketGroupPackage Map(this GameMarketGroupPackage gameMarketGroupPackage)
-        {
-            if (gameMarketGroupPackage is null)
-                return null;
-
-            return new IngestionMarketGroupPackage
+        private static IngestionMarketGroupPackage Map(this GameMarketGroupPackage gameMarketGroupPackage) =>
+            gameMarketGroupPackage is null ? null :new()
             {
                 AvailabilityDate = gameMarketGroupPackage.AvailabilityDate,
                 MandatoryUpdateInfo = gameMarketGroupPackage.MandatoryUpdateInfo.Map(),
@@ -138,19 +125,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 PackageAvailabilityDates = gameMarketGroupPackage.PackageAvailabilityDates,
                 PackageIds = gameMarketGroupPackage.PackageIds,
             };
-        }
 
-        private static IngestionMandatoryUpdateInfo Map(this GameMandatoryUpdateInfo gameMandatoryUpdateInfo)
-        {
-            if (gameMandatoryUpdateInfo is null)
-                return null;
-
-            return new IngestionMandatoryUpdateInfo
+        private static IngestionMandatoryUpdateInfo Map(this GameMandatoryUpdateInfo gameMandatoryUpdateInfo) =>
+            gameMandatoryUpdateInfo is null ? null : new ()
             {
                 MandatoryVersion = gameMandatoryUpdateInfo.MandatoryVersion,
                 EffectiveDate = gameMandatoryUpdateInfo.EffectiveDate,
                 IsEnabled = gameMandatoryUpdateInfo.IsEnabled,
             };
-        }
     }
 }
