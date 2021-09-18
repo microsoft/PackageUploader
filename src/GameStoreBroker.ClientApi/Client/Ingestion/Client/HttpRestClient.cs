@@ -30,6 +30,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
         };
 
         private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
+        private const LogLevel VerboseLogLevel = LogLevel.Trace;
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
         {
@@ -178,29 +179,29 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
 
         private async Task LogRequestVerboseAsync(HttpRequestMessage request, CancellationToken ct)
         {
-            if (!_logger.IsEnabled(LogLevel.Trace))
+            if (!_logger.IsEnabled(VerboseLogLevel))
                 return;
 
             var clientRequestId = GetRequestIdFromHeaders(request.Headers);
-            _logger.LogTrace("Request {verb} {requestUrl} [ClientRequestId: {clientRequestId}]", request.Method, request.RequestUri, clientRequestId);
+            _logger.Log(VerboseLogLevel, "Request {verb} {requestUrl} [ClientRequestId: {clientRequestId}]", request.Method, request.RequestUri, clientRequestId);
             if (request.Content is not null)
             {
                 var requestBody = await request.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-                _logger.LogTrace("Request Body:");
-                _logger.LogTrace(requestBody);
+                _logger.Log(VerboseLogLevel, "Request Body:");
+                _logger.Log(VerboseLogLevel, requestBody);
             }
         }
 
         private async Task LogResponseVerboseAsync(HttpResponseMessage response, CancellationToken ct)
         {
-            if (!_logger.IsEnabled(LogLevel.Trace))
+            if (!_logger.IsEnabled(VerboseLogLevel))
                 return;
 
             var serverRequestId = GetRequestIdFromHeaders(response.Headers);
-            _logger.LogTrace("Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
+            _logger.Log(VerboseLogLevel, "Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
             var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            _logger.LogTrace("Response Body:");
-            _logger.LogTrace(responseBody);
+            _logger.Log(VerboseLogLevel, "Response Body:");
+            _logger.Log(VerboseLogLevel, responseBody);
         }
 
         private void LogException(Exception ex)
