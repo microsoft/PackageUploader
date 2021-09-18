@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GamePackageConfiguration
+    public sealed class GamePackageConfiguration
     {
         /// <summary>
         /// List of market groups

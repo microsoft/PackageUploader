@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GameMarketGroupPackage
+    public sealed class GameMarketGroupPackage
     {
         /// <summary>
         /// Id of market group
@@ -29,12 +29,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         public List<string> PackageIds { get; set; }
 
         /// <summary>
-        /// Mandatory update
+        /// Mandatory update for UWP packages
         /// </summary>
         public GameMandatoryUpdateInfo MandatoryUpdateInfo { get; set; }
 
         /// <summary>
-        /// Schedule release date per region
+        /// Schedule release date per region for UWP packages
         /// </summary>
         public DateTime? AvailabilityDate { get; set; }
 

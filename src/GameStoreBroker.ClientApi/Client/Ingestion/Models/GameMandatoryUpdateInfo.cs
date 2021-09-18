@@ -5,7 +5,7 @@ using System;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GameMandatoryUpdateInfo
+    public sealed class GameMandatoryUpdateInfo
     {
         /// <summary>
         /// Is enabled

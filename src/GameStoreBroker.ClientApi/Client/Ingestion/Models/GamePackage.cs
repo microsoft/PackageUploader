@@ -5,7 +5,7 @@ using GameStoreBroker.ClientApi.Client.Xfus.Models;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GamePackage
+    public sealed class GamePackage
     {
         public string Id { get; internal init; }
 

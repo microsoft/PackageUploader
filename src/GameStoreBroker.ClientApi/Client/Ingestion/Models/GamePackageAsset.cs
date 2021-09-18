@@ -6,7 +6,7 @@ using GameStoreBroker.ClientApi.Client.Xfus.Models;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GamePackageAsset
+    public sealed class GamePackageAsset
     {
         /// <summary>
         /// The Id of the package asset.
