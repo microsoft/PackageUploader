@@ -267,7 +267,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
             if (packageSet is null)
             {
-                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
+                throw new PackageConfigurationNotFoundException($"Package configuration for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
             }
 
             var gamePackageConfiguration = packageSet.Map();
@@ -290,7 +290,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             
             if (packageSet is null)
             {
-                throw new PackageSetNotFoundException($"Package set for product '{productId}' and packageConfigurationId '{gamePackageConfiguration.Id}' not found.");
+                throw new PackageConfigurationNotFoundException($"Package configuration for product '{productId}' and packageConfigurationId '{gamePackageConfiguration.Id}' not found.");
             }
 
             var newPackageSet = packageSet.Merge(gamePackageConfiguration);
