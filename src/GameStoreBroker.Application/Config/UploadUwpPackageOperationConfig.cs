@@ -3,13 +3,10 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.Application.Schema
+namespace GameStoreBroker.Application.Config
 {
-    internal class UploadUwpPackageOperationSchema : UploadPackageOperationSchema
+    internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig
     {
         internal override string GetOperationName() => "UploadUwpPackage";
-
-        [Required]
-        public string PackageFilePath { get; set; }
     }
 }

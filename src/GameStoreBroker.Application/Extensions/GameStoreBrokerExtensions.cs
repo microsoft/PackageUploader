@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Schema;
+using GameStoreBroker.Application.Config;
 using GameStoreBroker.ClientApi;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using System;
@@ -12,7 +12,7 @@ namespace GameStoreBroker.Application.Extensions
 {
     internal static class GameStoreBrokerExtensions
     {
-        public static async Task<GameProduct> GetProductAsync(this IGameStoreBrokerService storeBroker, BaseOperationSchema schema, CancellationToken ct)
+        public static async Task<GameProduct> GetProductAsync(this IGameStoreBrokerService storeBroker, BaseOperationConfig schema, CancellationToken ct)
         {
             if (schema is null)
             {
@@ -32,7 +32,7 @@ namespace GameStoreBroker.Application.Extensions
             throw new Exception("BigId or ProductId needed.");
         }
 
-        public static async Task<GamePackageBranch> GetGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, PackageBranchOperationSchema schema, CancellationToken ct)
+        public static async Task<GamePackageBranch> GetGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, PackageBranchOperationConfig schema, CancellationToken ct)
         {
             if (product is null)
             {

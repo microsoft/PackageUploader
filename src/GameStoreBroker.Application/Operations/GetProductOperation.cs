@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Config;
 using GameStoreBroker.Application.Extensions;
-using GameStoreBroker.Application.Schema;
 using GameStoreBroker.ClientApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,9 +16,9 @@ namespace GameStoreBroker.Application.Operations
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
         private readonly ILogger<GetProductOperation> _logger;
-        private readonly BaseOperationSchema _config;
+        private readonly BaseOperationConfig _config;
 
-        public GetProductOperation(IGameStoreBrokerService storeBrokerService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationSchema> config) : base(logger)
+        public GetProductOperation(IGameStoreBrokerService storeBrokerService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

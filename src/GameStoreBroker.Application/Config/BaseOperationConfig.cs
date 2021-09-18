@@ -4,9 +4,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.Application.Schema
+namespace GameStoreBroker.Application.Config
 {
-    internal abstract class BaseOperationSchema : IValidatableObject
+    internal abstract class BaseOperationConfig : IValidatableObject
     {
         internal abstract string GetOperationName();
 

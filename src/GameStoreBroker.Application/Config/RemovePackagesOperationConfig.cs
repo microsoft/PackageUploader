@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace GameStoreBroker.Application.Schema
+namespace GameStoreBroker.Application.Config
 {
-    internal class RemovePackagesOperationSchema : PackageBranchOperationSchema
+    internal class RemovePackagesOperationConfig : PackageBranchOperationConfig
     {
         internal override string GetOperationName() => "RemovePackages";
 

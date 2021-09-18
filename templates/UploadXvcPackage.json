@@ -9,8 +9,8 @@
 
   "marketGroupId": "{{ default value is 'default' }}",
 
+  "packageFilePath": "{{ required }}",
   "gameAssets": {
-    "packageFilePath": "{{ required }}",
     "ekbFilePath": "{{ required }}",
     "subValFilePath": "{{ required }}",
     "symbolsFilePath": "{{ optional }}",

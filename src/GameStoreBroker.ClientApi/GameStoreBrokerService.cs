@@ -80,7 +80,7 @@ namespace GameStoreBroker.ClientApi
             return await _ingestionHttpClient.GetPackageBranchByFriendlyNameAsync(product.ProductId, branchFriendlyName, ct).ConfigureAwait(false);
         }
 
-        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, GameAssets gameAssets, bool uploadAssets, int minutesToWaitForProcessing, CancellationToken ct)
+        public async Task UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
         {
             if (product is null)
             {
@@ -97,17 +97,12 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
             }
 
-            if (gameAssets is null)
+            if (string.IsNullOrWhiteSpace(packageFilePath))
             {
-                throw new ArgumentNullException(nameof(gameAssets), $"{nameof(gameAssets)} cannot be null.");
+                throw new ArgumentException($"{nameof(packageFilePath)} cannot be null or empty.", nameof(packageFilePath));
             }
 
-            if (string.IsNullOrWhiteSpace(gameAssets.PackageFilePath))
-            {
-                throw new ArgumentException($"{nameof(gameAssets.PackageFilePath)} cannot be null or empty.", nameof(gameAssets));
-            }
-
-            var packageFile = new FileInfo(gameAssets.PackageFilePath);
+            var packageFile = new FileInfo(packageFilePath);
             if (!packageFile.Exists)
             {
                 throw new FileNotFoundException("Package file not found.", packageFile.FullName);
@@ -125,7 +120,7 @@ namespace GameStoreBroker.ClientApi
 
             await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
 
-            if (uploadAssets)
+            if (gameAssets is not null)
             {
                 await UploadAssetAsync(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
                 await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct).ConfigureAwait(false);

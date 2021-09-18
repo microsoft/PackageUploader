@@ -4,9 +4,9 @@
 using System.ComponentModel.DataAnnotations;
 using GameStoreBroker.ClientApi.Models;
 
-namespace GameStoreBroker.Application.Schema
+namespace GameStoreBroker.Application.Config
 {
-    internal class UploadXvcPackageOperationSchema : UploadPackageOperationSchema
+    internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
     {
         internal override string GetOperationName() => "UploadXvcPackage";
 

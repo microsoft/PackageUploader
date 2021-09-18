@@ -8,9 +8,6 @@ namespace GameStoreBroker.ClientApi.Models
     public class GameAssets
     {
         [Required]
-        public string PackageFilePath { get; set; }
-
-        [Required]
         public string EkbFilePath { get; set; }
 
         [Required]

@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Config;
 using GameStoreBroker.Application.Extensions;
-using GameStoreBroker.Application.Schema;
 using GameStoreBroker.ClientApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,9 +16,9 @@ namespace GameStoreBroker.Application.Operations
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
         private readonly ILogger<UploadXvcPackageOperation> _logger;
-        private readonly UploadXvcPackageOperationSchema _config;
+        private readonly UploadXvcPackageOperationConfig _config;
 
-        public UploadXvcPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadXvcPackageOperation> logger, IOptions<UploadXvcPackageOperationSchema> config) : base(logger)
+        public UploadXvcPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadXvcPackageOperation> logger, IOptions<UploadXvcPackageOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -28,11 +28,11 @@ namespace GameStoreBroker.Application.Operations
         protected override async Task ProcessAsync(CancellationToken ct)
         {
             _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
-            
+
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
-            
-            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.GameAssets, true, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+
+            await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.PackageFilePath, _config.GameAssets, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
         }
     }
 }

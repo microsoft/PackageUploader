@@ -4,9 +4,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.Application.Schema
+namespace GameStoreBroker.Application.Config
 {
-    internal abstract class PackageBranchOperationSchema : BaseOperationSchema
+    internal abstract class PackageBranchOperationConfig : BaseOperationConfig
     {
         public string BranchFriendlyName { get; set; }
         public string FlightName { get; set; }
