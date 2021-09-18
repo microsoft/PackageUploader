@@ -84,6 +84,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 BinarySizeInBytes = ingestionGamePackageAsset.BinarySizeInBytes,
                 UploadInfo = ingestionGamePackageAsset.UploadInfo.Map(),
                 FileName = ingestionGamePackageAsset.FileName,
+                ODataETag = ingestionGamePackageAsset.ODataETag,
             };
 
         public static GamePackageConfiguration Map(this IngestionGamePackageConfiguration ingestionGamePackageConfiguration) =>
@@ -127,7 +128,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                     throw new IngestionClientException("Error trying to merge GamePackageConfiguration. Id is not the same.");
                 }
                 ingestionGamePackageConfiguration.MarketGroupPackages = gamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList();
-                ingestionGamePackageConfiguration.ETag = gamePackageConfiguration.ODataETag;
             }
             return ingestionGamePackageConfiguration;
         }

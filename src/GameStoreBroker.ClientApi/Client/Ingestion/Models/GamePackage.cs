@@ -5,14 +5,21 @@ using GameStoreBroker.ClientApi.Client.Xfus.Models;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public sealed class GamePackage
+    public sealed class GamePackage : GamePackageResource
     {
-        public string Id { get; internal init; }
-
+        /// <summary>
+        /// State of the package [PendingUpload, Uploaded, InProcessing, Processed, ProcessFailed]
+        /// </summary>
         public GamePackageState State { get; internal set; }
 
+        /// <summary>
+        /// Xfus upload info
+        /// </summary>
         public XfusUploadInfo UploadInfo { get; internal init; }
 
-        public string ODataETag { get; internal init; }
+        /// <summary>
+        /// If the package is certified
+        /// </summary>
+        public bool? IsCertified { get; set; }
     }
 }

@@ -6,13 +6,8 @@ using GameStoreBroker.ClientApi.Client.Xfus.Models;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public sealed class GamePackageAsset
+    public sealed class GamePackageAsset : GamePackageResource
     {
-        /// <summary>
-        /// The Id of the package asset.
-        /// </summary>
-        public string Id { get; internal init; }
-
         /// <summary>
         /// The type of the package asset (EraSymbolFile, EraSubmissionValidatorLog, EraEkb).
         /// </summary>

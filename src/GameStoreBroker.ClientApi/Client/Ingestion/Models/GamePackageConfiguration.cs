@@ -6,22 +6,12 @@ using System.Collections.Generic;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public sealed class GamePackageConfiguration
+    public sealed class GamePackageConfiguration : GamePackageResource
     {
         /// <summary>
         /// List of market groups
         /// </summary>
         public List<GameMarketGroupPackage> MarketGroupPackages { get; internal init; }
-
-        /// <summary>
-        /// ETag
-        /// </summary>
-        public string ODataETag { get; internal init; }
-
-        /// <summary>
-        /// Resource ID
-        /// </summary>
-        public string Id { get; internal init; }
 
         /// <summary>
         /// Display name of the branch this PackageSet belongs to
