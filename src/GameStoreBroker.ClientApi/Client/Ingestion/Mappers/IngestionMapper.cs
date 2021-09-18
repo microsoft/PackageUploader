@@ -6,6 +6,7 @@ using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using GameStoreBroker.ClientApi.Client.Xfus.Models;
 using System;
 using System.Linq;
+using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
 {
@@ -110,8 +111,15 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
 
         public static IngestionPackageSet Merge(this IngestionPackageSet ingestionPackageSet, GamePackageConfiguration gamePackageConfiguration)
         {
-            ingestionPackageSet.MarketGroupPackages = gamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList();
-            ingestionPackageSet.ETag = gamePackageConfiguration.ODataETag;
+            if (gamePackageConfiguration is not null)
+            {
+                if (!string.Equals(ingestionPackageSet.Id, gamePackageConfiguration.Id))
+                {
+                    throw new IngestionClientException("Error trying to merge GamePackageConfiguration. Id is not the same.");
+                }
+                ingestionPackageSet.MarketGroupPackages = gamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList();
+                ingestionPackageSet.ETag = gamePackageConfiguration.ODataETag;
+            }
             return ingestionPackageSet;
         }
 
