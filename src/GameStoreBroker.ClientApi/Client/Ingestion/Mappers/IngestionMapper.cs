@@ -30,12 +30,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 ODataETag = ingestionGamePackage.ODataETag,
             };
 
-        public static GamePackageState GetState(this IngestionGamePackage ingestionGamePackage) =>
+        private static GamePackageState GetState(this IngestionGamePackage ingestionGamePackage) =>
             Enum.TryParse(ingestionGamePackage.State, true, out GamePackageState gamePackageState)
                 ? gamePackageState
                 : GamePackageState.Unknown;
 
-        public static XfusUploadInfo Map(this IngestionXfusUploadInfo ingestionXfusUploadInfo) =>
+        private static XfusUploadInfo Map(this IngestionXfusUploadInfo ingestionXfusUploadInfo) =>
             new()
             {
                 XfusId = new Guid(ingestionXfusUploadInfo.XfusId),
