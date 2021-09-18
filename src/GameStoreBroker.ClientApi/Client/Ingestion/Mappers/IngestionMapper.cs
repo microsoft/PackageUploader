@@ -45,6 +45,25 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 XfusTenant = ingestionXfusUploadInfo.XfusTenant,
             };
 
+        public static IngestionGamePackage Map(this GamePackage gamePackage) =>
+            gamePackage is null ? null : new()
+            {
+                ResourceType = "GamePackage",
+                Id = gamePackage.Id,
+                State = gamePackage.State.ToString(),
+                UploadInfo = gamePackage.UploadInfo.Map(),
+                ODataETag = gamePackage.ODataETag,
+            };
+
+        private static IngestionXfusUploadInfo Map(this XfusUploadInfo xfusUploadInfo) =>
+            xfusUploadInfo is null ? null : new()
+            {
+                XfusId = xfusUploadInfo.XfusId.ToString(),
+                Token = xfusUploadInfo.Token,
+                UploadDomain = xfusUploadInfo.UploadDomain,
+                XfusTenant = xfusUploadInfo.XfusTenant,
+            };
+
         public static GamePackageBranch Map(this IngestionBranch ingestionBranch) =>
             ingestionBranch is null ? null : new()
             {

@@ -9,7 +9,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
     {
         public string Id { get; internal init; }
 
-        public GamePackageState State { get; internal init; }
+        public GamePackageState State { get; internal set; }
 
         public XfusUploadInfo UploadInfo { get; internal init; }
 
