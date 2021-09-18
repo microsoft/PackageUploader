@@ -15,6 +15,9 @@ namespace GameStoreBroker.Application.Config
         public string DestinationBranchFriendlyName { get; set; }
         public string DestinationFlightName { get; set; }
 
+        public AvailabilityDateConfig AvailabilityDateConfig { get; set; }
+        public MandatoryDateConfig MandatoryDateConfig { get; set; }
+
         public bool Overwrite { get; set; }
 
         protected override void Validate(IList<ValidationResult> validationResults)
