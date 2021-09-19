@@ -67,17 +67,24 @@ The application can be used directly with the input config for ease of use, or t
 ## Step 4: Fire Away
 
 - Open _powershell_ via the start menu.
-- Navigate to the root of your wrapper directory and run the following command to upload an Xvc package:
-  -  ```.\GameStoreBroker.exe UploadXvcPackage -c *config file path* -s *secret key*```
 
-- Extra parameters to pass:
-  - -c, --ConfigFile <ConfigFile> (REQUIRED)  The location of the config file.
-  - -f, --ConfigFileFormat <Ini|Json|Xml>     The format of the config file. [default: Json]
-  - -s, --ClientSecret <ClientSecret>         The client secret of the AAD app.
-  - -v, --Verbose                             Log verbose messages such as http calls.
-  - -l, --LogFile <LogFile>                   The location of the log file.
-  - -?, -h, --help                            Show help and usage information
+- Navigate to the root of your wrapper directory and run the following command:
 
+  ```
+  .\GameStoreBroker.exe <OperationName> -c <ConfigFile> -s <ClientSecret>
+  ```
+
+- Parameters to pass:
+
+  ```
+  -c, --ConfigFile <ConfigFile> (REQUIRED)  The location of the config file.
+  -f, --ConfigFileFormat <Ini|Json|Xml>     The format of the config file. [default: Json]
+  -s, --ClientSecret <ClientSecret>         The client secret of the AAD app.
+  -v, --Verbose                             Log verbose messages such as http calls.
+  -l, --LogFile <LogFile>                   The location of the log file.
+  -?, -h, --help                            Show help and usage information
+  ```
+  
 ## Q & A
 
 Question: Can I use the API directly? <br>
