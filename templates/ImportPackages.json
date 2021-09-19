@@ -1,0 +1,29 @@
+{
+  "operationName": "ImportPackages",
+
+  "productId": "{{ productId or bigId required }}",
+  "bigId": "{{ productId or bigId required }}",
+
+  "flightName": "{{ flightName or branchFriendlyName required }}",
+  "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
+
+  "destinationFlightName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
+  "destinationBranchFriendlyName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
+
+  "marketGroupId": "{{ optional - if informed it will only import packages from & to the specified one }}",
+
+  "availabilityDateConfig": {
+      "availabilityDate": "{{ optional - if informed itwill set the availability date in the destination branch for the Xvc and Uwp packages (if any) }}"
+  },
+
+  "mandatoryDateConfig": {
+      "mandatoryDate": "{{ optional - if informed it will set the mandatory date in the destination branch for the Uwp packages (if any) }}"
+  },
+
+  "overwrite": true,
+
+  "aadAuthInfo": {
+      "tenantId": "{{ required }}",
+      "clientId": "{{ required }}"
+  }
+}
