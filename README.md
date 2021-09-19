@@ -74,14 +74,24 @@ The application can be used directly with the input config for ease of use, or t
   .\GameStoreBroker.exe <OperationName> -c <ConfigFile> -s <ClientSecret>
   ```
 
-- Parameters to pass:
+- Operations:
 
   ```
-  -c, --ConfigFile <ConfigFile> (REQUIRED)  The location of the config file.
-  -f, --ConfigFileFormat <Ini|Json|Xml>     The format of the config file. [default: Json]
-  -s, --ClientSecret <ClientSecret>         The client secret of the AAD app.
-  -v, --Verbose                             Log verbose messages such as http calls.
-  -l, --LogFile <LogFile>                   The location of the log file.
+  GetProduct        Gets metadata of the product
+  UploadUwpPackage  Uploads Uwp game package
+  UploadXvcPackage  Uploads Xvc game package and assets
+  RemovePackages    Removes all game packages and assets from a branch
+  ImportPackages    Imports all game packages from a branch to a destination branch
+  ```
+
+- Parameters:
+
+  ```
+  -c, --ConfigFile <ConfigFile> (REQUIRED)  The location of the config file
+  -f, --ConfigFileFormat <Ini|Json|Xml>     The format of the config file [default: Json]
+  -s, --ClientSecret <ClientSecret>         The client secret of the AAD app
+  -v, --Verbose                             Log verbose messages such as http calls
+  -l, --LogFile <LogFile>                   The location of the log file
   -?, -h, --help                            Show help and usage information
   ```
   
