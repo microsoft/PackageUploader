@@ -125,7 +125,7 @@ namespace GameStoreBroker.Application
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
                 }.AddOperationHandler<RemovePackagesOperation>(),
-                new Command("ImportPackages", "Imports all game packages from a branch to a different one")
+                new Command("ImportPackages", "Imports all game packages from a branch to a destination branch")
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
                 }.AddOperationHandler<ImportPackagesOperation>(),
