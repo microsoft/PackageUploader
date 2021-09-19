@@ -94,6 +94,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             ingestionGamePackageConfiguration is null ? null : new()
             {
                 MarketGroupPackages = ingestionGamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList(),
+                GradualRolloutInfo = ingestionGamePackageConfiguration.GradualRolloutInfo.Map(),
                 Id = ingestionGamePackageConfiguration.Id,
                 BranchName = ingestionGamePackageConfiguration.BranchName,
                 BranchId = ingestionGamePackageConfiguration.BranchId,
@@ -123,6 +124,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 EffectiveDate = ingestionMandatoryUpdateInfo.EffectiveDate,
             };
 
+        private static GameGradualRolloutInfo Map(this IngestionGradualRolloutInfo ingestionGradualRolloutInfo) =>
+            ingestionGradualRolloutInfo is null ? null : new()
+            {
+                IsEnabled = ingestionGradualRolloutInfo.IsEnabled,
+                IsSeekEnabled = ingestionGradualRolloutInfo.IsSeekEnabled,
+                Percentage = ingestionGradualRolloutInfo.Percentage,
+            };
+
         public static IngestionGamePackageConfiguration Merge(this IngestionGamePackageConfiguration ingestionGamePackageConfiguration, GamePackageConfiguration gamePackageConfiguration)
         {
             if (gamePackageConfiguration is not null)
@@ -132,6 +141,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                     throw new IngestionClientException("Error trying to merge GamePackageConfiguration. Id is not the same.");
                 }
                 ingestionGamePackageConfiguration.MarketGroupPackages = gamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList();
+                ingestionGamePackageConfiguration.GradualRolloutInfo = gamePackageConfiguration.GradualRolloutInfo.Map();
             }
             return ingestionGamePackageConfiguration;
         }
@@ -154,6 +164,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 MandatoryVersion = gameMandatoryUpdateInfo.MandatoryVersion,
                 EffectiveDate = gameMandatoryUpdateInfo.EffectiveDate,
                 IsEnabled = gameMandatoryUpdateInfo.IsEnabled,
+            };
+
+        private static IngestionGradualRolloutInfo Map(this GameGradualRolloutInfo gameGradualRolloutInfo) =>
+            gameGradualRolloutInfo is null ? null : new()
+            {
+                IsEnabled = gameGradualRolloutInfo.IsEnabled,
+                IsSeekEnabled = gameGradualRolloutInfo.IsSeekEnabled,
+                Percentage = gameGradualRolloutInfo.Percentage,
             };
     }
 }

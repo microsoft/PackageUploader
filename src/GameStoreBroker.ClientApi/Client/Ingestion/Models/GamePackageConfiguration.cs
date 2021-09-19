@@ -8,10 +8,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
     public sealed class GamePackageConfiguration : GamePackageResource
     {
-        /// <summary>
-        /// List of market groups
-        /// </summary>
-        public List<GameMarketGroupPackage> MarketGroupPackages { get; internal init; }
 
         /// <summary>
         /// Display name of the branch this PackageSet belongs to
@@ -32,5 +28,15 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         /// ModifiedDate date time
         /// </summary>
         public DateTime ModifiedDate { get; internal init; }
+
+        /// <summary>
+        /// Gradual Rollout information
+        /// </summary>
+        public GameGradualRolloutInfo GradualRolloutInfo { get; set; }
+
+        /// <summary>
+        /// List of market groups
+        /// </summary>
+        public List<GameMarketGroupPackage> MarketGroupPackages { get; internal init; }
     }
 }
