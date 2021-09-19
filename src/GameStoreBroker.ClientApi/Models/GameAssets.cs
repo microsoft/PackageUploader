@@ -14,6 +14,7 @@ namespace GameStoreBroker.ClientApi.Models
         public string SubValFilePath { get; set; }
 
         public string SymbolsFilePath { get; set; }
+
         public string DiscLayoutFilePath { get; set; }
     }
 }

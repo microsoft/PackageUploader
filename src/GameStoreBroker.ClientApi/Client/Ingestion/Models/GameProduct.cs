@@ -3,9 +3,6 @@
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    /// <summary>
-    /// GameProduct Model
-    /// </summary>
     public sealed class GameProduct
     {
         /// <summary>
