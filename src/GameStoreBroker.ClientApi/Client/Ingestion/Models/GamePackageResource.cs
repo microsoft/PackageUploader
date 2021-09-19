@@ -8,7 +8,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         /// <summary>
         /// ETag
         /// </summary>
-        public string ODataETag { get; internal init; }
+        internal string ETag { get; init; }
+
+        /// <summary>
+        /// ETag
+        /// </summary>
+        internal string ODataETag { get; init; }
 
         /// <summary>
         /// Resource ID

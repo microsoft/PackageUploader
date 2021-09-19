@@ -27,6 +27,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 Id = ingestionGamePackage.Id,
                 State = ingestionGamePackage.GetState(),
                 UploadInfo = ingestionGamePackage.UploadInfo.Map(),
+                ETag = ingestionGamePackage.ETag,
                 ODataETag = ingestionGamePackage.ODataETag,
             };
 
@@ -52,6 +53,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 Id = gamePackage.Id,
                 State = gamePackage.State.ToString(),
                 UploadInfo = gamePackage.UploadInfo.Map(),
+                ETag = gamePackage.ETag,
                 ODataETag = gamePackage.ODataETag,
             };
 
@@ -84,6 +86,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 BinarySizeInBytes = ingestionGamePackageAsset.BinarySizeInBytes,
                 UploadInfo = ingestionGamePackageAsset.UploadInfo.Map(),
                 FileName = ingestionGamePackageAsset.FileName,
+                ETag = ingestionGamePackageAsset.ETag,
                 ODataETag = ingestionGamePackageAsset.ODataETag,
             };
 
@@ -91,12 +94,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             ingestionGamePackageConfiguration is null ? null : new()
             {
                 MarketGroupPackages = ingestionGamePackageConfiguration.MarketGroupPackages?.Select(x => x.Map()).ToList(),
-                ODataETag = ingestionGamePackageConfiguration.ODataETag,
                 Id = ingestionGamePackageConfiguration.Id,
                 BranchName = ingestionGamePackageConfiguration.BranchName,
                 BranchId = ingestionGamePackageConfiguration.BranchId,
                 CreatedDate = ingestionGamePackageConfiguration.CreatedDate,
                 ModifiedDate = ingestionGamePackageConfiguration.ModifiedDate,
+                ETag = ingestionGamePackageConfiguration.ETag,
+                ODataETag = ingestionGamePackageConfiguration.ODataETag,
             };
 
         private static GameMarketGroupPackage Map(this IngestionMarketGroupPackage ingestionMarketGroupPackage) =>
