@@ -18,8 +18,9 @@
   },
   "minutesToWaitForProcessing": 60,
 
-  "availabilityDateConfig": {
-    "availabilityDate": "{{ if blank it will disable the availability date for this package in Partner Center }}"
+  "availabilityDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the availability date in this branch/marketGroupId for this Xvc package }}"
   },
 
   "aadAuthInfo": {
