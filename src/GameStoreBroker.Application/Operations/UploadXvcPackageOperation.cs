@@ -35,9 +35,9 @@ namespace GameStoreBroker.Application.Operations
             var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.PackageFilePath, _config.GameAssets, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
             _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
 
-            if (_config.AvailabilityDateConfig is not null)
+            if (_config.AvailabilityDate is not null)
             {
-                await _storeBrokerService.SetXvcAvailabilityDateAsync(product, packageBranch, gamePackage, _config.MarketGroupId, _config.AvailabilityDateConfig.GetGamePackageDate(), ct).ConfigureAwait(false);
+                await _storeBrokerService.SetXvcAvailabilityDateAsync(product, packageBranch, gamePackage, _config.MarketGroupId, _config.AvailabilityDate, ct).ConfigureAwait(false);
                 _logger.LogInformation("Availability date set");
             }
         }

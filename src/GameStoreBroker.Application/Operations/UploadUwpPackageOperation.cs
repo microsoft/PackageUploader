@@ -35,10 +35,10 @@ namespace GameStoreBroker.Application.Operations
             var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.PackageFilePath, null, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
             _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
 
-            if (_config.AvailabilityDateConfig is not null || _config.MandatoryDateConfig is not null)
+            if (_config.AvailabilityDate is not null || _config.MandatoryDate is not null)
             {
-                var gamePackageDates = _config.GetGamePackageDates();
-                await _storeBrokerService.SetUwpPackageDatesAsync(product, packageBranch, _config.MarketGroupId, gamePackageDates, ct).ConfigureAwait(false);
+                var gamePackageDates = _config.GetGameConfiguration();
+                await _storeBrokerService.SetUwpConfigurationAsync(product, packageBranch, _config.MarketGroupId, gamePackageDates, ct).ConfigureAwait(false);
                 _logger.LogInformation("Set Uwp Package dates set");
             }
         }

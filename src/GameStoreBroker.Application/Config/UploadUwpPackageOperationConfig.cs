@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.ComponentModel.DataAnnotations;
+using GameStoreBroker.ClientApi.Models;
 
 namespace GameStoreBroker.Application.Config
 {
@@ -9,6 +9,6 @@ namespace GameStoreBroker.Application.Config
     {
         internal override string GetOperationName() => "UploadUwpPackage";
 
-        public MandatoryDateConfig MandatoryDateConfig { get; set; }
+        public GamePackageDate MandatoryDate { get; set; }
     }
 }

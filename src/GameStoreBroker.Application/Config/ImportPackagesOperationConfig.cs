@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -15,8 +16,8 @@ namespace GameStoreBroker.Application.Config
         public string DestinationBranchFriendlyName { get; set; }
         public string DestinationFlightName { get; set; }
 
-        public AvailabilityDateConfig AvailabilityDateConfig { get; set; }
-        public MandatoryDateConfig MandatoryDateConfig { get; set; }
+        public GamePackageDate AvailabilityDate { get; set; }
+        public GamePackageDate MandatoryDate { get; set; }
 
         public bool Overwrite { get; set; }
 

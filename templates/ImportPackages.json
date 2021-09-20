@@ -12,12 +12,14 @@
 
   "marketGroupId": "{{ optional - if informed it will only import packages from & to the specified one }}",
 
-  "availabilityDateConfig": {
-      "availabilityDate": "{{ optional - if informed itwill set the availability date in the destination branch for the Xvc and Uwp packages (if any) }}"
+  "availabilityDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the availability date in the destination branch for the Xvc and Uwp packages (if any) }}"
   },
 
-  "mandatoryDateConfig": {
-      "mandatoryDate": "{{ optional - if informed it will set the mandatory date in the destination branch for the Uwp packages (if any) }}"
+  "mandatoryDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the mandatory date in the destination branch for the Uwp packages (if any) }}"
   },
 
   "overwrite": true,

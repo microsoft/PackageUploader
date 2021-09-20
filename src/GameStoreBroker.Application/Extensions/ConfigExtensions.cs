@@ -8,32 +8,18 @@ namespace GameStoreBroker.Application.Extensions
 {
     internal static class ConfigExtensions
     {
-        public static GamePackageDate GetGamePackageDate(this MandatoryDateConfig mandatoryDateConfig) =>
-            new ()
-            {
-                IsEnabled = mandatoryDateConfig is not null,
-                EffectiveDate = mandatoryDateConfig?.MandatoryDate,
-            };
-
-        public static GamePackageDate GetGamePackageDate(this AvailabilityDateConfig availabilityDateConfig) =>
+        public static GameConfiguration GetGameConfiguration(this ImportPackagesOperationConfig config) =>
             new()
             {
-                IsEnabled = availabilityDateConfig is not null,
-                EffectiveDate = availabilityDateConfig?.AvailabilityDate,
+                MandatoryDate = config.MandatoryDate,
+                AvailabilityDate = config.AvailabilityDate,
             };
 
-        public static GamePackageDates GetGamePackageDates(this ImportPackagesOperationConfig config) =>
+        public static GameConfiguration GetGameConfiguration(this UploadUwpPackageOperationConfig config) =>
             new()
             {
-                MandatoryDate = config.MandatoryDateConfig.GetGamePackageDate(),
-                AvailabilityDate = config.AvailabilityDateConfig.GetGamePackageDate(),
-            };
-
-        public static GamePackageDates GetGamePackageDates(this UploadUwpPackageOperationConfig config) =>
-            new()
-            {
-                MandatoryDate = config.MandatoryDateConfig.GetGamePackageDate(),
-                AvailabilityDate = config.AvailabilityDateConfig.GetGamePackageDate(),
+                MandatoryDate = config.MandatoryDate,
+                AvailabilityDate = config.AvailabilityDate,
             };
     }
 }

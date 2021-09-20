@@ -259,7 +259,7 @@ namespace GameStoreBroker.ClientApi
             return result;
         }
 
-        public async Task<GamePackageConfiguration> SetUwpPackageDatesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, GamePackageDates gamePackageDates, CancellationToken ct)
+        public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, GameConfiguration gameConfiguration, CancellationToken ct)
         {
 
             if (product is null)
@@ -272,9 +272,9 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
             }
 
-            if (gamePackageDates is null)
+            if (gameConfiguration is null)
             {
-                throw new ArgumentNullException(nameof(gamePackageDates), $"{nameof(gamePackageDates)} cannot be null.");
+                throw new ArgumentNullException(nameof(gameConfiguration), $"{nameof(gameConfiguration)} cannot be null.");
             }
 
             _logger.LogDebug("Setting the package dates in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
@@ -288,20 +288,20 @@ namespace GameStoreBroker.ClientApi
                     if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
                     {
                         // Setting the availability date
-                        if (gamePackageDates.AvailabilityDate is not null)
+                        if (gameConfiguration.AvailabilityDate is not null)
                         {
-                                marketGroupPackage.AvailabilityDate = gamePackageDates.AvailabilityDate.IsEnabled
-                                    ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                marketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
+                                    ? gameConfiguration.AvailabilityDate.EffectiveDate
                                     : null;
                         }
 
                         // Setting the mandatory date
-                        if (gamePackageDates.MandatoryDate is not null)
+                        if (gameConfiguration.MandatoryDate is not null)
                         {
                             marketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                             {
-                                IsEnabled = gamePackageDates.MandatoryDate.IsEnabled,
-                                EffectiveDate = gamePackageDates.MandatoryDate.EffectiveDate,
+                                IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
+                                EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
                             };
                         }
                     }
@@ -317,7 +317,7 @@ namespace GameStoreBroker.ClientApi
             return await ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, marketGroupId, overwrite, null, ct);
         }
 
-        public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, GamePackageDates gamePackageDates, CancellationToken ct)
+        public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, GameConfiguration gameConfiguration, CancellationToken ct)
         {
             if (product is null)
             {
@@ -371,10 +371,10 @@ namespace GameStoreBroker.ClientApi
                                         else
                                         {
                                             // If the package was not there, we set the availability date
-                                            if (gamePackageDates?.AvailabilityDate is not null)
+                                            if (gameConfiguration?.AvailabilityDate is not null)
                                             {
-                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gamePackageDates.AvailabilityDate.IsEnabled
-                                                    ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
+                                                    ? gameConfiguration.AvailabilityDate.EffectiveDate
                                                     : null;
                                             }
                                             else
@@ -395,10 +395,10 @@ namespace GameStoreBroker.ClientApi
                                     {
                                         foreach (var packageId in packageIdsToAdd)
                                         {
-                                            if (gamePackageDates?.AvailabilityDate is not null)
+                                            if (gameConfiguration?.AvailabilityDate is not null)
                                             {
-                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gamePackageDates.AvailabilityDate.IsEnabled
-                                                    ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
+                                                    ? gameConfiguration.AvailabilityDate.EffectiveDate
                                                     : null;
                                             }
                                             else
@@ -411,44 +411,44 @@ namespace GameStoreBroker.ClientApi
                             }
 
                             // Setting Uwp package dates
-                            if (gamePackageDates is not null)
+                            if (gameConfiguration is not null)
                             {
                                 if (overwrite)
                                 {
-                                    if (gamePackageDates.AvailabilityDate is not null)
+                                    if (gameConfiguration.AvailabilityDate is not null)
                                     {
-                                        destinationMarketGroupPackage.AvailabilityDate = gamePackageDates.AvailabilityDate.IsEnabled
-                                            ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                        destinationMarketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
+                                            ? gameConfiguration.AvailabilityDate.EffectiveDate
                                             : null;
                                     }
-                                    if (gamePackageDates.MandatoryDate is not null)
+                                    if (gameConfiguration.MandatoryDate is not null)
                                     {
                                         destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                                         {
-                                            IsEnabled = gamePackageDates.MandatoryDate.IsEnabled,
-                                            EffectiveDate = gamePackageDates.MandatoryDate.EffectiveDate,
+                                            IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
+                                            EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
                                         };
                                     }
                                 }
                                 else
                                 {
-                                    if (gamePackageDates.AvailabilityDate is not null &&
+                                    if (gameConfiguration.AvailabilityDate is not null &&
                                         !destinationMarketGroupPackage.AvailabilityDate.HasValue)
                                     {
                                         destinationMarketGroupPackage.AvailabilityDate =
-                                            gamePackageDates.AvailabilityDate.IsEnabled
-                                                ? gamePackageDates.AvailabilityDate.EffectiveDate
+                                            gameConfiguration.AvailabilityDate.IsEnabled
+                                                ? gameConfiguration.AvailabilityDate.EffectiveDate
                                                 : null;
                                     }
 
-                                    if (gamePackageDates.MandatoryDate is not null &&
+                                    if (gameConfiguration.MandatoryDate is not null &&
                                         (destinationMarketGroupPackage.MandatoryUpdateInfo is null ||
                                          !destinationMarketGroupPackage.MandatoryUpdateInfo.IsEnabled))
                                     {
                                         destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                                         {
-                                            IsEnabled = gamePackageDates.MandatoryDate.IsEnabled,
-                                            EffectiveDate = gamePackageDates.MandatoryDate.EffectiveDate,
+                                            IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
+                                            EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
                                         };
                                     }
                                 }
