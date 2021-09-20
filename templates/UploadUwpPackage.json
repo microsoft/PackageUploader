@@ -12,12 +12,20 @@
   "packageFilePath": "{{ required }}",
   "minutesToWaitForProcessing": 60,
 
-  "availabilityDateConfig": {
-    "availabilityDate": "{{ if blank it will disable the availability date in Partner Center for this branch }}"
+  "availabilityDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the availability date in this branch/marketGroupId for all the Uwp packages }}"
   },
 
-  "mandatoryDateConfig": {
-    "mandatoryDate": "{{ if blank it will disable the mandatory date in Partner Center for this branch }}"
+  "mandatoryDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the mandatory date in this branch/marketGroupId for all the Uwp packages }}"
+  },
+
+  "gradualRollout": {
+    "isEnabled": true,
+    "percentage": 33,
+    "isSeekEnabled": false
   },
 
   "aadAuthInfo": {
