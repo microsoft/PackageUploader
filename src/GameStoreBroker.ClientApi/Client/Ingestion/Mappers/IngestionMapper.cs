@@ -149,12 +149,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
         private static IngestionMarketGroupPackage Map(this GameMarketGroupPackage gameMarketGroupPackage) =>
             gameMarketGroupPackage is null ? null :new()
             {
-                AvailabilityDate = gameMarketGroupPackage.AvailabilityDate,
+                AvailabilityDate = gameMarketGroupPackage.AvailabilityDate?.ToUniversalTime(),
                 MandatoryUpdateInfo = gameMarketGroupPackage.MandatoryUpdateInfo.Map(),
                 MarketGroupId = gameMarketGroupPackage.MarketGroupId,
                 Markets = gameMarketGroupPackage.Markets,
                 Name = gameMarketGroupPackage.Name,
-                PackageAvailabilityDates = gameMarketGroupPackage.PackageAvailabilityDates,
+                PackageAvailabilityDates = gameMarketGroupPackage.PackageAvailabilityDates?.ToDictionary(a => a.Key, a => a.Value?.ToUniversalTime()),
                 PackageIds = gameMarketGroupPackage.PackageIds,
             };
 
@@ -162,7 +162,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             gameMandatoryUpdateInfo is null ? null : new ()
             {
                 MandatoryVersion = gameMandatoryUpdateInfo.MandatoryVersion,
-                EffectiveDate = gameMandatoryUpdateInfo.EffectiveDate,
+                EffectiveDate = gameMandatoryUpdateInfo.EffectiveDate?.ToUniversalTime(),
                 IsEnabled = gameMandatoryUpdateInfo.IsEnabled,
             };
 
