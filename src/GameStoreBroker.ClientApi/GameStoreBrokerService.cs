@@ -308,6 +308,11 @@ namespace GameStoreBroker.ClientApi
                 }
             }
 
+            if (gameConfiguration.GradualRolloutInfo is not null)
+            {
+                packageConfiguration.GradualRolloutInfo = gameConfiguration.GradualRolloutInfo;
+            }
+
             var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
             return result;
         }
@@ -455,6 +460,11 @@ namespace GameStoreBroker.ClientApi
                             }
                         }
                     }
+                }
+
+                if (gameConfiguration?.GradualRolloutInfo is not null && (overwrite || destinationPackageConfiguration.GradualRolloutInfo is null))
+                {
+                    destinationPackageConfiguration.GradualRolloutInfo = gameConfiguration.GradualRolloutInfo;
                 }
             }
 
