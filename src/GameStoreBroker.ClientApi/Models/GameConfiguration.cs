@@ -5,7 +5,7 @@ using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 
 namespace GameStoreBroker.ClientApi.Models
 {
-    public class GameConfiguration
+    public class GameConfiguration : IGameConfiguration
     {
         /// <summary>
         /// Availability date (Uwp/Xvc packages)
@@ -20,6 +20,6 @@ namespace GameStoreBroker.ClientApi.Models
         /// <summary>
         /// Gradual rollout information (Uwp packages)
         /// </summary>
-        public GameGradualRolloutInfo GradualRolloutInfo { get; set; }
+        public GameGradualRolloutInfo GradualRollout { get; set; }
     }
 }

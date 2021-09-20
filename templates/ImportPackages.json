@@ -22,6 +22,12 @@
     "effectiveDate": "{{ optional - if informed it will set the mandatory date in the destination branch for the Uwp packages (if any) }}"
   },
 
+  "gradualRollout": {
+    "isEnabled": true,
+    "percentage": 33,
+    "isSeekEnabled": false
+  },
+
   "overwrite": true,
 
   "aadAuthInfo": {

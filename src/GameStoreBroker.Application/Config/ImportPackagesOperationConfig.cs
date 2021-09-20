@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Config
 {
-    internal class ImportPackagesOperationConfig : PackageBranchOperationConfig
+    internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGameConfiguration
     {
         internal override string GetOperationName() => "ImportPackages";
 
@@ -18,6 +19,7 @@ namespace GameStoreBroker.Application.Config
 
         public GamePackageDate AvailabilityDate { get; set; }
         public GamePackageDate MandatoryDate { get; set; }
+        public GameGradualRolloutInfo GradualRollout { get; set; }
 
         public bool Overwrite { get; set; }
 

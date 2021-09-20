@@ -6,17 +6,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
     public sealed class GameGradualRolloutInfo
     {
         /// <summary>
-        /// Is enabled
+        /// Configure gradual rollout for your UWP packages
         /// </summary>
         public bool? IsEnabled { get; set; }
 
         /// <summary>
-        /// Percentage
+        /// Percentage to start rollout with
         /// </summary>
         public float? Percentage { get; set; }
 
         /// <summary>
-        /// Is Seek enabled
+        /// Always provide the newest packages when customers manually check for updates
         /// </summary>
         public bool? IsSeekEnabled { get; set; }
     }

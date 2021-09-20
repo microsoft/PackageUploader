@@ -259,7 +259,7 @@ namespace GameStoreBroker.ClientApi
             return result;
         }
 
-        public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, GameConfiguration gameConfiguration, CancellationToken ct)
+        public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, IGameConfiguration gameConfiguration, CancellationToken ct)
         {
 
             if (product is null)
@@ -308,9 +308,9 @@ namespace GameStoreBroker.ClientApi
                 }
             }
 
-            if (gameConfiguration.GradualRolloutInfo is not null)
+            if (gameConfiguration.GradualRollout is not null)
             {
-                packageConfiguration.GradualRolloutInfo = gameConfiguration.GradualRolloutInfo;
+                packageConfiguration.GradualRolloutInfo = gameConfiguration.GradualRollout;
             }
 
             var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
@@ -322,7 +322,7 @@ namespace GameStoreBroker.ClientApi
             return await ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, marketGroupId, overwrite, null, ct);
         }
 
-        public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, GameConfiguration gameConfiguration, CancellationToken ct)
+        public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, IGameConfiguration gameConfiguration, CancellationToken ct)
         {
             if (product is null)
             {
@@ -462,9 +462,9 @@ namespace GameStoreBroker.ClientApi
                     }
                 }
 
-                if (gameConfiguration?.GradualRolloutInfo is not null && (overwrite || destinationPackageConfiguration.GradualRolloutInfo is null))
+                if (gameConfiguration?.GradualRollout is not null && (overwrite || destinationPackageConfiguration.GradualRolloutInfo is null))
                 {
-                    destinationPackageConfiguration.GradualRolloutInfo = gameConfiguration.GradualRolloutInfo;
+                    destinationPackageConfiguration.GradualRolloutInfo = gameConfiguration.GradualRollout;
                 }
             }
 

@@ -33,8 +33,7 @@ namespace GameStoreBroker.Application.Operations
             var originPackageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
             var destinationPackageBranch = await _storeBrokerService.GetDestinationGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
-            var gameConfiguration = _config.GetGameConfiguration();
-            await _storeBrokerService.ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, _config.MarketGroupId, _config.Overwrite, gameConfiguration, ct).ConfigureAwait(false);
+            await _storeBrokerService.ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, _config.MarketGroupId, _config.Overwrite, _config, ct).ConfigureAwait(false);
         }
     }
 }
