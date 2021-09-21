@@ -47,7 +47,7 @@ The application can be used directly with the input config for ease of use, or t
 - ***gameAssets***:
   - ***ekbFilePath*** (Location of the EKB file)
   - ***subvalFilePath*** (Location of the SubVal File)
-  - ***SymbolsFilePath*** (Location of Symbole File - optional)
+  - ***SymbolsFilePath*** (Location of Symbols File - optional)
   - ***discLayoutFilePath*** (Location of Disc Layout File - optional)
 - ***aadAuthInfo***:
   - ***clientId*** (From Azure Portal)
