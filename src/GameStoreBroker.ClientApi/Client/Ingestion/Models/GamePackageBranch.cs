@@ -3,22 +3,16 @@
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    /// <summary>
-    /// GameProduct Model
-    /// </summary>
     public sealed class GamePackageBranch
     {
         /// <summary>
-        /// LongId
+        /// Branch name
         /// </summary>
-        public string Id { get; set; }
+        public string Name { get; internal init; }
 
         /// <summary>
-        /// Collection of external Id
-        /// Type: AzurePublisherId, AzureOfferId, ExternalAzureProductId
+        /// Branch current draft instance ID.
         /// </summary>
-        public string Name { get; set; }
-
-        public string CurrentDraftInstanceId { get; set; }
+        public string CurrentDraftInstanceId { get; internal init; }
     }
 }

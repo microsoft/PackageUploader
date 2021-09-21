@@ -12,6 +12,22 @@
   "packageFilePath": "{{ required }}",
   "minutesToWaitForProcessing": 60,
 
+  "availabilityDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the availability date in this branch/marketGroupId for all the Uwp packages }}"
+  },
+
+  "mandatoryDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the mandatory date in this branch/marketGroupId for all the Uwp packages }}"
+  },
+
+  "gradualRollout": {
+    "isEnabled": true,
+    "percentage": 33,
+    "isSeekEnabled": false
+  },
+
   "aadAuthInfo": {
     "tenantId": "{{ required }}",
     "clientId": "{{ required }}"

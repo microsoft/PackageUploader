@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Config
@@ -15,5 +16,7 @@ namespace GameStoreBroker.Application.Config
 
         [Required]
         public string PackageFilePath { get; set; }
+
+        public GamePackageDate AvailabilityDate { get; set; }
     }
 }

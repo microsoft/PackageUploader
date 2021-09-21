@@ -4,19 +4,19 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
+namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    internal class IngestionMarketGroupPackage
+    public sealed class GameMarketGroupPackage
     {
         /// <summary>
         /// Id of market group
         /// </summary>
-        public string MarketGroupId { get; set; }
+        public string MarketGroupId { get; internal init; }
         
         /// <summary>
         /// Name of market group
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; internal init; }
 
         /// <summary>
         /// List of markets
@@ -29,12 +29,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
         public List<string> PackageIds { get; set; }
 
         /// <summary>
-        /// Mandatory update
+        /// Mandatory update for UWP packages
         /// </summary>
-        public IngestionMandatoryUpdateInfo MandatoryUpdateInfo { get; set; }
+        public GameMandatoryUpdateInfo MandatoryUpdateInfo { get; set; }
 
         /// <summary>
-        /// Schedule release date per region
+        /// Schedule release date per region for UWP packages
         /// </summary>
         public DateTime? AvailabilityDate { get; set; }
 

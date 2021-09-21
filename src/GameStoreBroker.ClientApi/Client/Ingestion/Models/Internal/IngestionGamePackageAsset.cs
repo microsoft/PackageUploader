@@ -5,12 +5,12 @@ using System;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
-    internal class IngestionGamePackageAsset
+    internal class IngestionGamePackageAsset : IngestionResource
     {
         /// <summary>
-        /// The Id of the package asset.
+        /// Resource type [PackageAsset]
         /// </summary>
-        public string Id { get; set; }
+        public string ResourceType { get; set; }
 
         /// <summary>
         /// The type of the package asset (EraSymbolFile, EraSubmissionValidatorLog, EraEkb).
@@ -60,9 +60,5 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
         /// </summary>
         public string FileName { get; set; }
 
-        /// <summary>
-        /// Resource type of this data model
-        /// </summary>
-        public string ResourceType { get; set; }
     }
 }

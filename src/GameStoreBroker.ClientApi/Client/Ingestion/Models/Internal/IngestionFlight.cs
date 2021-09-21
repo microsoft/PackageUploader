@@ -5,16 +5,8 @@ using System.Collections.Generic;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
-    /// <summary>
-    /// Flight Resource
-    /// </summary>
-    internal sealed class IngestionFlight
+    internal sealed class IngestionFlight : IngestionResource
     {
-        /// <summary>
-        /// Resource ID
-        /// </summary>
-        public string Id { get; set; }
-
         /// <summary>
         /// Resource type [Flight]
         /// </summary>
