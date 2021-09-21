@@ -7,10 +7,8 @@
   "flightName": "{{ flightName or branchFriendlyName required }}",
   "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
 
-  "targetFlightName": "{{ targetFlightName or targetSandboxName required }}",
-  "targetSandboxName": "{{ targetFlightName or targetSandboxName required }}",
-
-  "marketGroupId": "{{ default value is 'default' }}",
+  "destinationFlightName": "{{ destinationFlightName or destinationSandboxName required }}",
+  "destinationSandboxName": "{{ destinationFlightName or destinationSandboxName required }}",
 
   "minutesToWaitForPublishing": 60,
 

@@ -24,7 +24,7 @@ namespace GameStoreBroker.Application.Operations
             _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         }
 
-        protected override Task ProcessAsync(CancellationToken ct)
+        protected override async Task ProcessAsync(CancellationToken ct)
         {
             //_logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
 
@@ -40,7 +40,7 @@ namespace GameStoreBroker.Application.Operations
             //    _logger.LogInformation("Availability date set");
             //}
 
-            return null;
+            await Task.Delay(0);
         }
     }
 }

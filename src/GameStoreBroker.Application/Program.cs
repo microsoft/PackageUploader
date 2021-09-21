@@ -133,7 +133,7 @@ namespace GameStoreBroker.Application
                 new Command("PublishPackages", "Publishes all game packages from a branch or flight to a destination sandbox or flight")
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
-                }.AddOperationHandler<ImportPackagesOperation>(),
+                }.AddOperationHandler<PublishPackagesOperation>(),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);
