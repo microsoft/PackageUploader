@@ -39,30 +39,30 @@ The application can be used directly with the input config for ease of use, or t
 
 ### To Upload Xvc Package:
 
-- operationName (UploadXvcPackage)
-- productId or bigId (From Partner Center)
-- branchFriendlyName (name of the branch/sandbox from Partner Center) or flightName (name of the flight from Partner Center)
-  - XBOX RECOMMEND: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
-- gameAssets:
-  - packageFilePath (Location of the game package)
-  - ekbFilePath (Location of the EKB file)
-  - subvalFilePath (Location of the SubVal File)
-  - SymbolsFilePath (Location of Symbole File - optional)
-  - discLayoutFilePath (Location of Disc Layout File - optional)
-- aadAuthInfo:
-  - clientId (From Azure Portal)
-  - tenantId (From Azure Portal)
+- ***operationName*** (UploadXvcPackage)
+- ***productId*** or ***bigId*** (From Partner Center)
+- ***branchFriendlyName*** or ***flightName*** (name of the branch/sandbox or the flight from Partner Center)
+  - *XBOX RECOMMEND*: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
+- ***packageFilePath*** (Location of the game package)
+- ***gameAssets***:
+  - ***ekbFilePath*** (Location of the EKB file)
+  - ***subvalFilePath*** (Location of the SubVal File)
+  - ***SymbolsFilePath*** (Location of Symbole File - optional)
+  - ***discLayoutFilePath*** (Location of Disc Layout File - optional)
+- ***aadAuthInfo***:
+  - ***clientId*** (From Azure Portal)
+  - ***tenantId*** (From Azure Portal)
 
 ### To Upload Uwp Package:
 
-- operationName (UploadUwpPackage)
-- productId or bigId (From Partner Center)
-- branchFriendlyName (name of the branch/sandbox from Partner Center) or flightName (name of the flight from Partner Center)
-  - XBOX RECOMMEND: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
-- packageFilePath (Location of the Uwp game package)
-- aadAuthInfo:
-  - clientId (From Azure Portal)
-  - tenantId (From Azure Portal)
+- ***operationName*** (UploadUwpPackage)
+- ***productId*** or ***bigId*** (From Partner Center)
+- ***branchFriendlyName*** or ***flightName*** (name of the branch/sandbox or the flight from Partner Center)
+  - *XBOX RECOMMEND*: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
+- ***packageFilePath*** (Location of the game package)
+- ***aadAuthInfo***:
+  - ***clientId*** (From Azure Portal)
+  - ***tenantId*** (From Azure Portal)
 
 ## Step 4: Fire Away
 
