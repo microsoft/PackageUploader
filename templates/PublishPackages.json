@@ -1,0 +1,21 @@
+{
+  "operationName": "PublishPackages",
+
+  "productId": "{{ productId or bigId required }}",
+  "bigId": "{{ productId or bigId required }}",
+
+  "flightName": "{{ flightName or branchFriendlyName required }}",
+  "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
+
+  "targetFlightName": "{{ targetFlightName or targetSandboxName required }}",
+  "targetSandboxName": "{{ targetFlightName or targetSandboxName required }}",
+
+  "marketGroupId": "{{ default value is 'default' }}",
+
+  "minutesToWaitForPublishing": 60,
+
+  "aadAuthInfo": {
+    "tenantId": "{{ required }}",
+    "clientId": "{{ required }}"
+  }
+}
