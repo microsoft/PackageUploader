@@ -1,17 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Extensions;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,9 +24,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
 
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
         {
+            IgnoreNullValues = true,
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
+
+        private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
+        private const LogLevel VerboseLogLevel = LogLevel.Trace;
 
         protected HttpRestClient(ILogger logger, HttpClient httpClient)
         {
@@ -39,17 +42,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
         {
             try
             {
-                var clientRequestId = GenerateClientRequestId();
-                LogRequestVerbose("GET", subUrl, clientRequestId);
-                
-                var request = new HttpRequestMessage(HttpMethod.Get, subUrl);
-                request.Headers.Add("Request-ID", clientRequestId);
+                var request = CreateJsonRequestMessage(HttpMethod.Get, subUrl);
 
+                await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
                 using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+                await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
-                
+
                 var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                LogResponseVerbose(result, GetRequestIdFromHeader(response));
                 return result;
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             var nextLink = subUrl;
             do
             {
-                var response = await GetAsync<PagedCollection<T>>(nextLink, ct);
+                var response = await GetAsync<PagedCollection<T>>(nextLink, ct).ConfigureAwait(false);
 
                 if (response.Value is null)
                 {
@@ -93,21 +93,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
         {
             try
             {
-                var clientRequestId = GenerateClientRequestId();
-                LogRequestVerbose("POST", subUrl, clientRequestId, body);
+                var request = CreateJsonRequestMessage(HttpMethod.Post, subUrl, body);
 
-                var json = body is null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
-                using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
-
-                var request = new HttpRequestMessage(HttpMethod.Post, subUrl);
-                request.Headers.Add("Request-ID", clientRequestId);
-                request.Content = content;
-
+                await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
                 using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+                await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
                 var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                LogResponseVerbose(result, GetRequestIdFromHeader(response));
                 return result;
             }
             catch (Exception ex)
@@ -136,30 +129,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
         {
             try
             {
-                var clientRequestId = GenerateClientRequestId();
-                LogRequestVerbose("PUT", subUrl, clientRequestId, body);
+                var request = CreateJsonRequestMessage(HttpMethod.Put, subUrl, body, customHeaders);
 
-                var json = body is null ? string.Empty : JsonSerializer.Serialize(body, DefaultJsonSerializerOptions);
-                using var content = new StringContent(json, Encoding.UTF8, MediaTypeNames.Application.Json);
-
-                var request = new HttpRequestMessage(HttpMethod.Put, subUrl);
-                request.Headers.Add("Request-ID", clientRequestId);
-
-                if (customHeaders is not null && customHeaders.Any())
-                {
-                    foreach (var (name, value) in customHeaders)
-                    {
-                        request.Headers.Add(name, value);
-                    }
-                }
-
-                request.Content = content;
-
+                await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
                 using var response = await _httpClient.SendAsync(request, ct);
+                await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
                 var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                LogResponseVerbose(result, GetRequestIdFromHeader(response));
                 return result;
             }
             catch (Exception ex)
@@ -169,32 +146,62 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
             }
         }
 
-        private static string GenerateClientRequestId() => Guid.NewGuid().ToString();
+        private static HttpRequestMessage CreateJsonRequestMessage(HttpMethod method, string requestUri) =>
+            CreateJsonRequestMessage(method, requestUri, (object) null, null);
 
-        private static string GetRequestIdFromHeader(HttpResponseMessage response)
+        private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue) =>
+            CreateJsonRequestMessage(method, requestUri, inputValue, null);
+
+        private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, IDictionary<string, string> customHeaders)
         {
-            if (response.Headers.TryGetValues("Request-ID", out var headerValues))
+            var request = new HttpRequestMessage(method, requestUri);
+            if (inputValue is not null)
             {
-                return headerValues.FirstOrDefault();
+                request.Content = JsonContent.Create(inputValue, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions);
+            }
+            request.Headers.Add("Request-ID", Guid.NewGuid().ToString());
+
+            if (customHeaders is not null && customHeaders.Any())
+            {
+                foreach (var (name, value) in customHeaders)
+                {
+                    request.Headers.Add(name, value);
+                }
             }
 
-            return string.Empty;
+            return request;
         }
 
-        private void LogRequestVerbose(string verb, string requestUrl, string clientRequestId, object requestBody = null)
+        private static string GetRequestIdFromHeaders(HttpHeaders headers) =>
+            headers.TryGetValues("Request-ID", out var headerValues)
+                ? headerValues.FirstOrDefault()
+                : string.Empty;
+
+        private async Task LogRequestVerboseAsync(HttpRequestMessage request, CancellationToken ct)
         {
-            _logger.LogTrace("{verb} {requestUrl} [ClientRequestId: {clientRequestId}]", verb, requestUrl, clientRequestId);
-            if (requestBody is not null)
+            if (!_logger.IsEnabled(VerboseLogLevel))
+                return;
+
+            var clientRequestId = GetRequestIdFromHeaders(request.Headers);
+            _logger.Log(VerboseLogLevel, "Request {verb} {requestUrl} [ClientRequestId: {clientRequestId}]", request.Method, request.RequestUri, clientRequestId);
+            if (request.Content is not null)
             {
-                _logger.LogTrace("Request Body:");
-                _logger.LogTrace(requestBody.ToJson());
+                var requestBody = await request.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+                _logger.Log(VerboseLogLevel, "Request Body:");
+                _logger.Log(VerboseLogLevel, requestBody);
             }
         }
 
-        private void LogResponseVerbose(object obj, string serverRequestId)
+        private async Task LogResponseVerboseAsync(HttpResponseMessage response, CancellationToken ct)
         {
-            _logger.LogTrace("Response Body: [RequestId: {serverRequestId}]", serverRequestId);
-            _logger.LogTrace(obj.ToJson());
+            if (!_logger.IsEnabled(VerboseLogLevel))
+                return;
+
+            var serverRequestId = GetRequestIdFromHeaders(response.Headers);
+            _logger.Log(VerboseLogLevel, "Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
+            var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            _logger.Log(VerboseLogLevel, "Response Body:");
+            _logger.Log(VerboseLogLevel, responseBody);
         }
 
         private void LogException(Exception ex)

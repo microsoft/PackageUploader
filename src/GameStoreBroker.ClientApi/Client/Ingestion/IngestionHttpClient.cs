@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.ClientApi.Client.Ingestion.Builders;
 using GameStoreBroker.ClientApi.Client.Ingestion.Client;
 using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
-using GameStoreBroker.ClientApi.Client.Ingestion.Extensions;
 using GameStoreBroker.ClientApi.Client.Ingestion.Mappers;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
@@ -141,13 +141,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
             }
 
-            var body = new IngestionPackageCreationRequest
-            {
-                PackageConfigurationId = currentDraftInstanceId,
-                FileName = fileName,
-                ResourceType = "PackageCreationRequest",
-                MarketGroupId = marketGroupId,
-            };
+            var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId).Build();
 
             var ingestionGamePackage = await PostAsync<IngestionPackageCreationRequest, IngestionGamePackage>($"products/{productId}/packages", body, ct).ConfigureAwait(false);
 
@@ -182,16 +176,22 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
         public async Task<GamePackageAsset> CreatePackageAssetRequestAsync(string productId, string packageId, FileInfo fileInfo, GamePackageAssetType packageAssetType, CancellationToken ct)
         {
-            var body = new IngestionGamePackageAsset
+            if (string.IsNullOrWhiteSpace(productId))
             {
-                PackageId = packageId,
-                Type = packageAssetType.GetGamePackageAssetType(),
-                ResourceType = "PackageAsset",
-                FileName = fileInfo.Name,
-                BinarySizeInBytes = fileInfo.Length,
-                CreatedDate = fileInfo.CreationTime,
-                Name = fileInfo.Name,
-            };
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(packageId))
+            {
+                throw new ArgumentException($"{nameof(packageId)} cannot be null or empty.", nameof(packageId));
+            }
+
+            if (fileInfo is null)
+            {
+                throw new ArgumentNullException(nameof(fileInfo), $"{nameof(fileInfo)} cannot be null.");
+            }
+
+            var body = new IngestionGamePackageAssetBuilder(packageId, fileInfo, packageAssetType).Build();
 
             var ingestionGamePackageAsset = await PostAsync($"products/{productId}/packages/{packageId}/packageAssets", body, ct).ConfigureAwait(false);
 
@@ -211,14 +211,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentNullException(nameof(gamePackage), $"{nameof(gamePackage)} cannot be null.");
             }
 
-            var body = new IngestionGamePackage
-            {
-                Id = gamePackage.Id,
-                State = "Uploaded",
-                ResourceType = "GamePackage",
-                ETag = gamePackage.ODataETag,
-                ODataETag = gamePackage.ODataETag
-            };
+            gamePackage.State = GamePackageState.Uploaded;
+            var body = gamePackage.Map();
 
             var ingestionGamePackage = await PutAsync($"products/{productId}/packages/{gamePackage.Id}", body, ct);
             var newGamePackage = ingestionGamePackage.Map();
@@ -250,7 +244,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             return gamePackageAsset;
         }
 
-        public async Task RemovePackagesAsync(string productId, string currentDraftInstanceId, string marketGroupId, CancellationToken ct)
+        public async Task<GamePackageConfiguration> GetPackageConfigurationAsync(string productId, string currentDraftInstanceId, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(productId))
             {
@@ -262,27 +256,38 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
             }
 
-            var packageSets = GetAsyncEnumerable<IngestionPackageSet>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+            var packageSets = GetAsyncEnumerable<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
 
             var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
             if (packageSet is null)
             {
-                throw new PackageSetNotFoundException($"Package set for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
+                throw new PackageConfigurationNotFoundException($"Package configuration for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
             }
 
-            packageSet.ETag = packageSet.ODataETag;
+            var gamePackageConfiguration = packageSet.Map();
+            return gamePackageConfiguration;
+        }
 
-            if (packageSet.MarketGroupPackages is not null && packageSet.MarketGroupPackages.Any())
+        public async Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(string productId, GamePackageConfiguration gamePackageConfiguration, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
             {
-                // Blanking all package ids for each market group package
-                foreach (var marketGroupPackage in packageSet.MarketGroupPackages)
-                {
-                    if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(marketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        marketGroupPackage.PackageIds = new List<string>();
-                    }
-                }
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
             }
+
+            if (gamePackageConfiguration is null)
+            {
+                throw new ArgumentNullException(nameof(gamePackageConfiguration), $"{nameof(gamePackageConfiguration)} cannot be null.");
+            }
+
+            var packageSet = await GetAsync<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", ct);
+            
+            if (packageSet is null)
+            {
+                throw new PackageConfigurationNotFoundException($"Package configuration for product '{productId}' and packageConfigurationId '{gamePackageConfiguration.Id}' not found.");
+            }
+
+            var newPackageSet = packageSet.Merge(gamePackageConfiguration);
 
             // ODataEtag needs to be added to If-Match header on http client still.
             var customHeaders = new Dictionary<string, string>
@@ -290,7 +295,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 { "If-Match", packageSet.ODataETag},
             };
 
-            await PutAsync($"products/{productId}/packageConfigurations/{packageSet.Id}", packageSet, customHeaders, ct);
+            var result = await PutAsync($"products/{productId}/packageConfigurations/{newPackageSet.Id}", packageSet, customHeaders, ct).ConfigureAwait(false);
+            return result.Map();
         }
     }
 }

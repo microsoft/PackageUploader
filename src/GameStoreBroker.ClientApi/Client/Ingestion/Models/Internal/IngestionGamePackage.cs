@@ -2,35 +2,15 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
-    /// <summary>
-    /// GamePackage resource
-    /// </summary>
-    internal class IngestionGamePackage
+    internal class IngestionGamePackage : IngestionResource
     {
         /// <summary>
-        /// Resource ID
+        /// Resource type [GamePackage]
         /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Revision Token (to be obsolete)
-        /// </summary>
-        public string RevisionToken { get; set; }
-
-        /// <summary>
-        /// ETag
-        /// </summary>
-        public string ETag { get; set; }
-
-        /// <summary>
-        /// ETag
-        /// </summary>
-        [JsonPropertyName("@odata.etag")]
-        public string ODataETag { get; set; }
+        public string ResourceType { get; set; }
 
         /// <summary>
         /// state of the package [PendingUpload, Uploaded, InProcessing, Processed, ProcessFailed]
@@ -41,11 +21,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
         /// Check body of package to return back to caller.
         /// </summary>
         public bool? IsEmpty { get; set; }
-
-        /// <summary>
-        /// Resource type
-        /// </summary>
-        public string ResourceType { get; set; }
 
         /// <summary>
         /// Type of the package (e.g. Appx, AppxBundle, Msix, Xvc, etc.).

@@ -1,0 +1,37 @@
+{
+  "operationName": "ImportPackages",
+
+  "productId": "{{ productId or bigId required }}",
+  "bigId": "{{ productId or bigId required }}",
+
+  "flightName": "{{ flightName or branchFriendlyName required }}",
+  "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
+
+  "destinationFlightName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
+  "destinationBranchFriendlyName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
+
+  "marketGroupId": "{{ optional - if informed it will only import packages from & to the specified one }}",
+
+  "availabilityDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the availability date in the destination branch for the Xvc and Uwp packages (if any) }}"
+  },
+
+  "mandatoryDate": {
+    "isEnabled": true,
+    "effectiveDate": "{{ optional - if informed it will set the mandatory date in the destination branch for the Uwp packages (if any) }}"
+  },
+
+  "gradualRollout": {
+    "isEnabled": true,
+    "percentage": 33,
+    "isSeekEnabled": false
+  },
+
+  "overwrite": true,
+
+  "aadAuthInfo": {
+      "tenantId": "{{ required }}",
+      "clientId": "{{ required }}"
+  }
+}
