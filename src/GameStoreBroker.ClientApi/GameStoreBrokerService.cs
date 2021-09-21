@@ -522,5 +522,15 @@ namespace GameStoreBroker.ClientApi
 
             return processingPackage;
         }
+
+        public Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

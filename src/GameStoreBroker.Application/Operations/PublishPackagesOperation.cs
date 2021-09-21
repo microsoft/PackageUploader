@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using System.Threading;
 using System.Threading.Tasks;
+using GameStoreBroker.Application.Extensions;
 
 namespace GameStoreBroker.Application.Operations
 {
@@ -26,19 +27,18 @@ namespace GameStoreBroker.Application.Operations
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            //_logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
+            _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
 
-            //var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
-            //var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+            var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
 
-            //var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.PackageFilePath, _config.GameAssets, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
-            //_logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
-
-            //if (_config.AvailabilityDate is not null)
-            //{
-            //    await _storeBrokerService.SetXvcAvailabilityDateAsync(product, packageBranch, gamePackage, _config.MarketGroupId, _config.AvailabilityDate, ct).ConfigureAwait(false);
-            //    _logger.LogInformation("Availability date set");
-            //}
+            if (!string.IsNullOrWhiteSpace(_config.BranchFriendlyName))
+            {
+                var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+            }
+            else if (!string.IsNullOrWhiteSpace(_config.FlightName))
+            {
+                // var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+            }
 
             await Task.Delay(0);
         }
