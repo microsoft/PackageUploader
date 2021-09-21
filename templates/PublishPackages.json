@@ -4,11 +4,10 @@
   "productId": "{{ productId or bigId required }}",
   "bigId": "{{ productId or bigId required }}",
 
-  "flightName": "{{ flightName or branchFriendlyName required }}",
-  "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
-
-  "destinationFlightName": "{{ destinationFlightName or destinationSandboxName required }}",
-  "destinationSandboxName": "{{ destinationFlightName or destinationSandboxName required }}",
+  "flightName": "{{ flightName or (branchFriendlyName and destinationSandboxName) required }}",
+  
+  "branchFriendlyName": "{{ flightName or (branchFriendlyName and destinationSandboxName) required }}",
+  "destinationSandboxName": "{{ flightName or (branchFriendlyName and destinationSandboxName) required }}",
 
   "minutesToWaitForPublishing": 60,
 

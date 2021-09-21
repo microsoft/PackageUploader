@@ -12,21 +12,18 @@ namespace GameStoreBroker.Application.Config
         internal override string GetOperationName() => "PublishPackages";
 
         public string DestinationSandboxName { get; set; }
-        public string DestinationFlightName { get; set; }
         public int MinutesToWaitForPublishing { get; set; }
 
         protected override void Validate(IList<ValidationResult> validationResults)
         {
-            base.Validate(validationResults);
-
-            if (string.IsNullOrWhiteSpace(DestinationSandboxName) && string.IsNullOrWhiteSpace(DestinationFlightName))
+            if (string.IsNullOrWhiteSpace(FlightName) || (string.IsNullOrWhiteSpace(BranchFriendlyName) && string.IsNullOrWhiteSpace(DestinationSandboxName)))
             {
-                validationResults.Add(new ValidationResult($"{nameof(DestinationSandboxName)} or {nameof(DestinationFlightName)} field is required.", new[] { nameof(DestinationSandboxName), nameof(DestinationFlightName) }));
+                validationResults.Add(new ValidationResult($"{nameof(FlightName)} or ({nameof(BranchFriendlyName)} and {nameof(DestinationSandboxName)}) field is required.", new[] { nameof(FlightName), nameof(BranchFriendlyName), nameof(DestinationSandboxName) }));
             }
 
-            if (!string.IsNullOrWhiteSpace(DestinationSandboxName) && !string.IsNullOrWhiteSpace(DestinationFlightName))
+            if ((!string.IsNullOrWhiteSpace(DestinationSandboxName) || !string.IsNullOrWhiteSpace(BranchFriendlyName)) && !string.IsNullOrWhiteSpace(FlightName))
             {
-                validationResults.Add(new ValidationResult($"Only one {nameof(DestinationSandboxName)} or {nameof(DestinationFlightName)} field is allowed.", new[] { nameof(DestinationSandboxName), nameof(DestinationFlightName) }));
+                validationResults.Add(new ValidationResult($"Only one {nameof(BranchFriendlyName)} or {nameof(FlightName)} field is allowed. {nameof(DestinationSandboxName)} must be provided with {nameof(BranchFriendlyName)}", new[] { nameof(BranchFriendlyName), nameof(FlightName), nameof(DestinationSandboxName) }));
             }
         }
     }
