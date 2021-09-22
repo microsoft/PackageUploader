@@ -8,6 +8,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
     internal sealed class IngestionSubmission
     {
+        public string Id { get; set; }
+
         /// <summary>
         /// (readonly) State of Submission [InProgress, Published]
         /// </summary>

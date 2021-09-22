@@ -12,6 +12,34 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
 {
     internal static class IngestionMapper
     {
+        public static GameSubmission Map(this IngestionSubmission ingestionSubmission)
+        {
+            var state = (ingestionSubmission.PendingUpdateInfo.Status.ToLower(), ingestionSubmission.State.ToLower(), ingestionSubmission.Substate.ToLower()) switch
+            {
+                ("failed", _, _) => GameSubmissionState.Failed,
+                ("running", _, _) => GameSubmissionState.InProgress,
+                ("completed", "published", _) => GameSubmissionState.Published,
+                ("completed", "inprogress", "indraft") => GameSubmissionState.InProgress,
+                ("completed", "inprogress", "submitted") => GameSubmissionState.Published, // not sure
+                ("completed", "inprogress", "failed") => GameSubmissionState.Failed,
+                ("completed", "inprogress", "failedincertification") => GameSubmissionState.Failed,
+                ("completed", "inprogress", "readytopublish") => GameSubmissionState.Published, // not sure
+                ("completed", "inprogress", "publishing") => GameSubmissionState.InProgress,
+                ("completed", "inprogress", "published") => GameSubmissionState.Published,
+                ("completed", "inprogress", "instore") => GameSubmissionState.Published,
+                _ => GameSubmissionState.NotStarted
+            };
+
+            return new GameSubmission
+            {
+                Id = ingestionSubmission.Id,
+                FriendlyName = ingestionSubmission.FriendlyName,
+                PublishedTimeInUtc = ingestionSubmission.PublishedTimeInUtc,
+                ReleaseNumber = ingestionSubmission.ReleaseNumber,
+                GameSubmissionState = state
+            };
+        }
+
         public static GameProduct Map(this IngestionGameProduct ingestionGameProduct) =>
             ingestionGameProduct is null ? null : new()
             {

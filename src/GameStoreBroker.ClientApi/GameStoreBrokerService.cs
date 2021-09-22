@@ -475,12 +475,11 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, int minutesToWaitForPublishing, CancellationToken ct)
         {
-            var submissionCreationRequest = new IngestionSubmissionCreationRequest
-            {
+            var gameSubmission = await _ingestionHttpClient.CreateSubmissionRequestAsync(product.ProductId, originPackageBranch, destinationSandboxName, ct);
 
-            };
+            gameSubmission = await WaitForPackagePublishingAsync(product.ProductId, gameSubmission, minutesToWaitForPublishing, ct);
 
-            return null;
+            return gameSubmission;
         }
 
         public async Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, int minutesToWaitForPublishing, CancellationToken ct)
@@ -539,9 +538,23 @@ namespace GameStoreBroker.ClientApi
             return processingPackage;
         }
 
-        private async Task<GameSubmission> WaitForPackagePublishingAsync(GameSubmission gameSubmission, int minutestoWaitForPublishing, CancellationToken ct)
+        private async Task<GameSubmission> WaitForPackagePublishingAsync(string productId, GameSubmission gameSubmission, int minutestoWaitForPublishing, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            await Task.Delay(TimeSpan.FromSeconds(10), ct).ConfigureAwait(false);
+            gameSubmission = await _ingestionHttpClient.GetGameSubmissionAsync(productId, gameSubmission.Id, ct);
+
+            while (gameSubmission.GameSubmissionState is GameSubmissionState.InProgress && minutestoWaitForPublishing > 0)
+            {
+                _logger.LogInformation("Package still in publishing, waiting another 1 minute. Will wait a further {minutestoWaitForPublishing} minute(s) after this.", minutestoWaitForPublishing);
+
+                await Task.Delay(TimeSpan.FromMinutes(1), ct).ConfigureAwait(false);
+
+                gameSubmission = await _ingestionHttpClient.GetGameSubmissionAsync(productId, gameSubmission.Id, ct);
+
+                minutestoWaitForPublishing -= 1;
+            }
+
+            return gameSubmission;
         }
     }
 }
