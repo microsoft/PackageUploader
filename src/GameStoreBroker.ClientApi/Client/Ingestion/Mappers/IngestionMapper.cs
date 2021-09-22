@@ -12,9 +12,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
 {
     internal static class IngestionMapper
     {
-        public static GameSubmission Map(this IngestionSubmission ingestionSubmission)
-        {
-            var state = (ingestionSubmission.PendingUpdateInfo.Status.ToLower(), ingestionSubmission.State.ToLower(), ingestionSubmission.Substate.ToLower()) switch
+        private static GameSubmissionState GetGameSubmissionState(this IngestionSubmission ingestionSubmission) =>
+            ingestionSubmission is null ? default :
+            (ingestionSubmission.PendingUpdateInfo.Status.ToLower(), ingestionSubmission.State.ToLower(), ingestionSubmission.Substate.ToLower()) switch
             {
                 ("failed", _, _) => GameSubmissionState.Failed,
                 ("running", _, _) => GameSubmissionState.InProgress,
@@ -30,15 +30,15 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 _ => GameSubmissionState.NotStarted
             };
 
-            return new GameSubmission
+        public static GameSubmission Map(this IngestionSubmission ingestionSubmission) =>
+            ingestionSubmission is null ? null : new()
             {
                 Id = ingestionSubmission.Id,
                 FriendlyName = ingestionSubmission.FriendlyName,
                 PublishedTimeInUtc = ingestionSubmission.PublishedTimeInUtc,
                 ReleaseNumber = ingestionSubmission.ReleaseNumber,
-                GameSubmissionState = state
+                GameSubmissionState = ingestionSubmission.GetGameSubmissionState(),
             };
-        }
 
         public static GameProduct Map(this IngestionGameProduct ingestionGameProduct) =>
             ingestionGameProduct is null ? null : new()
