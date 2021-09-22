@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
 {
-    internal class IngestionPackageCreationRequestBuilder
+    internal class IngestionPackageCreationRequestBuilder : IBuilder<IngestionPackageCreationRequest>
     {
         private readonly string _currentDraftInstanceId;
         private readonly string _fileName;
@@ -14,9 +15,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
 
         public IngestionPackageCreationRequestBuilder(string currentDraftInstanceId, string fileName, string marketGroupId)
         {
-            _currentDraftInstanceId = currentDraftInstanceId;
-            _fileName = fileName;
-            _marketGroupId = marketGroupId;
+            _currentDraftInstanceId = currentDraftInstanceId ?? throw new ArgumentNullException(nameof(currentDraftInstanceId));
+            _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
+            _marketGroupId = marketGroupId ?? throw new ArgumentNullException(nameof(marketGroupId));
         }
 
         public IngestionPackageCreationRequest Build() =>

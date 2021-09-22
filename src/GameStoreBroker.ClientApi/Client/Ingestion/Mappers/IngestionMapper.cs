@@ -201,5 +201,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 IsSeekEnabled = gameGradualRolloutInfo.IsSeekEnabled,
                 Percentage = gameGradualRolloutInfo.Percentage,
             };
+
+        public static GameSubmissionValidationItem Map(this IngestionSubmissionValidationItem ingestionSubmissionValidationItem) =>
+            ingestionSubmissionValidationItem is null ? null : new()
+            {
+                ErrorCode = ingestionSubmissionValidationItem.ErrorCode,
+                Message = ingestionSubmissionValidationItem.Message,
+                Resource = ingestionSubmissionValidationItem.Resource,
+                Severity = ingestionSubmissionValidationItem.Severity,
+            };
     }
 }

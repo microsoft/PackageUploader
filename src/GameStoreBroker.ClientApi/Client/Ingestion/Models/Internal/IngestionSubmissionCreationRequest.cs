@@ -1,25 +1,22 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
     internal sealed class IngestionSubmissionCreationRequest
     {
         public string ResourceType { get; set; }
-
-        //
-        // Summary:
-        //     Target of submission [{Sandbox, sandboxId}, {Flight, flightId}, {Scope, Preview/Live}]
+        
+        /// <summary>
+        /// Target of submission [{Sandbox, sandboxId}, {Flight, flightId}, {Scope, Preview/Live}]
+        /// </summary>
         public IList<TypeValuePair> Targets { get; set; }
 
-        //
-        // Summary:
-        //     Source of submission: [{Sandbox, sandboxId}] // TODO: [jinjma] TBD or [{Property,
-        //     propertyInstanceId}, {Listing, listingInstanceId}, {Availability, availabilityInstanceId},
-        //     {Package, packageInstanceId}]
+        /// <summary>
+        /// Source of submission: [{Sandbox, sandboxId}]
+        /// </summary>
         public IList<TypeValuePair> Resources { get; set; }
     }
 }

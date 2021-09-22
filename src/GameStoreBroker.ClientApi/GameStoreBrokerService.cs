@@ -475,7 +475,7 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, int minutesToWaitForPublishing, CancellationToken ct)
         {
-            var gameSubmission = await _ingestionHttpClient.CreateSubmissionRequestAsync(product.ProductId, originPackageBranch, destinationSandboxName, ct);
+            var gameSubmission = await _ingestionHttpClient.CreateSubmissionRequestAsync(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationSandboxName, ct);
 
             gameSubmission = await WaitForPackagePublishingAsync(product.ProductId, gameSubmission, minutesToWaitForPublishing, ct);
 

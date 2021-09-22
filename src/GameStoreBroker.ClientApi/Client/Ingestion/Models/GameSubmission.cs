@@ -1,24 +1,23 @@
-﻿using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
     public class GameSubmission
     {
-        public string Id { get; set; }
+        public string Id { get; internal init; }
 
-        public GameSubmissionState GameSubmissionState { get; set; }
+        public GameSubmissionState GameSubmissionState { get; internal init; }
 
-        public int ReleaseNumber { get; set; }
+        public int ReleaseNumber { get; internal init; }
 
-        public string FriendlyName { get; set; }
+        public string FriendlyName { get; internal init; }
 
-        public DateTime? PublishedTimeInUtc { get; set; }
+        public DateTime? PublishedTimeInUtc { get; internal init; }
 
-        public List<GameSubmissionValidationItem> SubmissionValidationItems { get; set; }
+        public List<GameSubmissionValidationItem> SubmissionValidationItems { get; internal set; }
     }
 }

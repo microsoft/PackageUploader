@@ -299,26 +299,24 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             return result.Map();
         }
 
-        public async Task<GameSubmission> CreateSubmissionRequestAsync(string productId, GamePackageBranch originPackageBranch, string destinationSandboxName, CancellationToken ct)
+        public async Task<GameSubmission> CreateSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationSandboxName, CancellationToken ct)
         {
-            var body = new IngestionSubmissionCreationRequest
+            if (string.IsNullOrWhiteSpace(productId))
             {
-                ResourceType = "SubmissionCreationRequest",
-                Targets = new List<TypeValuePair>
-                {
-                    new TypeValuePair
-                    {
-                        Type = "Sandbox",
-                        Value = destinationSandboxName,
-                    }
-                },
-                Resources = new List<TypeValuePair>()
-            };
-            body.Resources.Add(new TypeValuePair
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
             {
-                Type = "Package",
-                Value = originPackageBranch.CurrentDraftInstanceId,
-            });
+                throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(destinationSandboxName))
+            {
+                throw new ArgumentException($"{nameof(destinationSandboxName)} cannot be null or empty.", nameof(destinationSandboxName));
+            }
+
+            var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationSandboxName).Build();
 
             var submission = await PostAsync<IngestionSubmissionCreationRequest, IngestionSubmission>($"products/{productId}/submissions", body, ct).ConfigureAwait(false);
 
@@ -334,7 +332,21 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
         public async Task<GameSubmission> GetGameSubmissionAsync(string productId, string submissionId, CancellationToken ct)
         {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(submissionId))
+            {
+                throw new ArgumentException($"{nameof(submissionId)} cannot be null or empty.", nameof(submissionId));
+            }
+
             var submission = await GetAsync<IngestionSubmission>($"products/{productId}/submissions/{submissionId}", ct).ConfigureAwait(false);
+            if (submission is null)
+            {
+                throw new SubmissionNotFoundException($"Submission for product '{productId}' and submissionId '{submissionId}' not found.");
+            }
 
             var gameSubmission = submission.Map();
 
@@ -350,19 +362,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         {
             var validations = GetAsyncEnumerable<IngestionSubmissionValidationItem>($"products/{productId}/submissions/{submissionId}/validations", ct);
 
-            var items = new List<GameSubmissionValidationItem>();
-
-            await foreach (var validation in validations)
-            {
-                items.Add(new GameSubmissionValidationItem
-                {
-                    ErrorCode = validation.ErrorCode,
-                    Message = validation.Message,
-                    Resource = validation.Resource,
-                    Severity = validation.Severity
-                });
-            }
-
+            var items = await validations.Select(x => x.Map()).ToListAsync(ct);
             return items;
         }
     }

@@ -22,7 +22,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         Task<GamePackageAsset> CommitPackageAssetAsync(string productId, string packageId, string packageAssetId, CancellationToken ct);
         Task<GamePackageConfiguration> GetPackageConfigurationAsync(string productId, string currentDraftInstanceId, CancellationToken ct);
         Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(string productId, GamePackageConfiguration gamePackageConfiguration, CancellationToken ct);
-        Task<GameSubmission> CreateSubmissionRequestAsync(string productId, GamePackageBranch originPackageBranch, string destinationSandboxName, CancellationToken ct);
+        Task<GameSubmission> CreateSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationSandboxName, CancellationToken ct);
         Task<GameSubmission> GetGameSubmissionAsync(string productId, string submissionId, CancellationToken ct);
     }
 }
