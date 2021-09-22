@@ -60,10 +60,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             };
 
         private static GamePackageState GetState(this IngestionGamePackage ingestionGamePackage) =>
-            ingestionGamePackage.State is null ? GamePackageState.Unknown :
-            Enum.TryParse(ingestionGamePackage.State, true, out GamePackageState gamePackageState)
-                ? gamePackageState
-                : GamePackageState.Unknown;
+            ingestionGamePackage?.State is null ? default : GetEnum<GamePackageState>(ingestionGamePackage.State);
+
+        private static TEnum GetEnum<TEnum>(string value) where TEnum : struct =>
+            value is null ? default : Enum.TryParse(value, true, out TEnum result) ? result : default;
 
         private static XfusUploadInfo Map(this IngestionXfusUploadInfo ingestionXfusUploadInfo) =>
             ingestionXfusUploadInfo is null ? null : new()
