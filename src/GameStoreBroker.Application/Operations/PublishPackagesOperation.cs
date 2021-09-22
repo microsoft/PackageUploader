@@ -39,7 +39,7 @@ namespace GameStoreBroker.Application.Operations
                     throw new Exception("You need use the parameter --Retail to allow publish packages to RETAIL sandbox");
                 }
 
-                var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+                var packageBranch = await _storeBrokerService.GetPackageBranchByFriendlyNameAsync(product, _config.BranchFriendlyName, ct).ConfigureAwait(false);
                 var submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
 
                 if (submission.GameSubmissionState == GameSubmissionState.Failed)
