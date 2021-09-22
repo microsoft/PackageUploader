@@ -298,5 +298,72 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             var result = await PutAsync($"products/{productId}/packageConfigurations/{newPackageSet.Id}", packageSet, customHeaders, ct).ConfigureAwait(false);
             return result.Map();
         }
+
+        public async Task<GameSubmission> CreateSubmissionRequestAsync(string productId, GamePackageBranch originPackageBranch, string destinationSandboxName, CancellationToken ct)
+        {
+            var body = new IngestionSubmissionCreationRequest
+            {
+                ResourceType = "SubmissionCreationRequest",
+                Targets = new List<TypeValuePair>
+                {
+                    new TypeValuePair
+                    {
+                        Type = "Sandbox",
+                        Value = destinationSandboxName,
+                    }
+                },
+                Resources = new List<TypeValuePair>()
+            };
+            body.Resources.Add(new TypeValuePair
+            {
+                Type = "Package",
+                Value = originPackageBranch.CurrentDraftInstanceId,
+            });
+
+            var submission = await PostAsync<IngestionSubmissionCreationRequest, IngestionSubmission>($"products/{productId}/submissions", body, ct).ConfigureAwait(false);
+
+            var gameSubmission = submission.Map();
+
+            if (gameSubmission.GameSubmissionState == GameSubmissionState.Failed) 
+            {
+                gameSubmission.SubmissionValidationItems = await GetGameSubmissionValidationItemsFromFailureAsync(productId, submission.Id, ct);
+            }
+
+            return gameSubmission;
+        }
+
+        public async Task<GameSubmission> GetGameSubmissionAsync(string productId, string submissionId, CancellationToken ct)
+        {
+            var submission = await GetAsync<IngestionSubmission>($"products/{productId}/submissions/{submissionId}", ct).ConfigureAwait(false);
+
+            var gameSubmission = submission.Map();
+
+            if (gameSubmission.GameSubmissionState == GameSubmissionState.Failed)
+            {
+                gameSubmission.SubmissionValidationItems = await GetGameSubmissionValidationItemsFromFailureAsync(productId, submission.Id, ct);
+            }
+
+            return gameSubmission;
+        }
+
+        private async Task<List<GameSubmissionValidationItem>> GetGameSubmissionValidationItemsFromFailureAsync(string productId, string submissionId, CancellationToken ct)
+        {
+            var validations = GetAsyncEnumerable<IngestionSubmissionValidationItem>($"products/{productId}/submissions/{submissionId}/validations", ct);
+
+            var items = new List<GameSubmissionValidationItem>();
+
+            await foreach (var validation in validations)
+            {
+                items.Add(new GameSubmissionValidationItem
+                {
+                    ErrorCode = validation.ErrorCode,
+                    Message = validation.Message,
+                    Resource = validation.Resource,
+                    Severity = validation.Severity
+                });
+            }
+
+            return items;
+        }
     }
 }

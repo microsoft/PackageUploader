@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using System.Threading;
 using System.Threading.Tasks;
 using GameStoreBroker.Application.Extensions;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 
 namespace GameStoreBroker.Application.Operations
 {
@@ -34,13 +35,21 @@ namespace GameStoreBroker.Application.Operations
             if (!string.IsNullOrWhiteSpace(_config.BranchFriendlyName))
             {
                 var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+                var submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct);
+
+                if (submission.GameSubmissionState == GameSubmissionState.Failed)
+                {
+                    _logger.LogError("Failed to publish.");
+                }
+                else if (submission.GameSubmissionState == GameSubmissionState.Published) 
+                {
+                    _logger.LogInformation("Game published.");
+                }
             }
             else if (!string.IsNullOrWhiteSpace(_config.FlightName))
             {
                 // var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
             }
-
-            await Task.Delay(0);
         }
     }
 }
