@@ -5,6 +5,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
 {
     internal enum IngestionSubmissionSubstate
     {
+        Unknown,
         InDraft,
         Submitted,
         Cancelled,
