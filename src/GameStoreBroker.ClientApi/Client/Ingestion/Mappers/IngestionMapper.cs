@@ -14,20 +14,24 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
     {
         private static GameSubmissionState GetGameSubmissionState(this IngestionSubmission ingestionSubmission) =>
             ingestionSubmission is null ? default :
-            (ingestionSubmission.PendingUpdateInfo.Status.ToLower(), ingestionSubmission.State.ToLower(), ingestionSubmission.Substate.ToLower()) switch
+            (
+                GetEnum<IngestionPendingUpdateStatus>(ingestionSubmission.PendingUpdateInfo.Status),
+                GetEnum<IngestionSubmissionState>(ingestionSubmission.State),
+                GetEnum<IngestionSubmissionSubstate>(ingestionSubmission.Substate)
+            ) switch
             {
-                ("failed", _, _) => GameSubmissionState.Failed,
-                ("running", _, _) => GameSubmissionState.InProgress,
-                ("completed", "published", _) => GameSubmissionState.Published,
-                ("completed", "inprogress", "indraft") => GameSubmissionState.InProgress,
-                ("completed", "inprogress", "submitted") => GameSubmissionState.Published, // not sure
-                ("completed", "inprogress", "failed") => GameSubmissionState.Failed,
-                ("completed", "inprogress", "failedincertification") => GameSubmissionState.Failed,
-                ("completed", "inprogress", "readytopublish") => GameSubmissionState.Published, // not sure
-                ("completed", "inprogress", "publishing") => GameSubmissionState.InProgress,
-                ("completed", "inprogress", "published") => GameSubmissionState.Published,
-                ("completed", "inprogress", "instore") => GameSubmissionState.Published,
-                _ => GameSubmissionState.NotStarted
+                (IngestionPendingUpdateStatus.Failed, _, _) => GameSubmissionState.Failed,
+                (IngestionPendingUpdateStatus.Running, _, _) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.Published, _) => GameSubmissionState.Published,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.InDraft) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Submitted) => GameSubmissionState.Published, // not sure
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Failed) => GameSubmissionState.Failed,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.FailedInCertification) => GameSubmissionState.Failed,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.ReadyToPublish) => GameSubmissionState.Published, // not sure
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Publishing) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Published) => GameSubmissionState.Published,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.InStore) => GameSubmissionState.Published,
+                _ => default,
             };
 
         public static GameSubmission Map(this IngestionSubmission ingestionSubmission) =>
