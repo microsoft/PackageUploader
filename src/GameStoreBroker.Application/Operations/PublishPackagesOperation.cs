@@ -1,15 +1,15 @@
-﻿using GameStoreBroker.Application.Config;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using GameStoreBroker.Application.Config;
+using GameStoreBroker.Application.Extensions;
 using GameStoreBroker.ClientApi;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Extensions.Options;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using GameStoreBroker.Application.Extensions;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 
 namespace GameStoreBroker.Application.Operations
 {
