@@ -3,7 +3,6 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using GameStoreBroker.ClientApi.Client.Xfus;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
@@ -262,7 +261,6 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, IGameConfiguration gameConfiguration, CancellationToken ct)
         {
-
             if (product is null)
             {
                 throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
@@ -475,15 +473,40 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, int minutesToWaitForPublishing, CancellationToken ct)
         {
-            var gameSubmission = await _ingestionHttpClient.CreateSubmissionRequestAsync(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationSandboxName, ct);
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
 
-            gameSubmission = await WaitForPackagePublishingAsync(product.ProductId, gameSubmission, minutesToWaitForPublishing, ct);
+            if (originPackageBranch is null)
+            {
+                throw new ArgumentNullException(nameof(originPackageBranch), $"{nameof(originPackageBranch)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(destinationSandboxName))
+            {
+                throw new ArgumentException($"{nameof(destinationSandboxName)} cannot be null or empty.", nameof(destinationSandboxName));
+            }
+
+            var gameSubmission = await _ingestionHttpClient.CreateSubmissionRequestAsync(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationSandboxName, ct).ConfigureAwait(false);
+
+            gameSubmission = await WaitForPackagePublishingAsync(product.ProductId, gameSubmission, minutesToWaitForPublishing, ct).ConfigureAwait(false);
 
             return gameSubmission;
         }
 
         public async Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, int minutesToWaitForPublishing, CancellationToken ct)
         {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (gamePackageFlight is null)
+            {
+                throw new ArgumentNullException(nameof(gamePackageFlight), $"{nameof(gamePackageFlight)} cannot be null.");
+            }
+
             throw new NotImplementedException();
         }
 
@@ -538,20 +561,20 @@ namespace GameStoreBroker.ClientApi
             return processingPackage;
         }
 
-        private async Task<GameSubmission> WaitForPackagePublishingAsync(string productId, GameSubmission gameSubmission, int minutestoWaitForPublishing, CancellationToken ct)
+        private async Task<GameSubmission> WaitForPackagePublishingAsync(string productId, GameSubmission gameSubmission, int minutesToWait, CancellationToken ct)
         {
             await Task.Delay(TimeSpan.FromSeconds(10), ct).ConfigureAwait(false);
-            gameSubmission = await _ingestionHttpClient.GetGameSubmissionAsync(productId, gameSubmission.Id, ct);
+            gameSubmission = await _ingestionHttpClient.GetGameSubmissionAsync(productId, gameSubmission.Id, ct).ConfigureAwait(false);
 
-            while (gameSubmission.GameSubmissionState is GameSubmissionState.InProgress && minutestoWaitForPublishing > 0)
+            while (gameSubmission.GameSubmissionState is GameSubmissionState.InProgress && minutesToWait > 0)
             {
-                _logger.LogInformation("Package still in publishing, waiting another 1 minute. Will wait a further {minutestoWaitForPublishing} minute(s) after this.", minutestoWaitForPublishing);
+                _logger.LogInformation("Package still in publishing, waiting another 1 minute. Will wait a further {minutesToWait} minute(s) after this.", minutesToWait);
 
                 await Task.Delay(TimeSpan.FromMinutes(1), ct).ConfigureAwait(false);
 
-                gameSubmission = await _ingestionHttpClient.GetGameSubmissionAsync(productId, gameSubmission.Id, ct);
+                gameSubmission = await _ingestionHttpClient.GetGameSubmissionAsync(productId, gameSubmission.Id, ct).ConfigureAwait(false);
 
-                minutestoWaitForPublishing -= 1;
+                minutesToWait -= 1;
             }
 
             return gameSubmission;

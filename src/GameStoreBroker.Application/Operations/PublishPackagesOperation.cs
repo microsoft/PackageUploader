@@ -40,7 +40,7 @@ namespace GameStoreBroker.Application.Operations
                 }
 
                 var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
-                var submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct);
+                var submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
 
                 if (submission.GameSubmissionState == GameSubmissionState.Failed)
                 {
