@@ -3,6 +3,7 @@
 
 using GameStoreBroker.ClientApi.Client.Ingestion;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
 using GameStoreBroker.ClientApi.Client.Xfus;
 using GameStoreBroker.ClientApi.Models;
 using Microsoft.Extensions.Logging;
@@ -472,6 +473,21 @@ namespace GameStoreBroker.ClientApi
             return result;
         }
 
+        public async Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, int minutesToWaitForPublishing, CancellationToken ct)
+        {
+            var submissionCreationRequest = new IngestionSubmissionCreationRequest
+            {
+
+            };
+
+            return null;
+        }
+
+        public async Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, int minutesToWaitForPublishing, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(assetFilePath))
@@ -523,12 +539,7 @@ namespace GameStoreBroker.ClientApi
             return processingPackage;
         }
 
-        public Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, CancellationToken ct)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, CancellationToken ct)
+        private async Task<GameSubmission> WaitForPackagePublishingAsync(GameSubmission gameSubmission, int minutestoWaitForPublishing, CancellationToken ct)
         {
             throw new NotImplementedException();
         }

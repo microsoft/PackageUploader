@@ -34,13 +34,12 @@ namespace GameStoreBroker.Application.Operations
             if (!string.IsNullOrWhiteSpace(_config.BranchFriendlyName))
             {
                 var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+                var submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct);
             }
             else if (!string.IsNullOrWhiteSpace(_config.FlightName))
             {
                 // var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
             }
-
-            await Task.Delay(0);
         }
     }
 }
