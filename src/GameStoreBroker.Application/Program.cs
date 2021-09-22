@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
@@ -32,6 +33,7 @@ namespace GameStoreBroker.Application
         private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app");
         private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "The location of the config file").Required();
         private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "The format of the config file");
+        private static readonly Option<bool> RetailOption = new(new[] { "--Retail" }, "Allow publish packages to RETAIL sandbox");
 
         internal enum ConfigFileFormat
         {
@@ -104,6 +106,14 @@ namespace GameStoreBroker.Application
 
             var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => $"{nameof(AadAuthInfo)}:{nameof(AadAuthInfo.ClientSecret)}");
             builder.AddCommandLine(args, switchMappings);
+
+            if (invocationContext.GetOptionValue(RetailOption))
+            {
+                builder.AddInMemoryCollection(new List<KeyValuePair<string, string>>
+                {
+                    new (nameof(PublishPackagesOperationConfig.Retail), true.ToString())
+                });
+            }
         }
 
         private static CommandLineBuilder BuildCommandLine()
@@ -132,7 +142,7 @@ namespace GameStoreBroker.Application
                 }.AddOperationHandler<ImportPackagesOperation>(),
                 new Command("PublishPackages", "Publishes all game packages from a branch or flight to a destination sandbox or flight")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, RetailOption,
                 }.AddOperationHandler<PublishPackagesOperation>(),
             };
             rootCommand.AddGlobalOption(VerboseOption);

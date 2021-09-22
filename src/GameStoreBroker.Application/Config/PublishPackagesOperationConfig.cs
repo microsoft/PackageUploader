@@ -9,6 +9,7 @@ namespace GameStoreBroker.Application.Config
 
         public string DestinationSandboxName { get; set; }
         public int MinutesToWaitForPublishing { get; set; }
+        public bool Retail { get; set; }
 
         protected override void Validate(IList<ValidationResult> validationResults)
         {
