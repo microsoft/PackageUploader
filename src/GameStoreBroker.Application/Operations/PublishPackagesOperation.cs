@@ -42,8 +42,7 @@ namespace GameStoreBroker.Application.Operations
                 }
 
                 var packageBranch = await _storeBrokerService.GetPackageBranchByFriendlyNameAsync(product, _config.BranchFriendlyName, ct).ConfigureAwait(false);
-                submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
-
+                submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
             }
             else if (!string.IsNullOrWhiteSpace(_config.FlightName) && string.IsNullOrWhiteSpace(_config.BranchFriendlyName) && string.IsNullOrWhiteSpace(_config.DestinationSandboxName))
             {
@@ -55,13 +54,7 @@ namespace GameStoreBroker.Application.Operations
                 throw new Exception($"{nameof(_config.FlightName)} or ({nameof(_config.BranchFriendlyName)} and {nameof(_config.DestinationSandboxName)}) is required.");
             }
 
-            _logger.LogInformation(submission.GameSubmissionState switch
-            {
-                GameSubmissionState.Failed => "Failed to publish.",
-                GameSubmissionState.Published => "Game published.",
-                GameSubmissionState.InProgress => "Publish still in progress.",
-                _ => $"Submission state: {submission.GameSubmissionState}",
-            });
+            _logger.LogInformation("Published package with submission id: {submissionId}", submission.Id);
         }
     }
 }
