@@ -19,6 +19,8 @@ namespace GameStoreBroker.Application.Config
         public bool IsManualPublish { get; init; }
         public string CertificationNotes { get; set; }
 
+        private const string RetailSandboxName = "RETAIL";
+
         protected override void Validate(IList<ValidationResult> validationResults)
         {
             if ((!string.IsNullOrWhiteSpace(FlightName) || string.IsNullOrWhiteSpace(BranchFriendlyName) || string.IsNullOrWhiteSpace(DestinationSandboxName)) &&
@@ -26,6 +28,12 @@ namespace GameStoreBroker.Application.Config
             {
                 validationResults.Add(new ValidationResult($"{nameof(FlightName)} or ({nameof(BranchFriendlyName)} and {nameof(DestinationSandboxName)}) field is required.",
                     new[] { nameof(FlightName), nameof(BranchFriendlyName), nameof(DestinationSandboxName) }));
+            }
+
+            if (!string.IsNullOrWhiteSpace(DestinationSandboxName) && DestinationSandboxName.Equals(RetailSandboxName, StringComparison.OrdinalIgnoreCase) && !Retail)
+            {
+                validationResults.Add(new ValidationResult($"The parameter --Retail is needed to allow publish packages to {RetailSandboxName} sandbox.", 
+                    new[] { nameof(DestinationSandboxName) }));
             }
         }
     }
