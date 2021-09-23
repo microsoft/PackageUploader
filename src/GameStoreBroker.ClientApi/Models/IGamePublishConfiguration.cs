@@ -28,7 +28,7 @@ namespace GameStoreBroker.ClientApi.Models
             {
                 CertificationNotes = CertificationNotes,
                 IsManualPublish = IsManualPublish,
-                ReleaseTimeInUtc = ReleaseTimeInUtc,
+                ReleaseTimeInUtc = IsManualPublish ? null : ReleaseTimeInUtc,
             };
     }
 }
