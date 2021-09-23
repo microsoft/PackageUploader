@@ -37,12 +37,12 @@ namespace GameStoreBroker.Application.Operations
             if (string.IsNullOrWhiteSpace(_config.FlightName) && !string.IsNullOrWhiteSpace(_config.BranchFriendlyName) && !string.IsNullOrWhiteSpace(_config.DestinationSandboxName))
             {
                 var packageBranch = await _storeBrokerService.GetPackageBranchByFriendlyNameAsync(product, _config.BranchFriendlyName, ct).ConfigureAwait(false);
-                submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
+                submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.PublishConfiguration, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
             }
             else if (!string.IsNullOrWhiteSpace(_config.FlightName) && string.IsNullOrWhiteSpace(_config.BranchFriendlyName) && string.IsNullOrWhiteSpace(_config.DestinationSandboxName))
             {
                 var packageFlight = await _storeBrokerService.GetPackageFlightByFlightNameAsync(product, _config.FlightName, ct).ConfigureAwait(false);
-                submission = await _storeBrokerService.PublishPackagesToFlightAsync(product, packageFlight, _config, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
+                submission = await _storeBrokerService.PublishPackagesToFlightAsync(product, packageFlight, _config.PublishConfiguration, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
             }
             else
             {

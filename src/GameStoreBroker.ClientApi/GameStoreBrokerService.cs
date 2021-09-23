@@ -492,7 +492,7 @@ namespace GameStoreBroker.ClientApi
             return await PublishPackagesToSandboxAsync(product, originPackageBranch, destinationSandboxName, null, minutesToWaitForPublishing, ct).ConfigureAwait(true);
         }
 
-        public async Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, IGamePublishConfiguration gameSubmissionConfiguration, int minutesToWaitForPublishing, CancellationToken ct)
+        public async Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, GamePublishConfiguration gameSubmissionConfiguration, int minutesToWaitForPublishing, CancellationToken ct)
         {
             if (product is null)
             {
@@ -522,7 +522,7 @@ namespace GameStoreBroker.ClientApi
             return await PublishPackagesToFlightAsync(product, gamePackageFlight, null, minutesToWaitForPublishing, ct).ConfigureAwait(false);
         }
 
-        public async Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, IGamePublishConfiguration gameSubmissionConfiguration, int minutesToWaitForPublishing, CancellationToken ct)
+        public async Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, GamePublishConfiguration gameSubmissionConfiguration, int minutesToWaitForPublishing, CancellationToken ct)
         {
             if (product is null)
             {

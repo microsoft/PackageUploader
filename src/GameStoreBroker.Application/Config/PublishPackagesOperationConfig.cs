@@ -8,16 +8,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Config
 {
-    internal sealed class PublishPackagesOperationConfig : PackageBranchOperationConfig, IGamePublishConfiguration
+    internal sealed class PublishPackagesOperationConfig : PackageBranchOperationConfig
     {
         internal override string GetOperationName() => "PublishPackages";
 
         public string DestinationSandboxName { get; set; }
         public int MinutesToWaitForPublishing { get; set; }
         public bool Retail { get; set; }
-        public DateTime? ReleaseTimeInUtc { get; init; }
-        public bool IsManualPublish { get; init; }
-        public string CertificationNotes { get; set; }
+        public GamePublishConfiguration PublishConfiguration { get; set; }
 
         private const string RetailSandboxName = "RETAIL";
 

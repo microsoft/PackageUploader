@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 
 namespace GameStoreBroker.ClientApi.Models
 {
-    public class GamePublishConfiguration : IGamePublishConfiguration
+    public class GamePublishConfiguration
     {
         /// <summary>
         /// Scheduled release time (UTC). Default value is null, and submission will be published as soon as possible.
@@ -21,5 +22,13 @@ namespace GameStoreBroker.ClientApi.Models
         /// Certification notes
         /// </summary>
         public string CertificationNotes { get; set; }
+
+        internal GameSubmissionOptions ToGameSubmissionOptions() =>
+            new()
+            {
+                CertificationNotes = CertificationNotes,
+                IsManualPublish = IsManualPublish,
+                ReleaseTimeInUtc = IsManualPublish ? null : ReleaseTimeInUtc,
+            };
     }
 }
