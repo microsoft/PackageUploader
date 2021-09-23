@@ -513,6 +513,8 @@ namespace GameStoreBroker.ClientApi
                 : new GameSubmissionOptions
                 {
                     CertificationNotes = gameSubmissionConfiguration.CertificationNotes,
+                    IsManualPublish = gameSubmissionConfiguration.IsManualPublish,
+                    ReleaseTimeInUtc = gameSubmissionConfiguration.ReleaseTimeInUtc,
                 };
 
             var gameSubmission = await _ingestionHttpClient.CreateSandboxSubmissionRequestAsync(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationSandboxName, gameSubmissionOptions, ct).ConfigureAwait(false);

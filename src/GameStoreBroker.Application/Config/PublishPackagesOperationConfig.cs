@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -14,6 +15,8 @@ namespace GameStoreBroker.Application.Config
         public string DestinationSandboxName { get; set; }
         public int MinutesToWaitForPublishing { get; set; }
         public bool Retail { get; set; }
+        public DateTime? ReleaseTimeInUtc { get; init; }
+        public bool IsManualPublish { get; init; }
         public string CertificationNotes { get; set; }
 
         protected override void Validate(IList<ValidationResult> validationResults)
