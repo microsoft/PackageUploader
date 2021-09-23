@@ -5,7 +5,7 @@ using System;
 
 namespace GameStoreBroker.ClientApi.Models
 {
-    public interface IGameSubmissionConfiguration
+    public class GamePublishConfiguration : IGamePublishConfiguration
     {
         /// <summary>
         /// Scheduled release time (UTC). Default value is null, and submission will be published as soon as possible.

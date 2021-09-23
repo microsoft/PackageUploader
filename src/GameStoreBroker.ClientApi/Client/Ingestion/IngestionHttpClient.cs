@@ -362,6 +362,11 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
         public async Task<GameSubmission> CreateFlightSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationFlightId, CancellationToken ct)
         {
+            return await CreateFlightSubmissionRequestAsync(productId, currentDraftInstanceId, destinationFlightId, null, ct).ConfigureAwait(false);
+        }
+
+        public async Task<GameSubmission> CreateFlightSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationFlightId, GameSubmissionOptions gameSubmissionOptions, CancellationToken ct)
+        {
             if (string.IsNullOrWhiteSpace(productId))
             {
                 throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
@@ -377,7 +382,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(destinationFlightId)} cannot be null or empty.", nameof(destinationFlightId));
             }
 
-            var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationFlightId, IngestionSubmissionTargetType.Flight).Build();
+            var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationFlightId, IngestionSubmissionTargetType.Flight, gameSubmissionOptions).Build();
 
             var submission = await PostAsync<IngestionSubmissionCreationRequest, IngestionSubmission>($"products/{productId}/submissions", body, ct).ConfigureAwait(false);
 

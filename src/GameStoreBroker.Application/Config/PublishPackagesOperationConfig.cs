@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Config
 {
-    internal sealed class PublishPackagesOperationConfig : PackageBranchOperationConfig, IGameSubmissionConfiguration
+    internal sealed class PublishPackagesOperationConfig : PackageBranchOperationConfig, IGamePublishConfiguration
     {
         internal override string GetOperationName() => "PublishPackages";
 
