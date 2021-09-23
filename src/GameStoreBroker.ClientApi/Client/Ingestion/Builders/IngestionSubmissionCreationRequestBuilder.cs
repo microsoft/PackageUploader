@@ -25,17 +25,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
                 ResourceType = ResourceType,
                 Targets = new List<TypeValuePair>
                 {
-                    new TypeValuePair
+                    new()
                     {
-                        Type = "Sandbox",
+                        Type = IngestionSubmissionTargetType.Sandbox.ToString(),
                         Value = _destinationSandboxName,
                     }
                 },
                 Resources = new List<TypeValuePair>
                 {
-                    new ()
+                    new()
                     {
-                        Type = "Package",
+                        Type = IngestionBranchModuleType.Package.ToString(),
                         Value = _currentDraftInstanceId,
                     }
                 }
