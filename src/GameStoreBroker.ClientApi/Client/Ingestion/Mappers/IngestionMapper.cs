@@ -24,13 +24,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 (IngestionPendingUpdateStatus.Running, _, _) => GameSubmissionState.InProgress,
                 (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.Published, _) => GameSubmissionState.Published,
                 (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.InDraft) => GameSubmissionState.InProgress,
-                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Submitted) => GameSubmissionState.Published, // not sure
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Submitted) => GameSubmissionState.InProgress,
                 (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Failed) => GameSubmissionState.Failed,
                 (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.FailedInCertification) => GameSubmissionState.Failed,
-                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.ReadyToPublish) => GameSubmissionState.Published, // not sure
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.ReadyToPublish) => GameSubmissionState.InProgress,
                 (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Publishing) => GameSubmissionState.InProgress,
-                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Published) => GameSubmissionState.Published,
-                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.InStore) => GameSubmissionState.Published,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Published) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.InStore) => GameSubmissionState.InProgress,
                 _ => default,
             };
 
