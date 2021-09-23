@@ -14,6 +14,7 @@ namespace GameStoreBroker.ClientApi
         Task<GameProduct> GetProductByProductIdAsync(string productId, CancellationToken ct);
         Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(GameProduct product, string branchFriendlyName, CancellationToken ct);
         Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct);
+        Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct);
         Task<GamePackageConfiguration> GetPackageConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct);
         Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(GameProduct product, GamePackageConfiguration packageConfiguration, CancellationToken ct);
         Task<GamePackage> UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct);

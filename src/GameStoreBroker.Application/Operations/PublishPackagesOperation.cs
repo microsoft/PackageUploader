@@ -32,29 +32,36 @@ namespace GameStoreBroker.Application.Operations
 
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
 
-            if (!string.IsNullOrWhiteSpace(_config.BranchFriendlyName))
+            GameSubmission submission;
+
+            if (string.IsNullOrWhiteSpace(_config.FlightName) && !string.IsNullOrWhiteSpace(_config.BranchFriendlyName) && !string.IsNullOrWhiteSpace(_config.DestinationSandboxName))
             {
-                if (_config.DestinationSandboxName.Equals("retail", StringComparison.OrdinalIgnoreCase) && !_config.Retail)
+                if (_config.DestinationSandboxName.Equals("Retail", StringComparison.OrdinalIgnoreCase) && !_config.Retail)
                 {
                     throw new Exception("You need use the parameter --Retail to allow publish packages to RETAIL sandbox");
                 }
 
                 var packageBranch = await _storeBrokerService.GetPackageBranchByFriendlyNameAsync(product, _config.BranchFriendlyName, ct).ConfigureAwait(false);
-                var submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
+                submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
 
-                if (submission.GameSubmissionState == GameSubmissionState.Failed)
-                {
-                    _logger.LogError("Failed to publish.");
-                }
-                else if (submission.GameSubmissionState == GameSubmissionState.Published) 
-                {
-                    _logger.LogInformation("Game published.");
-                }
             }
-            else if (!string.IsNullOrWhiteSpace(_config.FlightName))
+            else if (!string.IsNullOrWhiteSpace(_config.FlightName) && string.IsNullOrWhiteSpace(_config.BranchFriendlyName) && string.IsNullOrWhiteSpace(_config.DestinationSandboxName))
             {
-                // var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+                var packageFlight = await _storeBrokerService.GetPackageFlightByFlightNameAsync(product, _config.FlightName, ct).ConfigureAwait(false);
+                submission = await _storeBrokerService.PublishPackagesToFlightAsync(product, packageFlight, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
             }
+            else
+            {
+                throw new Exception($"{nameof(_config.FlightName)} or ({nameof(_config.BranchFriendlyName)} and {nameof(_config.DestinationSandboxName)}) is required.");
+            }
+
+            _logger.LogInformation(submission.GameSubmissionState switch
+            {
+                GameSubmissionState.Failed => "Failed to publish.",
+                GameSubmissionState.Published => "Game published.",
+                GameSubmissionState.InProgress => "Publish still in progress.",
+                _ => $"Submission state: {submission.GameSubmissionState}",
+            });
         }
     }
 }

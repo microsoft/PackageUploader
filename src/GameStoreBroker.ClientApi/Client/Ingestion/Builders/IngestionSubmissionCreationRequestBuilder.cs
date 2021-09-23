@@ -10,13 +10,15 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
     internal class IngestionSubmissionCreationRequestBuilder : IBuilder<IngestionSubmissionCreationRequest>
     {
         private readonly string _currentDraftInstanceId;
-        private readonly string _destinationSandboxName;
+        private readonly string _target;
+        private readonly IngestionSubmissionTargetType _targetType;
         private const string ResourceType = "SubmissionCreationRequest";
 
-        public IngestionSubmissionCreationRequestBuilder(string currentDraftInstanceId, string destinationSandboxName)
+        public IngestionSubmissionCreationRequestBuilder(string currentDraftInstanceId, string target, IngestionSubmissionTargetType targetType)
         {
             _currentDraftInstanceId = currentDraftInstanceId ?? throw new ArgumentNullException(nameof(currentDraftInstanceId));
-            _destinationSandboxName = destinationSandboxName ?? throw new ArgumentNullException(nameof(destinationSandboxName));
+            _target = target ?? throw new ArgumentNullException(nameof(target));
+            _targetType = targetType;
         }
 
         public IngestionSubmissionCreationRequest Build() =>
@@ -27,8 +29,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
                 {
                     new()
                     {
-                        Type = IngestionSubmissionTargetType.Sandbox.ToString(),
-                        Value = _destinationSandboxName,
+                        Type = _targetType.ToString(),
+                        Value = _target,
                     }
                 },
                 Resources = new List<TypeValuePair>

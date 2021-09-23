@@ -82,6 +82,22 @@ namespace GameStoreBroker.ClientApi
             return await _ingestionHttpClient.GetPackageBranchByFriendlyNameAsync(product.ProductId, branchFriendlyName, ct).ConfigureAwait(false);
         }
 
+        public async Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct)
+        {
+            if (product is null)
+            {
+                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(flightName))
+            {
+                throw new ArgumentException($"{nameof(flightName)} cannot be null or empty.", nameof(flightName));
+            }
+
+            _logger.LogDebug("Requesting game package flight by flight name '{flightName}'.", flightName);
+            return await _ingestionHttpClient.GetPackageFlightByFlightNameAsync(product.ProductId, flightName, ct).ConfigureAwait(false);
+        }
+
         public async Task<GamePackageConfiguration> GetPackageConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct)
         {
 
@@ -488,7 +504,7 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentException($"{nameof(destinationSandboxName)} cannot be null or empty.", nameof(destinationSandboxName));
             }
 
-            var gameSubmission = await _ingestionHttpClient.CreateSubmissionRequestAsync(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationSandboxName, ct).ConfigureAwait(false);
+            var gameSubmission = await _ingestionHttpClient.CreateSandboxSubmissionRequestAsync(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationSandboxName, ct).ConfigureAwait(false);
 
             gameSubmission = await WaitForPackagePublishingAsync(product.ProductId, gameSubmission, minutesToWaitForPublishing, ct).ConfigureAwait(false);
 
@@ -507,7 +523,11 @@ namespace GameStoreBroker.ClientApi
                 throw new ArgumentNullException(nameof(gamePackageFlight), $"{nameof(gamePackageFlight)} cannot be null.");
             }
 
-            throw new NotImplementedException();
+            var gameSubmission = await _ingestionHttpClient.CreateFlightSubmissionRequestAsync(product.ProductId, gamePackageFlight.CurrentDraftInstanceId, gamePackageFlight.Id, ct).ConfigureAwait(false);
+
+            gameSubmission = await WaitForPackagePublishingAsync(product.ProductId, gameSubmission, minutesToWaitForPublishing, ct).ConfigureAwait(false);
+
+            return gameSubmission;
         }
 
         private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)

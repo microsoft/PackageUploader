@@ -214,5 +214,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 Resource = ingestionSubmissionValidationItem.Resource,
                 Severity = ingestionSubmissionValidationItem.Severity,
             };
+
+        public static GamePackageFlight Map(this IngestionFlight ingestionFlight, GamePackageBranch gamePackageBranch) =>
+            ingestionFlight is null ? null : new()
+            {
+                Id = ingestionFlight.Id,
+                ODataETag = ingestionFlight.ODataETag,
+                ETag = ingestionFlight.ETag,
+                GroupIds = ingestionFlight.GroupIds,
+                FlightName = ingestionFlight.Name,
+                BranchName = gamePackageBranch.Name,
+                CurrentDraftInstanceId = gamePackageBranch.CurrentDraftInstanceId,
+            };
     }
 }
