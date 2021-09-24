@@ -231,7 +231,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 ErrorCode = ingestionSubmissionValidationItem.ErrorCode,
                 Message = ingestionSubmissionValidationItem.Message,
                 Resource = ingestionSubmissionValidationItem.Resource,
-                Severity = ingestionSubmissionValidationItem.Severity,
+                Severity = GetEnum<GameSubmissionValidationSeverity>(ingestionSubmissionValidationItem.Severity),
             };
 
         public static GamePackageFlight Map(this IngestionFlight ingestionFlight, GamePackageBranch gamePackageBranch) =>

@@ -8,6 +8,7 @@ using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,7 +50,19 @@ namespace GameStoreBroker.Application.Operations
                 throw new Exception($"{nameof(_config.FlightName)} or ({nameof(_config.BranchFriendlyName)} and {nameof(_config.DestinationSandboxName)}) is required.");
             }
 
-            _logger.LogInformation("Published package with submission id: {submissionId}", submission.Id);
+            if (submission.SubmissionValidationItems is not null && submission.SubmissionValidationItems.Any())
+            {
+                submission.SubmissionValidationItems.ForEach(validationItem => _logger.Log(GetLogLevel(validationItem.Severity), validationItem.Message));
+            }
         }
+
+        private static LogLevel GetLogLevel(GameSubmissionValidationSeverity severity) =>
+            severity switch
+            {
+                GameSubmissionValidationSeverity.Informational => LogLevel.Information,
+                GameSubmissionValidationSeverity.Warning => LogLevel.Warning,
+                GameSubmissionValidationSeverity.Error => LogLevel.Error,
+                _ => LogLevel.Warning
+            };
     }
 }
