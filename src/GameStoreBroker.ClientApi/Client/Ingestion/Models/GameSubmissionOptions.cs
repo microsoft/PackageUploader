@@ -5,7 +5,7 @@ using System;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GameSubmissionOptions
+    public sealed class GameSubmissionOptions
     {
         /// <summary>
         /// Scheduled release time (UTC). Default value is null, and submission will be published as soon as possible.

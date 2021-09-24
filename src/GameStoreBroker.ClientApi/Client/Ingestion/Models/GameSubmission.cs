@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GameSubmission
+    public sealed class GameSubmission
     {
         /// <summary>
         /// Resource ID
