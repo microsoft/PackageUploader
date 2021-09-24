@@ -8,15 +8,15 @@ namespace GameStoreBroker.ClientApi.Models
 {
     public class GamePublishConfiguration
     {
-        private DateTime? _releaseTimeInUtc;
+        private DateTime? _releaseTime;
 
         /// <summary>
         /// Scheduled release time (UTC). Default value is null, and submission will be published as soon as possible.
         /// </summary>
-        public DateTime? ReleaseTimeInUtc
+        public DateTime? ReleaseTime
         {
-            get => _releaseTimeInUtc;
-            set => _releaseTimeInUtc = GetUtcDateWithHour(value);
+            get => _releaseTime;
+            set => _releaseTime = GetUtcDateWithHour(value);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace GameStoreBroker.ClientApi.Models
             {
                 CertificationNotes = CertificationNotes,
                 IsManualPublish = IsManualPublish,
-                ReleaseTimeInUtc = IsManualPublish ? null : ReleaseTimeInUtc,
+                ReleaseTimeInUtc = IsManualPublish ? null : ReleaseTime,
             };
 
         private static DateTime? GetUtcDateWithHour(DateTime? dateTime)
