@@ -57,7 +57,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
         public static IngestionPublishOption Map(this GameSubmissionOptions gameSubmissionOptions) =>
             gameSubmissionOptions is null ? null : new()
             {
-                ReleaseTimeInUtc = gameSubmissionOptions.ReleaseTimeInUtc,
+                ReleaseTimeInUtc = gameSubmissionOptions.ReleaseTimeInUtc?.ToUniversalTime(),
                 IsManualPublish = gameSubmissionOptions.IsManualPublish,
                 IsAutoPromote = gameSubmissionOptions.IsAutoPromote,
                 CertificationNotes = gameSubmissionOptions.CertificationNotes,
