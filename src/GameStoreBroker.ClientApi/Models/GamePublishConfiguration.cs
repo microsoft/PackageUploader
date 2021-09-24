@@ -8,15 +8,21 @@ namespace GameStoreBroker.ClientApi.Models
 {
     public class GamePublishConfiguration
     {
+        private DateTime? __releaseTimeInUtc;
+
         /// <summary>
         /// Scheduled release time (UTC). Default value is null, and submission will be published as soon as possible.
         /// </summary>
-        public DateTime? ReleaseTimeInUtc { get; init; }
+        public DateTime? ReleaseTimeInUtc
+        {
+            get => __releaseTimeInUtc;
+            set => __releaseTimeInUtc = value?.ToUniversalTime();
+        }
 
         /// <summary>
         /// Flag of if manual publish is enabled. Default value is false.
         /// </summary>
-        public bool IsManualPublish { get; init; }
+        public bool IsManualPublish { get; set; }
 
         /// <summary>
         /// Certification notes
