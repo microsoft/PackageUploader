@@ -50,9 +50,16 @@ namespace GameStoreBroker.Application.Operations
                 throw new Exception($"{nameof(_config.FlightName)} or ({nameof(_config.BranchFriendlyName)} and {nameof(_config.DestinationSandboxName)}) is required.");
             }
 
+            // Log validation errors if any
             if (submission.SubmissionValidationItems is not null && submission.SubmissionValidationItems.Any())
             {
-                submission.SubmissionValidationItems.ForEach(validationItem => _logger.Log(GetLogLevel(validationItem.Severity), validationItem.Message));
+                submission.SubmissionValidationItems.ForEach(validationItem =>
+                {
+                    if (validationItem.Severity is GameSubmissionValidationSeverity.Error)
+                    {
+                        _logger.Log(GetLogLevel(validationItem.Severity), validationItem.Message);
+                    }
+                });
             }
         }
 
