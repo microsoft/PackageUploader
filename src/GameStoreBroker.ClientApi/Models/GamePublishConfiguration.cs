@@ -16,7 +16,7 @@ namespace GameStoreBroker.ClientApi.Models
         public DateTime? ReleaseTimeInUtc
         {
             get => _releaseTimeInUtc;
-            set => _releaseTimeInUtc = value?.ToUniversalTime();
+            set => _releaseTimeInUtc = GetUtcDateWithHour(value);
         }
 
         /// <summary>
@@ -36,5 +36,15 @@ namespace GameStoreBroker.ClientApi.Models
                 IsManualPublish = IsManualPublish,
                 ReleaseTimeInUtc = IsManualPublish ? null : ReleaseTimeInUtc,
             };
+
+        private static DateTime? GetUtcDateWithHour(DateTime? dateTime)
+        {
+            if (!dateTime.HasValue)
+                return null;
+
+            var input = dateTime.Value.ToUniversalTime();
+            var output = new DateTime(input.Year, input.Month, input.Day, input.Hour, 0, 0, DateTimeKind.Utc);
+            return output;
+        }
     }
 }
