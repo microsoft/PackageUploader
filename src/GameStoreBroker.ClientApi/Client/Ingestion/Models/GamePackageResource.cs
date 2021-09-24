@@ -3,7 +3,7 @@
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GamePackageResource
+    public abstract class GamePackageResource
     {
         /// <summary>
         /// ETag

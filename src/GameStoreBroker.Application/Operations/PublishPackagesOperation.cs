@@ -8,6 +8,7 @@ using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,32 +37,39 @@ namespace GameStoreBroker.Application.Operations
 
             if (string.IsNullOrWhiteSpace(_config.FlightName) && !string.IsNullOrWhiteSpace(_config.BranchFriendlyName) && !string.IsNullOrWhiteSpace(_config.DestinationSandboxName))
             {
-                if (_config.DestinationSandboxName.Equals("Retail", StringComparison.OrdinalIgnoreCase) && !_config.Retail)
-                {
-                    throw new Exception("You need use the parameter --Retail to allow publish packages to RETAIL sandbox");
-                }
-
                 var packageBranch = await _storeBrokerService.GetPackageBranchByFriendlyNameAsync(product, _config.BranchFriendlyName, ct).ConfigureAwait(false);
-                submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
-
+                submission = await _storeBrokerService.PublishPackagesToSandboxAsync(product, packageBranch, _config.DestinationSandboxName, _config.PublishConfiguration, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
             }
             else if (!string.IsNullOrWhiteSpace(_config.FlightName) && string.IsNullOrWhiteSpace(_config.BranchFriendlyName) && string.IsNullOrWhiteSpace(_config.DestinationSandboxName))
             {
                 var packageFlight = await _storeBrokerService.GetPackageFlightByFlightNameAsync(product, _config.FlightName, ct).ConfigureAwait(false);
-                submission = await _storeBrokerService.PublishPackagesToFlightAsync(product, packageFlight, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
+                submission = await _storeBrokerService.PublishPackagesToFlightAsync(product, packageFlight, _config.PublishConfiguration, _config.MinutesToWaitForPublishing, ct).ConfigureAwait(false);
             }
             else
             {
                 throw new Exception($"{nameof(_config.FlightName)} or ({nameof(_config.BranchFriendlyName)} and {nameof(_config.DestinationSandboxName)}) is required.");
             }
 
-            _logger.LogInformation(submission.GameSubmissionState switch
+            // Log validation errors if any
+            if (submission.SubmissionValidationItems is not null && submission.SubmissionValidationItems.Any())
             {
-                GameSubmissionState.Failed => "Failed to publish.",
-                GameSubmissionState.Published => "Game published.",
-                GameSubmissionState.InProgress => "Publish still in progress.",
-                _ => $"Submission state: {submission.GameSubmissionState}",
-            });
+                submission.SubmissionValidationItems.ForEach(validationItem =>
+                {
+                    if (validationItem.Severity is GameSubmissionValidationSeverity.Error)
+                    {
+                        _logger.Log(GetLogLevel(validationItem.Severity), validationItem.Message);
+                    }
+                });
+            }
         }
+
+        private static LogLevel GetLogLevel(GameSubmissionValidationSeverity severity) =>
+            severity switch
+            {
+                GameSubmissionValidationSeverity.Informational => LogLevel.Information,
+                GameSubmissionValidationSeverity.Warning => LogLevel.Warning,
+                GameSubmissionValidationSeverity.Error => LogLevel.Error,
+                _ => LogLevel.Warning
+            };
     }
 }

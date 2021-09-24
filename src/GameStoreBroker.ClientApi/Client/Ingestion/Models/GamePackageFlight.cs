@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GamePackageFlight : GamePackageResource
+    public sealed class GamePackageFlight : GamePackageResource
     {
         /// <summary>
         /// Branch friendly Name

@@ -42,6 +42,25 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 PublishedTimeInUtc = ingestionSubmission.PublishedTimeInUtc,
                 ReleaseNumber = ingestionSubmission.ReleaseNumber,
                 GameSubmissionState = ingestionSubmission.GetGameSubmissionState(),
+                SubmissionOption = ingestionSubmission.PublishOption.Map(),
+            };
+
+        private static GameSubmissionOptions Map(this IngestionPublishOption ingestionPublishOption) =>
+            ingestionPublishOption is null ? null : new()
+            {
+                ReleaseTimeInUtc = ingestionPublishOption.ReleaseTimeInUtc,
+                IsManualPublish = ingestionPublishOption.IsManualPublish,
+                IsAutoPromote = ingestionPublishOption.IsAutoPromote,
+                CertificationNotes = ingestionPublishOption.CertificationNotes,
+            };
+
+        public static IngestionPublishOption Map(this GameSubmissionOptions gameSubmissionOptions) =>
+            gameSubmissionOptions is null ? null : new()
+            {
+                ReleaseTimeInUtc = gameSubmissionOptions.ReleaseTimeInUtc?.ToUniversalTime(),
+                IsManualPublish = gameSubmissionOptions.IsManualPublish,
+                IsAutoPromote = gameSubmissionOptions.IsAutoPromote,
+                CertificationNotes = gameSubmissionOptions.CertificationNotes,
             };
 
         public static GameProduct Map(this IngestionGameProduct ingestionGameProduct) =>
@@ -212,7 +231,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 ErrorCode = ingestionSubmissionValidationItem.ErrorCode,
                 Message = ingestionSubmissionValidationItem.Message,
                 Resource = ingestionSubmissionValidationItem.Resource,
-                Severity = ingestionSubmissionValidationItem.Severity,
+                Severity = GetEnum<GameSubmissionValidationSeverity>(ingestionSubmissionValidationItem.Severity),
             };
 
         public static GamePackageFlight Map(this IngestionFlight ingestionFlight, GamePackageBranch gamePackageBranch) =>

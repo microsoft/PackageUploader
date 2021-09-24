@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public class GameSubmission
+    public sealed class GameSubmission
     {
         /// <summary>
         /// Resource ID
@@ -37,5 +37,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         /// Submission validation items
         /// </summary>
         public List<GameSubmissionValidationItem> SubmissionValidationItems { get; internal set; }
+
+        /// <summary>
+        /// Submission publish details
+        /// </summary>
+        public GameSubmissionOptions SubmissionOption { get; internal init; }
     }
 }
