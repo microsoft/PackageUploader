@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace GameStoreBroker.Application.Extensions
 {
@@ -10,7 +11,7 @@ namespace GameStoreBroker.Application.Extensions
     {
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new ()
         {
-            IgnoreNullValues = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
