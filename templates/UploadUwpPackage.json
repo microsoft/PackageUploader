@@ -31,5 +31,14 @@
   "aadAuthInfo": {
     "clientId": "{{ required }}",
     "tenantId": "{{ required }}"
+  },
+  
+  "uploadConfig": {
+    "httpTimeoutMs": 5000,
+    "httpUploadTimeoutMs": 300000,
+    "maxParallelism": 24,
+    "defaultConnectionLimit": -1,
+    "expect100Continue": false,
+    "useNagleAlgorithm": false
   }
 }
