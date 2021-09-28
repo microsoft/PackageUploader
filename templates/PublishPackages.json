@@ -18,7 +18,7 @@
   },
 
   "aadAuthInfo": {
-    "tenantId": "{{ required }}",
-    "clientId": "{{ required }}"
+    "clientId": "{{ required }}",
+    "tenantId": "{{ required }}"
   }
 }
