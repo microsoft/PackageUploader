@@ -12,6 +12,57 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
 {
     internal static class IngestionMapper
     {
+        private static GameSubmissionState GetGameSubmissionState(this IngestionSubmission ingestionSubmission) =>
+            ingestionSubmission is null ? default :
+            (
+                GetEnum<IngestionPendingUpdateStatus>(ingestionSubmission.PendingUpdateInfo.Status),
+                GetEnum<IngestionSubmissionState>(ingestionSubmission.State),
+                GetEnum<IngestionSubmissionSubstate>(ingestionSubmission.Substate)
+            ) switch
+            {
+                (IngestionPendingUpdateStatus.Failed, _, _) => GameSubmissionState.Failed,
+                (IngestionPendingUpdateStatus.Running, _, _) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.Published, _) => GameSubmissionState.Published,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.InDraft) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Submitted) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Failed) => GameSubmissionState.Failed,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.FailedInCertification) => GameSubmissionState.Failed,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.ReadyToPublish) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Publishing) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.Published) => GameSubmissionState.InProgress,
+                (IngestionPendingUpdateStatus.Completed, IngestionSubmissionState.InProgress, IngestionSubmissionSubstate.InStore) => GameSubmissionState.InProgress,
+                _ => default,
+            };
+
+        public static GameSubmission Map(this IngestionSubmission ingestionSubmission) =>
+            ingestionSubmission is null ? null : new()
+            {
+                Id = ingestionSubmission.Id,
+                FriendlyName = ingestionSubmission.FriendlyName,
+                PublishedTimeInUtc = ingestionSubmission.PublishedTimeInUtc,
+                ReleaseNumber = ingestionSubmission.ReleaseNumber,
+                GameSubmissionState = ingestionSubmission.GetGameSubmissionState(),
+                SubmissionOption = ingestionSubmission.PublishOption.Map(),
+            };
+
+        private static GameSubmissionOptions Map(this IngestionPublishOption ingestionPublishOption) =>
+            ingestionPublishOption is null ? null : new()
+            {
+                ReleaseTimeInUtc = ingestionPublishOption.ReleaseTimeInUtc,
+                IsManualPublish = ingestionPublishOption.IsManualPublish,
+                IsAutoPromote = ingestionPublishOption.IsAutoPromote,
+                CertificationNotes = ingestionPublishOption.CertificationNotes,
+            };
+
+        public static IngestionPublishOption Map(this GameSubmissionOptions gameSubmissionOptions) =>
+            gameSubmissionOptions is null ? null : new()
+            {
+                ReleaseTimeInUtc = gameSubmissionOptions.ReleaseTimeInUtc?.ToUniversalTime(),
+                IsManualPublish = gameSubmissionOptions.IsManualPublish,
+                IsAutoPromote = gameSubmissionOptions.IsAutoPromote,
+                CertificationNotes = gameSubmissionOptions.CertificationNotes,
+            };
+
         public static GameProduct Map(this IngestionGameProduct ingestionGameProduct) =>
             ingestionGameProduct is null ? null : new()
             {
@@ -32,10 +83,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
             };
 
         private static GamePackageState GetState(this IngestionGamePackage ingestionGamePackage) =>
-            ingestionGamePackage.State is null ? GamePackageState.Unknown :
-            Enum.TryParse(ingestionGamePackage.State, true, out GamePackageState gamePackageState)
-                ? gamePackageState
-                : GamePackageState.Unknown;
+            ingestionGamePackage?.State is null ? default : GetEnum<GamePackageState>(ingestionGamePackage.State);
+
+        private static TEnum GetEnum<TEnum>(string value) where TEnum : struct =>
+            value is null ? default : Enum.TryParse(value, true, out TEnum result) ? result : default;
 
         private static XfusUploadInfo Map(this IngestionXfusUploadInfo ingestionXfusUploadInfo) =>
             ingestionXfusUploadInfo is null ? null : new()
@@ -172,6 +223,27 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
                 IsEnabled = gameGradualRolloutInfo.IsEnabled,
                 IsSeekEnabled = gameGradualRolloutInfo.IsSeekEnabled,
                 Percentage = gameGradualRolloutInfo.Percentage,
+            };
+
+        public static GameSubmissionValidationItem Map(this IngestionSubmissionValidationItem ingestionSubmissionValidationItem) =>
+            ingestionSubmissionValidationItem is null ? null : new()
+            {
+                ErrorCode = ingestionSubmissionValidationItem.ErrorCode,
+                Message = ingestionSubmissionValidationItem.Message,
+                Resource = ingestionSubmissionValidationItem.Resource,
+                Severity = GetEnum<GameSubmissionValidationSeverity>(ingestionSubmissionValidationItem.Severity),
+            };
+
+        public static GamePackageFlight Map(this IngestionFlight ingestionFlight, GamePackageBranch gamePackageBranch) =>
+            ingestionFlight is null ? null : new()
+            {
+                Id = ingestionFlight.Id,
+                ODataETag = ingestionFlight.ODataETag,
+                ETag = ingestionFlight.ETag,
+                GroupIds = ingestionFlight.GroupIds,
+                FlightName = ingestionFlight.Name,
+                BranchName = gamePackageBranch.Name,
+                CurrentDraftInstanceId = gamePackageBranch.CurrentDraftInstanceId,
             };
     }
 }

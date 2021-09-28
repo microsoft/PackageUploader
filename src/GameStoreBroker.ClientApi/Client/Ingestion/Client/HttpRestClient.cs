@@ -12,6 +12,7 @@ using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,7 +25,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
 
         private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
         {
-            IgnoreNullValues = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };

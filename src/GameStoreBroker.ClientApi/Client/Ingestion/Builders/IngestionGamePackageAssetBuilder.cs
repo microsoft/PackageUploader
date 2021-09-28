@@ -9,7 +9,7 @@ using System.IO;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
 {
-    internal class IngestionGamePackageAssetBuilder
+    internal class IngestionGamePackageAssetBuilder : IBuilder<IngestionGamePackageAsset>
     {
         private readonly string _packageId;
         private readonly FileInfo _fileInfo;
@@ -18,7 +18,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
 
         public IngestionGamePackageAssetBuilder(string packageId, FileInfo fileInfo, GamePackageAssetType packageAssetType)
         {
-            _packageId = packageId;
+            _packageId = packageId ?? throw new ArgumentNullException(nameof(packageId));
             _fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo));
             _packageAssetType = packageAssetType;
         }

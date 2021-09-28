@@ -119,6 +119,31 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
             return branch;
         }
 
+        public async Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(string productId, string flightName, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(flightName))
+            {
+                throw new ArgumentException($"{nameof(flightName)} cannot be null or empty.", nameof(flightName));
+            }
+
+            var flights = GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct);
+
+            var selectedFlight = await flights.FirstOrDefaultAsync(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
+
+            if (selectedFlight is null)
+            {
+                throw new PackageBranchNotFoundException($"Package branch with flight name '{flightName}' not found.");
+            }
+
+            var branch = await GetPackageBranchByFriendlyNameAsync(productId, selectedFlight.Id, ct).ConfigureAwait(false);
+            return selectedFlight.Map(branch);
+        }
+
         public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(productId))
@@ -297,6 +322,114 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
             var result = await PutAsync($"products/{productId}/packageConfigurations/{newPackageSet.Id}", packageSet, customHeaders, ct).ConfigureAwait(false);
             return result.Map();
+        }
+
+        public async Task<GameSubmission> CreateSandboxSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationSandboxName, CancellationToken ct)
+        {
+            return await CreateSandboxSubmissionRequestAsync(productId, currentDraftInstanceId, destinationSandboxName, null, ct).ConfigureAwait(false);
+        }
+
+        public async Task<GameSubmission> CreateSandboxSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationSandboxName, GameSubmissionOptions gameSubmissionOptions, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(destinationSandboxName))
+            {
+                throw new ArgumentException($"{nameof(destinationSandboxName)} cannot be null or empty.", nameof(destinationSandboxName));
+            }
+
+            var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationSandboxName, IngestionSubmissionTargetType.Sandbox, gameSubmissionOptions).Build();
+
+            var submission = await PostAsync<IngestionSubmissionCreationRequest, IngestionSubmission>($"products/{productId}/submissions", body, ct).ConfigureAwait(false);
+
+            var gameSubmission = submission.Map();
+
+            if (gameSubmission.GameSubmissionState is GameSubmissionState.Failed) 
+            {
+                gameSubmission.SubmissionValidationItems = await GetGameSubmissionValidationItemsFromFailureAsync(productId, submission.Id, ct);
+            }
+
+            return gameSubmission;
+        }
+
+        public async Task<GameSubmission> CreateFlightSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationFlightId, CancellationToken ct)
+        {
+            return await CreateFlightSubmissionRequestAsync(productId, currentDraftInstanceId, destinationFlightId, null, ct).ConfigureAwait(false);
+        }
+
+        public async Task<GameSubmission> CreateFlightSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationFlightId, GameSubmissionOptions gameSubmissionOptions, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
+            {
+                throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(destinationFlightId))
+            {
+                throw new ArgumentException($"{nameof(destinationFlightId)} cannot be null or empty.", nameof(destinationFlightId));
+            }
+
+            var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationFlightId, IngestionSubmissionTargetType.Flight, gameSubmissionOptions).Build();
+
+            var submission = await PostAsync<IngestionSubmissionCreationRequest, IngestionSubmission>($"products/{productId}/submissions", body, ct).ConfigureAwait(false);
+
+            var gameSubmission = submission.Map();
+
+            if (gameSubmission.GameSubmissionState is GameSubmissionState.Failed)
+            {
+                gameSubmission.SubmissionValidationItems = await GetGameSubmissionValidationItemsFromFailureAsync(productId, submission.Id, ct);
+            }
+
+            return gameSubmission;
+        }
+
+        public async Task<GameSubmission> GetGameSubmissionAsync(string productId, string submissionId, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(productId))
+            {
+                throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+            }
+
+            if (string.IsNullOrWhiteSpace(submissionId))
+            {
+                throw new ArgumentException($"{nameof(submissionId)} cannot be null or empty.", nameof(submissionId));
+            }
+
+            var submission = await GetAsync<IngestionSubmission>($"products/{productId}/submissions/{submissionId}", ct).ConfigureAwait(false);
+            if (submission is null)
+            {
+                throw new SubmissionNotFoundException($"Submission for product '{productId}' and submissionId '{submissionId}' not found.");
+            }
+
+            var gameSubmission = submission.Map();
+
+            if (gameSubmission.GameSubmissionState is GameSubmissionState.Failed)
+            {
+                gameSubmission.SubmissionValidationItems = await GetGameSubmissionValidationItemsFromFailureAsync(productId, submission.Id, ct);
+            }
+
+            return gameSubmission;
+        }
+
+        private async Task<List<GameSubmissionValidationItem>> GetGameSubmissionValidationItemsFromFailureAsync(string productId, string submissionId, CancellationToken ct)
+        {
+            var validations = GetAsyncEnumerable<IngestionSubmissionValidationItem>($"products/{productId}/submissions/{submissionId}/validations", ct);
+
+            var items = await validations.Select(x => x.Map()).ToListAsync(ct);
+            return items;
         }
     }
 }

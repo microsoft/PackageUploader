@@ -3,13 +3,11 @@
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
 {
-    public enum GamePackageState
+    public enum GameSubmissionState
     {
-        Unknown,
-        PendingUpload,
-        Uploaded,
-        InProcessing,
-        Processed,
-        ProcessFailed,
+        NotStarted,
+        InProgress,
+        Published,
+        Failed,
     }
 }
