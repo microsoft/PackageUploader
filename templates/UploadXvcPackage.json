@@ -27,6 +27,7 @@
     "clientId": "{{ required }}",
     "tenantId": "{{ required }}"
   },
+  
   "uploadConfig": {
     "httpTimeoutMs": 5000,
     "httpUploadTimeoutMs": 300000,
