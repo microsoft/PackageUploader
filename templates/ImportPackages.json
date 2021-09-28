@@ -4,11 +4,11 @@
   "productId": "{{ productId or bigId required }}",
   "bigId": "{{ productId or bigId required }}",
 
-  "flightName": "{{ flightName or branchFriendlyName required }}",
   "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
+  "flightName": "{{ flightName or branchFriendlyName required }}",
 
-  "destinationFlightName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
   "destinationBranchFriendlyName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
+  "destinationFlightName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
 
   "marketGroupId": "{{ optional - if informed it will only import packages from & to the specified one }}",
 
