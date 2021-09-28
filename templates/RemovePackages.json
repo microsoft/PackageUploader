@@ -4,8 +4,8 @@
   "productId": "{{ productId or bigId required }}",
   "bigId": "{{ productId or bigId required }}",
 
-  "flightName": "{{ flightName or branchFriendlyName required }}",
   "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
+  "flightName": "{{ flightName or branchFriendlyName required }}",
 
   "marketGroupId": "{{ optional - if informed it will only delete packages in the specified one }}",
 
