@@ -5,7 +5,8 @@
   "bigId": "{{ productId or bigId required }}",
 
   "aadAuthInfo": {
-    "tenantId": "{{ required }}",
-    "clientId": "{{ required }}"
+    "clientId": "{{ required }}",
+    "tenantId": "{{ required }}"
+
   }
 }
