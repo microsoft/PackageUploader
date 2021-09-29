@@ -37,32 +37,12 @@ The application can be used directly with the input config for ease of use, or t
 
 - Create or edit the configuration file with your favorite editor and update the following fields
 
-### To Upload Xvc Package:
-
-- ***operationName*** (UploadXvcPackage)
-- ***productId*** or ***bigId*** (From Partner Center)
-- ***branchFriendlyName*** or ***flightName*** (name of the branch/sandbox or the flight from Partner Center)
-  - *XBOX RECOMMEND*: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
-- ***packageFilePath*** (Location of the game package)
-- ***gameAssets***:
-  - ***ekbFilePath*** (Location of the EKB file)
-  - ***subvalFilePath*** (Location of the SubVal File)
-  - ***SymbolsFilePath*** (Location of Symbols File - optional)
-  - ***discLayoutFilePath*** (Location of Disc Layout File - optional)
-- ***aadAuthInfo***:
-  - ***clientId*** (From Azure Portal)
-  - ***tenantId*** (From Azure Portal)
-
-### To Upload Uwp Package:
-
-- ***operationName*** (UploadUwpPackage)
-- ***productId*** or ***bigId*** (From Partner Center)
-- ***branchFriendlyName*** or ***flightName*** (name of the branch/sandbox or the flight from Partner Center)
-  - *XBOX RECOMMEND*: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
-- ***packageFilePath*** (Location of the game package)
-- ***aadAuthInfo***:
-  - ***clientId*** (From Azure Portal)
-  - ***tenantId*** (From Azure Portal)
+### To get product metadata: [GetProduct](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#GetProduct)
+### To upload Uwp package: [UploadUwpPackage](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#UploadUwpPackage)
+### To upload Xvc package: [UploadXvcPackage](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#UploadXvcPackage)
+### To remove packages: [RemovePackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#RemovePackages)
+### To import packages: [ImportPackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#ImportPackages)
+### To publish packages: [PublishPackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#PublishPackages)
 
 ## Step 4: Fire Away
 
