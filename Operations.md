@@ -91,7 +91,7 @@
 ###### Imports all game packages from a branch to a destination branch
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/ImportPackages.json))
 ##### Definition:
-- **operationName**: "UploadUwpPackage",
+- **operationName**: "ImportPackages",
 - **aadAuthInfo**: required
   - **tenantId**: required
   - **clientId**: required
@@ -117,3 +117,18 @@
 # PublishPackages
 ###### Publishes all game packages from a branch or flight to a destination sandbox or flight
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/PublishPackages.json))
+##### Definition:
+- **operationName**: "PublishPackages",
+- **aadAuthInfo**: required
+  - **tenantId**: required
+  - **clientId**: required
+- **productId**: *productId* or *bigId* required
+- **bigId**: *productId* or *bigId* required
+- **flightName**: *flightName* or (*branchFriendlyName* and *destinationSandboxName*) required
+- **branchFriendlyName**: *flightName* or (*branchFriendlyName* and *destinationSandboxName*) required
+- **destinationSandboxName**: *flightName* or (*branchFriendlyName* and *destinationSandboxName*) required
+- **minutesToWaitForPublishing**: optional (default 0 is fire and forget) - it will check the package processing status every minute for this long, until it succeeds or fails
+- **publishConfiguration**: optional - configuration of the publish submission
+  - **releaseTime**: optional - publish release time, it will publish asap if it is not set
+  - **IsManualPublish**: optional - will enable/disable manual publish
+  - **CertificationNotes**: optional - Certification notes
