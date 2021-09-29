@@ -82,9 +82,6 @@ The application can be used directly with the input config for ease of use, or t
   
 ## Q & A
 
-Question: Can I use the API directly? <br>
-Answer: You may and documentation will be written however there will be no support. Please reference the document and the wrapper source for call patterns. 
-
 Question: Can I use one App name for multiple products? <br>
 Answer: In theory this should work, but currently it is not. We're working with the Partner Center Accounts Team to identify the issue. 
 
