@@ -116,6 +116,7 @@
 
 # PublishPackages
 ###### Publishes all game packages from a branch or flight to a destination sandbox or flight
+If you want to deploy to RETAIL, you need to use the parameter --Retail in the command line
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/PublishPackages.json))
 ##### Definition:
 - **operationName**: "PublishPackages",
