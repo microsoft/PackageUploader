@@ -45,6 +45,7 @@
 # UploadXvcPackage
 ###### Uploads Xvc game package and assets
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/UploadXvcPackage.json))
+##### Definition:
 - **operationName**: "UploadXvcPackage",
 - **aadAuthInfo**: required
   - **tenantId**: required
@@ -75,6 +76,16 @@
 # RemovePackages
 ###### Removes all game packages and assets from a branch
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/RemovePackages.json))
+##### Definition:
+- **operationName**: "RemovePackages",
+- **aadAuthInfo**: required
+  - **tenantId**: required
+  - **clientId**: required
+- **productId**: *productId* or *bigId* required
+- **bigId**: *productId* or *bigId* required
+- **branchFriendlyName**: *flightName* or *branchFriendlyName* required
+- **flightName**: *flightName* or *branchFriendlyName* required
+- **marketGroupId**: optional - if not set, it will remove all packages from all market groups
 
 # ImportPackages
 ###### Imports all game packages from a branch to a destination branch
