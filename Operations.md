@@ -130,6 +130,6 @@ If you want to deploy to RETAIL, you need to use the parameter --Retail in the c
 - **destinationSandboxName**: *flightName* or (*branchFriendlyName* and *destinationSandboxName*) required
 - **minutesToWaitForPublishing**: optional (default 0 is fire and forget) - it will check the package processing status every minute for this long, until it succeeds or fails
 - **publishConfiguration**: optional - configuration of the publish submission
-  - **releaseTime**: optional - publish release time, it will publish asap if it is not set
-  - **IsManualPublish**: optional - will enable/disable manual publish
+  - **releaseTime**: optional - publish release time, it will publish as soon as it passes certification if it is not set
+  - **IsManualPublish**: optional - will enable/disable manual publish 
   - **CertificationNotes**: optional - Certification notes
