@@ -22,7 +22,9 @@ The application can be used directly with the input config for ease of use, or t
 - Under your newly created App navigate to _Client credentials_ and create a _New client secret_. Note the _clientID_, _tenantID_, and your _Secret key_ for future use.
 - It is recommended that you add your team as backup to maintain your app going forward.
   - Navigate into the app, on the left under _manage_ find _owners_ and _add_ your back up.
-  
+
+[More information](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#register-an-application)
+
 ## Step 2: Add your app in Partner Center and give it the proper permissions.
 
 - Log in to Partner Center with a manager level account. 
@@ -32,6 +34,8 @@ The application can be used directly with the input config for ease of use, or t
 - On the top tab click on _Customize permissions_.
 - Under _Product-level permissions_ search for your product and apply the _Read/write_ permission under _Publishing_.
   - **NOTE** We will be changing this with future iterations of the tool to more accurately apply permissions.
+
+[More information](https://docs.microsoft.com/en-us/partner-center/multi-tenant-account#add-an-azure-ad-tenant-to-your-account)
 
 ## Step 3: Configure your wrapper using a config file
 
