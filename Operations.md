@@ -90,6 +90,29 @@
 # ImportPackages
 ###### Imports all game packages from a branch to a destination branch
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/ImportPackages.json))
+##### Definition:
+- **operationName**: "UploadUwpPackage",
+- **aadAuthInfo**: required
+  - **tenantId**: required
+  - **clientId**: required
+- **productId**: *productId* or *bigId* required
+- **bigId**: *productId* or *bigId* required
+- **branchFriendlyName**: *flightName* or *branchFriendlyName* required
+- **flightName**: *flightName* or *branchFriendlyName* required
+- **destinationBranchFriendlyName**: *destinationFlightName* or *destinationBranchFriendlyName* required
+- **destinationFlightName**: *destinationFlightName* or *destinationBranchFriendlyName* required
+- **overwrite**: optional - it will replace the packages in the destination branch/flight
+- **marketGroupId**: optional - if not set, it will import all market groups packages
+- **availabilityDate**: optional - if informed it will configure custom availability date for your UWP market groups and your XVC/MSIXVC packages in the destination branch/flight  [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
+   - **isEnabled**: optional (default false) - it will enable/disable custom availability date
+   - **effectiveDate**: optional - if informed it will set the package availability date
+- **mandatoryDate**: optional - if informed it will configure custom mandatory date for your UWP market groups in the destination branch/flight [Learn more](https://go.microsoft.com/fwlink/?linkid=2008878)
+   - **isEnabled**: optional (default false) - it will enable/disable custom mandatory date
+   - **effectiveDate**: optional - if informed it will set the mandatory date
+- **gradualRollout**: optional - if informed it will configure gradual rollout for your UWP packages in the destination branch/flight [Learn more](http://go.microsoft.com/fwlink/?LinkId=733680)
+   - **isEnabled**:  optional (default false) - it will enable/disable gradual rollout
+   - **percentage**: optional - rollout to start with
+   - **isSeekEnabled**: optional - enable/disable always provide the newest packages when customers manually check for updates
 
 # PublishPackages
 ###### Publishes all game packages from a branch or flight to a destination sandbox or flight
