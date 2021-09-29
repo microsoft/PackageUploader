@@ -13,7 +13,7 @@
 ###### Uploads Uwp game package
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/UploadUwpPackage.json))
 ##### Definition:
-- **operationName**: "GetProduct",
+- **operationName**: "UploadUwpPackage",
 - **aadAuthInfo**: required
   - **tenantId**: required
   - **clientId**: required
@@ -34,11 +34,44 @@
    - **isEnabled**:  optional (default false) - it will enable/disable gradual rollout
    - **percentage**: optional - rollout to start with
    - **isSeekEnabled**: optional - enable/disable always provide the newest packages when customers manually check for updates
+- **uploadConfig**: optional - httpClient configuration to be used to upload the files
+   - **httpTimeoutMs**: (default and recommended: 5000)
+   - **httpUploadTimeoutMs**: (default and recommended: 300000)
+   - **maxParallelism**: (default and recommended: 24)
+   - **defaultConnectionLimit**: (default and recommended: -1)
+   - **expect100Continue**: (default and recommended: false)
+   - **useNagleAlgorithm**: (default and recommended: false)
 
 # UploadXvcPackage
 ###### Uploads Xvc game package and assets
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/UploadXvcPackage.json))
-
+- **operationName**: "UploadXvcPackage",
+- **aadAuthInfo**: required
+  - **tenantId**: required
+  - **clientId**: required
+- **productId**: *productId* or *bigId* required
+- **bigId**: *productId* or *bigId* required
+- **branchFriendlyName**: *flightName* or *branchFriendlyName* required
+- **flightName**: *flightName* or *branchFriendlyName* required
+- **marketGroupId**: optional - if not set, it will use *default* as the market group
+- **packageFilePath**: required - path to the package file
+- **gameAssets**: required - paths to the game assets
+  - **ekbFilePath**: required - path to the EKB file
+  - **subValFilePath**: required - path to the SubVal File
+  - **symbolsFilePath**: optional - path to the Symbols File
+  - **discLayoutFilePath**: optional - path to the Disc Layout File
+- **minutesToWaitForProcessing**: optional (default 30) - it will check the package processing status every minute for this long, until it succeeds or fails
+- **availabilityDate**: optional - if informed it will configure custom availability date for your XVC/MSIXVC packages [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
+   - **isEnabled**: optional (default false) - it will enable/disable custom availability date
+   - **effectiveDate**: optional - if informed it will set the package availability date
+- **uploadConfig**: optional - httpClient configuration to be used to upload the files
+   - **httpTimeoutMs**: (default and recommended: 5000)
+   - **httpUploadTimeoutMs**: (default and recommended: 300000)
+   - **maxParallelism**: (default and recommended: 24)
+   - **defaultConnectionLimit**: (default and recommended: -1)
+   - **expect100Continue**: (default and recommended: false)
+   - **useNagleAlgorithm**: (default and recommended: false)
+  
 # RemovePackages
 ###### Removes all game packages and assets from a branch
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/RemovePackages.json))
