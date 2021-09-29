@@ -36,7 +36,7 @@ namespace GameStoreBroker.ClientApi.Client.Xfus
                     // Default connection limit is 2 which is too low for this multi-threaded
                     // client, we decided to use (12 * # of cores) based on experimentation.
                     // https://docs.microsoft.com/en-gb/archive/blogs/timomta/controlling-the-number-of-outgoing-connections-from-httpclient-net-core-or-full-framework
-                    MaxConnectionsPerServer = uploadConfig.DefaultConnectionLimit == -1 ? 12 * Environment.ProcessorCount : uploadConfig.DefaultConnectionLimit,
+                    MaxConnectionsPerServer = uploadConfig.DefaultConnectionLimit < 0 ? 12 * Environment.ProcessorCount : uploadConfig.DefaultConnectionLimit,
                     ConnectCallback = (context, ct) => ConnectCallback(context, uploadConfig.UseNagleAlgorithm, ct),
                 };
             });
