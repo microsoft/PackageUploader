@@ -13,7 +13,7 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Step 1: Creating your app in Azure.
 
-- Go to https://portal.azure.com and log in with your Azure account.
+- Go to [Azure Portal](https://portal.azure.com) and log in with your Azure account.
 - Under Azure services find _App registrations_.
 - Under _App registrations_ click _New registration_.
   - Enter in your _name_.
@@ -27,7 +27,7 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Step 2: Add your app in Partner Center and give it the proper permissions.
 
-- Log in to Partner Center with a manager level account. 
+- Go to [Partner Center](https://partner.microsoft.com/dashboard) and log in with a manager level account. 
 - Click on the _cogs_ wheel on the top right of the page and navigate to _Account settings_.
 - On the left navigation pane click on _User management_ then _Azure AD applications_.
 - Click on _Create Azure AD application_ and search for your Azure created app in the search pane on the right, check the box for your app and click _Next_.
