@@ -35,14 +35,13 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Step 3: Configure your wrapper using a config file
 
-- Create or edit the configuration file with your favorite editor and update the following fields
-
-### To get product metadata: [GetProduct](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#GetProduct)
-### To upload Uwp package: [UploadUwpPackage](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#UploadUwpPackage)
-### To upload Xvc package: [UploadXvcPackage](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#UploadXvcPackage)
-### To remove packages: [RemovePackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#RemovePackages)
-### To import packages: [ImportPackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#ImportPackages)
-### To publish packages: [PublishPackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#PublishPackages)
+- Create or edit the configuration file with your favorite editor and update the fields:
+  - #### To get product metadata: [GetProduct](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#GetProduct)
+  - #### To upload Uwp package: [UploadUwpPackage](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#UploadUwpPackage)
+  - #### To upload Xvc package: [UploadXvcPackage](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#UploadXvcPackage)
+  - #### To remove packages: [RemovePackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#RemovePackages)
+  - #### To import packages: [ImportPackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#ImportPackages)
+  - #### To publish packages: [PublishPackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#PublishPackages)
 
 ## Step 4: Fire Away
 
