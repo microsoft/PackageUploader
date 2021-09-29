@@ -23,17 +23,17 @@
 - **flightName**: *flightName* or *branchFriendlyName* required
 - **marketGroupId**: optional - if not set, it will use *default* as the market group
 - **packageFilePath**: required - path to the package file
-- **minutesToWaitForProcessing**: optional - if not set, it will be 30 
-- **availabilityDate**: optional
-   - **isEnabled**: optional 
-   - **effectiveDate**: optional - if informed it will set the availability date in this branch/marketGroupId for all the Uwp packages
-- **mandatoryDate**: optional
-   - **isEnabled**: optional,
-   - **effectiveDate**: optional - if informed it will set the mandatory date in this branch/marketGroupId for all the Uwp packages
-- **gradualRollout**: optional
-   - **isEnabled**: true,
-   - **percentage**: 33,
-   - **isSeekEnabled**: false
+- **minutesToWaitForProcessing**: optional (default 30) - it will check the package processing status every minute for this long, until it succeeds or fails
+- **availabilityDate**: optional - if informed it will configure custom availability date for your UWP market groups [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
+   - **isEnabled**: optional (default false) - it will enable/disable custom availability date
+   - **effectiveDate**: optional - if informed it will set the package availability date
+- **mandatoryDate**: optional - if informed it will configure custom mandatory date for your UWP market groups [Learn more](https://go.microsoft.com/fwlink/?linkid=2008878)
+   - **isEnabled**: optional (default false) - it will enable/disable custom mandatory date
+   - **effectiveDate**: optional - if informed it will set the mandatory date
+- **gradualRollout**: optional - if informed it will configure gradual rollout for your UWP packages [Learn more](http://go.microsoft.com/fwlink/?LinkId=733680)
+   - **isEnabled**:  optional (default false) - it will enable/disable gradual rollout
+   - **percentage**: optional - rollout to start with
+   - **isSeekEnabled**: optional - enable/disable always provide the newest packages when customers manually check for updates
 
 # UploadXvcPackage
 ###### Uploads Xvc game package and assets
