@@ -91,6 +91,7 @@ The application can be used directly with the input config for ease of use, or t
   -c, --ConfigFile <ConfigFile> (REQUIRED)  The location of the config file
   -f, --ConfigFileFormat <Ini|Json|Xml>     The format of the config file [default: Json]
   -s, --ClientSecret <ClientSecret>         The client secret of the AAD app
+  --Retail                                  Allow publish packages to RETAIL sandbox [specific for PublishPackages]
   -v, --Verbose                             Log verbose messages such as http calls
   -l, --LogFile <LogFile>                   The location of the log file
   -?, -h, --help                            Show help and usage information
