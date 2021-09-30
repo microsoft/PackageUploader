@@ -47,7 +47,7 @@ The application can be used directly with the input config for ease of use, or t
   - #### To import packages: [ImportPackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#ImportPackages)
   - #### To publish packages: [PublishPackages](https://github.com/microsoft/GameStoreBroker/blob/main/Operations.md#PublishPackages)
 
-## Step 4: Fire Away
+## Step 4: Run the tool
 
 - Open _powershell_ via the start menu.
 
