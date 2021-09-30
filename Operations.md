@@ -26,10 +26,10 @@
 - **minutesToWaitForProcessing**: optional (default 30) - it will check the package processing status every minute for this long, until it succeeds or fails
 - **availabilityDate**: optional - if informed it will configure custom availability date for your UWP market groups [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
    - **isEnabled**: optional (default false) - it will enable/disable custom availability date
-   - **effectiveDate**: optional - if informed it will set the package availability date
+   - **effectiveDate**: optional - if informed it will set the package availability date (date format example: "2021-10-24T21:00:00.000Z")
 - **mandatoryDate**: optional - if informed it will configure custom mandatory date for your UWP market groups [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#mandatory-update)
    - **isEnabled**: optional (default false) - it will enable/disable custom mandatory date
-   - **effectiveDate**: optional - if informed it will set the mandatory date
+   - **effectiveDate**: optional - if informed it will set the mandatory date (date format example: "2021-10-24T21:00:00.000Z")
 - **gradualRollout**: optional - if informed it will configure gradual rollout for your UWP packages [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#gradual-package-rollout)
    - **isEnabled**:  optional (default false) - it will enable/disable gradual rollout
    - **percentage**: optional - rollout to start with
@@ -64,7 +64,7 @@
 - **minutesToWaitForProcessing**: optional (default 30) - it will check the package processing status every minute for this long, until it succeeds or fails
 - **availabilityDate**: optional - if informed it will configure custom availability date for your XVC/MSIXVC packages [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
    - **isEnabled**: optional (default false) - it will enable/disable custom availability date
-   - **effectiveDate**: optional - if informed it will set the package availability date
+   - **effectiveDate**: optional - if informed it will set the package availability date (date format example: "2021-10-24T21:00:00.000Z")
 - **uploadConfig**: optional - httpClient configuration to be used to upload the files
    - **httpTimeoutMs**: (default and recommended: 5000)
    - **httpUploadTimeoutMs**: (default and recommended: 300000)
@@ -105,10 +105,10 @@
 - **marketGroupId**: optional - if not set, it will import all market groups packages
 - **availabilityDate**: optional - if informed it will configure custom availability date for your UWP market groups and your XVC/MSIXVC packages in the destination branch/flight  [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
    - **isEnabled**: optional (default false) - it will enable/disable custom availability date
-   - **effectiveDate**: optional - if informed it will set the package availability date
+   - **effectiveDate**: optional - if informed it will set the package availability date (date format example: "2021-10-24T21:00:00.000Z")
 - **mandatoryDate**: optional - if informed it will configure custom mandatory date for your UWP market groups in the destination branch/flight [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#mandatory-update)
    - **isEnabled**: optional (default false) - it will enable/disable custom mandatory date
-   - **effectiveDate**: optional - if informed it will set the mandatory date
+   - **effectiveDate**: optional - if informed it will set the mandatory date (date format example: "2021-10-24T21:00:00.000Z")
 - **gradualRollout**: optional - if informed it will configure gradual rollout for your UWP packages in the destination branch/flight [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#gradual-package-rollout)
    - **isEnabled**:  optional (default false) - it will enable/disable gradual rollout
    - **percentage**: optional - rollout to start with
@@ -130,6 +130,6 @@ If you want to deploy to RETAIL, you need to use the parameter --Retail in the c
 - **destinationSandboxName**: *flightName* or (*branchFriendlyName* and *destinationSandboxName*) required
 - **minutesToWaitForPublishing**: optional (default 0 is fire and forget) - it will check the package processing status every minute for this long, until it succeeds or fails
 - **publishConfiguration**: optional - configuration of the publish submission [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/manage-submission-options)
-  - **releaseTime**: optional - publish release time, it will publish as soon as it passes certification if it is not set
+  - **releaseTime**: optional - publish release time, it will publish as soon as it passes certification if it is not set (date format example: "2021-10-24T21:00:00.000Z")
   - **IsManualPublish**: optional - will enable/disable manual publish 
   - **CertificationNotes**: optional - Certification notes
