@@ -14,10 +14,7 @@ namespace GameStoreBroker.Application.Extensions
     {
         public static async Task<GameProduct> GetProductAsync(this IGameStoreBrokerService storeBroker, BaseOperationConfig config, CancellationToken ct)
         {
-            if (config is null)
-            {
-                throw new ArgumentNullException(nameof(config), $"{nameof(config)} cannot be null.");
-            }
+            _ = config ?? throw new ArgumentNullException(nameof(config));
 
             if (!string.IsNullOrWhiteSpace(config.BigId))
             {
@@ -34,15 +31,8 @@ namespace GameStoreBroker.Application.Extensions
 
         public static async Task<GamePackageBranch> GetGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, PackageBranchOperationConfig config, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (config is null)
-            {
-                throw new ArgumentNullException(nameof(config), $"{nameof(config)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = config ?? throw new ArgumentNullException(nameof(config));
 
             if (!string.IsNullOrWhiteSpace(config.BranchFriendlyName))
             {
@@ -59,15 +49,8 @@ namespace GameStoreBroker.Application.Extensions
 
         public static async Task<GamePackageBranch> GetDestinationGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, ImportPackagesOperationConfig config, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (config is null)
-            {
-                throw new ArgumentNullException(nameof(config), $"{nameof(config)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = config ?? throw new ArgumentNullException(nameof(config));
 
             if (!string.IsNullOrWhiteSpace(config.DestinationBranchFriendlyName))
             {
