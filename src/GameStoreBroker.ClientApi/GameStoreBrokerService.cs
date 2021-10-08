@@ -52,10 +52,7 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
 
             if (string.IsNullOrWhiteSpace(flightName))
             {
@@ -68,10 +65,7 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(GameProduct product, string branchFriendlyName, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
 
             if (string.IsNullOrWhiteSpace(branchFriendlyName))
             {
@@ -84,10 +78,7 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
 
             if (string.IsNullOrWhiteSpace(flightName))
             {
@@ -100,16 +91,8 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageConfiguration> GetPackageConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct)
         {
-
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
 
             _logger.LogDebug("Requesting game package configuration by product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -119,15 +102,8 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(GameProduct product, GamePackageConfiguration packageConfiguration, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageConfiguration is null)
-            {
-                throw new ArgumentNullException(nameof(packageConfiguration), $"{nameof(packageConfiguration)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = packageConfiguration ?? throw new ArgumentNullException(nameof(packageConfiguration));
 
             _logger.LogDebug("Updating game package configuration in product id '{productId}' and package configuration id '{packageConfigurationId}'.", product.ProductId, packageConfiguration.Id);
 
@@ -137,15 +113,8 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
 
             if (string.IsNullOrWhiteSpace(marketGroupId))
             {
@@ -188,15 +157,8 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
 
             _logger.LogDebug("Removing game packages in product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -221,25 +183,10 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupId, GamePackageDate availabilityDate, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
-            }
-
-            if (gamePackage is null)
-            {
-                throw new ArgumentNullException(nameof(gamePackage), $"{nameof(gamePackage)} cannot be null.");
-            }
-
-            if (availabilityDate is null)
-            {
-                throw new ArgumentNullException(nameof(availabilityDate), $"{nameof(availabilityDate)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
+            _ = gamePackage ?? throw new ArgumentNullException(nameof(gamePackage));
+            _ = availabilityDate ?? throw new ArgumentNullException(nameof(availabilityDate));
 
             _logger.LogDebug("Setting the availability date to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -277,20 +224,9 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, IGameConfiguration gameConfiguration, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (packageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(packageBranch), $"{nameof(packageBranch)} cannot be null.");
-            }
-
-            if (gameConfiguration is null)
-            {
-                throw new ArgumentNullException(nameof(gameConfiguration), $"{nameof(gameConfiguration)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
+            _ = gameConfiguration ?? throw new ArgumentNullException(nameof(gameConfiguration));
 
             _logger.LogDebug("Setting the package dates in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -339,20 +275,9 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupId, bool overwrite, IGameConfiguration gameConfiguration, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (originPackageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(originPackageBranch), $"{nameof(originPackageBranch)} cannot be null.");
-            }
-
-            if (destinationPackageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(destinationPackageBranch), $"{nameof(destinationPackageBranch)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = originPackageBranch ?? throw new ArgumentNullException(nameof(originPackageBranch));
+            _ = destinationPackageBranch ?? throw new ArgumentNullException(nameof(destinationPackageBranch));
 
             if (string.Equals(originPackageBranch.CurrentDraftInstanceId, destinationPackageBranch.CurrentDraftInstanceId, StringComparison.OrdinalIgnoreCase))
             {
@@ -374,7 +299,7 @@ namespace GameStoreBroker.ClientApi
                 {
                     if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(originMarketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
                     {
-                        var destinationMarketGroupPackage = destinationPackageConfiguration.MarketGroupPackages.SingleOrDefault(m => string.Equals(m.MarketGroupId, originMarketGroupPackage.MarketGroupId, ));
+                        var destinationMarketGroupPackage = destinationPackageConfiguration.MarketGroupPackages.SingleOrDefault(m => string.Equals(m.MarketGroupId, originMarketGroupPackage.MarketGroupId, StringComparison.OrdinalIgnoreCase));
 
                         // If GameMarketGroupPackage does not exist in destination, we create one
                         if (destinationMarketGroupPackage is null)
@@ -511,15 +436,8 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, GamePublishConfiguration gameSubmissionConfiguration, int minutesToWaitForPublishing, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (originPackageBranch is null)
-            {
-                throw new ArgumentNullException(nameof(originPackageBranch), $"{nameof(originPackageBranch)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = originPackageBranch ?? throw new ArgumentNullException(nameof(originPackageBranch));
 
             if (string.IsNullOrWhiteSpace(destinationSandboxName))
             {
@@ -541,15 +459,8 @@ namespace GameStoreBroker.ClientApi
 
         public async Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, GamePublishConfiguration gameSubmissionConfiguration, int minutesToWaitForPublishing, CancellationToken ct)
         {
-            if (product is null)
-            {
-                throw new ArgumentNullException(nameof(product), $"{nameof(product)} cannot be null.");
-            }
-
-            if (gamePackageFlight is null)
-            {
-                throw new ArgumentNullException(nameof(gamePackageFlight), $"{nameof(gamePackageFlight)} cannot be null.");
-            }
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = gamePackageFlight ?? throw new ArgumentNullException(nameof(gamePackageFlight));
 
             var gameSubmissionOptions = gameSubmissionConfiguration?.ToGameSubmissionOptions();
             var gameSubmission = await _ingestionHttpClient.CreateFlightSubmissionRequestAsync(product.ProductId, gamePackageFlight.CurrentDraftInstanceId, gamePackageFlight.Id, gameSubmissionOptions, ct).ConfigureAwait(false);
