@@ -37,6 +37,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
         /// <summary>
         /// List of market groups
         /// </summary>
-        public List<GameMarketGroupPackage> MarketGroupPackages { get; internal init; }
+        public List<GameMarketGroupPackage> MarketGroupPackages { get; internal set; }
     }
 }

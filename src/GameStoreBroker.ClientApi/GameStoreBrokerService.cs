@@ -367,110 +367,127 @@ namespace GameStoreBroker.ClientApi
             // Importing packages from originMarketGroupPackage to destinationPackageConfiguration
             if (originPackageConfiguration.MarketGroupPackages is not null && originPackageConfiguration.MarketGroupPackages.Any())
             {
+                // initializing MarketGroupPackages if needed
+                destinationPackageConfiguration.MarketGroupPackages ??= new List<GameMarketGroupPackage>();
+
                 foreach (var originMarketGroupPackage in originPackageConfiguration.MarketGroupPackages)
                 {
                     if (string.IsNullOrWhiteSpace(marketGroupId) || string.Equals(originMarketGroupPackage.MarketGroupId, marketGroupId, StringComparison.OrdinalIgnoreCase))
                     {
-                        var destinationMarketGroupPackage = destinationPackageConfiguration.MarketGroupPackages.SingleOrDefault(m => string.Equals(m.MarketGroupId, originMarketGroupPackage.MarketGroupId));
-                        if (destinationMarketGroupPackage is not null)
+                        var destinationMarketGroupPackage = destinationPackageConfiguration.MarketGroupPackages.SingleOrDefault(m => string.Equals(m.MarketGroupId, originMarketGroupPackage.MarketGroupId, ));
+
+                        // If GameMarketGroupPackage does not exist in destination, we create one
+                        if (destinationMarketGroupPackage is null)
                         {
-                            if (overwrite)
+                            destinationMarketGroupPackage = new GameMarketGroupPackage
                             {
-                                var originalPackageAvailabilityDates = destinationMarketGroupPackage.PackageAvailabilityDates;
-                                destinationMarketGroupPackage.PackageIds = originMarketGroupPackage.PackageIds;
-                                destinationMarketGroupPackage.PackageAvailabilityDates = originMarketGroupPackage.PackageAvailabilityDates;
-                                if (destinationMarketGroupPackage.PackageAvailabilityDates is not null)
+                                MarketGroupId = originMarketGroupPackage.MarketGroupId,
+                                Markets = originMarketGroupPackage.Markets,
+                                Name = originMarketGroupPackage.Name,
+                            };
+                            destinationPackageConfiguration.MarketGroupPackages.Add(destinationMarketGroupPackage);
+                        }
+
+                        if (overwrite)
+                        {
+                            var originalPackageAvailabilityDates =
+                                destinationMarketGroupPackage.PackageAvailabilityDates is null
+                                    ? new Dictionary<string, DateTime?>()
+                                    : new Dictionary<string, DateTime?>(destinationMarketGroupPackage.PackageAvailabilityDates);
+
+                            destinationMarketGroupPackage.PackageIds = originMarketGroupPackage.PackageIds;
+                            destinationMarketGroupPackage.PackageAvailabilityDates = originMarketGroupPackage.PackageAvailabilityDates;
+                            if (destinationMarketGroupPackage.PackageAvailabilityDates is not null)
+                            {
+                                foreach (var (packageId, _) in destinationMarketGroupPackage.PackageAvailabilityDates)
                                 {
-                                    foreach (var (packageId, _) in destinationMarketGroupPackage.PackageAvailabilityDates)
+                                    if (originalPackageAvailabilityDates.ContainsKey(packageId))
                                     {
-                                        if (originalPackageAvailabilityDates.ContainsKey(packageId))
+                                        // If the package was already there, we keep the availability date
+                                        destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = originalPackageAvailabilityDates[packageId];
+                                    }
+                                    else
+                                    {
+                                        // If the package was not there, we set the availability date
+                                        if (gameConfiguration?.AvailabilityDate is not null)
                                         {
-                                            // If the package was already there, we keep the availability date
-                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = originalPackageAvailabilityDates[packageId];
+                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
+                                                ? gameConfiguration.AvailabilityDate.EffectiveDate
+                                                : null;
                                         }
                                         else
                                         {
-                                            // If the package was not there, we set the availability date
-                                            if (gameConfiguration?.AvailabilityDate is not null)
-                                            {
-                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
-                                                    ? gameConfiguration.AvailabilityDate.EffectiveDate
-                                                    : null;
-                                            }
-                                            else
-                                            {
-                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
-                                            }
+                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
                                         }
                                     }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var packageIdsToAdd = originMarketGroupPackage.PackageIds.Where(packageId => !destinationMarketGroupPackage.PackageIds.Contains(packageId)).ToList();
+                            if (packageIdsToAdd.Any())
+                            {
+                                destinationMarketGroupPackage.PackageIds.AddRange(packageIdsToAdd);
+                                if (destinationMarketGroupPackage.PackageAvailabilityDates is not null)
+                                {
+                                    foreach (var packageId in packageIdsToAdd)
+                                    {
+                                        if (gameConfiguration?.AvailabilityDate is not null)
+                                        {
+                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
+                                                ? gameConfiguration.AvailabilityDate.EffectiveDate
+                                                : null;
+                                        }
+                                        else
+                                        {
+                                            destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Setting Uwp package dates
+                        if (gameConfiguration is not null)
+                        {
+                            if (overwrite)
+                            {
+                                if (gameConfiguration.AvailabilityDate is not null)
+                                {
+                                    destinationMarketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
+                                        ? gameConfiguration.AvailabilityDate.EffectiveDate
+                                        : null;
+                                }
+                                if (gameConfiguration.MandatoryDate is not null)
+                                {
+                                    destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
+                                    {
+                                        IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
+                                        EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
+                                    };
                                 }
                             }
                             else
                             {
-                                var packageIdsToAdd = originMarketGroupPackage.PackageIds.Where(packageId => !destinationMarketGroupPackage.PackageIds.Contains(packageId)).ToList();
-                                if (packageIdsToAdd.Any())
+                                if (gameConfiguration.AvailabilityDate is not null &&
+                                    !destinationMarketGroupPackage.AvailabilityDate.HasValue)
                                 {
-                                    destinationMarketGroupPackage.PackageIds.AddRange(packageIdsToAdd);
-                                    if (destinationMarketGroupPackage.PackageAvailabilityDates is not null)
-                                    {
-                                        foreach (var packageId in packageIdsToAdd)
-                                        {
-                                            if (gameConfiguration?.AvailabilityDate is not null)
-                                            {
-                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
-                                                    ? gameConfiguration.AvailabilityDate.EffectiveDate
-                                                    : null;
-                                            }
-                                            else
-                                            {
-                                                destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = null;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Setting Uwp package dates
-                            if (gameConfiguration is not null)
-                            {
-                                if (overwrite)
-                                {
-                                    if (gameConfiguration.AvailabilityDate is not null)
-                                    {
-                                        destinationMarketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
+                                    destinationMarketGroupPackage.AvailabilityDate =
+                                        gameConfiguration.AvailabilityDate.IsEnabled
                                             ? gameConfiguration.AvailabilityDate.EffectiveDate
                                             : null;
-                                    }
-                                    if (gameConfiguration.MandatoryDate is not null)
-                                    {
-                                        destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
-                                        {
-                                            IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                                            EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
-                                        };
-                                    }
                                 }
-                                else
-                                {
-                                    if (gameConfiguration.AvailabilityDate is not null &&
-                                        !destinationMarketGroupPackage.AvailabilityDate.HasValue)
-                                    {
-                                        destinationMarketGroupPackage.AvailabilityDate =
-                                            gameConfiguration.AvailabilityDate.IsEnabled
-                                                ? gameConfiguration.AvailabilityDate.EffectiveDate
-                                                : null;
-                                    }
 
-                                    if (gameConfiguration.MandatoryDate is not null &&
-                                        (destinationMarketGroupPackage.MandatoryUpdateInfo is null ||
-                                         !destinationMarketGroupPackage.MandatoryUpdateInfo.IsEnabled))
+                                if (gameConfiguration.MandatoryDate is not null &&
+                                    (destinationMarketGroupPackage.MandatoryUpdateInfo is null ||
+                                     !destinationMarketGroupPackage.MandatoryUpdateInfo.IsEnabled))
+                                {
+                                    destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                                     {
-                                        destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
-                                        {
-                                            IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                                            EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
-                                        };
-                                    }
+                                        IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
+                                        EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
+                                    };
                                 }
                             }
                         }
