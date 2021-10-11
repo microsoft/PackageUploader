@@ -5,6 +5,7 @@ using GameStoreBroker.Application.Config;
 using GameStoreBroker.ClientApi;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,6 +46,34 @@ namespace GameStoreBroker.Application.Extensions
             }
 
             throw new Exception("BranchFriendlyName or FlightName needed.");
+        }
+
+        public static async Task<GameMarketGroupPackage> GetGameMarketGroupPackage(this IGameStoreBrokerService storeBroker, GameProduct product, GamePackageBranch packageBranch, UploadPackageOperationConfig config, CancellationToken ct)
+        {
+            _ = product ?? throw new ArgumentNullException(nameof(product));
+            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
+            _ = config ?? throw new ArgumentNullException(nameof(config));
+
+            var packageConfiguration = await storeBroker.GetPackageConfigurationAsync(product, packageBranch, ct).ConfigureAwait(false);
+
+            if (packageConfiguration is null)
+            {
+                // todo: initialize branch with 'default' MarketGroupPackage
+                throw new Exception($"Package Configuration not found for branch '{packageBranch.Name}'.");
+            }
+
+            if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
+            {
+                throw new Exception($"Branch '{packageBranch.Name}' does not have any Market Group Packages.");
+            }
+            
+            var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.MarketGroupId.Equals(config.MarketGroupId, StringComparison.OrdinalIgnoreCase));
+
+            if (marketGroupPackage is null)
+            {
+                throw new Exception($"Market Group Package '{config.MarketGroupId}' not found in branch '{packageBranch.Name}'.");
+            }
+            return marketGroupPackage;
         }
 
         public static async Task<GamePackageBranch> GetDestinationGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, ImportPackagesOperationConfig config, CancellationToken ct)

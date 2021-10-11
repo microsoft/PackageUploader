@@ -31,8 +31,9 @@ namespace GameStoreBroker.Application.Operations
 
             var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
             var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+            var marketGroupPackage = await _storeBrokerService.GetGameMarketGroupPackage(product, packageBranch, _config, ct).ConfigureAwait(false);
 
-            var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, _config.MarketGroupId, _config.PackageFilePath, null, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+            var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, marketGroupPackage, _config.PackageFilePath, null, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
             _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
 
             if (_config.AvailabilityDate is not null || _config.MandatoryDate is not null || _config.MandatoryDate is not null)

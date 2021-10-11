@@ -111,15 +111,11 @@ namespace GameStoreBroker.ClientApi
             return result;
         }
 
-        public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupId, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
+        public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
         {
             _ = product ?? throw new ArgumentNullException(nameof(product));
             _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
-
-            if (string.IsNullOrWhiteSpace(marketGroupId))
-            {
-                throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
-            }
+            _ = marketGroupPackage ?? throw new ArgumentNullException(nameof(marketGroupPackage));
 
             if (string.IsNullOrWhiteSpace(packageFilePath))
             {
@@ -133,7 +129,7 @@ namespace GameStoreBroker.ClientApi
             }
 
             _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
-            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupId, ct).ConfigureAwait(false);
+            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, ct).ConfigureAwait(false);
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
             await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
