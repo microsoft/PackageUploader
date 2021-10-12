@@ -63,7 +63,6 @@ namespace GameStoreBroker.Application.Extensions
 
             if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
             {
-                // todo: initialize branch with 'default' MarketGroupPackage
                 throw new Exception($"Branch '{packageBranch.Name}' does not have any Market Group Packages.");
             }
             

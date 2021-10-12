@@ -96,8 +96,28 @@ namespace GameStoreBroker.ClientApi
 
             _logger.LogDebug("Requesting game package configuration by product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
 
-            var result = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-            return result;
+            var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+
+            if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
+            {
+                _logger.LogDebug("Initializing game package configuration in branch '{branchName}'.", packageConfiguration.BranchName);
+                packageConfiguration.MarketGroupPackages = new List<GameMarketGroupPackage>
+                {
+                    new()
+                    {
+                        MarketGroupId = "default",
+                        Name = "default",
+                        Markets = null,
+                        PackageIds = new List<string>(),
+                        AvailabilityDate = null,
+                        PackageAvailabilityDates = new Dictionary<string, DateTime?>(),
+                        MandatoryUpdateInfo = null,
+                    },
+                };
+                packageConfiguration = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+            }
+
+            return packageConfiguration;
         }
 
         public async Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(GameProduct product, GamePackageConfiguration packageConfiguration, CancellationToken ct)
