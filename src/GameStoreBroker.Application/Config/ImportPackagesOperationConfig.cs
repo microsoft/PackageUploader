@@ -12,7 +12,7 @@ namespace GameStoreBroker.Application.Config
     {
         internal override string GetOperationName() => "ImportPackages";
 
-        public string MarketGroupId { get; set; } = null;
+        public string MarketGroupName { get; set; } = null;
 
         public string DestinationBranchFriendlyName { get; set; }
         public string DestinationFlightName { get; set; }

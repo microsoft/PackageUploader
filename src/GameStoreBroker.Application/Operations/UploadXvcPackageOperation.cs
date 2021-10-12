@@ -38,7 +38,7 @@ namespace GameStoreBroker.Application.Operations
 
             if (_config.AvailabilityDate is not null)
             {
-                await _storeBrokerService.SetXvcAvailabilityDateAsync(product, packageBranch, gamePackage, _config.MarketGroupId, _config.AvailabilityDate, ct).ConfigureAwait(false);
+                await _storeBrokerService.SetXvcAvailabilityDateAsync(product, packageBranch, gamePackage, _config.MarketGroupName, _config.AvailabilityDate, ct).ConfigureAwait(false);
                 _logger.LogInformation("Availability date set");
             }
         }

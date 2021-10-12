@@ -36,9 +36,9 @@ namespace GameStoreBroker.Application.Operations
             var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, marketGroupPackage, _config.PackageFilePath, null, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
             _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
 
-            if (_config.AvailabilityDate is not null || _config.MandatoryDate is not null || _config.MandatoryDate is not null)
+            if (_config.AvailabilityDate is not null || _config.MandatoryDate is not null || _config.GradualRollout is not null)
             {
-                await _storeBrokerService.SetUwpConfigurationAsync(product, packageBranch, _config.MarketGroupId, _config, ct).ConfigureAwait(false);
+                await _storeBrokerService.SetUwpConfigurationAsync(product, packageBranch, _config.MarketGroupName, _config, ct).ConfigureAwait(false);
                 _logger.LogInformation("Configuration set for Uwp packages");
             }
         }

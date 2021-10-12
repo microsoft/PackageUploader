@@ -9,7 +9,7 @@ namespace GameStoreBroker.Application.Config
     internal abstract class UploadPackageOperationConfig : PackageBranchOperationConfig
     {
         [Required]
-        public string MarketGroupId { get; set; } = "default";
+        public string MarketGroupName { get; set; } = "default";
 
         [Range(0, 360)]
         public int MinutesToWaitForProcessing { get; set; } = 30;
