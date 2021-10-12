@@ -7,7 +7,7 @@
   "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
   "flightName": "{{ flightName or branchFriendlyName required }}",
 
-  "marketGroupId": "{{ optional - if informed it will only delete packages in the specified one }}",
+  "marketGroupName": "{{ optional - if informed it will only delete packages in the specified one (case sensitive) }}",
 
   "aadAuthInfo": {
     "clientId": "{{ required }}",

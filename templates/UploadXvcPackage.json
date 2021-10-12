@@ -7,7 +7,7 @@
   "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
   "flightName": "{{ flightName or branchFriendlyName required }}",
 
-  "marketGroupId": "{{ default value is 'default' }}",
+  "marketGroupName": "{{ default value is 'default' (case sensitive) }}",
 
   "packageFilePath": "{{ required }}",
   "gameAssets": {

@@ -21,7 +21,7 @@
 - **bigId**: *productId* or *bigId* required
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
 - **flightName**: *flightName* or *branchFriendlyName* required
-- **marketGroupId**: optional - if not set, it will use *default* as the market group
+- **marketGroupName**: optional - if not set, it will use *default* as the market group (case sensitive)
 - **packageFilePath**: required - path to the package file
 - **minutesToWaitForProcessing**: optional (default 30) - it will check the package processing status every minute for this long, until it succeeds or fails
 - **availabilityDate**: optional - if informed it will configure custom availability date for your UWP market groups [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
@@ -54,7 +54,7 @@
 - **bigId**: *productId* or *bigId* required
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
 - **flightName**: *flightName* or *branchFriendlyName* required
-- **marketGroupId**: optional - if not set, it will use *default* as the market group
+- **marketGroupName**: optional - if not set, it will use *default* as the market group (case sensitive)
 - **packageFilePath**: required - path to the package file
 - **gameAssets**: required - paths to the game assets
   - **ekbFilePath**: required - path to the EKB file
@@ -85,7 +85,7 @@
 - **bigId**: *productId* or *bigId* required
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
 - **flightName**: *flightName* or *branchFriendlyName* required
-- **marketGroupId**: optional - if not set, it will remove all packages from all market groups
+- **marketGroupName**: optional - if not set, it will remove all packages from all market groups (case sensitive)
 
 # ImportPackages
 ###### Imports all game packages from a branch to a destination branch
@@ -102,7 +102,7 @@
 - **destinationBranchFriendlyName**: *destinationFlightName* or *destinationBranchFriendlyName* required
 - **destinationFlightName**: *destinationFlightName* or *destinationBranchFriendlyName* required
 - **overwrite**: optional - it will replace the packages in the destination branch/flight
-- **marketGroupId**: optional - if not set, it will import all market groups packages
+- **marketGroupName**: optional - if not set, it will import all market groups packages (case sensitive)
 - **availabilityDate**: optional - if informed it will configure custom availability date for your UWP market groups and your XVC/MSIXVC packages in the destination branch/flight  [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
    - **isEnabled**: optional (default false) - it will enable/disable custom availability date
    - **effectiveDate**: optional - if informed it will set the package availability date (date format example: "2021-10-24T21:00:00.000Z")

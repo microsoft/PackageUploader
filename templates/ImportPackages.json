@@ -10,7 +10,7 @@
   "destinationBranchFriendlyName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
   "destinationFlightName": "{{ destinationFlightName or destinationBranchFriendlyName required }}",
 
-  "marketGroupId": "{{ optional - if informed it will only import packages from & to the specified one }}",
+  "marketGroupName": "{{ optional - if informed it will only import packages from & to the specified one (case sensitive) }}",
 
   "availabilityDate": {
     "isEnabled": true,
