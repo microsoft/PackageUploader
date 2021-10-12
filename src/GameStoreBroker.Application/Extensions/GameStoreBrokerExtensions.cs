@@ -66,7 +66,7 @@ namespace GameStoreBroker.Application.Extensions
                 throw new Exception($"Branch '{packageBranch.Name}' does not have any Market Group Packages.");
             }
             
-            var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.MarketGroupId.Equals(config.MarketGroupName));
+            var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(config.MarketGroupName));
 
             if (marketGroupPackage is null)
             {
