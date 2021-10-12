@@ -7,6 +7,6 @@ namespace GameStoreBroker.Application.Config
     {
         internal override string GetOperationName() => "RemovePackages";
 
-        public string MarketGroupId { get; set; } = null;
+        public string MarketGroupName { get; set; } = null;
     }
 }
