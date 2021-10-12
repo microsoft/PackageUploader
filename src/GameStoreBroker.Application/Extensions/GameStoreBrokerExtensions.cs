@@ -58,20 +58,20 @@ namespace GameStoreBroker.Application.Extensions
 
             if (packageConfiguration is null)
             {
-                // todo: initialize branch with 'default' MarketGroupPackage
                 throw new Exception($"Package Configuration not found for branch '{packageBranch.Name}'.");
             }
 
             if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
             {
+                // todo: initialize branch with 'default' MarketGroupPackage
                 throw new Exception($"Branch '{packageBranch.Name}' does not have any Market Group Packages.");
             }
             
-            var marketGroupPackage = packageConfiguration.MarketGroupPackages.FirstOrDefault(x => x.MarketGroupId.Equals(config.MarketGroupName, StringComparison.OrdinalIgnoreCase));
+            var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.MarketGroupId.Equals(config.MarketGroupName));
 
             if (marketGroupPackage is null)
             {
-                throw new Exception($"Market Group Package '{config.MarketGroupName}' not found in branch '{packageBranch.Name}'.");
+                throw new Exception($"Market Group '{config.MarketGroupName}' (case sensitive) not found in branch '{packageBranch.Name}'.");
             }
             return marketGroupPackage;
         }
