@@ -11,12 +11,21 @@ namespace GameStoreBroker.ClientApi
 {
     public static class IngestionExtensions
     {
-        public static void AddGameStoreBrokerService(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddGameStoreBrokerService(this IServiceCollection services, IConfiguration config, bool useDefaultAzureCredential = false)
         {
             services.AddScoped<IGameStoreBrokerService, GameStoreBrokerService>();
             services.AddIngestionService(config);
-            services.AddAccessTokenProvider(config);
+            if (useDefaultAzureCredential)
+            {
+                services.AddAzureAccessTokenProvider(config);
+            }
+            else
+            {
+                services.AddAccessTokenProvider(config);
+            }
             services.AddXfusService(config);
+
+            return services;
         }
     }
 }

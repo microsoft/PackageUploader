@@ -6,7 +6,6 @@ using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
-using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 {
@@ -36,13 +35,14 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
             }
         }
 
-        public async Task<string> GetAccessToken()
+        public string GetAccessToken()
         {
             var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
             var authenticationContext = new AuthenticationContext(authority, true);
 
             var clientCredential = new ClientCredential(_aadAuthInfo.ClientId, _aadAuthInfo.ClientSecret);
-            var result = await authenticationContext.AcquireTokenAsync(_config.AadResourceForCaller, clientCredential).ConfigureAwait(false);
+            var result = authenticationContext.AcquireTokenAsync(_config.AadResourceForCaller, clientCredential)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
 
             if (result is null)
             {

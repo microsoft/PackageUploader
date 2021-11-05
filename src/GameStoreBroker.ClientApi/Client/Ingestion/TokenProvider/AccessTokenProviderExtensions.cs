@@ -10,11 +10,19 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 {
     internal static class AccessTokenProviderExtensions
     {
-        public static void AddAccessTokenProvider(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddAccessTokenProvider(this IServiceCollection services, IConfiguration config)
         {
             services.AddOptions<AadAuthInfo>().Bind(config.GetSection(nameof(AadAuthInfo))).ValidateDataAnnotations();
             services.AddOptions<AccessTokenProviderConfig>().Bind(config.GetSection(nameof(AccessTokenProviderConfig))).ValidateDataAnnotations();
             services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
+            return services;
+        }
+
+        public static IServiceCollection AddAzureAccessTokenProvider(this IServiceCollection services, IConfiguration config)
+        {
+            services.AddOptions<AccessTokenProviderConfig>().Bind(config.GetSection(nameof(AccessTokenProviderConfig))).ValidateDataAnnotations();
+            services.AddScoped<IAccessTokenProvider, AzureAccessTokenProvider>();
+            return services;
         }
     }
 }

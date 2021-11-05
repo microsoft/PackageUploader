@@ -26,7 +26,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 httpClient.Timeout = TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs);
 
                 var accessTokenProvider = serviceProvider.GetRequiredService<IAccessTokenProvider>();
-                var accessToken = accessTokenProvider.GetAccessToken().GetAwaiter().GetResult();
+                var accessToken = accessTokenProvider.GetAccessToken();
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             });
         }

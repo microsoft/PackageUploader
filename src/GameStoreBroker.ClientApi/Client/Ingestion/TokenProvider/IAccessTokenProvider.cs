@@ -7,6 +7,6 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 {
     public interface IAccessTokenProvider
     {
-        Task<string> GetAccessToken();
+        string GetAccessToken();
     }
 }
