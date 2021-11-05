@@ -12,7 +12,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 {
     internal static class IngestionExtensions
     {
-        public static void AddIngestionService(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddIngestionService(this IServiceCollection services, IConfiguration config)
         {
             services.AddOptions<IngestionConfig>().Bind(config.GetSection(nameof(IngestionConfig))).ValidateDataAnnotations();
             services.AddScoped<IngestionAuthenticationDelegatingHandler>();
@@ -24,6 +24,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                     httpClient.BaseAddress = new Uri(ingestionConfig.BaseAddress);
                     httpClient.Timeout = TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs);
                 }).AddHttpMessageHandler<IngestionAuthenticationDelegatingHandler>();
+
+            return services;
         }
     }
 }
