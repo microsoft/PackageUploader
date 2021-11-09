@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.ClientApi.Models;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Config
 {
     internal abstract class UploadPackageOperationConfig : PackageBranchOperationConfig
     {
-        [Required]
-        public string MarketGroupId { get; set; } = "default";
+        public string MarketGroupName { get; set; } = "default";
 
         [Range(0, 360)]
         public int MinutesToWaitForProcessing { get; set; } = 30;
@@ -18,5 +18,13 @@ namespace GameStoreBroker.Application.Config
         public string PackageFilePath { get; set; }
 
         public GamePackageDate AvailabilityDate { get; set; }
+
+        protected override void Validate(IList<ValidationResult> validationResults)
+        {
+            if (string.IsNullOrWhiteSpace(MarketGroupName))
+            {
+                MarketGroupName = "default";
+            }
+        }
     }
 }

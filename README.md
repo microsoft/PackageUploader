@@ -1,4 +1,4 @@
-# Project GameStoreBroker
+# Project PackageUploader
 
 A .NET 5.0 cross platform application and library that enables game developers to upload Xbox and PC game packages to [Partner Center](https://partner.microsoft.com/).
 
@@ -13,7 +13,7 @@ The application can be used directly with the input config for ease of use, or t
 
 ## Step 1: Creating your app in Azure.
 
-- Go to https://portal.azure.com and log in with your Azure account.
+- Go to [Azure Portal](https://portal.azure.com) and log in with your Azure account.
 - Under Azure services find _App registrations_.
 - Under _App registrations_ click _New registration_.
   - Enter in your _name_.
@@ -22,10 +22,12 @@ The application can be used directly with the input config for ease of use, or t
 - Under your newly created App navigate to _Client credentials_ and create a _New client secret_. Note the _clientID_, _tenantID_, and your _Secret key_ for future use.
 - It is recommended that you add your team as backup to maintain your app going forward.
   - Navigate into the app, on the left under _manage_ find _owners_ and _add_ your back up.
-  
+
+[More information](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#register-an-application)
+
 ## Step 2: Add your app in Partner Center and give it the proper permissions.
 
-- Log in to Partner Center with a manager level account. 
+- Go to [Partner Center](https://partner.microsoft.com/dashboard) and log in with a manager level account. 
 - Click on the _cogs_ wheel on the top right of the page and navigate to _Account settings_.
 - On the left navigation pane click on _User management_ then _Azure AD applications_.
 - Click on _Create Azure AD application_ and search for your Azure created app in the search pane on the right, check the box for your app and click _Next_.
@@ -33,45 +35,26 @@ The application can be used directly with the input config for ease of use, or t
 - Under _Product-level permissions_ search for your product and apply the _Read/write_ permission under _Publishing_.
   - **NOTE** We will be changing this with future iterations of the tool to more accurately apply permissions.
 
+[More information](https://docs.microsoft.com/en-us/partner-center/multi-tenant-account#add-an-azure-ad-tenant-to-your-account)
+
 ## Step 3: Configure your wrapper using a config file
 
-- Create or edit the configuration file with your favorite editor and update the following fields
+- Create or edit the configuration file with your favorite editor and update the fields:
+  - #### To get product metadata: [GetProduct](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetProduct)
+  - #### To upload Uwp package: [UploadUwpPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadUwpPackage)
+  - #### To upload Xvc package: [UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)
+  - #### To remove packages: [RemovePackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#RemovePackages)
+  - #### To import packages: [ImportPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#ImportPackages)
+  - #### To publish packages: [PublishPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#PublishPackages)
 
-### To Upload Xvc Package:
-
-- ***operationName*** (UploadXvcPackage)
-- ***productId*** or ***bigId*** (From Partner Center)
-- ***branchFriendlyName*** or ***flightName*** (name of the branch/sandbox or the flight from Partner Center)
-  - *XBOX RECOMMEND*: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
-- ***packageFilePath*** (Location of the game package)
-- ***gameAssets***:
-  - ***ekbFilePath*** (Location of the EKB file)
-  - ***subvalFilePath*** (Location of the SubVal File)
-  - ***SymbolsFilePath*** (Location of Symbols File - optional)
-  - ***discLayoutFilePath*** (Location of Disc Layout File - optional)
-- ***aadAuthInfo***:
-  - ***clientId*** (From Azure Portal)
-  - ***tenantId*** (From Azure Portal)
-
-### To Upload Uwp Package:
-
-- ***operationName*** (UploadUwpPackage)
-- ***productId*** or ***bigId*** (From Partner Center)
-- ***branchFriendlyName*** or ***flightName*** (name of the branch/sandbox or the flight from Partner Center)
-  - *XBOX RECOMMEND*: In order to facilitate a quick and efficient development process, while at the same time ensuring that you are maintaining control over your production releases, we at Xbox highly recommend that you only use this feature on QA and dev branches and import packages to your Main branch in Partner Center, after they’ve been pre-certified.
-- ***packageFilePath*** (Location of the game package)
-- ***aadAuthInfo***:
-  - ***clientId*** (From Azure Portal)
-  - ***tenantId*** (From Azure Portal)
-
-## Step 4: Fire Away
+## Step 4: Run the tool
 
 - Open _powershell_ via the start menu.
 
 - Navigate to the root of your wrapper directory and run the following command:
 
   ```
-  .\GameStoreBroker.exe <OperationName> -c <ConfigFile> -s <ClientSecret>
+  .\PackageUploader.exe <OperationName> -c <ConfigFile> -s <ClientSecret>
   ```
 
 - Operations:
@@ -98,9 +81,6 @@ The application can be used directly with the input config for ease of use, or t
   ```
   
 ## Q & A
-
-Question: Can I use the API directly? <br>
-Answer: You may and documentation will be written however there will be no support. Please reference the document and the wrapper source for call patterns. 
 
 Question: Can I use one App name for multiple products? <br>
 Answer: In theory this should work, but currently it is not. We're working with the Partner Center Accounts Team to identify the issue. 
