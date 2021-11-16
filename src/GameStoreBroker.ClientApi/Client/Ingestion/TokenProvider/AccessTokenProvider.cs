@@ -5,7 +5,7 @@ using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Config;
 using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,19 +43,26 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
         public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
         {
             var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
-            var authenticationContext = new AuthenticationContext(authority, true);
-
-            var clientCredential = new ClientCredential(_aadAuthInfo.ClientId, _aadAuthInfo.ClientSecret);
+            var msalClient = ConfidentialClientApplicationBuilder
+               .Create(_aadAuthInfo.ClientId)
+               .WithClientSecret(_aadAuthInfo.ClientSecret)
+               .WithAuthority(authority, true)
+               .Build();
 
             _logger.LogDebug("Requesting authentication token");
-            var result = await authenticationContext.AcquireTokenAsync(_config.AadResourceForCaller, clientCredential).ConfigureAwait(false);
+            var result = await msalClient.AcquireTokenForClient(new[] { $"{_config.AadResourceForCaller}/.default" }).ExecuteAsync(ct).ConfigureAwait(false);
 
             if (result is null)
             {
                 throw new Exception("Failure while acquiring token.");
             }
 
-            return new IngestionAccessToken { AccessToken = result.AccessToken, ExpiresOn = result.ExpiresOn };
+            return new IngestionAccessToken
+            {
+                AccessToken = result.AccessToken,
+                ExpiresOn = result.ExpiresOn,
+            };
+
         }
     }
 }
