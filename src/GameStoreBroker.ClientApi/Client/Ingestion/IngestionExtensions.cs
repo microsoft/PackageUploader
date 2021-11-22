@@ -32,14 +32,12 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
                 var accessTokenProvider = serviceProvider.GetRequiredService<IAccessTokenProvider>();
                 var accessToken = accessTokenProvider.GetAccessToken().GetAwaiter().GetResult();
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            }).AddPolicyHandler((provider, request) => GetRetryPolicy(provider));
-        }
-
-        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(IServiceProvider serviceProvider)
-        {
-            var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
-            var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(ingestionConfig.MedianFirstRetryDelayMs), ingestionConfig.RetryCount);
-            return HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(delay);        
+            }).AddPolicyHandler((serviceProvider, httpRequestMessage) =>
+            {
+                var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
+                var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(ingestionConfig.MedianFirstRetryDelayMs), ingestionConfig.RetryCount);
+                return HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(delay);
+            });
         }
     }
 }
