@@ -26,7 +26,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
-            _token ??= await _accessTokenProvider.GetTokenAsync(ct);
+            _token ??= await _accessTokenProvider.GetTokenAsync(ct).ConfigureAwait(false);
             var response = await SetAuthHeaderAndSendAsync(request, ct).ConfigureAwait(false);
 
             if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
