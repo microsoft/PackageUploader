@@ -27,13 +27,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             _token ??= await _accessTokenProvider.GetTokenAsync(ct);
-            var response = await SetAuthHeaderAndSendAsync(request, ct);
+            var response = await SetAuthHeaderAndSendAsync(request, ct).ConfigureAwait(false);
 
             if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
             {
                 _logger.LogDebug("Response status code was {statusCode}. Retrying with new token.", response.StatusCode);
-                _token = await _accessTokenProvider.GetTokenAsync(ct);
-                response = await SetAuthHeaderAndSendAsync(request, ct);
+                _token = await _accessTokenProvider.GetTokenAsync(ct).ConfigureAwait(false);
+                response = await SetAuthHeaderAndSendAsync(request, ct).ConfigureAwait(false);
             }
 
             return response;
@@ -42,7 +42,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion
         private async Task<HttpResponseMessage> SetAuthHeaderAndSendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.AccessToken);
-            return await base.SendAsync(request, ct);
+            return await base.SendAsync(request, ct).ConfigureAwait(false);
         }
     }
 }
