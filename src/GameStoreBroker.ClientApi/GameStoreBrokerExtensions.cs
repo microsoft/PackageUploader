@@ -11,21 +11,32 @@ namespace GameStoreBroker.ClientApi
 {
     public static class IngestionExtensions
     {
-        public static IServiceCollection AddGameStoreBrokerService(this IServiceCollection services, IConfiguration config, bool useDefaultAzureCredential = false)
+        public enum AuthenticationMethod 
+        {
+            AzureApplicationSecret, 
+            DefaultAzureCredential, 
+            InteractiveBrowserCredential,
+        }
+
+        public static IServiceCollection AddGameStoreBrokerService(this IServiceCollection services, IConfiguration config, 
+            AuthenticationMethod authenticationMethod = AuthenticationMethod.AzureApplicationSecret)
         {
             services.AddScoped<IGameStoreBrokerService, GameStoreBrokerService>();
             services.AddIngestionService(config);
-            if (useDefaultAzureCredential)
-            {
-                services.AddAzureAccessTokenProvider(config);
-            }
-            else
-            {
-                services.AddAccessTokenProvider(config);
-            }
+            services.AddIngestionAuthentication(config, authenticationMethod);
             services.AddXfusService(config);
 
             return services;
         }
+
+        private static IServiceCollection AddIngestionAuthentication(this IServiceCollection services, IConfiguration config, 
+            AuthenticationMethod authenticationMethod = AuthenticationMethod.AzureApplicationSecret) =>
+            authenticationMethod switch
+            {
+                AuthenticationMethod.AzureApplicationSecret => services.AddAzureApplicationSecretAccessTokenProvider(config),
+                AuthenticationMethod.InteractiveBrowserCredential => services.AddInteractiveBrowserCredentialAccessTokenProvider(config),
+                AuthenticationMethod.DefaultAzureCredential => services.AddDefaultAzureCredentialAccessTokenProvider(config),
+                _ => services.AddAzureApplicationSecretAccessTokenProvider(config),
+            };
     }
 }

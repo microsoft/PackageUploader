@@ -13,12 +13,12 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 {
-    public class AzureAccessTokenProvider : IAccessTokenProvider
+    public class InteractiveBrowserCredentialAccessTokenProvider : IAccessTokenProvider
     {
         private readonly AccessTokenProviderConfig _config;
-        private readonly ILogger<AzureAccessTokenProvider> _logger;
+        private readonly ILogger<InteractiveBrowserCredentialAccessTokenProvider> _logger;
 
-        public AzureAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger<AzureAccessTokenProvider> logger)
+        public InteractiveBrowserCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger<InteractiveBrowserCredentialAccessTokenProvider> logger)
         {
             _config = config.Value;
             _logger = logger;
@@ -26,11 +26,15 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 
         public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
         {
-            var azureCredentialOptions = new DefaultAzureCredentialOptions
+            var azureCredentialOptions = new InteractiveBrowserCredentialOptions
             {
                 AuthorityHost = new Uri(_config.AadAuthorityBaseUrl),
             };
-            var azureCredential = new DefaultAzureCredential(azureCredentialOptions);
+            var azureCredential = new InteractiveBrowserCredential(azureCredentialOptions);
+
+            _logger.LogDebug("Authenticating user via the default browser");
+            await azureCredential.AuthenticateAsync(ct).ConfigureAwait(false);
+
             var requestContext = new TokenRequestContext(new[] { _config.AadResourceForCaller });
 
             _logger.LogDebug("Requesting authentication token");

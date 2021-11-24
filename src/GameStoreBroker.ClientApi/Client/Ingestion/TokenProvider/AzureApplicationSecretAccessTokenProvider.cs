@@ -12,13 +12,14 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 {
-    public class AccessTokenProvider : IAccessTokenProvider
+    public class AzureApplicationSecretAccessTokenProvider : IAccessTokenProvider
     {
-        private readonly ILogger<AccessTokenProvider> _logger;
+        private readonly ILogger<AzureApplicationSecretAccessTokenProvider> _logger;
         private readonly AccessTokenProviderConfig _config;
         private readonly AadAuthInfo _aadAuthInfo;
 
-        public AccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AadAuthInfo> aadAuthInfo, ILogger<AccessTokenProvider> logger)
+        public AzureApplicationSecretAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AadAuthInfo> aadAuthInfo, 
+            ILogger<AzureApplicationSecretAccessTokenProvider> logger)
         {
             _logger = logger;
             _config = config.Value;
