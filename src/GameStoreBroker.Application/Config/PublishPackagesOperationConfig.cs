@@ -14,7 +14,6 @@ namespace GameStoreBroker.Application.Config
 
         public string DestinationSandboxName { get; set; }
         public int MinutesToWaitForPublishing { get; set; }
-        public bool Retail { get; set; }
         public GamePublishConfiguration PublishConfiguration { get; set; }
 
         private const string RetailSandboxName = "RETAIL";
@@ -28,9 +27,9 @@ namespace GameStoreBroker.Application.Config
                     new[] { nameof(FlightName), nameof(BranchFriendlyName), nameof(DestinationSandboxName) }));
             }
 
-            if (!string.IsNullOrWhiteSpace(DestinationSandboxName) && DestinationSandboxName.Equals(RetailSandboxName, StringComparison.OrdinalIgnoreCase) && !Retail)
+            if (!string.IsNullOrWhiteSpace(DestinationSandboxName) && DestinationSandboxName.Equals(RetailSandboxName, StringComparison.OrdinalIgnoreCase))
             {
-                validationResults.Add(new ValidationResult($"The parameter --Retail is needed to allow publish packages to {RetailSandboxName} sandbox.", 
+                validationResults.Add(new ValidationResult($"Publishing packages to {RetailSandboxName} sandbox is not permitted through this tool.", 
                     new[] { nameof(DestinationSandboxName) }));
             }
         }
