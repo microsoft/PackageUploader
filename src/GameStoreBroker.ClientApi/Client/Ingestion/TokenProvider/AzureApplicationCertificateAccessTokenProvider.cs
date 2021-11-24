@@ -47,9 +47,13 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
                 throw new ArgumentException($"CertificateThumbprint not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
             }
 
-            _certificate = GetCertificate();
-            if (_certificate is null)
-                throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.", nameof(aadAuthInfo));
+            var certificates = GetCertificates();
+            _certificate = (certificates?.Count) switch
+            {
+                1 => certificates[0],
+                > 1 => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} found more than once.", nameof(aadAuthInfo)),
+                _ => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.", nameof(aadAuthInfo)),
+            };
         }
 
         public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
@@ -76,7 +80,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
             };
         }
 
-        private X509Certificate2 GetCertificate()
+        private X509Certificate2Collection GetCertificates()
         {
             using var store = new X509Store(_aadAuthInfo.CertificateStore, _aadAuthInfo.CertificateLocation);
 
@@ -84,7 +88,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
             var certs = store.Certificates.Find(X509FindType.FindByThumbprint, _aadAuthInfo.CertificateThumbprint, true);
             store.Close();
 
-            return (certs.Count < 1) ? certs[0]: null;
+            return certs;
         }
     }
 }
