@@ -31,9 +31,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
                 AuthorityHost = new Uri(_config.AadAuthorityBaseUrl),
             };
             var azureCredential = new DefaultAzureCredential(azureCredentialOptions);
-            var requestContext = new TokenRequestContext(new[] { _config.AadResourceForCaller });
 
             _logger.LogDebug("Requesting authentication token");
+            var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
+            var requestContext = new TokenRequestContext(scopes);
             var token = await azureCredential.GetTokenAsync(requestContext, ct).ConfigureAwait(false);
 
             return new IngestionAccessToken

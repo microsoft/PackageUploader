@@ -35,9 +35,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
             _logger.LogDebug("Authenticating user via the default browser");
             await azureCredential.AuthenticateAsync(ct).ConfigureAwait(false);
 
-            var requestContext = new TokenRequestContext(new[] { _config.AadResourceForCaller });
-
             _logger.LogDebug("Requesting authentication token");
+            var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
+            var requestContext = new TokenRequestContext(scopes);
             var token = await azureCredential.GetTokenAsync(requestContext, ct).ConfigureAwait(false);
 
             return new IngestionAccessToken

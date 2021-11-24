@@ -66,7 +66,8 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
                .Build();
 
             _logger.LogDebug("Requesting authentication token");
-            var result = await msalClient.AcquireTokenForClient(new[] { $"{_config.AadResourceForCaller}/.default" }).ExecuteAsync(ct).ConfigureAwait(false);
+            var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
+            var result = await msalClient.AcquireTokenForClient(scopes).ExecuteAsync(ct).ConfigureAwait(false);
 
             if (result is null)
             {
