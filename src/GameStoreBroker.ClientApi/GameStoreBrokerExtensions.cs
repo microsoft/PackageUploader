@@ -13,7 +13,8 @@ namespace GameStoreBroker.ClientApi
     {
         public enum AuthenticationMethod 
         {
-            AppSecret, 
+            AppSecret,
+            AppCert,
             Default, 
             Browser,
         }
@@ -34,6 +35,7 @@ namespace GameStoreBroker.ClientApi
             authenticationMethod switch
             {
                 AuthenticationMethod.AppSecret => services.AddAzureApplicationSecretAccessTokenProvider(config),
+                AuthenticationMethod.AppCert => services.AddAzureApplicationCertificateAccessTokenProvider(config),
                 AuthenticationMethod.Browser => services.AddInteractiveBrowserCredentialAccessTokenProvider(config),
                 AuthenticationMethod.Default => services.AddDefaultAzureCredentialAccessTokenProvider(config),
                 _ => services.AddAzureApplicationSecretAccessTokenProvider(config),

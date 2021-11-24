@@ -11,7 +11,10 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
     internal static class AccessTokenProviderExtensions
     {
         public static IServiceCollection AddAzureApplicationSecretAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
-            services.AddAccessTokenProvider<AzureApplicationSecretAccessTokenProvider, AadAuthInfo>(config);
+            services.AddAccessTokenProvider<AzureApplicationSecretAccessTokenProvider, AzureApplicationSecretAuthInfo>(config);
+
+        public static IServiceCollection AddAzureApplicationCertificateAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
+            services.AddAccessTokenProvider<AzureApplicationCertificateAccessTokenProvider, AzureApplicationCertificateAuthInfo>(config);
 
         public static IServiceCollection AddDefaultAzureCredentialAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
             services.AddAccessTokenProvider<DefaultAzureCredentialAccessTokenProvider>(config);
@@ -20,9 +23,9 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
             services.AddAccessTokenProvider<InteractiveBrowserCredentialAccessTokenProvider>(config);
 
         private static IServiceCollection AddAccessTokenProvider<TProvider, TAuthInfo>(this IServiceCollection services, IConfiguration config)
-            where TProvider : class, IAccessTokenProvider where TAuthInfo : class
+            where TProvider : class, IAccessTokenProvider where TAuthInfo : AadAuthInfo
         {
-            services.AddOptions<TAuthInfo>().Bind(config.GetSection("AadAuthInfo")).ValidateDataAnnotations();
+            services.AddOptions<TAuthInfo>().Bind(config.GetSection(AadAuthInfo.ConfigName)).ValidateDataAnnotations();
             services.AddAccessTokenProvider<TProvider>(config);
             return services;
         }

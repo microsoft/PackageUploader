@@ -7,19 +7,21 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 {
-    public class AzureApplicationSecretAccessTokenProvider : IAccessTokenProvider
+    public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvider
     {
-        private readonly ILogger<AzureApplicationSecretAccessTokenProvider> _logger;
+        private readonly ILogger<AzureApplicationCertificateAccessTokenProvider> _logger;
         private readonly AccessTokenProviderConfig _config;
-        private readonly AzureApplicationSecretAuthInfo _aadAuthInfo;
+        private readonly AzureApplicationCertificateAuthInfo _aadAuthInfo;
+        private readonly X509Certificate2 _certificate;
 
-        public AzureApplicationSecretAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationSecretAuthInfo> aadAuthInfo, 
-            ILogger<AzureApplicationSecretAccessTokenProvider> logger)
+        public AzureApplicationCertificateAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationCertificateAuthInfo> aadAuthInfo, 
+            ILogger<AzureApplicationCertificateAccessTokenProvider> logger)
         {
             _logger = logger;
             _config = config.Value;
@@ -35,10 +37,19 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
                 throw new ArgumentException($"ClientId not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
             }
 
-            if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientSecret))
+            if (string.IsNullOrWhiteSpace(_aadAuthInfo.CertificateStore))
             {
-                throw new ArgumentException($"ClientSecret not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
+                throw new ArgumentException($"CertificateStore not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
             }
+
+            if (string.IsNullOrWhiteSpace(_aadAuthInfo.CertificateThumbprint))
+            {
+                throw new ArgumentException($"CertificateThumbprint not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
+            }
+
+            _certificate = GetCertificate();
+            if (_certificate is null)
+                throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.", nameof(aadAuthInfo));
         }
 
         public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
@@ -46,7 +57,7 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
             var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
             var msalClient = ConfidentialClientApplicationBuilder
                .Create(_aadAuthInfo.ClientId)
-               .WithClientSecret(_aadAuthInfo.ClientSecret)
+               .WithCertificate(_certificate)
                .WithAuthority(authority, true)
                .Build();
 
@@ -63,7 +74,17 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
                 AccessToken = result.AccessToken,
                 ExpiresOn = result.ExpiresOn,
             };
+        }
 
+        private X509Certificate2 GetCertificate()
+        {
+            using var store = new X509Store(_aadAuthInfo.CertificateStore, _aadAuthInfo.CertificateLocation);
+
+            store.Open(OpenFlags.ReadOnly);
+            var certs = store.Certificates.Find(X509FindType.FindByThumbprint, _aadAuthInfo.CertificateThumbprint, true);
+            store.Close();
+
+            return (certs.Count < 1) ? certs[0]: null;
         }
     }
 }

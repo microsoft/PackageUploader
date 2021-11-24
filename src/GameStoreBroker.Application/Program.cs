@@ -104,7 +104,7 @@ namespace GameStoreBroker.Application
             var authenticationMethod = invocationContext.GetOptionValue(AuthenticationMethodOption);
             if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
             {
-                var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => $"{nameof(AadAuthInfo)}:{nameof(AadAuthInfo.ClientSecret)}");
+                var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => $"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}");
                 builder.AddCommandLine(args, switchMappings);
             }
         }
