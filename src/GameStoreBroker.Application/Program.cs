@@ -58,7 +58,6 @@ namespace GameStoreBroker.Application
             logging.AddFilter("GameStoreBroker", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
             logging.AddSimpleFile(options =>
             {
-                options.IncludeScopes = true;
                 options.SingleLine = true;
                 options.TimestampFormat = LogTimestampFormat;
             }, file =>
@@ -69,7 +68,6 @@ namespace GameStoreBroker.Application
             });
             logging.AddSimpleConsole(options =>
             {
-                options.IncludeScopes = true;
                 options.SingleLine = true;
                 options.TimestampFormat = LogTimestampFormat;
             });
