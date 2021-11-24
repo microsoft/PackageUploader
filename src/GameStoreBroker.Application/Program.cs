@@ -29,10 +29,10 @@ namespace GameStoreBroker.Application
         // Options
         private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls");
         private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file");
-        private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app");
+        private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app (only for AppSecret)");
         private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "The location of the config file").Required();
         private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "The format of the config file");
-        private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--AuthenticationMethod" }, () => IngestionExtensions.AuthenticationMethod.AzureApplicationSecret, "The format of the config file");
+        private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
 
         internal enum ConfigFileFormat { Json, Xml, Ini, }
 
@@ -102,7 +102,7 @@ namespace GameStoreBroker.Application
             }
 
             var authenticationMethod = invocationContext.GetOptionValue(AuthenticationMethodOption);
-            if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AzureApplicationSecret)
+            if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
             {
                 var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => $"{nameof(AadAuthInfo)}:{nameof(AadAuthInfo.ClientSecret)}");
                 builder.AddCommandLine(args, switchMappings);
@@ -115,27 +115,27 @@ namespace GameStoreBroker.Application
             {
                 new Command("GetProduct", "Gets metadata of the product")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
                 }.AddOperationHandler<GetProductOperation>(),
                 new Command("UploadUwpPackage", "Uploads Uwp game package")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
                 }.AddOperationHandler<UploadUwpPackageOperation>(),
                 new Command("UploadXvcPackage", "Uploads Xvc game package and assets")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
                 }.AddOperationHandler<UploadXvcPackageOperation>(),
                 new Command("RemovePackages", "Removes all game packages and assets from a branch")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
                 }.AddOperationHandler<RemovePackagesOperation>(),
                 new Command("ImportPackages", "Imports all game packages from a branch to a destination branch")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
                 }.AddOperationHandler<ImportPackagesOperation>(),
                 new Command("PublishPackages", "Publishes all game packages from a branch or flight to a destination sandbox or flight")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
                 }.AddOperationHandler<PublishPackagesOperation>(),
             };
             rootCommand.AddGlobalOption(VerboseOption);

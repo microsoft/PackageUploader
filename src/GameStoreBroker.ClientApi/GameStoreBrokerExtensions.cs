@@ -13,13 +13,13 @@ namespace GameStoreBroker.ClientApi
     {
         public enum AuthenticationMethod 
         {
-            AzureApplicationSecret, 
-            DefaultAzureCredential, 
-            InteractiveBrowserCredential,
+            AppSecret, 
+            Default, 
+            Browser,
         }
 
         public static IServiceCollection AddGameStoreBrokerService(this IServiceCollection services, IConfiguration config, 
-            AuthenticationMethod authenticationMethod = AuthenticationMethod.AzureApplicationSecret)
+            AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret)
         {
             services.AddScoped<IGameStoreBrokerService, GameStoreBrokerService>();
             services.AddIngestionService(config);
@@ -30,12 +30,12 @@ namespace GameStoreBroker.ClientApi
         }
 
         private static IServiceCollection AddIngestionAuthentication(this IServiceCollection services, IConfiguration config, 
-            AuthenticationMethod authenticationMethod = AuthenticationMethod.AzureApplicationSecret) =>
+            AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret) =>
             authenticationMethod switch
             {
-                AuthenticationMethod.AzureApplicationSecret => services.AddAzureApplicationSecretAccessTokenProvider(config),
-                AuthenticationMethod.InteractiveBrowserCredential => services.AddInteractiveBrowserCredentialAccessTokenProvider(config),
-                AuthenticationMethod.DefaultAzureCredential => services.AddDefaultAzureCredentialAccessTokenProvider(config),
+                AuthenticationMethod.AppSecret => services.AddAzureApplicationSecretAccessTokenProvider(config),
+                AuthenticationMethod.Browser => services.AddInteractiveBrowserCredentialAccessTokenProvider(config),
+                AuthenticationMethod.Default => services.AddDefaultAzureCredentialAccessTokenProvider(config),
                 _ => services.AddAzureApplicationSecretAccessTokenProvider(config),
             };
     }
