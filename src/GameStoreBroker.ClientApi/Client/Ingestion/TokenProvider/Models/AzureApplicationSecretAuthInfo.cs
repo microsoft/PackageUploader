@@ -5,14 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models
 {
-    public abstract class AadAuthInfo
+    public sealed class AzureApplicationSecretAuthInfo : AadAuthInfo
     {
-        public const string ConfigName = nameof(AadAuthInfo);
-
         [Required]
-        public string TenantId { get; set; }
-
-        [Required]
-        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
     }
 }

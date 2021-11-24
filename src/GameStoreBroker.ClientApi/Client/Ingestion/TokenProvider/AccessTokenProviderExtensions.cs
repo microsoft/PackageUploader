@@ -10,11 +10,32 @@ namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
 {
     internal static class AccessTokenProviderExtensions
     {
-        public static void AddAccessTokenProvider(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddAzureApplicationSecretAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
+            services.AddAccessTokenProvider<AzureApplicationSecretAccessTokenProvider, AzureApplicationSecretAuthInfo>(config);
+
+        public static IServiceCollection AddAzureApplicationCertificateAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
+            services.AddAccessTokenProvider<AzureApplicationCertificateAccessTokenProvider, AzureApplicationCertificateAuthInfo>(config);
+
+        public static IServiceCollection AddDefaultAzureCredentialAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
+            services.AddAccessTokenProvider<DefaultAzureCredentialAccessTokenProvider>(config);
+
+        public static IServiceCollection AddInteractiveBrowserCredentialAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
+            services.AddAccessTokenProvider<InteractiveBrowserCredentialAccessTokenProvider>(config);
+
+        private static IServiceCollection AddAccessTokenProvider<TProvider, TAuthInfo>(this IServiceCollection services, IConfiguration config)
+            where TProvider : class, IAccessTokenProvider where TAuthInfo : AadAuthInfo
         {
-            services.AddOptions<AadAuthInfo>().Bind(config.GetSection(nameof(AadAuthInfo))).ValidateDataAnnotations();
+            services.AddOptions<TAuthInfo>().Bind(config.GetSection(AadAuthInfo.ConfigName)).ValidateDataAnnotations();
+            services.AddAccessTokenProvider<TProvider>(config);
+            return services;
+        }
+
+        private static IServiceCollection AddAccessTokenProvider<TProvider>(this IServiceCollection services, IConfiguration config)
+            where TProvider : class, IAccessTokenProvider
+        {
             services.AddOptions<AccessTokenProviderConfig>().Bind(config.GetSection(nameof(AccessTokenProviderConfig))).ValidateDataAnnotations();
-            services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
+            services.AddScoped<IAccessTokenProvider, TProvider>();
+            return services;
         }
     }
 }
