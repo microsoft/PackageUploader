@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RemovePackagesOperationConfigSchema.json",
+  "title": "RemovePackagesOperationConfig",
+  "description": "Input config file structure for the package uploader Remove Packages Operation",
+  "type": "object",
+  "properties": {
+    "operationName": {
+      "type": "string",
+      "const": "RemovePackages"
+    },
+    "productId": {
+      "type": "string"
+    },
+    "bigId": {
+      "type": "string"
+    },
+    "branchFriendlyName": {
+      "type": "string"
+    },
+    "flightName": {
+      "type": "string"
+    },
+    "marketgroupName": {
+      "type": "string"
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "operationName",
+        "productId",
+        "branchFriendlyName"
+      ]
+    },
+    {
+      "required": [
+        "operationName",
+        "productId",
+        "flightName"
+      ]
+    },
+    {
+      "required": [
+        "operationName",
+        "bigId",
+        "branchFriendlyName"
+      ]
+    },
+    {
+      "required": [
+        "operationName",
+        "bigId",
+        "flightName"
+      ]
+    }
+  ]
+}
