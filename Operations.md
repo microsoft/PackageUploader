@@ -3,9 +3,12 @@
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/GetProduct.json))
 ##### Definition:
 - **operationName**: "GetProduct",
-- **aadAuthInfo**: required
+- **aadAuthInfo**: required when using authentication method *AppCert* or *AppSecret*
   - **tenantId**: required
   - **clientId**: required
+  - **certificateThumbprint**: required when using authentication method *AppCert*
+  - **certificateStore**: optional when using authentication method *AppCert* (default *My*)
+  - **certificateLocation**: optional when using authentication method *AppCert* (default *CurrentUser*)
 - **productId**: *productId* or *bigId* required
 - **bigId**: *productId* or *bigId* required
 
@@ -14,9 +17,12 @@
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/UploadUwpPackage.json))
 ##### Definition:
 - **operationName**: "UploadUwpPackage",
-- **aadAuthInfo**: required
+- **aadAuthInfo**: required when using authentication method *AppCert* or *AppSecret*
   - **tenantId**: required
   - **clientId**: required
+  - **certificateThumbprint**: required when using authentication method *AppCert*
+  - **certificateStore**: optional when using authentication method *AppCert* (default *My*)
+  - **certificateLocation**: optional when using authentication method *AppCert* (default *CurrentUser*)
 - **productId**: *productId* or *bigId* required
 - **bigId**: *productId* or *bigId* required
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
@@ -47,9 +53,12 @@
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/UploadXvcPackage.json))
 ##### Definition:
 - **operationName**: "UploadXvcPackage",
-- **aadAuthInfo**: required
+- **aadAuthInfo**: required when using authentication method *AppCert* or *AppSecret*
   - **tenantId**: required
   - **clientId**: required
+  - **certificateThumbprint**: required when using authentication method *AppCert*
+  - **certificateStore**: optional when using authentication method *AppCert* (default *My*)
+  - **certificateLocation**: optional when using authentication method *AppCert* (default *CurrentUser*)
 - **productId**: *productId* or *bigId* required
 - **bigId**: *productId* or *bigId* required
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
@@ -78,9 +87,12 @@
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/RemovePackages.json))
 ##### Definition:
 - **operationName**: "RemovePackages",
-- **aadAuthInfo**: required
+- **aadAuthInfo**: required when using authentication method *AppCert* or *AppSecret*
   - **tenantId**: required
   - **clientId**: required
+  - **certificateThumbprint**: required when using authentication method *AppCert*
+  - **certificateStore**: optional when using authentication method *AppCert* (default *My*)
+  - **certificateLocation**: optional when using authentication method *AppCert* (default *CurrentUser*)
 - **productId**: *productId* or *bigId* required
 - **bigId**: *productId* or *bigId* required
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
@@ -92,9 +104,12 @@
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/ImportPackages.json))
 ##### Definition:
 - **operationName**: "ImportPackages",
-- **aadAuthInfo**: required
+- **aadAuthInfo**: required when using authentication method *AppCert* or *AppSecret*
   - **tenantId**: required
   - **clientId**: required
+  - **certificateThumbprint**: required when using authentication method *AppCert*
+  - **certificateStore**: optional when using authentication method *AppCert* (default *My*)
+  - **certificateLocation**: optional when using authentication method *AppCert* (default *CurrentUser*)
 - **productId**: *productId* or *bigId* required
 - **bigId**: *productId* or *bigId* required
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
@@ -120,9 +135,12 @@ If you want to deploy to RETAIL, you need to use the parameter --Retail in the c
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/PublishPackages.json))
 ##### Definition:
 - **operationName**: "PublishPackages",
-- **aadAuthInfo**: required
+- **aadAuthInfo**: required when using authentication method *AppCert* or *AppSecret*
   - **tenantId**: required
   - **clientId**: required
+  - **certificateThumbprint**: required when using authentication method *AppCert*
+  - **certificateStore**: optional when using authentication method *AppCert* (default *My*)
+  - **certificateLocation**: optional when using authentication method *AppCert* (default *CurrentUser*)
 - **productId**: *productId* or *bigId* required
 - **bigId**: *productId* or *bigId* required
 - **flightName**: *flightName* or (*branchFriendlyName* and *destinationSandboxName*) required
