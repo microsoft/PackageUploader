@@ -33,6 +33,7 @@ namespace GameStoreBroker.Application
         private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "The location of the config file").Required();
         private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "The format of the config file");
         private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
+        private static readonly Option<Operations.Operations> TemplateOperationOption = new Option<Operations.Operations>(new[] { "-o", "--Operation" }, "Operation we want to generate the config template for").Required();
 
         internal enum ConfigFileFormat { Json, Xml, Ini, }
 
@@ -80,6 +81,7 @@ namespace GameStoreBroker.Application
             services.AddLogging();
             services.AddGameStoreBrokerService(context.Configuration, invocationContext.GetOptionValue(AuthenticationMethodOption));
 
+            services.AddScoped<GenerateConfigTemplateOperation>();
             services.AddOperation<GetProductOperation, GetProductOperationConfig>(context);
             services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationConfig>(context);
             services.AddOperation<UploadXvcPackageOperation, UploadXvcPackageOperationConfig>(context);
@@ -113,28 +115,32 @@ namespace GameStoreBroker.Application
             {
                 new Command("GetProduct", "Gets metadata of the product")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
                 }.AddOperationHandler<GetProductOperation>(),
                 new Command("UploadUwpPackage", "Uploads Uwp game package")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
                 }.AddOperationHandler<UploadUwpPackageOperation>(),
                 new Command("UploadXvcPackage", "Uploads Xvc game package and assets")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
                 }.AddOperationHandler<UploadXvcPackageOperation>(),
                 new Command("RemovePackages", "Removes all game packages and assets from a branch")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
                 }.AddOperationHandler<RemovePackagesOperation>(),
                 new Command("ImportPackages", "Imports all game packages from a branch to a destination branch")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
                 }.AddOperationHandler<ImportPackagesOperation>(),
                 new Command("PublishPackages", "Publishes all game packages from a branch or flight to a destination sandbox or flight")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
                 }.AddOperationHandler<PublishPackagesOperation>(),
+                new Command("GenerateTemplate", "Generates a new config template file for the selected operation")
+                {
+                    TemplateOperationOption,
+                }.AddGenerateConfigTemplateOperationHandler(),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);

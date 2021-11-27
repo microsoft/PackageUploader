@@ -1,0 +1,11 @@
+{
+  "$schema": "./schema.json",
+  "operationName": "GetProduct",
+  "productId": "string",
+  "bigId": "string",
+  "aadAuthInfo": {
+    "clientId": "string",
+    "tenantId": "string"
+
+  }
+}

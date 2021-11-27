@@ -10,12 +10,16 @@
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>true</PublishReadyToRun>
-    <PublishTrimmed>true</PublishTrimmed>
+    <!--<PublishTrimmed>true</PublishTrimmed>-->
     <TrimMode>link</TrimMode>
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Templates\RemovePackages.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
@@ -33,6 +37,12 @@
   <ItemGroup>
     <ProjectReference Include="..\GameStoreBroker.ClientApi\GameStoreBroker.ClientApi.csproj" />
     <ProjectReference Include="..\GameStoreBroker.FileLogger\GameStoreBroker.FileLogger.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <EmbeddedResource Include="Templates\*.json">
+		  <ExcludeFromSingleFile>false</ExcludeFromSingleFile>
+	  </EmbeddedResource>
   </ItemGroup>
 
 </Project>

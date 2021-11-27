@@ -20,16 +20,38 @@ namespace GameStoreBroker.Application.Extensions
     {
         public static Command AddOperationHandler<T>(this Command command) where T : Operation
         {
-            command.Handler = CommandHandler.Create<IHost, CancellationToken>(RunAsyncOperation<T>);
+            command.Handler = CommandHandler.Create<IHost, CancellationToken>(RunOperationAsync<T>);
             return command;
         }
 
-        private static async Task<int> RunAsyncOperation<T>(IHost host, CancellationToken ct) where T : Operation
+        private static async Task<int> RunOperationAsync<T>(IHost host, CancellationToken ct) where T : Operation
         {
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             try
             {
                 return await host.Services.GetRequiredService<T>().RunAsync(ct).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e.Message);
+                logger.LogTrace(e, "Exception thrown.");
+                return 2;
+            }
+        }
+
+        public static Command AddGenerateConfigTemplateOperationHandler(this Command command)
+        {
+            command.Handler = CommandHandler.Create<IHost, Operations.Operations, CancellationToken>(RunGenerateConfigTemplateOperationAsync);
+            return command;
+        }
+
+        private static async Task<int> RunGenerateConfigTemplateOperationAsync(IHost host, Operations.Operations operation, CancellationToken ct)
+        {
+            var logger = host.Services.GetRequiredService<ILogger<Program>>();
+            try
+            {
+                var service = host.Services.GetRequiredService<GenerateConfigTemplateOperation>();
+                return await service.RunAsync(operation, ct).ConfigureAwait(false);
             }
             catch (Exception e)
             {

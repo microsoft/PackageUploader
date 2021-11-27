@@ -1,0 +1,17 @@
+{
+  "$schema": "./schema.json",
+  "operationName": "RemovePackages",
+
+  "productId": "{{ productId or bigId required }}",
+  "bigId": "{{ productId or bigId required }}",
+
+  "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
+  "flightName": "{{ flightName or branchFriendlyName required }}",
+
+  "marketGroupName": "{{ optional - if informed it will only delete packages in the specified one (case sensitive) }}",
+
+  "aadAuthInfo": {
+    "clientId": "{{ required }}",
+    "tenantId": "{{ required }}"
+  }
+}
