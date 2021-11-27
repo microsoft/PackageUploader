@@ -7,6 +7,15 @@
     "$defs": {
         "packageDate": {
             "type": "object",
+            "defaultSnippets": [
+                {
+                    "label": "packageDate properties",
+                    "body": {
+                        "isEnabled": "^$1",
+                        "isManualPublish": "$2"
+                    }
+                }
+            ],
             "properties": {
                 "isEnabled": {
                     "description": "it will enable/disable the date",
@@ -21,6 +30,16 @@
         },
         "gradualRollout": {
             "type": "object",
+            "defaultSnippets": [
+                {
+                    "label": "gradualRollout properties",
+                    "body": {
+                        "isEnabled": "^$1",
+                        "percentage": "$2",
+                        "isSeekEnabled": "^$3"
+                    }
+                }
+            ],
             "properties": {
                 "isEnabled": {
                     "description": "it will enable/disable gradual rollout",
@@ -71,21 +90,56 @@
             ]
         },
         "productId": {
+            "markdownDescription": "***productId*** or ***bigId*** required, but not both",
             "description": "\"productId\" or \"bigId\" required, but not both",
             "type": "string"
         },
         "bigId": {
+            "markdownDescription": "***productId*** or ***bigId*** required, but not both",
             "description": "\"productId\" or \"bigId\" required, but not both",
             "type": "string"
         },
         "aadAuthInfo": {
+            "markdownDescription": "Azure AD application authentication information [Learn more](https://github.com/microsoft/PackageUploader#step-1-creating-your-app-in-azure)",
+            "description": "Azure AD application authentication information",
             "type": "object",
+            "defaultSnippets": [
+                {
+                    "label": "Required properties",
+                    "body": {
+                        "tenantId": "$1",
+                        "clientId": "$2"
+                    }
+                }
+            ],
             "properties": {
                 "tenantId": {
+                    "description": "Azure AD application tenant id",
                     "type": "string"
                 },
                 "clientId": {
+                    "description": "Azure AD application client id",
                     "type": "string"
+                },
+                "certificateThumbprint": {
+                    "description": "Azure AD application certificate thumbprint",
+                    "type": "string"
+                },
+                "certificateStore": {
+                    "description": "Azure AD application certificate store",
+                    "type": "string"
+                },
+                "certificateLocation": {
+                    "description": "Azure AD application certificate location",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "const": "CurrentUser"
+                        },
+                        {
+                            "const": "LocalMachine"
+                        }
+                    ]
                 }
             },
             "required": [
@@ -116,6 +170,7 @@
             "if": {
                 "properties": {
                     "operationName": {
+                        "type": "string",
                         "oneOf": [
                             {
                                 "const": "UploadUwpPackage"
@@ -139,10 +194,12 @@
             "then": {
                 "properties": {
                     "branchFriendlyName": {
+                        "markdownDescription": "***branchFriendlyName*** or ***flightName*** required, but not both",
                         "description": "\"branchFriendlyName\" or \"flightName\" property required, but not both",
                         "type": "string"
                     },
                     "flightName": {
+                        "markdownDescription": "***branchFriendlyName*** or ***flightName*** required, but not both",
                         "description": "\"branchFriendlyName\" or \"flightName\" property required, but not both",
                         "type": "string"
                     }
@@ -180,20 +237,24 @@
             "then": {
                 "properties": {
                     "marketGroupName": {
-                        "description": "if not set, it will use default as the market group (case sensitive)",
-                        "type": "string"
+                        "markdownDescription": "if not set, it will use ***default*** as the market group (case sensitive)",
+                        "description": "if not set, it will use \"default\" as the market group (case sensitive)",
+                        "type": "string",
+                        "default": "default"
                     },
                     "minutesToWaitForProcessing": {
                         "description": "it will check the package processing status every minute for this long, until it succeeds or fails",
                         "type": "integer",
                         "minimum": 0,
-                        "maximum": 360
+                        "maximum": 360,
+                        "default": 30
                     },
                     "packageFilePath": {
                         "description": "path to the package file",
                         "type": "string"
                     },
                     "availabilityDate": {
+                        "markdownDescription": "if informed it will configure custom availability date [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)",
                         "description": "if informed it will configure custom availability date",
                         "$ref": "#/$defs/packageDate"
                     }
@@ -221,6 +282,16 @@
                     "gameAssets": {
                         "description": "paths to the game assets",
                         "type": "object",
+                        "defaultSnippets": [
+                            {
+                                "label": "Required gameAssets properties",
+                                "body": {
+                                    "ekbFilePath": "$1",
+                                    "subValFilePath": "$2",
+                                    "symbolsFilePath": "$3"
+                                }
+                            }
+                        ],
                         "properties": {
                             "ekbFilePath": {
                                 "description": "path to the EKB file",
@@ -267,10 +338,12 @@
             "then": {
                 "properties": {
                     "mandatoryDate": {
+                        "markdownDescription": "if informed it will configure custom mandatory date for your UWP market groups [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#mandatory-update)",
                         "description": "if informed it will configure custom mandatory date for your UWP market groups",
                         "$ref": "#/$defs/packageDate"
                     },
                     "gradualRollout": {
+                        "markdownDescription": "if informed it will configure gradual rollout for your UWP packages [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#gradual-package-rollout)",
                         "description": "if informed it will configure gradual rollout for your UWP packages",
                         "$ref": "#/$defs/gradualRollout"
                     }
@@ -320,12 +393,24 @@
                     },
                     "minutesToWaitForPublishing": {
                         "description": "it will check the package processing status every minute for this long, until it succeeds or fails",
+                        "markdownDescription": "it will check the package processing status every minute for this long, until it succeeds or fails",
                         "type": "integer",
                         "minimum": 0
                     },
                     "publishConfiguration": {
+                        "markdownDescription": "configuration of the publish submission [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/manage-submission-options)",
                         "description": "configuration of the publish submission",
                         "type": "object",
+                        "defaultSnippets": [
+                            {
+                                "label": "publishConfiguration properties",
+                                "body": {
+                                    "releaseTime": "$1",
+                                    "isManualPublish": "^$2",
+                                    "certificationNotes": "$3"
+                                }
+                            }
+                        ],
                         "properties": {
                             "releaseTime": {
                                 "description": "publish release time, it will publish as soon as it passes certification if it is not set",
@@ -385,22 +470,27 @@
                         "type": "string"
                     },
                     "destinationBranchFriendlyName": {
-                        "description": "\"destinationFlightName\" or \"destinationBranchFriendlyName\" required",
+                        "markdownDescription": "***destinationFlightName*** or ***destinationBranchFriendlyName*** required, but not both",
+                        "description": "\"destinationFlightName\" or \"destinationBranchFriendlyName\" required, but not both",
                         "type": "string"
                     },
                     "destinationFlightName": {
-                        "description": "\"destinationFlightName\" or \"destinationBranchFriendlyName\" required",
+                        "markdownDescription": "***destinationFlightName*** or ***destinationBranchFriendlyName*** required, but not both",
+                        "description": "\"destinationFlightName\" or \"destinationBranchFriendlyName\" required, but not both",
                         "type": "string"
                     },
                     "availabilityDate": {
+                        "markdownDescription": "if informed it will configure custom availability date for all your packages in the destination branch/flight [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)",
                         "description": "if informed it will configure custom availability date for all your packages in the destination branch/flight",
                         "$ref": "#/$defs/packageDate"
                     },
                     "mandatoryDate": {
+                        "markdownDescription": "if informed it will configure custom mandatory date for your UWP market groups in the destination branch/flight [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#mandatory-update)",
                         "description": "if informed it will configure custom mandatory date for your UWP market groups in the destination branch/flight",
                         "$ref": "#/$defs/packageDate"
                     },
                     "gradualRollout": {
+                        "markdownDescription": "if informed it will configure gradual rollout for your UWP packages in the destination branch/flight [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#gradual-package-rollout)",
                         "description": "if informed it will configure gradual rollout for your UWP packages in the destination branch/flight",
                         "$ref": "#/$defs/gradualRollout"
                     },
