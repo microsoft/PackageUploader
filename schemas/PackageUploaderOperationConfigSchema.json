@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema#",
   "$id": "PackageUploaderOperationConfigSchema.json",
   "title": "PackageUploader configuration file schema",
+  "markdownDescription": "Input config file structure for PackageUploader configuration file [Learn more](https://github.com/microsoft/PackageUploader)",
   "description": "Input config file structure for PackageUploader configuration file",
   "type": "object",
   "$defs": {
@@ -138,23 +139,28 @@
       ],
       "properties": {
         "tenantId": {
-          "description": "Azure AD application tenant id",
+          "markdownDescription": "Azure AD application tenant id (required when using authentication method ***AppCert*** or ***AppSecret***)",
+          "description": "Azure AD application tenant id (required when using authentication method \"AppCert\" or \"AppSecret*)",
           "type": "string"
         },
         "clientId": {
-          "description": "Azure AD application client id",
+          "markdownDescription": "Azure AD application client id (required when using authentication method ***AppCert*** or ***AppSecret***)",
+          "description": "Azure AD application client id (required when using authentication method \"AppCert\" or \"AppSecret*)",
           "type": "string"
         },
         "certificateThumbprint": {
-          "description": "Azure AD application certificate thumbprint",
+          "markdownDescription": "Azure AD application certificate thumbprint (required when using authentication method ***AppCert***)",
+          "description": "Azure AD application certificate thumbprint (required when using authentication method \"AppCert\")",
           "type": "string"
         },
         "certificateStore": {
-          "description": "Azure AD application certificate store",
+          "markdownDescription": "Azure AD application certificate store (required when using authentication method ***AppCert***)",
+          "description": "Azure AD application certificate store (required when using authentication method \"AppCert\")",
           "type": "string"
         },
         "certificateLocation": {
-          "description": "Azure AD application certificate location",
+          "markdownDescription": "Azure AD application certificate location (required when using authentication method ***AppCert***)",
+          "description": "Azure AD application certificate location (required when using authentication method \"AppCert\")",
           "type": "string",
           "oneOf": [
             {
