@@ -8,7 +8,7 @@ namespace GameStoreBroker.Application.Config
 {
     internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
     {
-        internal override string GetOperationName() => "UploadXvcPackage";
+        internal override Operations.OperationName GetOperationName() => Operations.OperationName.UploadXvcPackage;
 
         [Required]
         public GameAssets GameAssets { get; set; }

@@ -10,7 +10,7 @@ namespace GameStoreBroker.Application.Config
 {
     internal sealed class PublishPackagesOperationConfig : PackageBranchOperationConfig
     {
-        internal override string GetOperationName() => "PublishPackages";
+        internal override Operations.OperationName GetOperationName() => Operations.OperationName.PublishPackages;
 
         public string DestinationSandboxName { get; set; }
         public int MinutesToWaitForPublishing { get; set; }

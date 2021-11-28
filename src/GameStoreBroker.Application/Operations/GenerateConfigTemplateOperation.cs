@@ -24,21 +24,20 @@ namespace GameStoreBroker.Application.Operations
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            var configOperation = _config.GenerateConfigTemplateOperationName;
-            _logger.LogDebug("Generating config file template for {configOperation} operation.", configOperation);
+            _logger.LogDebug("Generating config file template for {configOperation} operation.", _config.OperationName);
 
             var assembly = Assembly.GetExecutingAssembly();
-            var resource = $"GameStoreBroker.Application.Templates.{configOperation}.json";
+            var resourceName = $"GameStoreBroker.Application.Templates.{_config.OperationName}.json";
 
-            using var resourceStream = assembly.GetManifestResourceStream(resource);
+            using var resourceStream = assembly.GetManifestResourceStream(resourceName);
             if (resourceStream is null)
             {
-                _logger.LogError("Config file template for {configOperation} not found.", configOperation);
+                _logger.LogError("Config file template for {configOperation} not found.", _config.OperationName);
             }
             else
             {
                 var generate = true;
-                var destinationFile = new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{configOperation}.json"));
+                var destinationFile = new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{_config.OperationName}.json"));
                 if (destinationFile.Exists)
                 {
                     if (_config.Overwrite)

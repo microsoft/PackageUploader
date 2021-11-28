@@ -8,11 +8,11 @@ namespace GameStoreBroker.Application.Config
 {
     internal abstract class BaseOperationConfig : IValidatableObject
     {
-        internal abstract string GetOperationName();
+        internal abstract Operations.OperationName GetOperationName();
 
         [Required]
-        public string OperationName { get; set; }
-        
+        public Operations.OperationName OperationName { get; set; }
+
         public string ProductId { get; set; }
         
         public string BigId { get; set; }
@@ -32,7 +32,7 @@ namespace GameStoreBroker.Application.Config
         private void ValidateBase(IList<ValidationResult> validationResults)
         {
             var operationName = GetOperationName();
-            if (!string.Equals(operationName, OperationName))
+            if (operationName != OperationName)
             {
                 validationResults.Add(new ValidationResult($"{nameof(OperationName)} field is not {operationName}.", new [] { nameof(OperationName) }));
             }

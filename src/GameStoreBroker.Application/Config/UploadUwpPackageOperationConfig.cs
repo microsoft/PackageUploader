@@ -8,7 +8,7 @@ namespace GameStoreBroker.Application.Config
 {
     internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig, IGameConfiguration
     {
-        internal override string GetOperationName() => "UploadUwpPackage";
+        internal override Operations.OperationName GetOperationName() => Operations.OperationName.UploadUwpPackage;
 
         public GamePackageDate MandatoryDate { get; set; }
         public GameGradualRolloutInfo GradualRollout { get; set; }

@@ -5,6 +5,6 @@ namespace GameStoreBroker.Application.Config
 {
     internal class GetProductOperationConfig : BaseOperationConfig
     {
-        internal override string GetOperationName() => "GetProduct";
+        internal override Operations.OperationName GetOperationName() => Operations.OperationName.GetProduct;
     }
 }

@@ -5,11 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStoreBroker.Application.Config
 {
-    internal class GenerateConfigTemplateOperationConfig
+    internal class ValidateConfigOperationConfig
     {
         [Required]
-        public Operations.OperationName OperationName { get; set; }
-
-        public bool Overwrite { get; set; }
+        public Operations.OperationName ValidateOperationName { get; set; }
     }
 }

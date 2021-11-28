@@ -3,13 +3,13 @@
 
 namespace GameStoreBroker.Application.Operations
 {
-    internal enum OperationNames
+    enum OperationName
     {
         GetProduct,
-        UploadUwpPackage,
         UploadXvcPackage,
-        RemovePackages,
+        UploadUwpPackage,
         ImportPackages,
-        PublishPackages
+        PublishPackages,
+        RemovePackages,
     }
 }
