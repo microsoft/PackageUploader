@@ -25,7 +25,7 @@ namespace GameStoreBroker.Application.Operations
         protected override async Task ProcessAsync(CancellationToken ct)
         {
             var configOperation = _config.GenerateConfigTemplateOperationName;
-            _logger.LogDebug("GameStoreBroker is generating a config file template for {configOperation}.", configOperation);
+            _logger.LogDebug("Generating config file template for {configOperation} operation.", configOperation);
 
             var assembly = Assembly.GetExecutingAssembly();
             var resource = $"GameStoreBroker.Application.Templates.{configOperation}.json";
