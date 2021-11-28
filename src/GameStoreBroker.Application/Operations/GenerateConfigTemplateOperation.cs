@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Config;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Reflection;
@@ -10,53 +12,59 @@ using System.Threading.Tasks;
 
 namespace GameStoreBroker.Application.Operations
 {
-    internal class GenerateConfigTemplateOperation
+    internal class GenerateConfigTemplateOperation : Operation
     {
-        private readonly ILogger<GenerateConfigTemplateOperation> _logger;
         private const int BufferSize = 8 * 1024;
+        private readonly GenerateConfigTemplateOperationConfig _config;
 
-        public GenerateConfigTemplateOperation(ILogger<GenerateConfigTemplateOperation> logger)
+        public GenerateConfigTemplateOperation(IOptions<GenerateConfigTemplateOperationConfig> config, ILogger<GenerateConfigTemplateOperation> logger) : base(logger)
         {
-            _logger = logger;
+            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         }
 
-        public async Task<int> RunAsync(Operations configOperation, CancellationToken ct)
+        protected override async Task ProcessAsync(CancellationToken ct)
         {
-            try
+            var configOperation = _config.GenerateConfigTemplateOperationName;
+            _logger.LogDebug("GameStoreBroker is generating a config file template for {configOperation}.", configOperation);
+
+            var assembly = Assembly.GetExecutingAssembly();
+            var resource = $"GameStoreBroker.Application.Templates.{configOperation}.json";
+
+            using var resourceStream = assembly.GetManifestResourceStream(resource);
+            if (resourceStream is null)
             {
-                _logger.LogDebug("GameStoreBroker is generating a config file template for {configOperation}.", configOperation);
-
-                var assembly = Assembly.GetExecutingAssembly();
-                var resources = assembly.GetManifestResourceNames();
-                var resource = $"GameStoreBroker.Application.Templates.{configOperation}.json";
-
-                using var resourceStream = assembly.GetManifestResourceStream(resource);
-                if (resourceStream is null)
+                _logger.LogError("Config file template for {configOperation} not found.", configOperation);
+            }
+            else
+            {
+                var generate = true;
+                var destinationFile = new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{configOperation}.json"));
+                if (destinationFile.Exists)
                 {
-                    _logger.LogInformation("Config file template for {configOperation} not found.", configOperation);
-                    return -1;
-                }
-                else
-                {
-                    var destinationFile = new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{configOperation}.json"));
-                    if (destinationFile.Exists)
+                    if (_config.Overwrite)
                     {
-                        _logger.LogInformation("Config file template already found for {configOperation}. It will be overwritten.", configOperation);
+                        _logger.LogWarning("Config file template {destinationFile} will be overwritten.", destinationFile.Name);
                     }
-                    using var destinationFileStream = destinationFile.Open(FileMode.Create);
-                    await CopyStream(resourceStream, destinationFileStream, ct).ConfigureAwait(false); ;
-
+                    else
+                    {
+                        generate = false;
+                        _logger.LogError("Config file template {destinationFile} already exists. No template will be generated.", destinationFile.Name);
+                    }
+                }
+                if (generate)
+                {
+                    await GenerateConfigFile(resourceStream, destinationFile, ct).ConfigureAwait(false);
                     _logger.LogInformation("Config file template {destinationFile} generated.", destinationFile.Name);
                 }
+            }
+        }
 
-                return 0;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-                _logger.LogTrace(e, "Exception thrown.");
-                return -1;
-            }
+        private async ValueTask GenerateConfigFile(Stream originStream, FileInfo destinationFile, CancellationToken ct)
+        {
+            using var destinationFileStream = destinationFile.Open(FileMode.Create);
+            await CopyStream(originStream, destinationFileStream, ct).ConfigureAwait(false); ;
+
+            _logger.LogInformation("Config file template {destinationFile} generated.", destinationFile.Name);
         }
 
         private static async ValueTask CopyStream(Stream input, Stream output, CancellationToken ct)

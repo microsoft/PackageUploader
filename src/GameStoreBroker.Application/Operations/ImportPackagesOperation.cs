@@ -15,13 +15,11 @@ namespace GameStoreBroker.Application.Operations
     internal class ImportPackagesOperation : Operation
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
-        private readonly ILogger<ImportPackagesOperation> _logger;
         private readonly ImportPackagesOperationConfig _config;
 
         public ImportPackagesOperation(IGameStoreBrokerService storeBrokerService, ILogger<ImportPackagesOperation> logger, IOptions<ImportPackagesOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         }
 

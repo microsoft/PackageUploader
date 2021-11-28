@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
@@ -33,7 +34,8 @@ namespace GameStoreBroker.Application
         private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "The location of the config file").Required();
         private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "The format of the config file");
         private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
-        private static readonly Option<Operations.Operations> TemplateOperationOption = new Option<Operations.Operations>(new[] { "-o", "--Operation" }, "Operation we want to generate the config template for").Required();
+        private static readonly Option<bool> OverwriteOption = new(new[] { "-o", "--Overwrite" }, "Overwrite file");
+        private static readonly Command NewCommand = new Command("New", "Generate config template file") { OverwriteOption, }.AddOperationHandler<GenerateConfigTemplateOperation>();
 
         internal enum ConfigFileFormat { Json, Xml, Ini, }
 
@@ -43,7 +45,7 @@ namespace GameStoreBroker.Application
                 .UseHost(hostBuilder => hostBuilder
                     .ConfigureLogging(ConfigureLogging)
                     .ConfigureServices(ConfigureServices)
-                    .ConfigureAppConfiguration((context, builder) => ConfigureAppConfiguration(context, builder, args))
+                    .ConfigureAppConfiguration(ConfigureAppConfiguration)
                 )
                 .UseDefaults()
                 .Build()
@@ -81,16 +83,16 @@ namespace GameStoreBroker.Application
             services.AddLogging();
             services.AddGameStoreBrokerService(context.Configuration, invocationContext.GetOptionValue(AuthenticationMethodOption));
 
-            services.AddScoped<GenerateConfigTemplateOperation>();
             services.AddOperation<GetProductOperation, GetProductOperationConfig>(context);
             services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationConfig>(context);
             services.AddOperation<UploadXvcPackageOperation, UploadXvcPackageOperationConfig>(context);
             services.AddOperation<RemovePackagesOperation, RemovePackagesOperationConfig>(context);
             services.AddOperation<ImportPackagesOperation, ImportPackagesOperationConfig>(context);
             services.AddOperation<PublishPackagesOperation, PublishPackagesOperationConfig>(context);
+            services.AddOperation<GenerateConfigTemplateOperation, GenerateConfigTemplateOperationConfig>(context);
         }
 
-        private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
+        private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder)
         {
             var invocationContext = context.GetInvocationContext();
 
@@ -101,11 +103,27 @@ namespace GameStoreBroker.Application
                 builder.AddConfigFile(configFile, configFileFormat);
             }
 
+            var inMemoryValues = new Dictionary<string, string>();
+
             var authenticationMethod = invocationContext.GetOptionValue(AuthenticationMethodOption);
             if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
             {
-                var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => $"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}");
-                builder.AddCommandLine(args, switchMappings);
+                var clientSecret = invocationContext.GetOptionValue(ClientSecretOption);
+                inMemoryValues.TryAdd($"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}", clientSecret);
+            }
+
+            if (invocationContext.ParseResult.CommandResult.Command == NewCommand)
+            {
+                var operationName = invocationContext.ParseResult.RootCommandResult.Children[0].Symbol.Name;
+                inMemoryValues.TryAdd($"{nameof(GenerateConfigTemplateOperationConfig.GenerateConfigTemplateOperationName)}", operationName);
+
+                var overwrite = invocationContext.GetOptionValue(OverwriteOption);
+                inMemoryValues.TryAdd($"{nameof(GenerateConfigTemplateOperationConfig.Overwrite)}", overwrite.ToString());
+            }
+
+            if (inMemoryValues.Any())
+            {
+                builder.AddInMemoryCollection(inMemoryValues);
             }
         }
 
@@ -115,32 +133,28 @@ namespace GameStoreBroker.Application
             {
                 new Command("GetProduct", "Gets metadata of the product")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
                 }.AddOperationHandler<GetProductOperation>(),
                 new Command("UploadUwpPackage", "Uploads Uwp game package")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
                 }.AddOperationHandler<UploadUwpPackageOperation>(),
                 new Command("UploadXvcPackage", "Uploads Xvc game package and assets")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
                 }.AddOperationHandler<UploadXvcPackageOperation>(),
                 new Command("RemovePackages", "Removes all game packages and assets from a branch")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
                 }.AddOperationHandler<RemovePackagesOperation>(),
                 new Command("ImportPackages", "Imports all game packages from a branch to a destination branch")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
                 }.AddOperationHandler<ImportPackagesOperation>(),
                 new Command("PublishPackages", "Publishes all game packages from a branch or flight to a destination sandbox or flight")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
                 }.AddOperationHandler<PublishPackagesOperation>(),
-                new Command("GenerateTemplate", "Generates a new config template file for the selected operation")
-                {
-                    TemplateOperationOption,
-                }.AddGenerateConfigTemplateOperationHandler(),
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);

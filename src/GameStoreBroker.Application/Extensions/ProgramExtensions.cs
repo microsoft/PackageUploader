@@ -39,28 +39,6 @@ namespace GameStoreBroker.Application.Extensions
             }
         }
 
-        public static Command AddGenerateConfigTemplateOperationHandler(this Command command)
-        {
-            command.Handler = CommandHandler.Create<IHost, Operations.Operations, CancellationToken>(RunGenerateConfigTemplateOperationAsync);
-            return command;
-        }
-
-        private static async Task<int> RunGenerateConfigTemplateOperationAsync(IHost host, Operations.Operations operation, CancellationToken ct)
-        {
-            var logger = host.Services.GetRequiredService<ILogger<Program>>();
-            try
-            {
-                var service = host.Services.GetRequiredService<GenerateConfigTemplateOperation>();
-                return await service.RunAsync(operation, ct).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e.Message);
-                logger.LogTrace(e, "Exception thrown.");
-                return 2;
-            }
-        }
-
         public static T GetOptionValue<T>(this InvocationContext invocationContext, Option<T> option)
         {
             return invocationContext.ParseResult.ValueForOption(option);
@@ -72,10 +50,10 @@ namespace GameStoreBroker.Application.Extensions
             return option;
         }
 
-        public static void AddOperation<T1, T2>(this IServiceCollection services, HostBuilderContext context) where T1 : Operation where T2 : BaseOperationConfig
+        public static void AddOperation<TOperation, TConfig>(this IServiceCollection services, HostBuilderContext context) where TOperation : Operation where TConfig : class
         {
-            services.AddScoped<T1>();
-            services.AddOptions<T2>().Bind(context.Configuration).ValidateDataAnnotations();
+            services.AddScoped<TOperation>();
+            services.AddOptions<TConfig>().Bind(context.Configuration).ValidateDataAnnotations();
         }
 
         public static IConfigurationBuilder AddConfigFile(this IConfigurationBuilder builder, FileInfo configFile, Program.ConfigFileFormat configFileFormat) =>

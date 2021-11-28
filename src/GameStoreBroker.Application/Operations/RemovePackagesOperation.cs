@@ -15,13 +15,11 @@ namespace GameStoreBroker.Application.Operations
     internal class RemovePackagesOperation : Operation
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
-        private readonly ILogger<RemovePackagesOperation> _logger;
         private readonly RemovePackagesOperationConfig _config;
 
         public RemovePackagesOperation(IGameStoreBrokerService storeBrokerService, ILogger<RemovePackagesOperation> logger, IOptions<RemovePackagesOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         }
 

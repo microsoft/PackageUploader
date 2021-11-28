@@ -10,11 +10,11 @@ namespace GameStoreBroker.Application.Operations
 {
     internal abstract class Operation
     {
-        private readonly ILogger _logger;
+        protected readonly ILogger _logger;
 
         protected Operation(ILogger logger)
         {
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<int> RunAsync(CancellationToken ct)

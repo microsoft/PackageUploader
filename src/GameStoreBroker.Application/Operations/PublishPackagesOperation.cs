@@ -17,13 +17,11 @@ namespace GameStoreBroker.Application.Operations
     internal sealed class PublishPackagesOperation : Operation
     {
         private readonly IGameStoreBrokerService _storeBrokerService;
-        private readonly ILogger<PublishPackagesOperation> _logger;
         private readonly PublishPackagesOperationConfig _config;
 
         public PublishPackagesOperation(IGameStoreBrokerService storeBrokerService, ILogger<PublishPackagesOperation> logger, IOptions<PublishPackagesOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
         }
 
