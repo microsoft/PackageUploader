@@ -48,7 +48,7 @@ namespace GameStoreBroker.Application.Operations
                     else
                     {
                         generate = false;
-                        _logger.LogError("Config file template {destinationFile} already exists. No template will be generated.", destinationFile.Name);
+                        _logger.LogWarning("Config file template {destinationFile} already exists. No template will be generated.", destinationFile.Name);
                     }
                 }
                 if (generate)
@@ -59,12 +59,10 @@ namespace GameStoreBroker.Application.Operations
             }
         }
 
-        private async ValueTask GenerateConfigFile(Stream originStream, FileInfo destinationFile, CancellationToken ct)
+        private static async ValueTask GenerateConfigFile(Stream originStream, FileInfo destinationFile, CancellationToken ct)
         {
             using var destinationFileStream = destinationFile.Open(FileMode.Create);
             await CopyStream(originStream, destinationFileStream, ct).ConfigureAwait(false); ;
-
-            _logger.LogInformation("Config file template {destinationFile} generated.", destinationFile.Name);
         }
 
         private static async ValueTask CopyStream(Stream input, Stream output, CancellationToken ct)
