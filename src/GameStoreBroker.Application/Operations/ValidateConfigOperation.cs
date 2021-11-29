@@ -2,10 +2,13 @@
 // Licensed under the MIT License.
 
 using GameStoreBroker.Application.Config;
-using Microsoft.Extensions.DependencyInjection;
+using Json.Schema;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.IO;
+using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,34 +17,80 @@ namespace GameStoreBroker.Application.Operations
     internal class ValidateConfigOperation : Operation
     {
         private readonly ValidateConfigOperationConfig _config;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ValidationOptions _validationOptions;
 
-        public ValidateConfigOperation(IOptions<ValidateConfigOperationConfig> config, ILogger<GenerateConfigTemplateOperation> logger, 
-            IServiceProvider serviceProvider) : base(logger)
+        public ValidateConfigOperation(IOptions<ValidateConfigOperationConfig> config, ILogger<GenerateConfigTemplateOperation> logger) : base(logger)
         {
-            _config = config.Value;
-            _serviceProvider = serviceProvider;
+            _config = config.Value; 
+            _validationOptions = new ValidationOptions
+            {
+                Log = new JsonSchemaLogger(_logger),
+                OutputFormat = OutputFormat.Basic,
+            };
         }
 
-        protected override Task ProcessAsync(CancellationToken ct)
+        protected async override Task ProcessAsync(CancellationToken ct)
         {
-            var isValidConfig = _config.ValidateOperationName switch
-            {
-                OperationName.GetProduct => _serviceProvider.GetRequiredService<IOptions<GetProductOperationConfig>>()?.Value is not null,
-                OperationName.UploadXvcPackage => _serviceProvider.GetRequiredService<IOptions<UploadXvcPackageOperationConfig>>()?.Value is not null,
-                OperationName.UploadUwpPackage => _serviceProvider.GetRequiredService<IOptions<UploadUwpPackageOperationConfig>>()?.Value is not null,
-                OperationName.ImportPackages => _serviceProvider.GetRequiredService<IOptions<ImportPackagesOperationConfig>>()?.Value is not null,
-                OperationName.PublishPackages => _serviceProvider.GetRequiredService<IOptions<PublishPackagesOperationConfig>>()?.Value is not null,
-                OperationName.RemovePackages => _serviceProvider.GetRequiredService<IOptions<RemovePackagesOperationConfig>>()?.Value is not null,
-                _ => throw new NotImplementedException($"{_config.ValidateOperationName} config validation has not been implemented."),
-            };
+            _logger.LogDebug("Validating config file.");
 
-            if (isValidConfig)
+            var configFile = new FileInfo(_config.ConfigFilepath);
+            if (!configFile.Exists)
             {
-                _logger.LogInformation("The configuration file is valid.");
+                throw new FileNotFoundException("Config file does not exist.");
             }
 
-            return Task.CompletedTask;
+            JsonDocument configJson = null;
+            try
+            {
+                using var configFileStream = configFile.OpenRead();
+                configJson = await JsonDocument.ParseAsync(configFileStream, cancellationToken: ct).ConfigureAwait(false);
+            }
+            catch (JsonException e)
+            {
+                throw new JsonException($"Config file Json parsing error: {e.Message}.", e);
+            }
+
+            var schema = await GetJsonSchema().ConfigureAwait(false);
+            var validationResult = schema.Validate(configJson.RootElement, _validationOptions);
+            if (validationResult.IsValid)
+            {
+                _logger.LogInformation("Valid config file.");
+            }
+            else
+            {
+                throw new Exception($"Validation error: '{validationResult.Message}' in '{validationResult.SchemaLocation}'");
+            }
+        }
+
+        private static async Task<JsonSchema> GetJsonSchema()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            const string resourceName = "GameStoreBroker.Application.Schemas.PackageUploaderOperationConfigSchema.json";
+            using var schemaStream = assembly.GetManifestResourceStream(resourceName);
+            if (schemaStream is null)
+            {
+                throw new Exception($"Error while accessing the schema.");
+            }
+            else
+            {
+                var schema = await JsonSchema.FromStream(schemaStream).ConfigureAwait(false);
+                return schema;
+            }
+        }
+
+        private class JsonSchemaLogger : ILog
+        {
+            private readonly ILogger _logger;
+
+            public JsonSchemaLogger(ILogger logger)
+            {
+                _logger = logger;
+            }
+            public void Write(Func<string> message, int indent = 0)
+            {
+                var logmessage = message();
+                _logger.LogTrace(logmessage);
+            }
         }
     }
 }

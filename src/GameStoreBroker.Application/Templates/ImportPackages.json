@@ -1,5 +1,5 @@
 {
-  "$schema": "./schema.json",
+  "$schema": "PackageUploaderOperationConfigSchema.json",
   "operationName": "ImportPackages",
 
   "productId": "{{ productId or bigId required }}",

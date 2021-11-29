@@ -1,11 +1,10 @@
 {
-  "$schema": "./schema.json",
+  "$schema": "PackageUploaderOperationConfigSchema.json",
   "operationName": "GetProduct",
   "productId": "string",
   "bigId": "string",
   "aadAuthInfo": {
     "clientId": "string",
     "tenantId": "string"
-
   }
 }

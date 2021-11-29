@@ -8,6 +8,6 @@ namespace GameStoreBroker.Application.Config
     internal class ValidateConfigOperationConfig
     {
         [Required]
-        public Operations.OperationName ValidateOperationName { get; set; }
+        public string ConfigFilepath { get; set; }
     }
 }

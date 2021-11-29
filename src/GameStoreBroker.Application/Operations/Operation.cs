@@ -31,15 +31,6 @@ namespace GameStoreBroker.Application.Operations
                 _logger.LogWarning("Operation cancelled.");
                 return 1;
             }
-            catch (OptionsValidationException e)
-            {
-                _logger.LogError("The configuration file is not valid:");
-                foreach (var failure in e.Failures)
-                {
-                    _logger.LogError(failure);
-                }
-                return 3;
-            }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);

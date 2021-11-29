@@ -1,20 +1,20 @@
 {
-  "$schema": "./schema.json",
+  "$schema": "PackageUploaderOperationConfigSchema.json",
   "operationName": "PublishPackages",
 
   "productId": "{{ productId or bigId required }}",
   "bigId": "{{ productId or bigId required }}",
 
   "flightName": "{{ flightName or (branchFriendlyName and destinationSandboxName) required }}",
-  
+
   "branchFriendlyName": "{{ flightName or (branchFriendlyName and destinationSandboxName) required }}",
   "destinationSandboxName": "{{ flightName or (branchFriendlyName and destinationSandboxName) required }}",
 
   "minutesToWaitForPublishing": 60,
-  
+
   "publishConfiguration": {
     "releaseTime": "{{ optional - will publish asap if it is not set }}",
-    "IsManualPublish" : false,
+    "IsManualPublish": false,
     "CertificationNotes": "{{ optional }}"
   },
 

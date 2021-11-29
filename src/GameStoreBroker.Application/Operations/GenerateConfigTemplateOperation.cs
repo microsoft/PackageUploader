@@ -61,7 +61,7 @@ namespace GameStoreBroker.Application.Operations
         private static async ValueTask GenerateConfigFile(Stream originStream, FileInfo destinationFile, CancellationToken ct)
         {
             using var destinationFileStream = destinationFile.Open(FileMode.Create);
-            await CopyStream(originStream, destinationFileStream, ct).ConfigureAwait(false); ;
+            await CopyStream(originStream, destinationFileStream, ct).ConfigureAwait(false);
         }
 
         private static async ValueTask CopyStream(Stream input, Stream output, CancellationToken ct)
@@ -70,7 +70,7 @@ namespace GameStoreBroker.Application.Operations
             int len;
             while ((len = input.Read(buffer, 0, buffer.Length)) > 0)
             {
-                await output.WriteAsync(buffer.AsMemory(0, len), ct).ConfigureAwait(false); ;
+                await output.WriteAsync(buffer.AsMemory(0, len), ct).ConfigureAwait(false);
             }
         }
     }

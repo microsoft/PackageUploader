@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="JsonSchema.Net" Version="1.11.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
@@ -41,6 +42,9 @@
 
   <ItemGroup>
 	  <EmbeddedResource Include="Templates\*.json">
+		  <ExcludeFromSingleFile>false</ExcludeFromSingleFile>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Schemas\*.json">
 		  <ExcludeFromSingleFile>false</ExcludeFromSingleFile>
 	  </EmbeddedResource>
   </ItemGroup>

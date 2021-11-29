@@ -1,5 +1,5 @@
 {
-  "$schema": "./schema.json",
+  "$schema": "PackageUploaderOperationConfigSchema.json",
   "operationName": "UploadUwpPackage",
 
   "productId": "{{ productId or bigId required }}",
@@ -33,7 +33,7 @@
     "clientId": "{{ required }}",
     "tenantId": "{{ required }}"
   },
-  
+
   "uploadConfig": {
     "httpTimeoutMs": 5000,
     "httpUploadTimeoutMs": 300000,
