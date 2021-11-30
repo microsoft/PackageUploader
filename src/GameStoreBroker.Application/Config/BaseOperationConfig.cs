@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Operations;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -8,10 +9,10 @@ namespace GameStoreBroker.Application.Config
 {
     internal abstract class BaseOperationConfig : IValidatableObject
     {
-        internal abstract Operations.OperationName GetOperationName();
+        internal abstract OperationName GetOperationName();
 
         [Required]
-        public Operations.OperationName OperationName { get; set; }
+        public OperationName OperationName { get; set; }
 
         public string ProductId { get; set; }
         

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Operations;
 using GameStoreBroker.ClientApi.Models;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace GameStoreBroker.Application.Config
 {
     internal sealed class PublishPackagesOperationConfig : PackageBranchOperationConfig
     {
-        internal override Operations.OperationName GetOperationName() => Operations.OperationName.PublishPackages;
+        internal override OperationName GetOperationName() => OperationName.PublishPackages;
 
         public string DestinationSandboxName { get; set; }
         public int MinutesToWaitForPublishing { get; set; }

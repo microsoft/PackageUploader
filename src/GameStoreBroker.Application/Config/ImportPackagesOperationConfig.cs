@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using GameStoreBroker.Application.Operations;
 using GameStoreBroker.ClientApi.Client.Ingestion.Models;
 using GameStoreBroker.ClientApi.Models;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace GameStoreBroker.Application.Config
 {
     internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGameConfiguration
     {
-        internal override Operations.OperationName GetOperationName() => Operations.OperationName.ImportPackages;
+        internal override OperationName GetOperationName() => OperationName.ImportPackages;
 
         public string MarketGroupName { get; set; } = null;
 
