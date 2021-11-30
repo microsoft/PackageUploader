@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GameStoreBroker.ClientApi.Client.Xfus.Models
+namespace PackageUploader.ClientApi.Client.Xfus.Models
 {
     public class XfusUploadInfo
     {

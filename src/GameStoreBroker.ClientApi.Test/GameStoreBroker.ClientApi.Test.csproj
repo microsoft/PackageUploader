@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameStoreBroker.ClientApi\GameStoreBroker.ClientApi.csproj" />
+    <ProjectReference Include="..\PackageUploader.ClientApi\PackageUploader.ClientApi.csproj" />
   </ItemGroup>
 
 </Project>

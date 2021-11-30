@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     public static class FileLoggerExtensions
     {

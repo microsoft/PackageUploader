@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Xfus.Models;
+using PackageUploader.ClientApi.Client.Xfus.Models;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.Models
 {
     public sealed class GamePackage : GamePackageResource
     {

@@ -6,7 +6,7 @@ using System.IO;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     internal class FileLogger : ILogger
     {

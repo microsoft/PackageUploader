@@ -3,15 +3,15 @@
 
 using Azure.Core;
 using Azure.Identity;
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Config;
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
 {
     public class DefaultAzureCredentialAccessTokenProvider : IAccessTokenProvider
     {

@@ -8,7 +8,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     /// <summary>
     /// A provider of <see cref="FileLogger"/> instances.

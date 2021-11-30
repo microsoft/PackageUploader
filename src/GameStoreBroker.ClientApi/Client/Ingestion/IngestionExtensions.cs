@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Config;
+using PackageUploader.ClientApi.Client.Ingestion.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Net.Mime;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion
+namespace PackageUploader.ClientApi.Client.Ingestion
 {
     internal static class IngestionExtensions
     {

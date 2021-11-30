@@ -3,7 +3,7 @@
 
 using System.Text.Json;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     /// <summary>
     /// Options for the built-in json file log formatter.

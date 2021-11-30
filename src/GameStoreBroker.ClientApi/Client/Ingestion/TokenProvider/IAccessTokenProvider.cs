@@ -3,9 +3,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
 {
     public interface IAccessTokenProvider
     {

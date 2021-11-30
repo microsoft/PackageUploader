@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Client.Xfus;
-using GameStoreBroker.ClientApi.Models;
+using PackageUploader.ClientApi.Client.Ingestion;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Client.Xfus;
+using PackageUploader.ClientApi.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -13,15 +13,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi
+namespace PackageUploader.ClientApi
 {
-    public class GameStoreBrokerService : IGameStoreBrokerService
+    public class PackageUploaderService : IPackageUploaderService
     {
         private readonly IIngestionHttpClient _ingestionHttpClient;
         private readonly IXfusUploader _xfusUploader;
-        private readonly ILogger<GameStoreBrokerService> _logger;
+        private readonly ILogger<PackageUploaderService> _logger;
 
-        public GameStoreBrokerService(IIngestionHttpClient ingestionHttpClient, IXfusUploader xfusUploader, ILogger<GameStoreBrokerService> logger)
+        public PackageUploaderService(IIngestionHttpClient ingestionHttpClient, IXfusUploader xfusUploader, ILogger<PackageUploaderService> logger)
         {
             _ingestionHttpClient = ingestionHttpClient ?? throw new ArgumentNullException(nameof(ingestionHttpClient));
             _xfusUploader = xfusUploader ?? throw new ArgumentNullException(nameof(xfusUploader));

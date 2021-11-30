@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider;
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http;
@@ -10,7 +10,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion
+namespace PackageUploader.ClientApi.Client.Ingestion
 {
     internal class IngestionAuthenticationDelegatingHandler : DelegatingHandler
     {

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
+using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
+namespace PackageUploader.ClientApi.Client.Ingestion.Builders
 {
     internal class IngestionPackageCreationRequestBuilder : IBuilder<IngestionPackageCreationRequest>
     {

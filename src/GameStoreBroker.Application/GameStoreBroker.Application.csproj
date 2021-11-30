@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>GameStoreBroker</AssemblyName>
+    <AssemblyName>PackageUploader</AssemblyName>
     <Copyright>© Microsoft Corporation</Copyright>
     <RuntimeFrameworkVersion>5.0.11</RuntimeFrameworkVersion>
     <OutputType>Exe</OutputType>
@@ -31,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameStoreBroker.ClientApi\GameStoreBroker.ClientApi.csproj" />
-    <ProjectReference Include="..\GameStoreBroker.FileLogger\GameStoreBroker.FileLogger.csproj" />
+    <ProjectReference Include="..\PackageUploader.ClientApi\PackageUploader.ClientApi.csproj" />
+    <ProjectReference Include="..\PackageUploader.FileLogger\PackageUploader.FileLogger.csproj" />
   </ItemGroup>
 
 </Project>

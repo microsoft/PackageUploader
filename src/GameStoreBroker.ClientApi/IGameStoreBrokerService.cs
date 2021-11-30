@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Models;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Models;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi
+namespace PackageUploader.ClientApi
 {
-    public interface IGameStoreBrokerService
+    public interface IPackageUploaderService
     {
         Task<GameProduct> GetProductByBigIdAsync(string bigId, CancellationToken ct);
         Task<GameProduct> GetProductByProductIdAsync(string productId, CancellationToken ct);

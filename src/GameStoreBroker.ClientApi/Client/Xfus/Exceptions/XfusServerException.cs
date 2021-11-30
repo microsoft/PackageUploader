@@ -4,7 +4,7 @@
 using System;
 using System.Net;
 
-namespace GameStoreBroker.ClientApi.Client.Xfus.Exceptions
+namespace PackageUploader.ClientApi.Client.Xfus.Exceptions
 {
     public sealed class XfusServerException : Exception
     {

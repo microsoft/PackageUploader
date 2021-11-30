@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Config;
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
@@ -11,7 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
 {
     public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvider
     {

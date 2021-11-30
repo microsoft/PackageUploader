@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Config
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config
 {
     public class AccessTokenProviderConfig
     {

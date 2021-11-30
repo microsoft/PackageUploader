@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
+namespace PackageUploader.ClientApi.Client.Ingestion.Models.Internal
 {
     internal sealed class IngestionSubmissionCreationRequest
     {

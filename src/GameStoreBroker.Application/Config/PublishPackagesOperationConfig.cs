@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Models;
+using PackageUploader.ClientApi.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.Application.Config
+namespace PackageUploader.Application.Config
 {
     internal sealed class PublishPackagesOperationConfig : PackageBranchOperationConfig
     {

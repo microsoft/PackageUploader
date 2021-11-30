@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     internal class JsonFileFormatter : FileFormatter, IDisposable
     {

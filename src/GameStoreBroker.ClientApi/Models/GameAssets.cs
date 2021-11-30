@@ -3,7 +3,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.ClientApi.Models
+namespace PackageUploader.ClientApi.Models
 {
     public class GameAssets
     {

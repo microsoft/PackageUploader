@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Config;
-using GameStoreBroker.Application.Extensions;
-using GameStoreBroker.Application.Operations;
-using GameStoreBroker.ClientApi;
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
-using GameStoreBroker.FileLogger;
+using PackageUploader.Application.Config;
+using PackageUploader.Application.Extensions;
+using PackageUploader.Application.Operations;
+using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.FileLogger;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,7 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application
+namespace PackageUploader.Application
 {
     internal class Program
     {
@@ -55,7 +55,7 @@ namespace GameStoreBroker.Application
             var invocationContext = context.GetInvocationContext();
             logging.ClearProviders();
             logging.SetMinimumLevel(LogLevel.Warning);
-            logging.AddFilter("GameStoreBroker", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
+            logging.AddFilter("PackageUploader", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
             logging.AddSimpleFile(options =>
             {
                 options.SingleLine = true;
@@ -63,7 +63,7 @@ namespace GameStoreBroker.Application
             }, file =>
             {
                 var logFile = invocationContext.GetOptionValue(LogFileOption);
-                file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"GameStoreBroker_{DateTime.Now:yyyyMMddHHmmss}.log");
+                file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"PackageUploader_{DateTime.Now:yyyyMMddHHmmss}.log");
                 file.Append = true;
             });
             logging.AddSimpleConsole(options =>
@@ -78,7 +78,7 @@ namespace GameStoreBroker.Application
             var invocationContext = context.GetInvocationContext();
 
             services.AddLogging();
-            services.AddGameStoreBrokerService(context.Configuration, invocationContext.GetOptionValue(AuthenticationMethodOption));
+            services.AddPackageUploaderService(context.Configuration, invocationContext.GetOptionValue(AuthenticationMethodOption));
 
             services.AddOperation<GetProductOperation, GetProductOperationConfig>(context);
             services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationConfig>(context);

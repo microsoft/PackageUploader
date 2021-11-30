@@ -5,7 +5,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace GameStoreBroker.Application.Extensions
+namespace PackageUploader.Application.Extensions
 {
     internal static class ObjectExtensions
     {

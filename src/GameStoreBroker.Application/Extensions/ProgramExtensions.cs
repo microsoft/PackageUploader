@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Config;
-using GameStoreBroker.Application.Operations;
+using PackageUploader.Application.Config;
+using PackageUploader.Application.Operations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +14,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Extensions
+namespace PackageUploader.Application.Extensions
 {
     internal static class ProgramExtensions
     {

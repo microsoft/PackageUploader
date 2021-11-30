@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System.ComponentModel.DataAnnotations;
-using GameStoreBroker.ClientApi.Models;
+using PackageUploader.ClientApi.Models;
 
-namespace GameStoreBroker.Application.Config
+namespace PackageUploader.Application.Config
 {
     internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
     {

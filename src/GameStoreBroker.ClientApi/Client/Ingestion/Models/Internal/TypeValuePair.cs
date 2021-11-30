@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
+namespace PackageUploader.ClientApi.Client.Ingestion.Models.Internal
 {
     internal sealed class TypeValuePair
     {

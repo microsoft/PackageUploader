@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     /// <summary>
     /// Options for the built-in default file log formatter.

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace GameStoreBroker.ClientApi.Client.Xfus.Models.Internal
+namespace PackageUploader.ClientApi.Client.Xfus.Models.Internal
 {
     internal class ByteSize
     {

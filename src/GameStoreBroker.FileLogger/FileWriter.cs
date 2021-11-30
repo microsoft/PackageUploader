@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     internal class FileWriter : IFileWriter
     {

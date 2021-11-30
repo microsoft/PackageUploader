@@ -5,7 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     internal class FileLoggerProcessor : IDisposable
     {

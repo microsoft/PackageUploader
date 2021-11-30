@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Client
+namespace PackageUploader.ClientApi.Client.Ingestion.Client
 {
     internal interface IHttpRestClient
     {

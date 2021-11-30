@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Config;
-using GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
 {
     internal static class AccessTokenProviderExtensions
     {

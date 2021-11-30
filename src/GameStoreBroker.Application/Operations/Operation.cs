@@ -6,7 +6,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Operations
+namespace PackageUploader.Application.Operations
 {
     internal abstract class Operation
     {
@@ -21,7 +21,7 @@ namespace GameStoreBroker.Application.Operations
         {
             try
             {
-                _logger.LogDebug("GameStoreBroker is running.");
+                _logger.LogDebug("PackageUploader is running.");
                 await ProcessAsync(ct).ConfigureAwait(false);
                 return 0;
             }
@@ -38,7 +38,7 @@ namespace GameStoreBroker.Application.Operations
             }
             finally
             {
-                _logger.LogInformation("GameStoreBroker has finished running.");
+                _logger.LogInformation("PackageUploader has finished running.");
             }
         }
 

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Exceptions
+namespace PackageUploader.ClientApi.Client.Ingestion.Exceptions
 {
     public class PackageBranchNotFoundException : IngestionClientException
     {

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.Models
 {
     public sealed class GameMandatoryUpdateInfo
     {

@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Xfus.Config;
-using GameStoreBroker.ClientApi.Client.Xfus.Exceptions;
-using GameStoreBroker.ClientApi.Client.Xfus.Models;
-using GameStoreBroker.ClientApi.Client.Xfus.Models.Internal;
+using PackageUploader.ClientApi.Client.Xfus.Config;
+using PackageUploader.ClientApi.Client.Xfus.Exceptions;
+using PackageUploader.ClientApi.Client.Xfus.Models;
+using PackageUploader.ClientApi.Client.Xfus.Models.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -23,7 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace GameStoreBroker.ClientApi.Client.Xfus
+namespace PackageUploader.ClientApi.Client.Xfus
 {
     internal class XfusUploader : IXfusUploader
     {

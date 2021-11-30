@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models
 {
     public class IngestionAccessToken
     {

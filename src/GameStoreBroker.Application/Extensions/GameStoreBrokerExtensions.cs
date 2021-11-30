@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Config;
-using GameStoreBroker.ClientApi;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+using PackageUploader.Application.Config;
+using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Extensions
+namespace PackageUploader.Application.Extensions
 {
-    internal static class GameStoreBrokerExtensions
+    internal static class PackageUploaderExtensions
     {
-        public static async Task<GameProduct> GetProductAsync(this IGameStoreBrokerService storeBroker, BaseOperationConfig config, CancellationToken ct)
+        public static async Task<GameProduct> GetProductAsync(this IPackageUploaderService storeBroker, BaseOperationConfig config, CancellationToken ct)
         {
             _ = storeBroker ?? throw new ArgumentNullException(nameof(storeBroker));
             _ = config ?? throw new ArgumentNullException(nameof(config));
@@ -31,7 +31,7 @@ namespace GameStoreBroker.Application.Extensions
             throw new Exception("BigId or ProductId needed.");
         }
 
-        public static async Task<GamePackageBranch> GetGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, PackageBranchOperationConfig config, CancellationToken ct)
+        public static async Task<GamePackageBranch> GetGamePackageBranch(this IPackageUploaderService storeBroker, GameProduct product, PackageBranchOperationConfig config, CancellationToken ct)
         {
             _ = storeBroker ?? throw new ArgumentNullException(nameof(storeBroker));
             _ = product ?? throw new ArgumentNullException(nameof(product));
@@ -50,7 +50,7 @@ namespace GameStoreBroker.Application.Extensions
             throw new Exception("BranchFriendlyName or FlightName needed.");
         }
 
-        public static async Task<GameMarketGroupPackage> GetGameMarketGroupPackage(this IGameStoreBrokerService storeBroker, GameProduct product, GamePackageBranch packageBranch, UploadPackageOperationConfig config, CancellationToken ct)
+        public static async Task<GameMarketGroupPackage> GetGameMarketGroupPackage(this IPackageUploaderService storeBroker, GameProduct product, GamePackageBranch packageBranch, UploadPackageOperationConfig config, CancellationToken ct)
         {
             _ = storeBroker ?? throw new ArgumentNullException(nameof(storeBroker));
             _ = product ?? throw new ArgumentNullException(nameof(product));
@@ -78,7 +78,7 @@ namespace GameStoreBroker.Application.Extensions
             return marketGroupPackage;
         }
 
-        public static async Task<GamePackageBranch> GetDestinationGamePackageBranch(this IGameStoreBrokerService storeBroker, GameProduct product, ImportPackagesOperationConfig config, CancellationToken ct)
+        public static async Task<GamePackageBranch> GetDestinationGamePackageBranch(this IPackageUploaderService storeBroker, GameProduct product, ImportPackagesOperationConfig config, CancellationToken ct)
         {
             _ = storeBroker ?? throw new ArgumentNullException(nameof(storeBroker));
             _ = product ?? throw new ArgumentNullException(nameof(product));

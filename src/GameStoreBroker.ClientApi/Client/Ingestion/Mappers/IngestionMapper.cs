@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
-using GameStoreBroker.ClientApi.Client.Xfus.Models;
+using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
+using PackageUploader.ClientApi.Client.Xfus.Models;
 using System;
 using System.Linq;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Mappers
+namespace PackageUploader.ClientApi.Client.Ingestion.Mappers
 {
     internal static class IngestionMapper
     {

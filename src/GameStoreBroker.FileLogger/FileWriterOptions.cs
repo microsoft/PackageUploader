@@ -3,7 +3,7 @@
 
 using System.Text;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     public class FileWriterOptions
     {

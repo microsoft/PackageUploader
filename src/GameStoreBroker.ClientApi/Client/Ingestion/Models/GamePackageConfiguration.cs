@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.Models
 {
     public sealed class GamePackageConfiguration : GamePackageResource
     {

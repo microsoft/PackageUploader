@@ -1,24 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Config;
-using GameStoreBroker.Application.Extensions;
-using GameStoreBroker.ClientApi;
+using PackageUploader.Application.Config;
+using PackageUploader.Application.Extensions;
+using PackageUploader.ClientApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Operations
+namespace PackageUploader.Application.Operations
 {
     internal class UploadUwpPackageOperation : Operation
     {
-        private readonly IGameStoreBrokerService _storeBrokerService;
+        private readonly IPackageUploaderService _storeBrokerService;
         private readonly ILogger<UploadUwpPackageOperation> _logger;
         private readonly UploadUwpPackageOperationConfig _config;
 
-        public UploadUwpPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationConfig> config) : base(logger)
+        public UploadUwpPackageOperation(IPackageUploaderService storeBrokerService, ILogger<UploadUwpPackageOperation> logger, IOptions<UploadUwpPackageOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

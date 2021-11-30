@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
 
-namespace GameStoreBroker.ClientApi.Models
+namespace PackageUploader.ClientApi.Models
 {
     public interface IGameConfiguration
     {

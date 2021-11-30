@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.Application.Config
+namespace PackageUploader.Application.Config
 {
     internal abstract class BaseOperationConfig : IValidatableObject
     {

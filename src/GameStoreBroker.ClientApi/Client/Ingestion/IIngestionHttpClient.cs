@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion
+namespace PackageUploader.ClientApi.Client.Ingestion
 {
     public interface IIngestionHttpClient
     {

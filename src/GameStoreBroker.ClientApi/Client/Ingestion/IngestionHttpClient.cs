@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Builders;
-using GameStoreBroker.ClientApi.Client.Ingestion.Client;
-using GameStoreBroker.ClientApi.Client.Ingestion.Exceptions;
-using GameStoreBroker.ClientApi.Client.Ingestion.Mappers;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
+using PackageUploader.ClientApi.Client.Ingestion.Builders;
+using PackageUploader.ClientApi.Client.Ingestion.Client;
+using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
+using PackageUploader.ClientApi.Client.Ingestion.Mappers;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -18,8 +18,8 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("GameStoreBroker.ClientApi.Test")]
-namespace GameStoreBroker.ClientApi.Client.Ingestion
+[assembly: InternalsVisibleTo("PackageUploader.ClientApi.Test")]
+namespace PackageUploader.ClientApi.Client.Ingestion
 {
     internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
     {

@@ -4,7 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography.X509Certificates;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.TokenProvider.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models
 {
     public sealed class AzureApplicationCertificateAuthInfo : AadAuthInfo
     {

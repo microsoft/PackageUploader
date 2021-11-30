@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Models;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GameStoreBroker.Application.Config
+namespace PackageUploader.Application.Config
 {
     internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGameConfiguration
     {

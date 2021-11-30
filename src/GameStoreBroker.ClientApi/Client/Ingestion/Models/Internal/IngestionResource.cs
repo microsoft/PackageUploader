@@ -3,7 +3,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal
+namespace PackageUploader.ClientApi.Client.Ingestion.Models.Internal
 {
     internal abstract class IngestionResource
     {

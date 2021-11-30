@@ -1,24 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Config;
-using GameStoreBroker.Application.Extensions;
-using GameStoreBroker.ClientApi;
+using PackageUploader.Application.Config;
+using PackageUploader.Application.Extensions;
+using PackageUploader.ClientApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Operations
+namespace PackageUploader.Application.Operations
 {
     internal class UploadXvcPackageOperation : Operation
     {
-        private readonly IGameStoreBrokerService _storeBrokerService;
+        private readonly IPackageUploaderService _storeBrokerService;
         private readonly ILogger<UploadXvcPackageOperation> _logger;
         private readonly UploadXvcPackageOperationConfig _config;
 
-        public UploadXvcPackageOperation(IGameStoreBrokerService storeBrokerService, ILogger<UploadXvcPackageOperation> logger, IOptions<UploadXvcPackageOperationConfig> config) : base(logger)
+        public UploadXvcPackageOperation(IPackageUploaderService storeBrokerService, ILogger<UploadXvcPackageOperation> logger, IOptions<UploadXvcPackageOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

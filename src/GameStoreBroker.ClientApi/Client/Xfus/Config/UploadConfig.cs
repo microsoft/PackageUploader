@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace GameStoreBroker.ClientApi.Client.Xfus.Config
+namespace PackageUploader.ClientApi.Client.Xfus.Config
 {
     public class UploadConfig
     {

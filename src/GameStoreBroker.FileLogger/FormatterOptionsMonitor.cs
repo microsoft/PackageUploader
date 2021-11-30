@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Extensions.Options;
 
-namespace GameStoreBroker.FileLogger
+namespace PackageUploader.FileLogger
 {
     internal class FormatterOptionsMonitor<TOptions> : IOptionsMonitor<TOptions> where TOptions : FileFormatterOptions
     {

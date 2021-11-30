@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Config;
-using GameStoreBroker.Application.Extensions;
-using GameStoreBroker.ClientApi;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
+using PackageUploader.Application.Config;
+using PackageUploader.Application.Extensions;
+using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -12,15 +12,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GameStoreBroker.Application.Operations
+namespace PackageUploader.Application.Operations
 {
     internal sealed class PublishPackagesOperation : Operation
     {
-        private readonly IGameStoreBrokerService _storeBrokerService;
+        private readonly IPackageUploaderService _storeBrokerService;
         private readonly ILogger<PublishPackagesOperation> _logger;
         private readonly PublishPackagesOperationConfig _config;
 
-        public PublishPackagesOperation(IGameStoreBrokerService storeBrokerService, ILogger<PublishPackagesOperation> logger, IOptions<PublishPackagesOperationConfig> config) : base(logger)
+        public PublishPackagesOperation(IPackageUploaderService storeBrokerService, ILogger<PublishPackagesOperation> logger, IOptions<PublishPackagesOperationConfig> config) : base(logger)
         {
             _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GameStoreBroker.ClientApi.Models
+namespace PackageUploader.ClientApi.Models
 {
     public class GamePackageDate
     {

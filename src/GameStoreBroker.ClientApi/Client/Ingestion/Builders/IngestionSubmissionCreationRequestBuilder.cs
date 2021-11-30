@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.ClientApi.Client.Ingestion.Mappers;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models;
-using GameStoreBroker.ClientApi.Client.Ingestion.Models.Internal;
+using PackageUploader.ClientApi.Client.Ingestion.Mappers;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
 using System;
 using System.Collections.Generic;
 
-namespace GameStoreBroker.ClientApi.Client.Ingestion.Builders
+namespace PackageUploader.ClientApi.Client.Ingestion.Builders
 {
     internal class IngestionSubmissionCreationRequestBuilder : IBuilder<IngestionSubmissionCreationRequest>
     {
