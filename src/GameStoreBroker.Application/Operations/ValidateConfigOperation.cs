@@ -21,7 +21,7 @@ namespace GameStoreBroker.Application.Operations
 
         public ValidateConfigOperation(IOptions<ValidateConfigOperationConfig> config, ILogger<GenerateConfigTemplateOperation> logger) : base(logger)
         {
-            _config = config.Value; 
+            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
             _validationOptions = new ValidationOptions
             {
                 Log = new JsonSchemaLogger(_logger),
