@@ -18,7 +18,6 @@ using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
 using System.CommandLine.Parsing;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace GameStoreBroker.Application
@@ -31,10 +30,10 @@ namespace GameStoreBroker.Application
         private static readonly Option<bool> VerboseOption = new(new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls");
         private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "Location of the log file");
         private static readonly Option<string> ClientSecretOption = new(new[] { "-s", "--ClientSecret" }, "Client secret of the AAD app (only for AppSecret)");
-        private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "Location of the config file").Required();
+        internal static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "Location of the config file").Required();
         private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "Format of the config file");
         private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "Authentication method");
-        private static readonly Option<bool> OverwriteOption = new(new[] { "-o", "--Overwrite" }, "Overwrite file");
+        internal static readonly Option<bool> OverwriteOption = new(new[] { "-o", "--Overwrite" }, "Overwrite file");
         private static readonly Command NewCommand = new Command("New", "Generate config template file") { OverwriteOption, }.AddOperationHandler<GenerateConfigTemplateOperation>();
         private static readonly Command ValidateConfigCommand = new Command("ValidateConfig", "Validate Json config file against the schema") { ConfigFileOption, }.AddOperationHandler<ValidateConfigOperation>();
 
@@ -90,23 +89,18 @@ namespace GameStoreBroker.Application
             services.AddOperation<RemovePackagesOperation, RemovePackagesOperationConfig>(context);
             services.AddOperation<ImportPackagesOperation, ImportPackagesOperationConfig>(context);
             services.AddOperation<PublishPackagesOperation, PublishPackagesOperationConfig>(context);
-            services.AddOperation<GenerateConfigTemplateOperation, GenerateConfigTemplateOperationConfig>(context);
-            services.AddOperation<ValidateConfigOperation, ValidateConfigOperationConfig>(context);
+            services.AddOperation<GenerateConfigTemplateOperation>();
+            services.AddOperation<ValidateConfigOperation>();
         }
 
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder)
         {
             var invocationContext = context.GetInvocationContext();
-            var inMemoryValues = new Dictionary<string, string>();
-            var command = invocationContext.ParseResult.CommandResult.Command;
 
-            var configFile = invocationContext.GetOptionValue(ConfigFileOption);
-            if (command == ValidateConfigCommand)
+            var command = invocationContext.ParseResult.CommandResult.Command;
+            if (command != ValidateConfigCommand)
             {
-                inMemoryValues.TryAdd(nameof(ValidateConfigOperationConfig.ConfigFilepath), configFile.FullName);
-            }
-            else
-            {
+                var configFile = invocationContext.GetOptionValue(ConfigFileOption);
                 if (configFile is not null)
                 {
                     var configFileFormat = invocationContext.GetOptionValue(ConfigFileFormatOption);
@@ -118,20 +112,8 @@ namespace GameStoreBroker.Application
             if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
             {
                 var clientSecret = invocationContext.GetOptionValue(ClientSecretOption);
+                var inMemoryValues = new Dictionary<string, string>();
                 inMemoryValues.TryAdd($"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}", clientSecret);
-            }
-
-            if (command == NewCommand)
-            {
-                var operationName = invocationContext.ParseResult.RootCommandResult.Children[0].Symbol.Name;
-                inMemoryValues.TryAdd(nameof(GenerateConfigTemplateOperationConfig.OperationName), operationName);
-
-                var overwrite = invocationContext.GetOptionValue(OverwriteOption);
-                inMemoryValues.TryAdd(nameof(GenerateConfigTemplateOperationConfig.Overwrite), overwrite.ToString());
-            }
-
-            if (inMemoryValues.Any())
-            {
                 builder.AddInMemoryCollection(inMemoryValues);
             }
         }

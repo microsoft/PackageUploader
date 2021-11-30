@@ -1,11 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Config;
 using Json.Schema;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
+using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,12 +16,12 @@ namespace GameStoreBroker.Application.Operations
 {
     internal class ValidateConfigOperation : Operation
     {
-        private readonly ValidateConfigOperationConfig _config;
+        private readonly InvocationContext _invocationContext;
         private readonly ValidationOptions _validationOptions;
 
-        public ValidateConfigOperation(IOptions<ValidateConfigOperationConfig> config, ILogger<GenerateConfigTemplateOperation> logger) : base(logger)
+        public ValidateConfigOperation(ILogger<GenerateConfigTemplateOperation> logger, InvocationContext invocationContext) : base(logger)
         {
-            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
+            _invocationContext = invocationContext;
             _validationOptions = new ValidationOptions
             {
                 Log = new JsonSchemaLogger(_logger),
@@ -34,7 +33,7 @@ namespace GameStoreBroker.Application.Operations
         {
             _logger.LogDebug("Validating config file.");
 
-            var configFile = new FileInfo(_config.ConfigFilepath);
+            var configFile = _invocationContext.ParseResult.ValueForOption(Program.ConfigFileOption);
             if (!configFile.Exists)
             {
                 throw new FileNotFoundException("Config file does not exist.");

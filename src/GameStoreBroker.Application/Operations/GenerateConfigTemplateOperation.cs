@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Config;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System;
+using System.CommandLine.Invocation;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -15,32 +14,35 @@ namespace GameStoreBroker.Application.Operations
     internal class GenerateConfigTemplateOperation : Operation
     {
         private const int BufferSize = 8 * 1024;
-        private readonly GenerateConfigTemplateOperationConfig _config;
+        private readonly InvocationContext _invocationContext;
 
-        public GenerateConfigTemplateOperation(IOptions<GenerateConfigTemplateOperationConfig> config, ILogger<GenerateConfigTemplateOperation> logger) : base(logger)
+        public GenerateConfigTemplateOperation(ILogger<GenerateConfigTemplateOperation> logger, InvocationContext invocationContext) : base(logger)
         {
-            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
+            _invocationContext = invocationContext;
         }
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            _logger.LogDebug("Generating config file template for {configOperation} operation.", _config.OperationName);
+            var operationName = _invocationContext.ParseResult.RootCommandResult.Children[0].Symbol.Name;
+            var overwrite = _invocationContext.ParseResult.ValueForOption(Program.OverwriteOption);
+
+            _logger.LogDebug("Generating config file template for {configOperation} operation.", operationName);
 
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = $"GameStoreBroker.Application.Templates.{_config.OperationName}.json";
+            var resourceName = $"GameStoreBroker.Application.Templates.{operationName}.json";
 
             using var resourceStream = assembly.GetManifestResourceStream(resourceName);
             if (resourceStream is null)
             {
-                _logger.LogError("Config file template for {configOperation} not found.", _config.OperationName);
+                _logger.LogError("Config file template for {configOperation} not found.", operationName);
             }
             else
             {
                 var generate = true;
-                var destinationFile = new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{_config.OperationName}.json"));
+                var destinationFile = new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{operationName}.json"));
                 if (destinationFile.Exists)
                 {
-                    if (_config.Overwrite)
+                    if (overwrite)
                     {
                         _logger.LogWarning("Config file template {destinationFile} will be overwritten.", destinationFile.Name);
                     }

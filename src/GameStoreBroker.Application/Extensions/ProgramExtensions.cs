@@ -52,8 +52,13 @@ namespace GameStoreBroker.Application.Extensions
 
         public static void AddOperation<TOperation, TConfig>(this IServiceCollection services, HostBuilderContext context) where TOperation : Operation where TConfig : class
         {
-            services.AddScoped<TOperation>();
+            services.AddOperation<TOperation>();
             services.AddOptions<TConfig>().Bind(context.Configuration).ValidateDataAnnotations();
+        }
+
+        public static void AddOperation<TOperation>(this IServiceCollection services) where TOperation : Operation
+        {
+            services.AddScoped<TOperation>();
         }
 
         public static IConfigurationBuilder AddConfigFile(this IConfigurationBuilder builder, FileInfo configFile, Program.ConfigFileFormat configFileFormat) =>
