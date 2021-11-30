@@ -10,16 +10,12 @@
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>true</PublishReadyToRun>
-    <!--<PublishTrimmed>true</PublishTrimmed>-->
+    <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Templates\RemovePackages.json" />
-  </ItemGroup>
 
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
@@ -41,12 +37,8 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <EmbeddedResource Include="Templates\*.json">
-		  <ExcludeFromSingleFile>false</ExcludeFromSingleFile>
-	  </EmbeddedResource>
-	  <EmbeddedResource Include="Schemas\*.json">
-		  <ExcludeFromSingleFile>false</ExcludeFromSingleFile>
-	  </EmbeddedResource>
+	<EmbeddedResource Include="..\..\templates\*.json" LinkBase="Templates" />
+	<EmbeddedResource Include="..\..\schemas\*.json" LinkBase="Schemas" />
   </ItemGroup>
 
 </Project>
