@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
@@ -65,8 +66,20 @@ namespace GameStoreBroker.Application.Operations
         private static async Task<JsonSchema> GetJsonSchema(CancellationToken ct)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            const string resourceName = "GameStoreBroker.Application.Schemas.PackageUploaderOperationConfigSchema.json";
-            using var schemaStream = assembly.GetManifestResourceStream(resourceName);
+            var schemaResources = assembly.GetManifestResourceNames()
+                .Where(x => x.StartsWith("GameStoreBroker.Application.Schemas.") && x.EndsWith(".json"));
+
+            if (!schemaResources.Any())
+            {
+                throw new Exception("Schema not found in the assembly.");
+            }
+            else if (schemaResources.Count() > 1)
+            {
+                throw new Exception("More than one schema found in the assembly.");
+            }
+
+            var schemaResourceName = schemaResources.First();
+            using var schemaStream = assembly.GetManifestResourceStream(schemaResourceName);
             if (schemaStream is null)
             {
                 throw new Exception($"Error while accessing the schema.");
