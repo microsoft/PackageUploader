@@ -50,7 +50,7 @@ namespace GameStoreBroker.Application.Operations
                 throw new JsonException($"Config file Json parsing error: {e.Message}.", e);
             }
 
-            var schema = await GetJsonSchema().ConfigureAwait(false);
+            var schema = await GetJsonSchema(ct).ConfigureAwait(false);
             var validationResult = schema.Validate(configJson.RootElement, _validationOptions);
             if (validationResult.IsValid)
             {
@@ -62,7 +62,7 @@ namespace GameStoreBroker.Application.Operations
             }
         }
 
-        private static async Task<JsonSchema> GetJsonSchema()
+        private static async Task<JsonSchema> GetJsonSchema(CancellationToken ct)
         {
             var assembly = Assembly.GetExecutingAssembly();
             const string resourceName = "GameStoreBroker.Application.Schemas.PackageUploaderOperationConfigSchema.json";
@@ -73,7 +73,7 @@ namespace GameStoreBroker.Application.Operations
             }
             else
             {
-                var schema = await JsonSchema.FromStream(schemaStream).ConfigureAwait(false);
+                var schema = await JsonSerializer.DeserializeAsync<JsonSchema>(schemaStream, cancellationToken: ct).ConfigureAwait(false);
                 return schema;
             }
         }
@@ -86,11 +86,8 @@ namespace GameStoreBroker.Application.Operations
             {
                 _logger = logger;
             }
-            public void Write(Func<string> message, int indent = 0)
-            {
-                var logmessage = message();
-                _logger.LogTrace(logmessage);
-            }
+
+            public void Write(Func<string> message, int indent = 0) => _logger.LogTrace(message());
         }
     }
 }
