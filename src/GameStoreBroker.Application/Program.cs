@@ -164,7 +164,7 @@ namespace GameStoreBroker.Application
                 {
                     ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
                 }.AddOperationHandler<PublishPackagesOperation>(),
-                ValidateConfigCommand,
+                //ValidateConfigCommand,
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);
