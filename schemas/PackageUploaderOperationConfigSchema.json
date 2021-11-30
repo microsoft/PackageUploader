@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema#",
-  "$id": "PackageUploaderOperationConfigSchema.json",
+  "$id": "https://product-ingestion-int.azureedge.net/schema/package-uploader-operation-configuration/2021-11-30",
   "title": "PackageUploader configuration file schema",
   "markdownDescription": "Input config file structure for PackageUploader configuration file [Learn more](https://github.com/microsoft/PackageUploader)",
   "description": "Input config file structure for PackageUploader configuration file",
