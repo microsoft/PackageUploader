@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using GameStoreBroker.Application.Operations;
+using PackageUploader.Application.Operations;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
