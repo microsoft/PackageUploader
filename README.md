@@ -19,7 +19,8 @@ The application can be used directly with the input config for ease of use, or t
   - Enter in your _name_.
   - Choose your _Supported account types_.
   - Click _Register_ at the bottom of the page.
-- Under your newly created App navigate to _Client credentials_ and create a _New client secret_. Note the _clientID_, _tenantID_, and your _Secret key_ for future use.
+- Under your newly created App navigate to _Client credentials_ and create a _New client secret_ or _Upload certificate_.
+  - Note the _clientID_, _tenantID_, and your _Secret key_ or certificate _Thumbprint_ for future use.
 - It is recommended that you add your team as backup to maintain your app going forward.
   - Navigate into the app, on the left under _manage_ find _owners_ and _add_ your back up.
 
