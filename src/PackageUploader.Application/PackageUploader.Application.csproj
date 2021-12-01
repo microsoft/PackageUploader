@@ -10,7 +10,7 @@
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>true</PublishReadyToRun>
-	<PublishReadyToRunShowWarnings>false</PublishReadyToRunShowWarnings>
+    <PublishReadyToRunShowWarnings>false</PublishReadyToRunShowWarnings>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
@@ -38,8 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-	<EmbeddedResource Include="..\..\templates\*.json" LinkBase="Templates" />
-	<EmbeddedResource Include="..\..\schemas\*.json" LinkBase="Schemas" />
+    <EmbeddedResource Include="..\..\templates\*.json" LinkBase="Templates" />
+    <EmbeddedResource Include="..\..\schemas\*.json" LinkBase="Schemas" />
   </ItemGroup>
 
 </Project>
