@@ -10,7 +10,10 @@
   "marketGroupName": "{{ optional - if informed it will only delete packages in the specified one (case sensitive) }}",
 
   "aadAuthInfo": {
-    "clientId": "{{ required }}",
-    "tenantId": "{{ required }}"
+    "clientId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
+    "tenantId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
+    "certificateThumbprint": "{{ required when using authentication method *AppCert* }}",
+    "certificateStore": "{{ required when using authentication method *AppCert* }}",
+    "certificateLocation": "{{ required when using authentication method *AppCert* }}"
   }
 }
