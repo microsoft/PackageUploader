@@ -354,9 +354,4 @@ MigrationBackup/
 .vscode/tasks.json
 
 # Other
-/src/GameStoreBroker.Application/GetProductTest.json
-/src/GameStoreBroker.Application/InvalidJsonTest.json
-/src/GameStoreBroker.Application/Properties/launchSettings.json
-/src/GameStoreBroker.Application/UploadUwpPackageTest.json
-/src/GameStoreBroker.Application/UploadXboxPackageTest.json
-/src/GameStoreBroker.Application/UploadGamePackageTest.json
+/src/PackageUploader.Application/Properties/launchSettings.json

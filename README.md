@@ -19,7 +19,8 @@ The application can be used directly with the input config for ease of use, or t
   - Enter in your _name_.
   - Choose your _Supported account types_.
   - Click _Register_ at the bottom of the page.
-- Under your newly created App navigate to _Client credentials_ and create a _New client secret_. Note the _clientID_, _tenantID_, and your _Secret key_ for future use.
+- Under your newly created App navigate to _Client credentials_ and create a _New client secret_ or _Upload certificate_.
+  - Note the _clientID_, _tenantID_, and your _Secret key_ or certificate _Thumbprint_ for future use.
 - It is recommended that you add your team as backup to maintain your app going forward.
   - Navigate into the app, on the left under _manage_ find _owners_ and _add_ your back up.
 
@@ -71,13 +72,13 @@ The application can be used directly with the input config for ease of use, or t
 - Parameters:
 
   ```
-  -c, --ConfigFile <ConfigFile> (REQUIRED)  The location of the config file
-  -f, --ConfigFileFormat <Ini|Json|Xml>     The format of the config file [default: Json]
-  -s, --ClientSecret <ClientSecret>         The client secret of the AAD app
-  --Retail                                  Allow publish packages to RETAIL sandbox [specific for PublishPackages]
-  -v, --Verbose                             Log verbose messages such as http calls
-  -l, --LogFile <LogFile>                   The location of the log file
-  -?, -h, --help                            Show help and usage information
+  -c, --ConfigFile <ConfigFile> (REQUIRED)                  The location of the config file
+  -f, --ConfigFileFormat <Ini|Json|Xml>                     The format of the config file [default: Json]
+  -s, --ClientSecret <ClientSecret>                         The client secret of the AAD app (only for AppSecret)
+  -a, --Authentication <AppCert|AppSecret|Browser|Default>  The authentication method [default: AppSecret]
+  -v, --Verbose                                             Log verbose messages such as http calls
+  -l, --LogFile <LogFile>                                   The location of the log file
+  -?, -h, --help                                            Show help and usage information
   ```
   
 ## Q & A
