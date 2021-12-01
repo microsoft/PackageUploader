@@ -14,7 +14,7 @@ namespace PackageUploader.Application.Operations
 {
     internal class GetProductOperation : Operation
     {
-        private readonly IGameStoreBrokerService _storeBrokerService;
+        private readonly IPackageUploaderService _storeBrokerService;
         private readonly BaseOperationConfig _config;
 
         public GetProductOperation(IPackageUploaderService storeBrokerService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationConfig> config) : base(logger)
