@@ -13,17 +13,17 @@
   "marketGroupName": "{{ optional - if informed it will only import packages from & to the specified one (case sensitive) }}",
 
   "availabilityDate": {
-    "isEnabled": true,
+    "isEnabled": false,
     "effectiveDate": "{{ optional - if informed it will set the availability date in the destination branch for the Xvc and Uwp packages (if any) }}"
   },
 
   "mandatoryDate": {
-    "isEnabled": true,
+    "isEnabled": false,
     "effectiveDate": "{{ optional - if informed it will set the mandatory date in the destination branch for the Uwp packages (if any) }}"
   },
 
   "gradualRollout": {
-    "isEnabled": true,
+    "isEnabled": false,
     "percentage": 33,
     "isSeekEnabled": false
   },
@@ -31,7 +31,10 @@
   "overwrite": true,
 
   "aadAuthInfo": {
-    "clientId": "{{ required }}",
-    "tenantId": "{{ required }}"
+    "clientId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
+    "tenantId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
+    "certificateThumbprint": "{{ required when using authentication method *AppCert* }}",
+    "certificateStore": "{{ required when using authentication method *AppCert* }}",
+    "certificateLocation": "{{ required when using authentication method *AppCert* }}"
   }
 }

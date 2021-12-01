@@ -1,0 +1,547 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://product-ingestion-int.azureedge.net/schema/package-uploader-operation-configuration/2021-11-30",
+  "title": "PackageUploader configuration file schema",
+  "markdownDescription": "Input config file structure for PackageUploader configuration file [Learn more](https://github.com/microsoft/PackageUploader)",
+  "description": "Input config file structure for PackageUploader configuration file",
+  "type": "object",
+  "$defs": {
+    "packageDate": {
+      "type": "object",
+      "defaultSnippets": [
+        {
+          "label": "packageDate properties",
+          "body": {
+            "isEnabled": "^$1",
+            "effectiveDate": "$2"
+          }
+        }
+      ],
+      "properties": {
+        "isEnabled": {
+          "description": "it will enable/disable the date",
+          "type": "boolean"
+        },
+        "effectiveDate": {
+          "description": "if informed it will set the date",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "if": {
+        "properties": {
+          "isEnabled": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "effectiveDate"
+        ]
+      }
+    },
+    "gradualRollout": {
+      "type": "object",
+      "defaultSnippets": [
+        {
+          "label": "gradualRollout properties",
+          "body": {
+            "isEnabled": "^$1",
+            "percentage": "$2",
+            "isSeekEnabled": "^$3"
+          }
+        }
+      ],
+      "properties": {
+        "isEnabled": {
+          "description": "it will enable/disable gradual rollout",
+          "type": "boolean"
+        },
+        "percentage": {
+          "description": "rollout to start with",
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 100
+        },
+        "isSeekEnabled": {
+          "description": "enable/disable always provide the newest packages when customers manually check for updates",
+          "type": "boolean"
+        }
+      },
+      "if": {
+        "properties": {
+          "isEnabled": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "percentage"
+        ]
+      }
+    }
+  },
+  "properties": {
+    "operationName": {
+      "type": "string",
+      "description": "Package operation to run",
+      "oneOf": [
+        {
+          "const": "GetProduct",
+          "description": "Returns metadata of the product"
+        },
+        {
+          "const": "UploadUwpPackage",
+          "description": "Uploads Uwp game package"
+        },
+        {
+          "const": "UploadXvcPackage",
+          "description": "Uploads Xvc game package and assets"
+        },
+        {
+          "const": "RemovePackages",
+          "description": "Removes all game packages and assets from a branch"
+        },
+        {
+          "const": "ImportPackages",
+          "description": "Imports all game packages from a branch to a destination branch"
+        },
+        {
+          "const": "PublishPackages",
+          "description": "Publishes all game packages from a branch or flight to a destination sandbox or flight"
+        }
+      ]
+    },
+    "productId": {
+      "markdownDescription": "***productId*** or ***bigId*** required, but not both",
+      "description": "\"productId\" or \"bigId\" required, but not both",
+      "type": "string"
+    },
+    "bigId": {
+      "markdownDescription": "***productId*** or ***bigId*** required, but not both",
+      "description": "\"productId\" or \"bigId\" required, but not both",
+      "type": "string"
+    },
+    "aadAuthInfo": {
+      "markdownDescription": "Azure AD application authentication information [Learn more](https://github.com/microsoft/PackageUploader#step-1-creating-your-app-in-azure)",
+      "description": "Azure AD application authentication information",
+      "type": "object",
+      "defaultSnippets": [
+        {
+          "label": "Required properties",
+          "body": {
+            "tenantId": "$1",
+            "clientId": "$2"
+          }
+        }
+      ],
+      "properties": {
+        "tenantId": {
+          "markdownDescription": "Azure AD application tenant id (required when using authentication method ***AppCert*** or ***AppSecret***)",
+          "description": "Azure AD application tenant id (required when using authentication method \"AppCert\" or \"AppSecret*)",
+          "type": "string"
+        },
+        "clientId": {
+          "markdownDescription": "Azure AD application client id (required when using authentication method ***AppCert*** or ***AppSecret***)",
+          "description": "Azure AD application client id (required when using authentication method \"AppCert\" or \"AppSecret*)",
+          "type": "string"
+        },
+        "certificateThumbprint": {
+          "markdownDescription": "Azure AD application certificate thumbprint (required when using authentication method ***AppCert***)",
+          "description": "Azure AD application certificate thumbprint (required when using authentication method \"AppCert\")",
+          "type": "string"
+        },
+        "certificateStore": {
+          "markdownDescription": "Azure AD application certificate store (required when using authentication method ***AppCert***)",
+          "description": "Azure AD application certificate store (required when using authentication method \"AppCert\")",
+          "type": "string"
+        },
+        "certificateLocation": {
+          "markdownDescription": "Azure AD application certificate location (required when using authentication method ***AppCert***)",
+          "description": "Azure AD application certificate location (required when using authentication method \"AppCert\")",
+          "type": "string",
+          "oneOf": [
+            {
+              "const": "CurrentUser"
+            },
+            {
+              "const": "LocalMachine"
+            }
+          ]
+        }
+      },
+      "required": [
+        "tenantId",
+        "clientId"
+      ]
+    }
+  },
+  "required": [
+    "operationName"
+  ],
+  "$comment": "\"productId\" or \"bigId\" property required, but not both",
+  "oneOf": [
+    {
+      "required": [
+        "productId"
+      ]
+    },
+    {
+      "required": [
+        "bigId"
+      ]
+    }
+  ],
+  "allOf": [
+    {
+      "$comment": "\"branchFriendlyName\" or \"flightName\" property required, but not both",
+      "if": {
+        "properties": {
+          "operationName": {
+            "type": "string",
+            "oneOf": [
+              {
+                "const": "UploadUwpPackage"
+              },
+              {
+                "const": "UploadXvcPackage"
+              },
+              {
+                "const": "RemovePackages"
+              },
+              {
+                "const": "ImportPackages"
+              },
+              {
+                "const": "PublishPackages"
+              }
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "branchFriendlyName": {
+            "markdownDescription": "***branchFriendlyName*** or ***flightName*** required, but not both",
+            "description": "\"branchFriendlyName\" or \"flightName\" property required, but not both",
+            "type": "string"
+          },
+          "flightName": {
+            "markdownDescription": "***branchFriendlyName*** or ***flightName*** required, but not both",
+            "description": "\"branchFriendlyName\" or \"flightName\" property required, but not both",
+            "type": "string"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "branchFriendlyName"
+            ]
+          },
+          {
+            "required": [
+              "flightName"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "$comment": "specific properties for upload package operations",
+      "if": {
+        "properties": {
+          "operationName": {
+            "oneOf": [
+              {
+                "const": "UploadUwpPackage"
+              },
+              {
+                "const": "UploadXvcPackage"
+              }
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "marketGroupName": {
+            "markdownDescription": "if not set, it will use ***default*** as the market group (case sensitive)",
+            "description": "if not set, it will use \"default\" as the market group (case sensitive)",
+            "type": "string",
+            "default": "default"
+          },
+          "minutesToWaitForProcessing": {
+            "description": "it will check the package processing status every minute for this long, until it succeeds or fails",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 360,
+            "default": 30
+          },
+          "packageFilePath": {
+            "description": "path to the package file",
+            "type": "string"
+          },
+          "availabilityDate": {
+            "markdownDescription": "if informed it will configure custom availability date [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)",
+            "description": "if informed it will configure custom availability date",
+            "$ref": "#/$defs/packageDate"
+          }
+        },
+        "required": [
+          "packageFilePath"
+        ]
+      }
+    },
+    {
+      "$comment": "specific properties for Xvc upload package operation",
+      "if": {
+        "properties": {
+          "operationName": {
+            "oneOf": [
+              {
+                "const": "UploadXvcPackage"
+              }
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "gameAssets": {
+            "description": "paths to the game assets",
+            "type": "object",
+            "defaultSnippets": [
+              {
+                "label": "Required gameAssets properties",
+                "body": {
+                  "ekbFilePath": "$1",
+                  "subValFilePath": "$2",
+                  "symbolsFilePath": "$3"
+                }
+              }
+            ],
+            "properties": {
+              "ekbFilePath": {
+                "description": "path to the EKB file",
+                "type": "string"
+              },
+              "subValFilePath": {
+                "description": "path to the SubVal File",
+                "type": "string"
+              },
+              "symbolsFilePath": {
+                "description": "path to the Symbols File",
+                "type": "string"
+              },
+              "discLayoutFilePath": {
+                "description": "path to the Disc Layout File",
+                "type": "string"
+              }
+            },
+            "required": [
+              "ekbFilePath",
+              "subValFilePath",
+              "symbolsFilePath"
+            ]
+          }
+        },
+        "required": [
+          "gameAssets"
+        ]
+      }
+    },
+    {
+      "$comment": "specific properties for Uwp upload package operation",
+      "if": {
+        "properties": {
+          "operationName": {
+            "oneOf": [
+              {
+                "const": "UploadUwpPackage"
+              }
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "mandatoryDate": {
+            "markdownDescription": "if informed it will configure custom mandatory date for your UWP market groups [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#mandatory-update)",
+            "description": "if informed it will configure custom mandatory date for your UWP market groups",
+            "$ref": "#/$defs/packageDate"
+          },
+          "gradualRollout": {
+            "markdownDescription": "if informed it will configure gradual rollout for your UWP packages [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#gradual-package-rollout)",
+            "description": "if informed it will configure gradual rollout for your UWP packages",
+            "$ref": "#/$defs/gradualRollout"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "specific properties for remove packages operation",
+      "if": {
+        "properties": {
+          "operationName": {
+            "oneOf": [
+              {
+                "const": "RemovePackages"
+              }
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "marketGroupName": {
+            "description": "if not set, it will remove all packages from all market groups (case sensitive)",
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "$comment": "specific properties for publish packages operation",
+      "if": {
+        "properties": {
+          "operationName": {
+            "oneOf": [
+              {
+                "const": "PublishPackages"
+              }
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "destinationSandboxName": {
+            "description": "\"destinationSandboxName\" is only required when using \"branchFriendlyName\"",
+            "type": "string"
+          },
+          "minutesToWaitForPublishing": {
+            "description": "it will check the package processing status every minute for this long, until it succeeds or fails",
+            "markdownDescription": "it will check the package processing status every minute for this long, until it succeeds or fails",
+            "type": "integer",
+            "minimum": 0
+          },
+          "publishConfiguration": {
+            "markdownDescription": "configuration of the publish submission [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/manage-submission-options)",
+            "description": "configuration of the publish submission",
+            "type": "object",
+            "defaultSnippets": [
+              {
+                "label": "publishConfiguration properties",
+                "body": {
+                  "releaseTime": "$1",
+                  "isManualPublish": "^$2",
+                  "certificationNotes": "$3"
+                }
+              }
+            ],
+            "properties": {
+              "releaseTime": {
+                "description": "publish release time, it will publish as soon as it passes certification if it is not set",
+                "type": "string",
+                "format": "date-time"
+              },
+              "isManualPublish": {
+                "description": "will enable/disable manual publish",
+                "type": "boolean"
+              },
+              "certificationNotes": {
+                "description": "the certification notes",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "not": {
+          "properties": {
+            "destinationSandboxName": {
+              "pattern": "(?i)RETAIL"
+            }
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "branchFriendlyName",
+              "destinationSandboxName"
+            ]
+          },
+          {
+            "required": [
+              "flightName"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "$comment": "specific properties for import packages operation",
+      "if": {
+        "properties": {
+          "operationName": {
+            "oneOf": [
+              {
+                "const": "ImportPackages"
+              }
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "marketGroupName": {
+            "description": "if not set, it will import all market groups packages (case sensitive)",
+            "type": "string"
+          },
+          "destinationBranchFriendlyName": {
+            "markdownDescription": "***destinationFlightName*** or ***destinationBranchFriendlyName*** required, but not both",
+            "description": "\"destinationFlightName\" or \"destinationBranchFriendlyName\" required, but not both",
+            "type": "string"
+          },
+          "destinationFlightName": {
+            "markdownDescription": "***destinationFlightName*** or ***destinationBranchFriendlyName*** required, but not both",
+            "description": "\"destinationFlightName\" or \"destinationBranchFriendlyName\" required, but not both",
+            "type": "string"
+          },
+          "availabilityDate": {
+            "markdownDescription": "if informed it will configure custom availability date for all your packages in the destination branch/flight [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)",
+            "description": "if informed it will configure custom availability date for all your packages in the destination branch/flight",
+            "$ref": "#/$defs/packageDate"
+          },
+          "mandatoryDate": {
+            "markdownDescription": "if informed it will configure custom mandatory date for your UWP market groups in the destination branch/flight [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#mandatory-update)",
+            "description": "if informed it will configure custom mandatory date for your UWP market groups in the destination branch/flight",
+            "$ref": "#/$defs/packageDate"
+          },
+          "gradualRollout": {
+            "markdownDescription": "if informed it will configure gradual rollout for your UWP packages in the destination branch/flight [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#gradual-package-rollout)",
+            "description": "if informed it will configure gradual rollout for your UWP packages in the destination branch/flight",
+            "$ref": "#/$defs/gradualRollout"
+          },
+          "overwrite": {
+            "description": "it will replace the packages in the destination branch/flight",
+            "type": "boolean"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "destinationBranchFriendlyName"
+            ]
+          },
+          {
+            "required": [
+              "destinationFlightName"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

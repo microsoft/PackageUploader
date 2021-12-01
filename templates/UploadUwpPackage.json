@@ -13,26 +13,29 @@
   "minutesToWaitForProcessing": 60,
 
   "availabilityDate": {
-    "isEnabled": true,
+    "isEnabled": false,
     "effectiveDate": "{{ optional - if informed it will set the availability date in this branch/marketGroupId for all the Uwp packages }}"
   },
 
   "mandatoryDate": {
-    "isEnabled": true,
+    "isEnabled": false,
     "effectiveDate": "{{ optional - if informed it will set the mandatory date in this branch/marketGroupId for all the Uwp packages }}"
   },
 
   "gradualRollout": {
-    "isEnabled": true,
+    "isEnabled": false,
     "percentage": 33,
     "isSeekEnabled": false
   },
 
   "aadAuthInfo": {
-    "clientId": "{{ required }}",
-    "tenantId": "{{ required }}"
+    "clientId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
+    "tenantId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
+    "certificateThumbprint": "{{ required when using authentication method *AppCert* }}",
+    "certificateStore": "{{ required when using authentication method *AppCert* }}",
+    "certificateLocation": "{{ required when using authentication method *AppCert* }}"
   },
-  
+
   "uploadConfig": {
     "httpTimeoutMs": 5000,
     "httpUploadTimeoutMs": 300000,
