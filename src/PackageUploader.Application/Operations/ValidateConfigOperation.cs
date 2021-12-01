@@ -58,7 +58,7 @@ namespace PackageUploader.Application.Operations
             }
             else
             {
-                throw new Exception($"Validation error: '{validationResult.Message}' in '{validationResult.SchemaLocation}'");
+                throw new Exception("Invalid config file");
             }
         }
 
@@ -66,7 +66,7 @@ namespace PackageUploader.Application.Operations
         {
             var assembly = Assembly.GetExecutingAssembly();
             var schemaResources = assembly.GetManifestResourceNames()
-                .Where(x => x.StartsWith("GameStoreBroker.Application.Schemas.") && x.EndsWith(".json"));
+                .Where(x => x.StartsWith("PackageUploader.Application.Schemas.") && x.EndsWith(".json"));
 
             if (!schemaResources.Any())
             {

@@ -25,11 +25,13 @@ namespace PackageUploader.Application.Operations
         {
             var operationName = _invocationContext.ParseResult.RootCommandResult.Children[0].Symbol.Name;
             var overwrite = _invocationContext.ParseResult.ValueForOption(Program.OverwriteOption);
+            var destinationFile = _invocationContext.ParseResult.ValueForOption(Program.NewConfigFileOption)?? 
+                new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{operationName}.json"));
 
             _logger.LogDebug("Generating config file template for {configOperation} operation.", operationName);
 
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = $"GameStoreBroker.Application.Templates.{operationName}.json";
+            var resourceName = $"PackageUploader.Application.Templates.{operationName}.json";
 
             using var resourceStream = assembly.GetManifestResourceStream(resourceName);
             if (resourceStream is null)
@@ -39,7 +41,6 @@ namespace PackageUploader.Application.Operations
             else
             {
                 var generate = true;
-                var destinationFile = new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{operationName}.json"));
                 if (destinationFile.Exists)
                 {
                     if (overwrite)

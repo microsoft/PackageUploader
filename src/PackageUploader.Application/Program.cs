@@ -34,7 +34,8 @@ namespace PackageUploader.Application
         private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "Format of the config file");
         private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "Authentication method");
         internal static readonly Option<bool> OverwriteOption = new(new[] { "-o", "--Overwrite" }, "Overwrite file");
-        private static readonly Command NewCommand = new Command("New", "Generate config template file") { OverwriteOption, }.AddOperationHandler<GenerateConfigTemplateOperation>();
+        internal static readonly Option<FileInfo> NewConfigFileOption = new(new[] { "-c", "--ConfigFile" }, "Location of the config file");
+        private static readonly Command NewConfigCommand = new Command("NewConfig", "Generate Json config template file") { OverwriteOption, NewConfigFileOption, }.AddOperationHandler<GenerateConfigTemplateOperation>();
         private static readonly Command ValidateConfigCommand = new Command("ValidateConfig", "Validate Json config file against the schema") { ConfigFileOption, }.AddOperationHandler<ValidateConfigOperation>();
 
         internal enum ConfigFileFormat { Json, Xml, Ini, }
@@ -124,29 +125,29 @@ namespace PackageUploader.Application
             {
                 new Command(OperationName.GetProduct.ToString(), "Gets metadata of the product")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewConfigCommand,
                 }.AddOperationHandler<GetProductOperation>(),
                 new Command(OperationName.UploadUwpPackage.ToString(), "Uploads Uwp game package")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewConfigCommand,
                 }.AddOperationHandler<UploadUwpPackageOperation>(),
                 new Command(OperationName.UploadXvcPackage.ToString(), "Uploads Xvc game package and assets")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewConfigCommand,
                 }.AddOperationHandler<UploadXvcPackageOperation>(),
                 new Command(OperationName.RemovePackages.ToString(), "Removes all game packages and assets from a branch")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewConfigCommand,
                 }.AddOperationHandler<RemovePackagesOperation>(),
                 new Command(OperationName.ImportPackages.ToString(), "Imports all game packages from a branch to a destination branch")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewConfigCommand,
                 }.AddOperationHandler<ImportPackagesOperation>(),
                 new Command(OperationName.PublishPackages.ToString(), "Publishes all game packages from a branch or flight to a destination sandbox or flight")
                 {
-                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewCommand,
+                    ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, NewConfigCommand,
                 }.AddOperationHandler<PublishPackagesOperation>(),
-                //ValidateConfigCommand,
+                ValidateConfigCommand,
             };
             rootCommand.AddGlobalOption(VerboseOption);
             rootCommand.AddGlobalOption(LogFileOption);
