@@ -31,7 +31,7 @@ namespace PackageUploader.Application.Operations
             _logger.LogDebug("Generating config file template for {configOperation} operation.", operationName);
 
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = $"PackageUploader.Application.Templates.{operationName}.json";
+            var resourceName = $"{typeof(Program).Namespace}.Templates.{operationName}.json";
 
             using var resourceStream = assembly.GetManifestResourceStream(resourceName);
             if (resourceStream is null)

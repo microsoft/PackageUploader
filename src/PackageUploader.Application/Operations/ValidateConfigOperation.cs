@@ -66,7 +66,7 @@ namespace PackageUploader.Application.Operations
         {
             var assembly = Assembly.GetExecutingAssembly();
             var schemaResources = assembly.GetManifestResourceNames()
-                .Where(x => x.StartsWith("PackageUploader.Application.Schemas.") && x.EndsWith(".json"));
+                .Where(x => x.StartsWith($"{typeof(Program).Namespace}.Schemas.") && x.EndsWith(".json"));
 
             if (!schemaResources.Any())
             {
