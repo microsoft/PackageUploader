@@ -1,10 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using PackageUploader.ClientApi.Client.Ingestion.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using PackageUploader.ClientApi.Client.Ingestion.Config;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
+using Polly.Extensions.Http;
 using System;
 using System.Net.Mime;
 
@@ -23,7 +26,14 @@ namespace PackageUploader.ClientApi.Client.Ingestion
                     var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
                     httpClient.BaseAddress = new Uri(ingestionConfig.BaseAddress);
                     httpClient.Timeout = TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs);
-                }).AddHttpMessageHandler<IngestionAuthenticationDelegatingHandler>();
+                })
+                .AddHttpMessageHandler<IngestionAuthenticationDelegatingHandler>()
+                .AddPolicyHandler((serviceProvider, httpRequestMessage) =>
+                {
+                    var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
+                    var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(ingestionConfig.MedianFirstRetryDelayMs), ingestionConfig.RetryCount);
+                    return HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(delay);
+                });
 
             return services;
         }
