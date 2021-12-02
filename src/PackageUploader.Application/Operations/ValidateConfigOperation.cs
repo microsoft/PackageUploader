@@ -4,7 +4,7 @@
 using Json.Schema;
 using Microsoft.Extensions.Logging;
 using System;
-using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,12 +16,12 @@ namespace PackageUploader.Application.Operations
 {
     internal class ValidateConfigOperation : Operation
     {
-        private readonly InvocationContext _invocationContext;
+        private readonly ParseResult _parseResult;
         private readonly ValidationOptions _validationOptions;
 
-        public ValidateConfigOperation(ILogger<GenerateConfigTemplateOperation> logger, InvocationContext invocationContext) : base(logger)
+        public ValidateConfigOperation(ILogger<ValidateConfigOperation> logger, ParseResult parseResult) : base(logger)
         {
-            _invocationContext = invocationContext;
+            _parseResult = parseResult;
             _validationOptions = new ValidationOptions
             {
                 Log = new JsonSchemaLogger(_logger),
@@ -33,7 +33,7 @@ namespace PackageUploader.Application.Operations
         {
             _logger.LogDebug("Validating config file.");
 
-            var configFile = _invocationContext.ParseResult.ValueForOption(Program.ConfigFileOption);
+            var configFile = _parseResult.ValueForOption(Program.ConfigFileOption);
             if (!configFile.Exists)
             {
                 throw new FileNotFoundException("Config file does not exist.");

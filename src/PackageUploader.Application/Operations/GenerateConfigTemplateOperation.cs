@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 using System;
-using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -14,18 +14,18 @@ namespace PackageUploader.Application.Operations
     internal class GenerateConfigTemplateOperation : Operation
     {
         private const int BufferSize = 8 * 1024;
-        private readonly InvocationContext _invocationContext;
+        private readonly ParseResult _parseResult;
 
-        public GenerateConfigTemplateOperation(ILogger<GenerateConfigTemplateOperation> logger, InvocationContext invocationContext) : base(logger)
+        public GenerateConfigTemplateOperation(ILogger<GenerateConfigTemplateOperation> logger, ParseResult parseResult) : base(logger)
         {
-            _invocationContext = invocationContext;
+            _parseResult = parseResult;
         }
 
         protected override async Task ProcessAsync(CancellationToken ct)
         {
-            var operationName = _invocationContext.ParseResult.RootCommandResult.Children[0].Symbol.Name;
-            var overwrite = _invocationContext.ParseResult.ValueForOption(Program.OverwriteOption);
-            var destinationFile = _invocationContext.ParseResult.ValueForOption(Program.NewConfigFileOption)?? 
+            var operationName = _parseResult.RootCommandResult.Children[0].Symbol.Name;
+            var overwrite = _parseResult.ValueForOption(Program.OverwriteOption);
+            var destinationFile = _parseResult.ValueForOption(Program.NewConfigFileOption)?? 
                 new FileInfo(Path.Combine(Environment.CurrentDirectory, $"{operationName}.json"));
 
             _logger.LogDebug("Generating config file template for {configOperation} operation.", operationName);
