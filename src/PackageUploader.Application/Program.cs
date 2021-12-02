@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using PackageUploader.Application.Config;
 using PackageUploader.Application.Extensions;
 using PackageUploader.Application.Operations;
 using PackageUploader.ClientApi;
@@ -40,19 +39,18 @@ namespace PackageUploader.Application
 
         internal enum ConfigFileFormat { Json, Xml, Ini, }
 
-        private static async Task<int> Main(string[] args)
-        {
-            return await BuildCommandLine()
-                .UseHost(hostBuilder => hostBuilder
-                    .ConfigureLogging(ConfigureLogging)
-                    .ConfigureServices(ConfigureServices)
-                    .ConfigureAppConfiguration(ConfigureAppConfiguration)
-                )
-                .UseDefaults()
-                .Build()
-                .InvokeAsync(args)
-                .ConfigureAwait(false);
-        }
+        private static async Task<int> Main(string[] args) => await BuildCommandLine()
+            .UseHost(UseHost)
+            .UseDefaults()
+            .Build()
+            .InvokeAsync(args)
+            .ConfigureAwait(false);
+
+
+        private static void UseHost(IHostBuilder hostBuilder) => hostBuilder
+            .ConfigureLogging(ConfigureLogging)
+            .ConfigureServices(ConfigureServices)
+            .ConfigureAppConfiguration(ConfigureAppConfiguration);
 
         private static void ConfigureLogging(HostBuilderContext context, ILoggingBuilder logging)
         {
@@ -83,15 +81,7 @@ namespace PackageUploader.Application
 
             services.AddLogging();
             services.AddPackageUploaderService(context.Configuration, invocationContext.GetOptionValue(AuthenticationMethodOption));
-
-            services.AddOperation<GetProductOperation, GetProductOperationConfig>(context);
-            services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationConfig>(context);
-            services.AddOperation<UploadXvcPackageOperation, UploadXvcPackageOperationConfig>(context);
-            services.AddOperation<RemovePackagesOperation, RemovePackagesOperationConfig>(context);
-            services.AddOperation<ImportPackagesOperation, ImportPackagesOperationConfig>(context);
-            services.AddOperation<PublishPackagesOperation, PublishPackagesOperationConfig>(context);
-            services.AddOperation<GenerateConfigTemplateOperation>();
-            services.AddOperation<ValidateConfigOperation>();
+            services.AddOperations(context.Configuration);
         }
 
         private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder)
