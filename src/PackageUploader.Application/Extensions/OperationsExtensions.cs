@@ -18,7 +18,7 @@ namespace PackageUploader.Application.Extensions
             services.AddOperation<RemovePackagesOperation, RemovePackagesOperationConfig>(config);
             services.AddOperation<ImportPackagesOperation, ImportPackagesOperationConfig>(config);
             services.AddOperation<PublishPackagesOperation, PublishPackagesOperationConfig>(config);
-            services.AddOperation<GenerateConfigTemplateOperation>();
+            services.AddOperation<NewConfigOperation>();
             services.AddOperation<ValidateConfigOperation>();
 
             return services;

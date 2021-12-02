@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace PackageUploader.Application.Operations
 {
-    internal class GenerateConfigTemplateOperation : Operation
+    internal class NewConfigOperation : Operation
     {
         private const int BufferSize = 8 * 1024;
         private readonly ParseResult _parseResult;
 
-        public GenerateConfigTemplateOperation(ILogger<GenerateConfigTemplateOperation> logger, ParseResult parseResult) : base(logger)
+        public NewConfigOperation(ILogger<NewConfigOperation> logger, ParseResult parseResult) : base(logger)
         {
             _parseResult = parseResult;
         }

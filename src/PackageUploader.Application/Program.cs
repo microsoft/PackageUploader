@@ -34,7 +34,7 @@ namespace PackageUploader.Application
         private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "Authentication method");
         internal static readonly Option<bool> OverwriteOption = new(new[] { "-o", "--Overwrite" }, "Overwrite file");
         internal static readonly Option<FileInfo> NewConfigFileOption = new(new[] { "-c", "--ConfigFile" }, "File path for the generated config template");
-        private static readonly Command NewConfigCommand = new Command("NewConfig", "Generate Json config template file") { OverwriteOption, NewConfigFileOption, }.AddOperationHandler<GenerateConfigTemplateOperation>();
+        private static readonly Command NewConfigCommand = new Command("NewConfig", "Generate Json config template file") { OverwriteOption, NewConfigFileOption, }.AddOperationHandler<NewConfigOperation>();
         private static readonly Command ValidateConfigCommand = new Command("ValidateConfig", "Validate Json config file against the schema") { ConfigFileOption, }.AddOperationHandler<ValidateConfigOperation>();
 
         internal enum ConfigFileFormat { Json, Xml, Ini, }
