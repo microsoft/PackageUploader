@@ -122,12 +122,12 @@ Running the package uploader requires three arguments.
 
 | Operation | Description |
 | --- | ---|
-| **GetProduct** | Gets metadata for the product. This is useful for getting the productId, BigId, and product name that's used in all configuration files. |
-| **UploadUwpPackage** | Uploads a UWP game package. |
-| **UploadXvcPackage** | Uploads a XVC game package and assets, including EKB, SubVal, and layout files. |
-| **RemovePackages** | Removes all game packages and assets from a branch. We recommend keeping only your 10 most recent packages to ensure optimal performance. |
-| **ImportPackages** | Imports all game packages from a branch to a destination branch. This enables you to copy your previously uploaded and published packages from one branch to another. |
-| **PublishPackages** | Publishes all game packages from a branch or flight to a destination sandbox or flight. You can set specific availability times in the configuration file. |
+| **[GetProduct](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetProduct)** | Gets metadata for the product. This is useful for getting the productId, BigId, and product name that's used in all configuration files. |
+| **[UploadUwpPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadUwpPackage)** | Uploads a UWP game package. |
+| **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads a XVC game package and assets, including EKB, SubVal, and layout files. |
+| **[RemovePackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#RemovePackages)** | Removes all game packages and assets from a branch. We recommend keeping only your 10 most recent packages to ensure optimal performance. |
+| **[ImportPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#ImportPackages)** | Imports all game packages from a branch to a destination branch. This enables you to copy your previously uploaded and published packages from one branch to another. |
+| **[PublishPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#PublishPackages)** | Publishes all game packages from a branch or flight to a destination sandbox or flight. You can set specific availability times in the configuration file. |
 
 ### Available parameters
 
