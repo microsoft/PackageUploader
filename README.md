@@ -179,7 +179,7 @@ Running the package uploader requires three arguments.
 
 ### Example GetProduct operation output
 
-```json
+```
 Product: {
   "productId":"00000000000000000000",
   "bigId":"9FAKEBIGID",
