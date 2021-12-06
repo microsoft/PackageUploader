@@ -129,6 +129,8 @@ Running the package uploader requires three arguments.
 | **[ImportPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#ImportPackages)** | Imports all game packages from a branch to a destination branch. This enables you to copy your previously uploaded and published packages from one branch to another. |
 | **[PublishPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#PublishPackages)** | Publishes all game packages from a branch or flight to a destination sandbox or flight. You can set specific availability times in the configuration file. |
 
+For more information on operation parameters, see [Operations](https://github.com/microsoft/PackageUploader/blob/main/Operations.md).
+
 ### Available parameters
 
 | Parameter | Description |
