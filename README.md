@@ -22,7 +22,7 @@ This article covers the following:
 
 ## Introduction
 
-Package Uploader is a .NET 5.0-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
+Package Uploader is a .NET 6.0-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
 
 Package Uploader has a command-line tool and a dynamic linked library (DLL) that you can integrate into your build pipelines or other development workflows.
 
@@ -44,7 +44,7 @@ Programmatic manipulation of packages for a particular product requires the foll
 * The branch for the target upload must already exist in Partner Center. The tool currently doesn't support branch creation.
 * The target product must have been previously fully published to a sandbox before the Package Uploader can be used. A full publishing includes all modules like properties, store listing, pricing and availabilities, and packages.
 * Access to create Azure application registrations in the Azure Active Directory (Azure AD) tenant connected to the target Partner Center account.
-* To build the Package Uploader, download .NET 5 or the latest version.
+* To build the Package Uploader, download .NET 6 or the latest version.
 * You only need a valid certificate if you plan on setting up certificate-based authorization.
 
 <a id="service-creation-and-authentication"></a>
