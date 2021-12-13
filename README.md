@@ -100,8 +100,7 @@ The tool currently supports either app secrets or certificates. Perform one of t
 
 ## Get the Package Uploader
 
-To use the Package Uploader, you can download the latest executable from the [Releases page](https://github.com/microsoft/PackageUploader/releases/latest)
-**NOTE:** No need to install the .NET Runtime to run the tool since it is included inside the binary.
+To use the Package Uploader, you can download the latest executable from the [Releases page](https://github.com/microsoft/PackageUploader/releases/latest).<br>**NOTE:** No need to install the .NET Runtime to run the tool since it is included inside the binary.
 
 Alternatively, you can also build it.
 
