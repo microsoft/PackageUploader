@@ -9,7 +9,7 @@ This article covers the following:
 * [Introduction](#introduction)
 * [Prerequisites](#prerequisites)
 * [Service creation and authentication](#service-creation-and-authentication)
-* [Build the Package Uploader](#build-the-package-uploader)
+* [Get the Package Uploader](#get-the-package-uploader)
 * [Run the Package Uploader](#run-the-package-uploader)
 * [Putting it all together](#putting-it-all-together)
 * [Example GetProduct operation](#example-getproduct-operation)
@@ -22,7 +22,7 @@ This article covers the following:
 
 ## Introduction
 
-Package Uploader is a .NET 5.0-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
+Package Uploader is a .NET 6.0-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
 
 Package Uploader has a command-line tool and a dynamic linked library (DLL) that you can integrate into your build pipelines or other development workflows.
 
@@ -44,8 +44,8 @@ Programmatic manipulation of packages for a particular product requires the foll
 * The branch for the target upload must already exist in Partner Center. The tool currently doesn't support branch creation.
 * The target product must have been previously fully published to a sandbox before the Package Uploader can be used. A full publishing includes all modules like properties, store listing, pricing and availabilities, and packages.
 * Access to create Azure application registrations in the Azure Active Directory (Azure AD) tenant connected to the target Partner Center account.
-* To build the Package Uploader, download .NET 5 or the latest version.
 * You only need a valid certificate if you plan on setting up certificate-based authorization.
+* The Package Uploader executable.
 
 <a id="service-creation-and-authentication"></a>
 
@@ -96,15 +96,18 @@ The tool currently supports either app secrets or certificates. Perform one of t
 5.  On the top tab, select **Customize permissions**.
 6.  Find the product that you want to programmatically upload builds to. Grant your Azure application the **Read/Write** permission under **Publishing**. For more information, see [Add an Azure AD tenant to your account](https://docs.microsoft.com/partner-center/multi-tenant-account#add-an-azure-ad-tenant-to-your-account).
 
-<a id="build-the-package-uploader"></a>
+<a id="get-the-package-uploader"></a>
 
-## Build the Package Uploader
+## Get the Package Uploader
 
-To use the Package Uploader, you will first need to build it.
+To use the Package Uploader, you can download the latest executable from the [releases page] (https://github.com/microsoft/PackageUploader/releases/latest)
 
-1. Open a command prompt, and then browse to the folder where you downloaded the Package Uploader.
-2. Browse to the `src` folder and then run `dotnet publish -c Release`.
-3. When it's built, PackageUploader.exe is in the `src\PackageUploader.application\bin\Release\net5.0\win-x64\publish` directory.
+Alternatively, you can also build it.
+
+1. [Download .NET 6 SDK] (https://dotnet.microsoft.com/en-us/download) or the latest version.
+2. Open a powershell prompt, and then browse to the folder where you downloaded the Package Uploader.
+3. Browse to the `src` folder and then run `./publish.win-x64.ps1`.
+4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net5.0\win-x64\publish` directory.
 
 <a id="run-the-package-uploader"></a>
 
