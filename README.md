@@ -100,11 +100,11 @@ The tool currently supports either app secrets or certificates. Perform one of t
 
 ## Get the Package Uploader
 
-To use the Package Uploader, you can download the latest executable from the [releases page] (https://github.com/microsoft/PackageUploader/releases/latest)
+To use the Package Uploader, you can download the latest executable from the [releases page](https://github.com/microsoft/PackageUploader/releases/latest)
 
 Alternatively, you can also build it.
 
-1. [Download .NET 6 SDK] (https://dotnet.microsoft.com/en-us/download) or the latest version.
+1. [Download .NET 6 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
 2. Open a powershell prompt, and then browse to the folder where you downloaded the Package Uploader.
 3. Browse to the `src` folder and then run `./publish.win-x64.ps1`.
 4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net5.0\win-x64\publish` directory.
