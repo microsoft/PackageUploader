@@ -211,10 +211,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(packageId)} cannot be null or empty.", nameof(packageId));
             }
 
-            if (fileInfo is null)
-            {
-                throw new ArgumentNullException(nameof(fileInfo), $"{nameof(fileInfo)} cannot be null.");
-            }
+            ArgumentNullException.ThrowIfNull(fileInfo);
 
             var body = new IngestionGamePackageAssetBuilder(packageId, fileInfo, packageAssetType).Build();
 
@@ -231,10 +228,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
             }
 
-            if (gamePackage is null)
-            {
-                throw new ArgumentNullException(nameof(gamePackage), $"{nameof(gamePackage)} cannot be null.");
-            }
+            ArgumentNullException.ThrowIfNull(gamePackage);
 
             gamePackage.State = GamePackageState.Uploaded;
             var body = gamePackage.Map();
@@ -300,10 +294,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion
                 throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
             }
 
-            if (gamePackageConfiguration is null)
-            {
-                throw new ArgumentNullException(nameof(gamePackageConfiguration), $"{nameof(gamePackageConfiguration)} cannot be null.");
-            }
+            ArgumentNullException.ThrowIfNull(gamePackageConfiguration);
 
             var packageSet = await GetAsync<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", ct);
             

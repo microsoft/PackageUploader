@@ -52,7 +52,7 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
+            ArgumentNullException.ThrowIfNull(product);
 
             if (string.IsNullOrWhiteSpace(flightName))
             {
@@ -65,7 +65,7 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(GameProduct product, string branchFriendlyName, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
+            ArgumentNullException.ThrowIfNull(product);
 
             if (string.IsNullOrWhiteSpace(branchFriendlyName))
             {
@@ -78,7 +78,7 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
+            ArgumentNullException.ThrowIfNull(product);
 
             if (string.IsNullOrWhiteSpace(flightName))
             {
@@ -91,8 +91,8 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageConfiguration> GetPackageConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(packageBranch);
 
             _logger.LogDebug("Requesting game package configuration by product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -122,8 +122,8 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(GameProduct product, GamePackageConfiguration packageConfiguration, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = packageConfiguration ?? throw new ArgumentNullException(nameof(packageConfiguration));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(packageConfiguration);
 
             _logger.LogDebug("Updating game package configuration in product id '{productId}' and package configuration id '{packageConfigurationId}'.", product.ProductId, packageConfiguration.Id);
 
@@ -133,9 +133,9 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
-            _ = marketGroupPackage ?? throw new ArgumentNullException(nameof(marketGroupPackage));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(packageBranch);
+            ArgumentNullException.ThrowIfNull(marketGroupPackage);
 
             if (string.IsNullOrWhiteSpace(packageFilePath))
             {
@@ -173,8 +173,8 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupName, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(packageBranch);
 
             _logger.LogDebug("Removing game packages in product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -206,10 +206,10 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
-            _ = gamePackage ?? throw new ArgumentNullException(nameof(gamePackage));
-            _ = availabilityDate ?? throw new ArgumentNullException(nameof(availabilityDate));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(packageBranch);
+            ArgumentNullException.ThrowIfNull(gamePackage);
+            ArgumentNullException.ThrowIfNull(availabilityDate);
 
             _logger.LogDebug("Setting the availability date to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -254,9 +254,9 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupName, IGameConfiguration gameConfiguration, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
-            _ = gameConfiguration ?? throw new ArgumentNullException(nameof(gameConfiguration));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(packageBranch);
+            ArgumentNullException.ThrowIfNull(gameConfiguration);
 
             _logger.LogDebug("Setting the package dates in '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -312,9 +312,9 @@ namespace PackageUploader.ClientApi
 
         public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = originPackageBranch ?? throw new ArgumentNullException(nameof(originPackageBranch));
-            _ = destinationPackageBranch ?? throw new ArgumentNullException(nameof(destinationPackageBranch));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(originPackageBranch);
+            ArgumentNullException.ThrowIfNull(destinationPackageBranch);
 
             if (string.Equals(originPackageBranch.CurrentDraftInstanceId, destinationPackageBranch.CurrentDraftInstanceId, StringComparison.OrdinalIgnoreCase))
             {
@@ -473,8 +473,8 @@ namespace PackageUploader.ClientApi
 
         public async Task<GameSubmission> PublishPackagesToSandboxAsync(GameProduct product, GamePackageBranch originPackageBranch, string destinationSandboxName, GamePublishConfiguration gameSubmissionConfiguration, int minutesToWaitForPublishing, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = originPackageBranch ?? throw new ArgumentNullException(nameof(originPackageBranch));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(originPackageBranch);
 
             if (string.IsNullOrWhiteSpace(destinationSandboxName))
             {
@@ -496,8 +496,8 @@ namespace PackageUploader.ClientApi
 
         public async Task<GameSubmission> PublishPackagesToFlightAsync(GameProduct product, GamePackageFlight gamePackageFlight, GamePublishConfiguration gameSubmissionConfiguration, int minutesToWaitForPublishing, CancellationToken ct)
         {
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = gamePackageFlight ?? throw new ArgumentNullException(nameof(gamePackageFlight));
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(gamePackageFlight);
 
             var gameSubmissionOptions = gameSubmissionConfiguration?.ToGameSubmissionOptions();
             var gameSubmission = await _ingestionHttpClient.CreateFlightSubmissionRequestAsync(product.ProductId, gamePackageFlight.CurrentDraftInstanceId, gamePackageFlight.Id, gameSubmissionOptions, ct).ConfigureAwait(false);

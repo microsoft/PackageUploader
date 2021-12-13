@@ -15,8 +15,8 @@ namespace PackageUploader.Application.Extensions
     {
         public static async Task<GameProduct> GetProductAsync(this IPackageUploaderService storeBroker, BaseOperationConfig config, CancellationToken ct)
         {
-            _ = storeBroker ?? throw new ArgumentNullException(nameof(storeBroker));
-            _ = config ?? throw new ArgumentNullException(nameof(config));
+            ArgumentNullException.ThrowIfNull(storeBroker);
+            ArgumentNullException.ThrowIfNull(config);
 
             if (!string.IsNullOrWhiteSpace(config.BigId))
             {
@@ -33,9 +33,9 @@ namespace PackageUploader.Application.Extensions
 
         public static async Task<GamePackageBranch> GetGamePackageBranch(this IPackageUploaderService storeBroker, GameProduct product, PackageBranchOperationConfig config, CancellationToken ct)
         {
-            _ = storeBroker ?? throw new ArgumentNullException(nameof(storeBroker));
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = config ?? throw new ArgumentNullException(nameof(config));
+            ArgumentNullException.ThrowIfNull(storeBroker);
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(config);
 
             if (!string.IsNullOrWhiteSpace(config.BranchFriendlyName))
             {
@@ -52,10 +52,10 @@ namespace PackageUploader.Application.Extensions
 
         public static async Task<GameMarketGroupPackage> GetGameMarketGroupPackage(this IPackageUploaderService storeBroker, GameProduct product, GamePackageBranch packageBranch, UploadPackageOperationConfig config, CancellationToken ct)
         {
-            _ = storeBroker ?? throw new ArgumentNullException(nameof(storeBroker));
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = packageBranch ?? throw new ArgumentNullException(nameof(packageBranch));
-            _ = config ?? throw new ArgumentNullException(nameof(config));
+            ArgumentNullException.ThrowIfNull(storeBroker);
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(packageBranch);
+            ArgumentNullException.ThrowIfNull(config);
 
             var packageConfiguration = await storeBroker.GetPackageConfigurationAsync(product, packageBranch, ct).ConfigureAwait(false);
 
@@ -80,9 +80,9 @@ namespace PackageUploader.Application.Extensions
 
         public static async Task<GamePackageBranch> GetDestinationGamePackageBranch(this IPackageUploaderService storeBroker, GameProduct product, ImportPackagesOperationConfig config, CancellationToken ct)
         {
-            _ = storeBroker ?? throw new ArgumentNullException(nameof(storeBroker));
-            _ = product ?? throw new ArgumentNullException(nameof(product));
-            _ = config ?? throw new ArgumentNullException(nameof(config));
+            ArgumentNullException.ThrowIfNull(storeBroker);
+            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(config);
 
             if (!string.IsNullOrWhiteSpace(config.DestinationBranchFriendlyName))
             {
