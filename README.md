@@ -301,8 +301,8 @@ Product: {
   
   "publishConfiguration": {
     "releaseTime": "",
-    "IsManualPublish" : false,
-    "CertificationNotes": "No Notes for CERT at this time"
+    "isManualPublish" : false,
+    "certificationNotes": "No Notes for CERT at this time"
   },
 
   "aadAuthInfo": {
