@@ -15,8 +15,8 @@
 
   "publishConfiguration": {
     "releaseTime": "{{ optional - will publish asap if it is not set }}",
-    "IsManualPublish": false,
-    "CertificationNotes": "{{ optional }}"
+    "isManualPublish": false,
+    "certificationNotes": "{{ optional }}"
   },
 
   "aadAuthInfo": {
