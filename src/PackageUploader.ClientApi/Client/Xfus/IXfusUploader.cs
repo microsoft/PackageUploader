@@ -6,10 +6,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PackageUploader.ClientApi.Client.Xfus
+namespace PackageUploader.ClientApi.Client.Xfus;
+
+public interface IXfusUploader
 {
-    public interface IXfusUploader
-    {
-        Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, CancellationToken ct);
-    }
+    Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, CancellationToken ct);
 }

@@ -3,12 +3,11 @@
 
 using System;
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Exceptions
+namespace PackageUploader.ClientApi.Client.Ingestion.Exceptions;
+
+public class PackageBranchNotFoundException : IngestionClientException
 {
-    public class PackageBranchNotFoundException : IngestionClientException
+    public PackageBranchNotFoundException(string errorMessage, Exception innerException = null) : base(errorMessage, innerException)
     {
-        public PackageBranchNotFoundException(string errorMessage, Exception innerException = null) : base(errorMessage, innerException)
-        {
-        }
     }
 }

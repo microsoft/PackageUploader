@@ -11,37 +11,36 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
+
+public class DefaultAzureCredentialAccessTokenProvider : IAccessTokenProvider
 {
-    public class DefaultAzureCredentialAccessTokenProvider : IAccessTokenProvider
+    private readonly AccessTokenProviderConfig _config;
+    private readonly ILogger<DefaultAzureCredentialAccessTokenProvider> _logger;
+
+    public DefaultAzureCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger<DefaultAzureCredentialAccessTokenProvider> logger)
     {
-        private readonly AccessTokenProviderConfig _config;
-        private readonly ILogger<DefaultAzureCredentialAccessTokenProvider> _logger;
+        _config = config.Value;
+        _logger = logger;
+    }
 
-        public DefaultAzureCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger<DefaultAzureCredentialAccessTokenProvider> logger)
+    public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
+    {
+        var azureCredentialOptions = new DefaultAzureCredentialOptions
         {
-            _config = config.Value;
-            _logger = logger;
-        }
+            AuthorityHost = new Uri(_config.AadAuthorityBaseUrl),
+        };
+        var azureCredential = new DefaultAzureCredential(azureCredentialOptions);
 
-        public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
+        _logger.LogDebug("Requesting authentication token");
+        var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
+        var requestContext = new TokenRequestContext(scopes);
+        var token = await azureCredential.GetTokenAsync(requestContext, ct).ConfigureAwait(false);
+
+        return new IngestionAccessToken
         {
-            var azureCredentialOptions = new DefaultAzureCredentialOptions
-            {
-                AuthorityHost = new Uri(_config.AadAuthorityBaseUrl),
-            };
-            var azureCredential = new DefaultAzureCredential(azureCredentialOptions);
-
-            _logger.LogDebug("Requesting authentication token");
-            var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
-            var requestContext = new TokenRequestContext(scopes);
-            var token = await azureCredential.GetTokenAsync(requestContext, ct).ConfigureAwait(false);
-
-            return new IngestionAccessToken
-            {
-                AccessToken = token.Token, 
-                ExpiresOn = token.ExpiresOn
-            };
-        }
+            AccessToken = token.Token, 
+            ExpiresOn = token.ExpiresOn
+        };
     }
 }

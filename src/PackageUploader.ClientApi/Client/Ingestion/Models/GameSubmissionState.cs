@@ -1,13 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.Models;
+
+public enum GameSubmissionState
 {
-    public enum GameSubmissionState
-    {
-        NotStarted,
-        InProgress,
-        Published,
-        Failed,
-    }
+    NotStarted,
+    InProgress,
+    Published,
+    Failed,
 }

@@ -3,10 +3,9 @@
 
 using System;
 
-namespace PackageUploader.FileLogger
+namespace PackageUploader.FileLogger;
+
+internal interface IFileWriter : IDisposable
 {
-    internal interface IFileWriter : IDisposable
-    {
-        void Write(string message);
-    }
+    void Write(string message);
 }

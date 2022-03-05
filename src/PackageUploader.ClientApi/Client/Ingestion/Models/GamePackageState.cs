@@ -1,15 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.Models;
+
+public enum GamePackageState
 {
-    public enum GamePackageState
-    {
-        Unknown,
-        PendingUpload,
-        Uploaded,
-        InProcessing,
-        Processed,
-        ProcessFailed,
-    }
+    Unknown,
+    PendingUpload,
+    Uploaded,
+    InProcessing,
+    Processed,
+    ProcessFailed,
 }

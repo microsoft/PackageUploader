@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Builders
+namespace PackageUploader.ClientApi.Client.Ingestion.Builders;
+
+internal interface IBuilder<out T>
 {
-    internal interface IBuilder<out T>
-    {
-        public T Build();
-    }
+    public T Build();
 }

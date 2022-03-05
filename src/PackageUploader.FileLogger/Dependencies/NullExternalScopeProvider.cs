@@ -3,31 +3,30 @@
 
 using System;
 
-namespace Microsoft.Extensions.Logging
+namespace Microsoft.Extensions.Logging;
+
+/// <summary>
+/// Scope provider that does nothing.
+/// </summary>
+internal class NullExternalScopeProvider : IExternalScopeProvider
 {
-    /// <summary>
-    /// Scope provider that does nothing.
-    /// </summary>
-    internal class NullExternalScopeProvider : IExternalScopeProvider
+    private NullExternalScopeProvider()
     {
-        private NullExternalScopeProvider()
-        {
-        }
+    }
 
-        /// <summary>
-        /// Returns a cached instance of <see cref="NullExternalScopeProvider"/>.
-        /// </summary>
-        public static IExternalScopeProvider Instance { get; } = new NullExternalScopeProvider();
+    /// <summary>
+    /// Returns a cached instance of <see cref="NullExternalScopeProvider"/>.
+    /// </summary>
+    public static IExternalScopeProvider Instance { get; } = new NullExternalScopeProvider();
 
-        /// <inheritdoc />
-        void IExternalScopeProvider.ForEachScope<TState>(Action<object, TState> callback, TState state)
-        {
-        }
+    /// <inheritdoc />
+    void IExternalScopeProvider.ForEachScope<TState>(Action<object, TState> callback, TState state)
+    {
+    }
 
-        /// <inheritdoc />
-        IDisposable IExternalScopeProvider.Push(object state)
-        {
-            return NullScope.Instance;
-        }
+    /// <inheritdoc />
+    IDisposable IExternalScopeProvider.Push(object state)
+    {
+        return NullScope.Instance;
     }
 }

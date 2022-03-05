@@ -3,12 +3,11 @@
 
 using System.Text;
 
-namespace PackageUploader.FileLogger
+namespace PackageUploader.FileLogger;
+
+public class FileWriterOptions
 {
-    public class FileWriterOptions
-    {
-        public string Path { get; set; }
-        public Encoding Encoding { get; set; }
-        public bool Append { get; set; }
-    }
+    public string Path { get; set; }
+    public Encoding Encoding { get; set; }
+    public bool Append { get; set; }
 }

@@ -1,18 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Models
-{
-    public sealed class GamePackageBranch
-    {
-        /// <summary>
-        /// Branch name
-        /// </summary>
-        public string Name { get; internal init; }
+namespace PackageUploader.ClientApi.Client.Ingestion.Models;
 
-        /// <summary>
-        /// Branch current draft instance ID.
-        /// </summary>
-        public string CurrentDraftInstanceId { get; internal init; }
-    }
+public sealed class GamePackageBranch
+{
+    /// <summary>
+    /// Branch name
+    /// </summary>
+    public string Name { get; internal init; }
+
+    /// <summary>
+    /// Branch current draft instance ID.
+    /// </summary>
+    public string CurrentDraftInstanceId { get; internal init; }
 }

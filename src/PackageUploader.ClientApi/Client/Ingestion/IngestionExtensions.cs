@@ -11,31 +11,30 @@ using Polly.Extensions.Http;
 using System;
 using System.Net.Mime;
 
-namespace PackageUploader.ClientApi.Client.Ingestion
+namespace PackageUploader.ClientApi.Client.Ingestion;
+
+internal static class IngestionExtensions
 {
-    internal static class IngestionExtensions
+    public static IServiceCollection AddIngestionService(this IServiceCollection services, IConfiguration config)
     {
-        public static IServiceCollection AddIngestionService(this IServiceCollection services, IConfiguration config)
-        {
-            services.AddOptions<IngestionConfig>().Bind(config.GetSection(nameof(IngestionConfig))).ValidateDataAnnotations();
-            services.AddScoped<IngestionAuthenticationDelegatingHandler>();
-            services.AddHttpClient<IIngestionHttpClient, IngestionHttpClient>((serviceProvider, httpClient) =>
-                {
-                    httpClient.DefaultRequestHeaders.Add("Accept", MediaTypeNames.Application.Json);
+        services.AddOptions<IngestionConfig>().Bind(config.GetSection(nameof(IngestionConfig))).ValidateDataAnnotations();
+        services.AddScoped<IngestionAuthenticationDelegatingHandler>();
+        services.AddHttpClient<IIngestionHttpClient, IngestionHttpClient>((serviceProvider, httpClient) =>
+            {
+                httpClient.DefaultRequestHeaders.Add("Accept", MediaTypeNames.Application.Json);
 
-                    var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
-                    httpClient.BaseAddress = new Uri(ingestionConfig.BaseAddress);
-                    httpClient.Timeout = TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs);
-                })
-                .AddHttpMessageHandler<IngestionAuthenticationDelegatingHandler>()
-                .AddPolicyHandler((serviceProvider, httpRequestMessage) =>
-                {
-                    var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
-                    var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(ingestionConfig.MedianFirstRetryDelayMs), ingestionConfig.RetryCount);
-                    return HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(delay);
-                });
+                var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
+                httpClient.BaseAddress = new Uri(ingestionConfig.BaseAddress);
+                httpClient.Timeout = TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs);
+            })
+            .AddHttpMessageHandler<IngestionAuthenticationDelegatingHandler>()
+            .AddPolicyHandler((serviceProvider, httpRequestMessage) =>
+            {
+                var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
+                var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(ingestionConfig.MedianFirstRetryDelayMs), ingestionConfig.RetryCount);
+                return HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(delay);
+            });
 
-            return services;
-        }
+        return services;
     }
 }

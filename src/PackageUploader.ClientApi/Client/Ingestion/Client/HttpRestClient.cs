@@ -16,198 +16,197 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Client
+namespace PackageUploader.ClientApi.Client.Ingestion.Client;
+
+internal abstract class HttpRestClient : IHttpRestClient
 {
-    internal abstract class HttpRestClient : IHttpRestClient
+    private readonly ILogger _logger;
+    private readonly HttpClient _httpClient;
+
+    private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
     {
-        private readonly ILogger _logger;
-        private readonly HttpClient _httpClient;
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
 
-        private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
+    private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
+    private const LogLevel VerboseLogLevel = LogLevel.Trace;
+
+    protected HttpRestClient(ILogger logger, HttpClient httpClient)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+    }
+
+    public async Task<T> GetAsync<T>(string subUrl, CancellationToken ct)
+    {
+        try
         {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        };
+            var request = CreateJsonRequestMessage(HttpMethod.Get, subUrl);
 
-        private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
-        private const LogLevel VerboseLogLevel = LogLevel.Trace;
+            await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
+            using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+            await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
 
-        protected HttpRestClient(ILogger logger, HttpClient httpClient)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+            return result;
         }
-
-        public async Task<T> GetAsync<T>(string subUrl, CancellationToken ct)
+        catch (Exception ex)
         {
-            try
-            {
-                var request = CreateJsonRequestMessage(HttpMethod.Get, subUrl);
-
-                await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
-                using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
-                await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
-
-                var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                LogException(ex);
-                throw;
-            }
+            LogException(ex);
+            throw;
         }
+    }
 
-        public async IAsyncEnumerable<T> GetAsyncEnumerable<T>(string subUrl, [EnumeratorCancellation] CancellationToken ct)
+    public async IAsyncEnumerable<T> GetAsyncEnumerable<T>(string subUrl, [EnumeratorCancellation] CancellationToken ct)
+    {
+        var nextLink = subUrl;
+        do
         {
-            var nextLink = subUrl;
-            do
-            {
-                var response = await GetAsync<PagedCollection<T>>(nextLink, ct).ConfigureAwait(false);
+            var response = await GetAsync<PagedCollection<T>>(nextLink, ct).ConfigureAwait(false);
 
-                if (response.Value is null)
+            if (response.Value is null)
+            {
+                yield break;
+            }
+
+            foreach (var value in response.Value)
+            {
+                if (ct.IsCancellationRequested)
                 {
                     yield break;
                 }
-
-                foreach (var value in response.Value)
-                {
-                    if (ct.IsCancellationRequested)
-                    {
-                        yield break;
-                    }
-                    yield return value;
-                }
-
-                nextLink = response.NextLink;
-            } while (!string.IsNullOrWhiteSpace(nextLink) && !ct.IsCancellationRequested);
-        }
-
-        public async Task<T> PostAsync<T>(string subUrl, T body, CancellationToken ct)
-        {
-            return await PostAsync<T, T>(subUrl, body, ct);
-        }
-
-        public async Task<TOut> PostAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
-        {
-            try
-            {
-                var request = CreateJsonRequestMessage(HttpMethod.Post, subUrl, body);
-
-                await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
-                using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
-                await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
-
-                var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                LogException(ex);
-                throw;
-            }
-        }
-
-        public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct)
-        {
-            return await PutAsync(subUrl, body, null, ct).ConfigureAwait(false);
-        }
-
-        public async Task<T> PutAsync<T>(string subUrl, T body, IDictionary<string, string> customHeaders, CancellationToken ct)
-        {
-            return await PutAsync<T, T>(subUrl, body, customHeaders, ct).ConfigureAwait(false);
-        }
-
-        public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
-        {
-            return await PutAsync<TIn, TOut>(subUrl, body, null, ct).ConfigureAwait(false);
-        }
-
-        public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, IDictionary<string, string> customHeaders, CancellationToken ct)
-        {
-            try
-            {
-                var request = CreateJsonRequestMessage(HttpMethod.Put, subUrl, body, customHeaders);
-
-                await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
-                using var response = await _httpClient.SendAsync(request, ct);
-                await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
-
-                var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                LogException(ex);
-                throw;
-            }
-        }
-
-        private static HttpRequestMessage CreateJsonRequestMessage(HttpMethod method, string requestUri) =>
-            CreateJsonRequestMessage(method, requestUri, (object) null, null);
-
-        private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue) =>
-            CreateJsonRequestMessage(method, requestUri, inputValue, null);
-
-        private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, IDictionary<string, string> customHeaders)
-        {
-            var request = new HttpRequestMessage(method, requestUri);
-            if (inputValue is not null)
-            {
-                request.Content = JsonContent.Create(inputValue, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions);
-            }
-            request.Headers.Add("Request-ID", Guid.NewGuid().ToString());
-
-            if (customHeaders is not null && customHeaders.Any())
-            {
-                foreach (var (name, value) in customHeaders)
-                {
-                    request.Headers.Add(name, value);
-                }
+                yield return value;
             }
 
-            return request;
-        }
+            nextLink = response.NextLink;
+        } while (!string.IsNullOrWhiteSpace(nextLink) && !ct.IsCancellationRequested);
+    }
 
-        private static string GetRequestIdFromHeaders(HttpHeaders headers) =>
-            headers.TryGetValues("Request-ID", out var headerValues)
-                ? headerValues.FirstOrDefault()
-                : string.Empty;
+    public async Task<T> PostAsync<T>(string subUrl, T body, CancellationToken ct)
+    {
+        return await PostAsync<T, T>(subUrl, body, ct);
+    }
 
-        private async Task LogRequestVerboseAsync(HttpRequestMessage request, CancellationToken ct)
+    public async Task<TOut> PostAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
+    {
+        try
         {
-            if (!_logger.IsEnabled(VerboseLogLevel))
-                return;
+            var request = CreateJsonRequestMessage(HttpMethod.Post, subUrl, body);
 
-            var clientRequestId = GetRequestIdFromHeaders(request.Headers);
-            _logger.Log(VerboseLogLevel, "Request {verb} {requestUrl} [ClientRequestId: {clientRequestId}]", request.Method, request.RequestUri, clientRequestId);
-            if (request.Content is not null)
+            await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
+            using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+            await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            LogException(ex);
+            throw;
+        }
+    }
+
+    public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct)
+    {
+        return await PutAsync(subUrl, body, null, ct).ConfigureAwait(false);
+    }
+
+    public async Task<T> PutAsync<T>(string subUrl, T body, IDictionary<string, string> customHeaders, CancellationToken ct)
+    {
+        return await PutAsync<T, T>(subUrl, body, customHeaders, ct).ConfigureAwait(false);
+    }
+
+    public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
+    {
+        return await PutAsync<TIn, TOut>(subUrl, body, null, ct).ConfigureAwait(false);
+    }
+
+    public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, IDictionary<string, string> customHeaders, CancellationToken ct)
+    {
+        try
+        {
+            var request = CreateJsonRequestMessage(HttpMethod.Put, subUrl, body, customHeaders);
+
+            await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
+            using var response = await _httpClient.SendAsync(request, ct);
+            await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            LogException(ex);
+            throw;
+        }
+    }
+
+    private static HttpRequestMessage CreateJsonRequestMessage(HttpMethod method, string requestUri) =>
+        CreateJsonRequestMessage(method, requestUri, (object) null, null);
+
+    private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue) =>
+        CreateJsonRequestMessage(method, requestUri, inputValue, null);
+
+    private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, IDictionary<string, string> customHeaders)
+    {
+        var request = new HttpRequestMessage(method, requestUri);
+        if (inputValue is not null)
+        {
+            request.Content = JsonContent.Create(inputValue, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions);
+        }
+        request.Headers.Add("Request-ID", Guid.NewGuid().ToString());
+
+        if (customHeaders is not null && customHeaders.Any())
+        {
+            foreach (var (name, value) in customHeaders)
             {
-                var requestBody = await request.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-                _logger.Log(VerboseLogLevel, "Request Body:");
-                _logger.Log(VerboseLogLevel, requestBody);
+                request.Headers.Add(name, value);
             }
         }
 
-        private async Task LogResponseVerboseAsync(HttpResponseMessage response, CancellationToken ct)
-        {
-            if (!_logger.IsEnabled(VerboseLogLevel))
-                return;
+        return request;
+    }
 
-            var serverRequestId = GetRequestIdFromHeaders(response.Headers);
-            _logger.Log(VerboseLogLevel, "Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
-            var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            _logger.Log(VerboseLogLevel, "Response Body:");
-            _logger.Log(VerboseLogLevel, responseBody);
-        }
+    private static string GetRequestIdFromHeaders(HttpHeaders headers) =>
+        headers.TryGetValues("Request-ID", out var headerValues)
+            ? headerValues.FirstOrDefault()
+            : string.Empty;
 
-        private void LogException(Exception ex)
+    private async Task LogRequestVerboseAsync(HttpRequestMessage request, CancellationToken ct)
+    {
+        if (!_logger.IsEnabled(VerboseLogLevel))
+            return;
+
+        var clientRequestId = GetRequestIdFromHeaders(request.Headers);
+        _logger.Log(VerboseLogLevel, "Request {verb} {requestUrl} [ClientRequestId: {clientRequestId}]", request.Method, request.RequestUri, clientRequestId);
+        if (request.Content is not null)
         {
-            _logger.LogError(ex, "Exception:");
+            var requestBody = await request.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            _logger.Log(VerboseLogLevel, "Request Body:");
+            _logger.Log(VerboseLogLevel, requestBody);
         }
+    }
+
+    private async Task LogResponseVerboseAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        if (!_logger.IsEnabled(VerboseLogLevel))
+            return;
+
+        var serverRequestId = GetRequestIdFromHeaders(response.Headers);
+        _logger.Log(VerboseLogLevel, "Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
+        var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        _logger.Log(VerboseLogLevel, "Response Body:");
+        _logger.Log(VerboseLogLevel, responseBody);
+    }
+
+    private void LogException(Exception ex)
+    {
+        _logger.LogError(ex, "Exception:");
     }
 }

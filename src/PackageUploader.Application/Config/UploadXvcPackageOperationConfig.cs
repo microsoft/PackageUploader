@@ -4,13 +4,12 @@
 using System.ComponentModel.DataAnnotations;
 using PackageUploader.ClientApi.Models;
 
-namespace PackageUploader.Application.Config
-{
-    internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
-    {
-        internal override string GetOperationName() => "UploadXvcPackage";
+namespace PackageUploader.Application.Config;
 
-        [Required]
-        public GameAssets GameAssets { get; set; }
-    }
+internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
+{
+    internal override string GetOperationName() => "UploadXvcPackage";
+
+    [Required]
+    public GameAssets GameAssets { get; set; }
 }

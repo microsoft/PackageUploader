@@ -4,13 +4,12 @@
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
 
-namespace PackageUploader.Application.Config
-{
-    internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig, IGameConfiguration
-    {
-        internal override string GetOperationName() => "UploadUwpPackage";
+namespace PackageUploader.Application.Config;
 
-        public GamePackageDate MandatoryDate { get; set; }
-        public GameGradualRolloutInfo GradualRollout { get; set; }
-    }
+internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig, IGameConfiguration
+{
+    internal override string GetOperationName() => "UploadUwpPackage";
+
+    public GamePackageDate MandatoryDate { get; set; }
+    public GameGradualRolloutInfo GradualRollout { get; set; }
 }

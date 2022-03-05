@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.Models;
+
+public enum GamePackageAssetType
 {
-    public enum GamePackageAssetType
-    {
-        EkbFile,
-        SubmissionValidatorLog,
-        SymbolsZip,
-        DiscLayoutFile,
-    }
+    EkbFile,
+    SubmissionValidatorLog,
+    SymbolsZip,
+    DiscLayoutFile,
 }
