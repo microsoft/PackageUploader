@@ -20,7 +20,7 @@ internal static class ProgramExtensions
 {
     public static Command AddOperationHandler<T>(this Command command) where T : Operation
     {
-        command.Handler = CommandHandler.Create<IHost, CancellationToken>(RunAsyncOperation<T>);
+        command.SetHandler((IHost host, CancellationToken ct) => RunAsyncOperation<T>(host, ct));
         return command;
     }
 
@@ -41,7 +41,7 @@ internal static class ProgramExtensions
 
     public static T GetOptionValue<T>(this InvocationContext invocationContext, Option<T> option)
     {
-        return invocationContext.ParseResult.ValueForOption(option);
+        return invocationContext.ParseResult.GetValueForOption(option);
     }
 
     public static Option<T> Required<T>(this Option<T> option, bool required = true)
