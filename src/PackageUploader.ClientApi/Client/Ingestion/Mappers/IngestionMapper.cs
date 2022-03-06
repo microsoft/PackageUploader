@@ -120,9 +120,8 @@ internal static class IngestionMapper
     public static GamePackageBranch Map(this IngestionBranch ingestionBranch) =>
         ingestionBranch is null ? null : new()
         {
-            BranchFriendlyName = ingestionBranch.FriendlyName,
+            Name = ingestionBranch.FriendlyName,
             CurrentDraftInstanceId = ingestionBranch.CurrentDraftInstanceId,
-            IsFlight = false,
         };
 
     public static GamePackageAsset Map(this IngestionGamePackageAsset ingestionGamePackageAsset) =>
@@ -235,6 +234,17 @@ internal static class IngestionMapper
             Severity = GetEnum<GameSubmissionValidationSeverity>(ingestionSubmissionValidationItem.Severity),
         };
 
+    public static GamePackageFlight Map(this IngestionFlight ingestionFlight, IngestionBranch ingestionBranch) =>
+        ingestionFlight is null ? null : ingestionBranch is null ? null : new()
+        {
+            Id = ingestionFlight.Id,
+            ODataETag = ingestionFlight.ODataETag,
+            ETag = ingestionFlight.ETag,
+            GroupIds = ingestionFlight.GroupIds,
+            Name = ingestionFlight.Name,
+            CurrentDraftInstanceId = ingestionBranch.CurrentDraftInstanceId,
+        };
+
     public static GamePackageFlight Map(this IngestionFlight ingestionFlight, GamePackageBranch gamePackageBranch) =>
         ingestionFlight is null ? null : gamePackageBranch is null ? null : new()
         {
@@ -242,9 +252,7 @@ internal static class IngestionMapper
             ODataETag = ingestionFlight.ODataETag,
             ETag = ingestionFlight.ETag,
             GroupIds = ingestionFlight.GroupIds,
-            FlightName = ingestionFlight.Name,
-            BranchFriendlyName = gamePackageBranch.BranchFriendlyName,
+            Name = ingestionFlight.Name,
             CurrentDraftInstanceId = gamePackageBranch.CurrentDraftInstanceId,
-            IsFlight = true,
         };
 }

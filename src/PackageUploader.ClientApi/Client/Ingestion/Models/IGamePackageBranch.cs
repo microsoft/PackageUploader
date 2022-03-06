@@ -5,9 +5,9 @@ namespace PackageUploader.ClientApi.Client.Ingestion.Models;
 public interface IGamePackageBranch
 {
     /// <summary>
-    /// Branch name
+    /// Branch friendly name or flight name
     /// </summary>
-    string BranchFriendlyName { get; }
+    string Name { get; }
 
     /// <summary>
     /// Branch current draft instance ID.
@@ -17,5 +17,5 @@ public interface IGamePackageBranch
     /// <summary>
     /// Indicates if this branch is a flight.
     /// </summary>
-    bool IsFlight { get; }
+    GamePackageBranchType BranchType { get; }
 }

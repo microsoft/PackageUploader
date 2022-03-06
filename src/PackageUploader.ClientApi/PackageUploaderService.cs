@@ -3,7 +3,6 @@
 
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion;
-using PackageUploader.ClientApi.Client.Ingestion.Extensions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Client.Xfus;
 using PackageUploader.ClientApi.Models;
@@ -181,7 +180,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.GetBranchType().ToLower(), packageBranch.GetName());
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
             }
             else
             {
@@ -216,7 +215,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.GetBranchType().ToLower(), packageBranch.GetName());
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
             }
             else
             {
@@ -262,7 +261,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.GetBranchType().ToLower(), packageBranch.GetName());
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
             }
             else
             {

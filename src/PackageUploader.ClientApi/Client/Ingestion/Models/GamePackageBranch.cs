@@ -6,9 +6,9 @@ namespace PackageUploader.ClientApi.Client.Ingestion.Models;
 public sealed class GamePackageBranch : IGamePackageBranch
 {
     /// <summary>
-    /// Branch name
+    /// Branch friendly name
     /// </summary>
-    public string BranchFriendlyName { get; internal init; }
+    public string Name { get; internal init; }
 
     /// <summary>
     /// Branch current draft instance ID.
@@ -18,5 +18,5 @@ public sealed class GamePackageBranch : IGamePackageBranch
     /// <summary>
     /// Indicates if this branch is a flight.
     /// </summary>
-    public bool IsFlight { get; internal init; }
+    public GamePackageBranchType BranchType => GamePackageBranchType.Branch;
 }

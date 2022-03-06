@@ -10,17 +10,12 @@ public sealed class GamePackageFlight : GamePackageResource, IGamePackageBranch
     /// <summary>
     /// Flight name
     /// </summary>
-    public string FlightName { get; internal init; }
+    public string Name { get; internal init; }
 
     /// <summary>
     /// Flight group ids
     /// </summary>
     public IList<string> GroupIds { get; set; }
-
-    /// <summary>
-    /// Branch name
-    /// </summary>
-    public string BranchFriendlyName { get; internal init; }
 
     /// <summary>
     /// Branch current draft instance ID.
@@ -30,6 +25,6 @@ public sealed class GamePackageFlight : GamePackageResource, IGamePackageBranch
     /// <summary>
     /// Indicates if this branch is a flight.
     /// </summary>
-    public bool IsFlight { get; internal init; }
+    public GamePackageBranchType BranchType => GamePackageBranchType.Flight;
 
 }

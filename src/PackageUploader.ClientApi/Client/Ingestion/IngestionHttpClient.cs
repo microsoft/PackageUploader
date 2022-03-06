@@ -398,13 +398,12 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         }
 
         var flights = await GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct).ToListAsync(ct).ConfigureAwait(false);
-        var branches = await GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct)
-            .Select(b => b.Map()).ToListAsync(ct).ConfigureAwait(false);
+        var branches = await GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct).ToListAsync(ct).ConfigureAwait(false);
 
         var gamePackageBranches = new List<IGamePackageBranch>();
         foreach (var flight in flights)
         {
-            var branch = branches.SingleOrDefault(b => b.BranchFriendlyName.Equals(flight.Id));
+            var branch = branches.SingleOrDefault(b => b.FriendlyName.Equals(flight.Id));
 
             if (branch is null)
             {
@@ -415,7 +414,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
             branches.Remove(branch);
         }
 
-        gamePackageBranches.AddRange(branches);
+        gamePackageBranches.AddRange(branches.Select(b => b.Map()));
         return gamePackageBranches;
     }
 

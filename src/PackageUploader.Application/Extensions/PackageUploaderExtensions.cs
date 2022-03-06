@@ -61,19 +61,19 @@ internal static class PackageUploaderExtensions
 
         if (packageConfiguration is null)
         {
-            throw new Exception($"Package Configuration not found for branch '{packageBranch.BranchFriendlyName}'.");
+            throw new Exception($"Package Configuration not found for {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
         }
 
         if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
         {
-            throw new Exception($"Branch '{packageBranch.BranchFriendlyName}' does not have any Market Group Packages.");
+            throw new Exception($"{packageBranch.BranchType} '{packageBranch.Name}' does not have any Market Group Packages.");
         }
             
         var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(config.MarketGroupName));
 
         if (marketGroupPackage is null)
         {
-            throw new Exception($"Market Group '{config.MarketGroupName}' (case sensitive) not found in branch '{packageBranch.BranchFriendlyName}'.");
+            throw new Exception($"Market Group '{config.MarketGroupName}' (case sensitive) not found in {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
         }
         return marketGroupPackage;
     }
