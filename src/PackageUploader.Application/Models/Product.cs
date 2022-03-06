@@ -1,10 +1,10 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 
+using PackageUploader.ClientApi.Client.Ingestion.Models;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using PackageUploader.ClientApi.Client.Ingestion.Models;
 
 namespace PackageUploader.Application.Models;
 
@@ -35,7 +35,7 @@ public class Product
     /// </summary>
     public IList<string> FlightNames { get; }
 
-    public Product(GameProduct gameProduct, IReadOnlyCollection<IGamePackageBranch> branches)
+    public Product(GameProduct gameProduct, IEnumerable<IGamePackageBranch> branches)
     {
         ProductId = gameProduct.ProductId;
         BigId = gameProduct.BigId;
