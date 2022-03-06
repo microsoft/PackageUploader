@@ -120,8 +120,9 @@ internal static class IngestionMapper
     public static GamePackageBranch Map(this IngestionBranch ingestionBranch) =>
         ingestionBranch is null ? null : new()
         {
-            Name = ingestionBranch.FriendlyName,
+            BranchFriendlyName = ingestionBranch.FriendlyName,
             CurrentDraftInstanceId = ingestionBranch.CurrentDraftInstanceId,
+            IsFlight = false,
         };
 
     public static GamePackageAsset Map(this IngestionGamePackageAsset ingestionGamePackageAsset) =>
@@ -235,14 +236,15 @@ internal static class IngestionMapper
         };
 
     public static GamePackageFlight Map(this IngestionFlight ingestionFlight, GamePackageBranch gamePackageBranch) =>
-        ingestionFlight is null ? null : new()
+        ingestionFlight is null ? null : gamePackageBranch is null ? null : new()
         {
             Id = ingestionFlight.Id,
             ODataETag = ingestionFlight.ODataETag,
             ETag = ingestionFlight.ETag,
             GroupIds = ingestionFlight.GroupIds,
             FlightName = ingestionFlight.Name,
-            BranchName = gamePackageBranch.Name,
+            BranchFriendlyName = gamePackageBranch.BranchFriendlyName,
             CurrentDraftInstanceId = gamePackageBranch.CurrentDraftInstanceId,
+            IsFlight = true,
         };
 }

@@ -31,7 +31,7 @@ internal static class PackageUploaderExtensions
         throw new Exception("BigId or ProductId needed.");
     }
 
-    public static async Task<GamePackageBranch> GetGamePackageBranch(this IPackageUploaderService storeBroker, GameProduct product, PackageBranchOperationConfig config, CancellationToken ct)
+    public static async Task<IGamePackageBranch> GetGamePackageBranch(this IPackageUploaderService storeBroker, GameProduct product, PackageBranchOperationConfig config, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(storeBroker);
         ArgumentNullException.ThrowIfNull(product);
@@ -44,13 +44,13 @@ internal static class PackageUploaderExtensions
 
         if (!string.IsNullOrWhiteSpace(config.FlightName))
         {
-            return await storeBroker.GetPackageBranchByFlightNameAsync(product, config.FlightName, ct).ConfigureAwait(false);
+            return await storeBroker.GetPackageFlightByFlightNameAsync(product, config.FlightName, ct).ConfigureAwait(false);
         }
 
         throw new Exception("BranchFriendlyName or FlightName needed.");
     }
 
-    public static async Task<GameMarketGroupPackage> GetGameMarketGroupPackage(this IPackageUploaderService storeBroker, GameProduct product, GamePackageBranch packageBranch, UploadPackageOperationConfig config, CancellationToken ct)
+    public static async Task<GameMarketGroupPackage> GetGameMarketGroupPackage(this IPackageUploaderService storeBroker, GameProduct product, IGamePackageBranch packageBranch, UploadPackageOperationConfig config, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(storeBroker);
         ArgumentNullException.ThrowIfNull(product);
@@ -61,24 +61,24 @@ internal static class PackageUploaderExtensions
 
         if (packageConfiguration is null)
         {
-            throw new Exception($"Package Configuration not found for branch '{packageBranch.Name}'.");
+            throw new Exception($"Package Configuration not found for branch '{packageBranch.BranchFriendlyName}'.");
         }
 
         if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
         {
-            throw new Exception($"Branch '{packageBranch.Name}' does not have any Market Group Packages.");
+            throw new Exception($"Branch '{packageBranch.BranchFriendlyName}' does not have any Market Group Packages.");
         }
             
         var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(config.MarketGroupName));
 
         if (marketGroupPackage is null)
         {
-            throw new Exception($"Market Group '{config.MarketGroupName}' (case sensitive) not found in branch '{packageBranch.Name}'.");
+            throw new Exception($"Market Group '{config.MarketGroupName}' (case sensitive) not found in branch '{packageBranch.BranchFriendlyName}'.");
         }
         return marketGroupPackage;
     }
 
-    public static async Task<GamePackageBranch> GetDestinationGamePackageBranch(this IPackageUploaderService storeBroker, GameProduct product, ImportPackagesOperationConfig config, CancellationToken ct)
+    public static async Task<IGamePackageBranch> GetDestinationGamePackageBranch(this IPackageUploaderService storeBroker, GameProduct product, ImportPackagesOperationConfig config, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(storeBroker);
         ArgumentNullException.ThrowIfNull(product);
@@ -91,7 +91,7 @@ internal static class PackageUploaderExtensions
 
         if (!string.IsNullOrWhiteSpace(config.DestinationFlightName))
         {
-            return await storeBroker.GetPackageBranchByFlightNameAsync(product, config.DestinationFlightName, ct).ConfigureAwait(false);
+            return await storeBroker.GetPackageFlightByFlightNameAsync(product, config.DestinationFlightName, ct).ConfigureAwait(false);
         }
 
         throw new Exception("DestinationBranchFriendlyName or DestinationFlightName needed.");

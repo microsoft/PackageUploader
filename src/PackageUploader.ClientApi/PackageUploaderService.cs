@@ -50,17 +50,12 @@ public class PackageUploaderService : IPackageUploaderService
         return await _ingestionHttpClient.GetGameProductByLongIdAsync(productId, ct).ConfigureAwait(false);
     }
 
-    public async Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct)
+    public async Task<IReadOnlyCollection<IGamePackageBranch>> GetPackageBranchesAsync(GameProduct product, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
 
-        if (string.IsNullOrWhiteSpace(flightName))
-        {
-            throw new ArgumentException($"{nameof(flightName)} cannot be null or empty.", nameof(flightName));
-        }
-
-        _logger.LogDebug("Requesting game package branch by flight name '{flightName}'.", flightName);
-        return await _ingestionHttpClient.GetPackageBranchByFlightNameAsync(product.ProductId, flightName, ct).ConfigureAwait(false);
+        _logger.LogDebug("Requesting game package branches.");
+        return await _ingestionHttpClient.GetPackageBranchesAsync(product.ProductId, ct).ConfigureAwait(false);
     }
 
     public async Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(GameProduct product, string branchFriendlyName, CancellationToken ct)
@@ -89,7 +84,7 @@ public class PackageUploaderService : IPackageUploaderService
         return await _ingestionHttpClient.GetPackageFlightByFlightNameAsync(product.ProductId, flightName, ct).ConfigureAwait(false);
     }
 
-    public async Task<GamePackageConfiguration> GetPackageConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, CancellationToken ct)
+    public async Task<GamePackageConfiguration> GetPackageConfigurationAsync(GameProduct product, IGamePackageBranch packageBranch, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -131,7 +126,7 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, GamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
+    public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -171,7 +166,7 @@ public class PackageUploaderService : IPackageUploaderService
         return package;
     }
 
-    public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupName, CancellationToken ct)
+    public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -185,7 +180,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.Name);
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.BranchFriendlyName);
             }
             else
             {
@@ -204,7 +199,7 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAsync(GameProduct product, GamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, CancellationToken ct)
+    public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -220,7 +215,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.Name);
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.BranchFriendlyName);
             }
             else
             {
@@ -252,7 +247,7 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, GamePackageBranch packageBranch, string marketGroupName, IGameConfiguration gameConfiguration, CancellationToken ct)
+    public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, IGameConfiguration gameConfiguration, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -266,7 +261,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.Name);
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.BranchFriendlyName);
             }
             else
             {
@@ -305,12 +300,12 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, CancellationToken ct)
+    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, CancellationToken ct)
     {
         return await ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, marketGroupName, overwrite, null, ct);
     }
 
-    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, GamePackageBranch originPackageBranch, GamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, CancellationToken ct)
+    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(originPackageBranch);

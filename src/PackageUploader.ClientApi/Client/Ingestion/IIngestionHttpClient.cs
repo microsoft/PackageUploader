@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using PackageUploader.ClientApi.Client.Ingestion.Models;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +14,6 @@ public interface IIngestionHttpClient
     Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct);
     Task<GameProduct> GetGameProductByBigIdAsync(string bigId, CancellationToken ct);
     Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(string productId, string branchFriendlyName, CancellationToken ct);
-    Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(string productId, string flightName, CancellationToken ct);
     Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(string productId, string flightName, CancellationToken ct);
     Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, CancellationToken ct);
     Task<GamePackage> GetPackageByIdAsync(string productId, string packageId, CancellationToken ct);
@@ -27,4 +27,5 @@ public interface IIngestionHttpClient
     Task<GameSubmission> CreateFlightSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationFlightId, CancellationToken ct);
     Task<GameSubmission> CreateFlightSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationFlightId, GameSubmissionOptions gameSubmissionOptions, CancellationToken ct);
     Task<GameSubmission> GetGameSubmissionAsync(string productId, string submissionId, CancellationToken ct);
+    Task<IReadOnlyCollection<IGamePackageBranch>> GetPackageBranchesAsync(string productId, CancellationToken ct);
 }

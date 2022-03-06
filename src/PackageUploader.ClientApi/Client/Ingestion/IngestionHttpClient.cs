@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion.Builders;
 using PackageUploader.ClientApi.Client.Ingestion.Client;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Mappers;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -92,31 +92,6 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var gamePackageBranch = ingestionGamePackageBranch.Map();
         return gamePackageBranch;
-    }
-
-    public async Task<GamePackageBranch> GetPackageBranchByFlightNameAsync(string productId, string flightName, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(flightName))
-        {
-            throw new ArgumentException($"{nameof(flightName)} cannot be null or empty.", nameof(flightName));
-        }
-
-        var flights = GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct);
-
-        var selectedFlight = await flights.FirstOrDefaultAsync(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
-
-        if (selectedFlight is null)
-        {
-            throw new PackageBranchNotFoundException($"Package branch with flight name '{flightName}' not found.");
-        }
-
-        var branch = await GetPackageBranchByFriendlyNameAsync(productId, selectedFlight.Id, ct).ConfigureAwait(false);
-        return branch;
     }
 
     public async Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(string productId, string flightName, CancellationToken ct)
@@ -413,6 +388,35 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         }
 
         return gameSubmission;
+    }
+
+    public async Task<IReadOnlyCollection<IGamePackageBranch>> GetPackageBranchesAsync(string productId, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(productId))
+        {
+            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
+        }
+
+        var flights = await GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct).ToListAsync(ct).ConfigureAwait(false);
+        var branches = await GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct)
+            .Select(b => b.Map()).ToListAsync(ct).ConfigureAwait(false);
+
+        var gamePackageBranches = new List<IGamePackageBranch>();
+        foreach (var flight in flights)
+        {
+            var branch = branches.SingleOrDefault(b => b.BranchFriendlyName.Equals(flight.Id));
+
+            if (branch is null)
+            {
+                throw new PackageBranchNotFoundException($"Package branch with flight name '{flight.Name}' not found.");
+            }
+
+            gamePackageBranches.Add(flight.Map(branch));
+            branches.Remove(branch);
+        }
+
+        gamePackageBranches.AddRange(branches);
+        return gamePackageBranches;
     }
 
     private async Task<List<GameSubmissionValidationItem>> GetGameSubmissionValidationItemsFromFailureAsync(string productId, string submissionId, CancellationToken ct)
