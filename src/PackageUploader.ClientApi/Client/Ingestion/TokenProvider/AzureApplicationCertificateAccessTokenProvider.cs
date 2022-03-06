@@ -62,7 +62,7 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
         var msalClient = ConfidentialClientApplicationBuilder
             .Create(_aadAuthInfo.ClientId)
             .WithCertificate(_certificate)
-            .WithAuthority(authority, true)
+            .WithAuthority(authority)
             .Build();
 
         _logger.LogDebug("Requesting authentication token");
@@ -86,7 +86,7 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
         using var store = new X509Store(_aadAuthInfo.CertificateStore, _aadAuthInfo.CertificateLocation);
 
         store.Open(OpenFlags.ReadOnly);
-        var certs = store.Certificates.Find(X509FindType.FindByThumbprint, _aadAuthInfo.CertificateThumbprint, true);
+        var certs = store.Certificates.Find(X509FindType.FindByThumbprint, _aadAuthInfo.CertificateThumbprint, false);
         store.Close();
 
         return certs;
