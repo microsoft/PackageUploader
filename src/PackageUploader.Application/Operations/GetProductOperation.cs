@@ -31,7 +31,7 @@ internal class GetProductOperation : Operation
         _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
 
         var gameProduct = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
-        var gamePackageBranches = await _storeBrokerService.GetPackageBranchesAsync(gameProduct, ct);
+        var gamePackageBranches = await _storeBrokerService.GetPackageBranchesAsync(gameProduct, ct).ConfigureAwait(false);
 
         var product = new Product(gameProduct, gamePackageBranches);
 
