@@ -1,5 +1,7 @@
-﻿// Copyright (C) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
+using PackageUploader.ClientApi.Client.Ingestion.Extensions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using System;
 using System.Collections.Generic;
@@ -47,7 +49,7 @@ internal class Product
         {
             if (branch.IsFlight)
             {
-                FlightNames.Add(((GamePackageFlight)branch).FlightName);
+                FlightNames.Add(branch.GetName());
             }
             else
             {

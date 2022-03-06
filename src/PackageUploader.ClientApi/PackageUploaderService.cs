@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion;
+using PackageUploader.ClientApi.Client.Ingestion.Extensions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Client.Xfus;
 using PackageUploader.ClientApi.Models;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -180,7 +181,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.BranchFriendlyName);
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.GetBranchType().ToLower(), packageBranch.GetName());
             }
             else
             {
@@ -215,7 +216,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.BranchFriendlyName);
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.GetBranchType().ToLower(), packageBranch.GetName());
             }
             else
             {
@@ -261,7 +262,7 @@ public class PackageUploaderService : IPackageUploaderService
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in branch '{branchName}'.", marketGroupName, packageBranch.BranchFriendlyName);
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.GetBranchType().ToLower(), packageBranch.GetName());
             }
             else
             {
