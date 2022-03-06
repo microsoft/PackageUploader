@@ -8,22 +8,22 @@ using System.Text.Json.Serialization;
 
 namespace PackageUploader.Application.Models;
 
-public class Product
+internal class Product
 {
     /// <summary>
     /// Product Id, aka. LongId - looks like a long number
     /// </summary>
-    public string ProductId { get; internal init; }
+    public string ProductId { get; }
 
     /// <summary>
     /// Big Id, combination of letters/numbers usually beginning with 9
     /// </summary>
-    public string BigId { get; internal init; }
+    public string BigId { get; }
 
     /// <summary>
     /// Product name
     /// </summary>
-    public string ProductName { get; internal init; }
+    public string ProductName { get; }
 
     /// <summary>
     /// List of friendly names of all branches in the product
