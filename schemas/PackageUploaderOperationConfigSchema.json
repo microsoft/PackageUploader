@@ -89,27 +89,27 @@
       "description": "Package operation to run",
       "oneOf": [
         {
-          "const": "GetProduct",
+          "const": "getProduct",
           "description": "Returns metadata of the product"
         },
         {
-          "const": "UploadUwpPackage",
+          "const": "uploadUwpPackage",
           "description": "Uploads Uwp game package"
         },
         {
-          "const": "UploadXvcPackage",
+          "const": "uploadXvcPackage",
           "description": "Uploads Xvc game package and assets"
         },
         {
-          "const": "RemovePackages",
+          "const": "removePackages",
           "description": "Removes all game packages and assets from a branch"
         },
         {
-          "const": "ImportPackages",
+          "const": "importPackages",
           "description": "Imports all game packages from a branch to a destination branch"
         },
         {
-          "const": "PublishPackages",
+          "const": "publishPackages",
           "description": "Publishes all game packages from a branch or flight to a destination sandbox or flight"
         }
       ]
@@ -203,19 +203,19 @@
             "type": "string",
             "oneOf": [
               {
-                "const": "UploadUwpPackage"
+                "const": "uploadUwpPackage"
               },
               {
-                "const": "UploadXvcPackage"
+                "const": "uploadXvcPackage"
               },
               {
-                "const": "RemovePackages"
+                "const": "removePackages"
               },
               {
-                "const": "ImportPackages"
+                "const": "importPackages"
               },
               {
-                "const": "PublishPackages"
+                "const": "publishPackages"
               }
             ]
           }
@@ -255,10 +255,10 @@
           "operationName": {
             "oneOf": [
               {
-                "const": "UploadUwpPackage"
+                "const": "uploadUwpPackage"
               },
               {
-                "const": "UploadXvcPackage"
+                "const": "uploadXvcPackage"
               }
             ]
           }
@@ -301,7 +301,7 @@
           "operationName": {
             "oneOf": [
               {
-                "const": "UploadXvcPackage"
+                "const": "uploadXvcPackage"
               }
             ]
           }
@@ -359,7 +359,7 @@
           "operationName": {
             "oneOf": [
               {
-                "const": "UploadUwpPackage"
+                "const": "uploadUwpPackage"
               }
             ]
           }
@@ -387,7 +387,7 @@
           "operationName": {
             "oneOf": [
               {
-                "const": "RemovePackages"
+                "const": "removePackages"
               }
             ]
           }
@@ -409,7 +409,7 @@
           "operationName": {
             "oneOf": [
               {
-                "const": "PublishPackages"
+                "const": "publishPackages"
               }
             ]
           }
@@ -487,7 +487,7 @@
           "operationName": {
             "oneOf": [
               {
-                "const": "ImportPackages"
+                "const": "importPackages"
               }
             ]
           }
