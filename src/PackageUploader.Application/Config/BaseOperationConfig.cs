@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -32,7 +33,7 @@ internal abstract class BaseOperationConfig : IValidatableObject
     private void ValidateBase(IList<ValidationResult> validationResults)
     {
         var operationName = GetOperationName();
-        if (!string.Equals(operationName, OperationName))
+        if (!string.Equals(operationName, OperationName, StringComparison.OrdinalIgnoreCase))
         {
             validationResults.Add(new ValidationResult($"{nameof(OperationName)} field is not {operationName}.", new [] { nameof(OperationName) }));
         }
