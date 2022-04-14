@@ -1,23 +1,22 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.Models;
+
+public abstract class GamePackageResource
 {
-    public abstract class GamePackageResource
-    {
-        /// <summary>
-        /// ETag
-        /// </summary>
-        internal string ETag { get; init; }
+    /// <summary>
+    /// ETag
+    /// </summary>
+    internal string ETag { get; init; }
 
-        /// <summary>
-        /// ETag
-        /// </summary>
-        internal string ODataETag { get; init; }
+    /// <summary>
+    /// ETag
+    /// </summary>
+    internal string ODataETag { get; init; }
 
-        /// <summary>
-        /// Resource ID
-        /// </summary>
-        public string Id { get; internal init; }
-    }
+    /// <summary>
+    /// Resource ID
+    /// </summary>
+    public string Id { get; internal init; }
 }

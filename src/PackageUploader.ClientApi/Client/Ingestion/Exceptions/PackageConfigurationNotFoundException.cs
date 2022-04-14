@@ -3,12 +3,11 @@
 
 using System;
 
-namespace PackageUploader.ClientApi.Client.Ingestion.Exceptions
+namespace PackageUploader.ClientApi.Client.Ingestion.Exceptions;
+
+public class PackageConfigurationNotFoundException : IngestionClientException
 {
-    public class PackageConfigurationNotFoundException : IngestionClientException
+    public PackageConfigurationNotFoundException(string errorMessage, Exception innerException = null) : base(errorMessage, innerException)
     {
-        public PackageConfigurationNotFoundException(string errorMessage, Exception innerException = null) : base(errorMessage, innerException)
-        {
-        }
     }
 }

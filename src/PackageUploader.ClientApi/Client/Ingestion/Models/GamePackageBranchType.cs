@@ -3,10 +3,8 @@
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Models;
 
-public enum GameSubmissionState
+public enum GamePackageBranchType
 {
-    NotStarted,
-    InProgress,
-    Published,
-    Failed,
+    Branch,
+    Flight,
 }

@@ -10,61 +10,60 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
+
+public class AzureApplicationSecretAccessTokenProvider : IAccessTokenProvider
 {
-    public class AzureApplicationSecretAccessTokenProvider : IAccessTokenProvider
+    private readonly ILogger<AzureApplicationSecretAccessTokenProvider> _logger;
+    private readonly AccessTokenProviderConfig _config;
+    private readonly AzureApplicationSecretAuthInfo _aadAuthInfo;
+
+    public AzureApplicationSecretAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationSecretAuthInfo> aadAuthInfo, 
+        ILogger<AzureApplicationSecretAccessTokenProvider> logger)
     {
-        private readonly ILogger<AzureApplicationSecretAccessTokenProvider> _logger;
-        private readonly AccessTokenProviderConfig _config;
-        private readonly AzureApplicationSecretAuthInfo _aadAuthInfo;
+        _logger = logger;
+        _config = config.Value;
+        _aadAuthInfo = aadAuthInfo?.Value ?? throw new ArgumentNullException(nameof(aadAuthInfo), $"{nameof(aadAuthInfo)} cannot be null.");
 
-        public AzureApplicationSecretAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationSecretAuthInfo> aadAuthInfo, 
-            ILogger<AzureApplicationSecretAccessTokenProvider> logger)
+        if (string.IsNullOrWhiteSpace(_aadAuthInfo.TenantId))
         {
-            _logger = logger;
-            _config = config.Value;
-            _aadAuthInfo = aadAuthInfo?.Value ?? throw new ArgumentNullException(nameof(aadAuthInfo), $"{nameof(aadAuthInfo)} cannot be null.");
-
-            if (string.IsNullOrWhiteSpace(_aadAuthInfo.TenantId))
-            {
-                throw new ArgumentException($"TenantId not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
-            }
-
-            if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientId))
-            {
-                throw new ArgumentException($"ClientId not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
-            }
-
-            if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientSecret))
-            {
-                throw new ArgumentException($"ClientSecret not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
-            }
+            throw new ArgumentException($"TenantId not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
         }
 
-        public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
+        if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientId))
         {
-            var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
-            var msalClient = ConfidentialClientApplicationBuilder
-               .Create(_aadAuthInfo.ClientId)
-               .WithClientSecret(_aadAuthInfo.ClientSecret)
-               .WithAuthority(authority, true)
-               .Build();
-
-            _logger.LogDebug("Requesting authentication token");
-            var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
-            var result = await msalClient.AcquireTokenForClient(scopes).ExecuteAsync(ct).ConfigureAwait(false);
-
-            if (result is null)
-            {
-                throw new Exception("Failure while acquiring token.");
-            }
-
-            return new IngestionAccessToken
-            {
-                AccessToken = result.AccessToken,
-                ExpiresOn = result.ExpiresOn,
-            };
-
+            throw new ArgumentException($"ClientId not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
         }
+
+        if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientSecret))
+        {
+            throw new ArgumentException($"ClientSecret not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
+        }
+    }
+
+    public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
+    {
+        var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
+        var msalClient = ConfidentialClientApplicationBuilder
+            .Create(_aadAuthInfo.ClientId)
+            .WithClientSecret(_aadAuthInfo.ClientSecret)
+            .WithAuthority(authority, true)
+            .Build();
+
+        _logger.LogDebug("Requesting authentication token");
+        var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
+        var result = await msalClient.AcquireTokenForClient(scopes).ExecuteAsync(ct).ConfigureAwait(false);
+
+        if (result is null)
+        {
+            throw new Exception("Failure while acquiring token.");
+        }
+
+        return new IngestionAccessToken
+        {
+            AccessToken = result.AccessToken,
+            ExpiresOn = result.ExpiresOn,
+        };
+
     }
 }

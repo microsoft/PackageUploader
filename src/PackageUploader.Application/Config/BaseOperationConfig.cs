@@ -5,48 +5,47 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace PackageUploader.Application.Config
+namespace PackageUploader.Application.Config;
+
+internal abstract class BaseOperationConfig : IValidatableObject
 {
-    internal abstract class BaseOperationConfig : IValidatableObject
+    internal abstract string GetOperationName();
+
+    [Required]
+    public string OperationName { get; set; }
+        
+    public string ProductId { get; set; }
+        
+    public string BigId { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        internal abstract string GetOperationName();
+        var validationResults = new List<ValidationResult>();
+        Validate(validationResults);
+        ValidateBase(validationResults);
+        return validationResults;
+    }
 
-        [Required]
-        public string OperationName { get; set; }
-        
-        public string ProductId { get; set; }
-        
-        public string BigId { get; set; }
+    protected virtual void Validate(IList<ValidationResult> validationResults)
+    {
+    }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    private void ValidateBase(IList<ValidationResult> validationResults)
+    {
+        var operationName = GetOperationName();
+        if (!string.Equals(operationName, OperationName, StringComparison.OrdinalIgnoreCase))
         {
-            var validationResults = new List<ValidationResult>();
-            Validate(validationResults);
-            ValidateBase(validationResults);
-            return validationResults;
+            validationResults.Add(new ValidationResult($"{nameof(OperationName)} field is not {operationName}.", new [] { nameof(OperationName) }));
         }
 
-        protected virtual void Validate(IList<ValidationResult> validationResults)
+        if (string.IsNullOrWhiteSpace(ProductId) && string.IsNullOrWhiteSpace(BigId))
         {
+            validationResults.Add(new ValidationResult($"{nameof(ProductId)} or {nameof(BigId)} field is required.", new[] { nameof(ProductId), nameof(BigId) }));
         }
 
-        private void ValidateBase(IList<ValidationResult> validationResults)
+        if (!string.IsNullOrWhiteSpace(ProductId) && !string.IsNullOrWhiteSpace(BigId))
         {
-            var operationName = GetOperationName();
-            if (!string.Equals(operationName, OperationName, StringComparison.OrdinalIgnoreCase))
-            {
-                validationResults.Add(new ValidationResult($"{nameof(OperationName)} field is not {operationName}.", new [] { nameof(OperationName) }));
-            }
-
-            if (string.IsNullOrWhiteSpace(ProductId) && string.IsNullOrWhiteSpace(BigId))
-            {
-                validationResults.Add(new ValidationResult($"{nameof(ProductId)} or {nameof(BigId)} field is required.", new[] { nameof(ProductId), nameof(BigId) }));
-            }
-
-            if (!string.IsNullOrWhiteSpace(ProductId) && !string.IsNullOrWhiteSpace(BigId))
-            {
-                validationResults.Add(new ValidationResult($"Only one {nameof(ProductId)} or {nameof(BigId)} field is allowed.", new[] { nameof(ProductId), nameof(BigId) }));
-            }
+            validationResults.Add(new ValidationResult($"Only one {nameof(ProductId)} or {nameof(BigId)} field is allowed.", new[] { nameof(ProductId), nameof(BigId) }));
         }
     }
 }

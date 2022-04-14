@@ -5,26 +5,25 @@ using PackageUploader.ClientApi.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace PackageUploader.Application.Config
+namespace PackageUploader.Application.Config;
+
+internal abstract class UploadPackageOperationConfig : PackageBranchOperationConfig
 {
-    internal abstract class UploadPackageOperationConfig : PackageBranchOperationConfig
+    public string MarketGroupName { get; set; } = "default";
+
+    [Range(0, 360)]
+    public int MinutesToWaitForProcessing { get; set; } = 30;
+
+    [Required]
+    public string PackageFilePath { get; set; }
+
+    public GamePackageDate AvailabilityDate { get; set; }
+
+    protected override void Validate(IList<ValidationResult> validationResults)
     {
-        public string MarketGroupName { get; set; } = "default";
-
-        [Range(0, 360)]
-        public int MinutesToWaitForProcessing { get; set; } = 30;
-
-        [Required]
-        public string PackageFilePath { get; set; }
-
-        public GamePackageDate AvailabilityDate { get; set; }
-
-        protected override void Validate(IList<ValidationResult> validationResults)
+        if (string.IsNullOrWhiteSpace(MarketGroupName))
         {
-            if (string.IsNullOrWhiteSpace(MarketGroupName))
-            {
-                MarketGroupName = "default";
-            }
+            MarketGroupName = "default";
         }
     }
 }

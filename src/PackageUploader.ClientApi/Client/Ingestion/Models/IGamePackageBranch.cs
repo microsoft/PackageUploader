@@ -3,20 +3,20 @@
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Models;
 
-public sealed class GamePackageBranch : IGamePackageBranch
+public interface IGamePackageBranch
 {
     /// <summary>
-    /// Branch friendly name
+    /// Branch friendly name or flight name
     /// </summary>
-    public string Name { get; internal init; }
+    string Name { get; }
 
     /// <summary>
     /// Branch current draft instance ID.
     /// </summary>
-    public string CurrentDraftInstanceId { get; internal init; }
+    string CurrentDraftInstanceId { get; }
 
     /// <summary>
     /// Indicates if this branch is a flight.
     /// </summary>
-    public GamePackageBranchType BranchType => GamePackageBranchType.Branch;
+    GamePackageBranchType BranchType { get; }
 }

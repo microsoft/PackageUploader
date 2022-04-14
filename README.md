@@ -125,7 +125,7 @@ Running the package uploader requires three arguments.
 
 | Operation | Description |
 | --- | ---|
-| **[GetProduct](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetProduct)** | Gets metadata for the product. This is useful for getting the productId, BigId, and product name that's used in all configuration files. |
+| **[GetProduct](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetProduct)** | Gets metadata for the product. This is useful for getting the productId, BigId, product name that's used in all configuration files. And a list of the BranchFriendlyNames and FlightNames of the product. |
 | **[UploadUwpPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadUwpPackage)** | Uploads a UWP game package. |
 | **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads a XVC game package and assets, including EKB, SubVal, and layout files. |
 | **[RemovePackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#RemovePackages)** | Removes all game packages and assets from a branch. We recommend keeping only your 10 most recent packages to ensure optimal performance. |
@@ -189,7 +189,8 @@ Product: {
   "productId":"00000000000000000000",
   "bigId":"9FAKEBIGID",
   "productName":" Test product (Hidden)",
-  "isJaguar":true
+  "branchFriendlyNames": ["Main", "Branch1", "Branch2", "Branch3"],
+  "flightNames": ["Flight 1", "Flight 2", "Flight 3"]
 }
 ```
 

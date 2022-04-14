@@ -3,16 +3,15 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models
+namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+
+public abstract class AadAuthInfo
 {
-    public abstract class AadAuthInfo
-    {
-        public const string ConfigName = nameof(AadAuthInfo);
+    public const string ConfigName = nameof(AadAuthInfo);
 
-        [Required]
-        public string TenantId { get; set; }
+    [Required]
+    public string TenantId { get; set; }
 
-        [Required]
-        public string ClientId { get; set; }
-    }
+    [Required]
+    public string ClientId { get; set; }
 }
