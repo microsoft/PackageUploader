@@ -10,5 +10,5 @@ namespace PackageUploader.ClientApi.Client.Xfus;
 
 public interface IXfusUploader
 {
-    Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, CancellationToken ct);
+    Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, bool deltaUpload, CancellationToken ct);
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
@@ -66,4 +67,9 @@ internal class IngestionGamePackage : IngestionResource
     /// xvc target platform of the package
     /// </summary>
     public string XvcTargetPlatform { get; set; }
+
+    /// <summary>
+    /// client metadata, contains XvcTargetPlatform from input game packages
+    /// </summary>
+    public JToken ClientExtractedMetaData { get; set; }
 }

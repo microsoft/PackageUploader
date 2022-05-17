@@ -12,4 +12,6 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
 
     [Required]
     public GameAssets GameAssets { get; set; }
+
+    public bool DeltaUpload { get; set; } = false;
 }

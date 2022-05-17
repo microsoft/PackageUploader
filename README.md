@@ -372,7 +372,7 @@ You have uploaded two packages to the same branch. Use the Partner Center portal
 **A:** No. We're currently working with the Partner Center team to make this possible. For now, each product you upload requires the creation of a unique Azure AD application.
 
 **Q:** Are delta uploads supported?<br>
-**A:** No. But they're coming. When the service is updated, delta uploads will start working right away and you should notice a significant improvement in upload speeds.
+**A:** TBD - answer is a bit nuanced since UWP won't be supported. TODO check the official GDK documentation of delta upload and expectations.
 
 **Q:** Can I upload multiple packages for the same product at the same time?<br>
 **A:** No. You'll need to upload packages one at a time.

@@ -47,7 +47,7 @@ internal class XfusUploader : IXfusUploader
         _uploadConfig = uploadConfig?.Value ?? throw new ArgumentNullException(nameof(uploadConfig));
     }
 
-    public async Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, CancellationToken ct)
+    public async Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, bool deltaUpload, CancellationToken ct)
     {
         if (!uploadFile.Exists)
         {
@@ -64,7 +64,7 @@ internal class XfusUploader : IXfusUploader
         var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(xfusUploadInfo.Token));
         httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authToken);
 
-        var uploadProgress = await InitializeAssetAsync(httpClient, xfusUploadInfo.XfusId, uploadFile, ct).ConfigureAwait(false);
+        var uploadProgress = await InitializeAssetAsync(httpClient, xfusUploadInfo.XfusId, uploadFile, deltaUpload, ct).ConfigureAwait(false);
         _logger.LogDebug($"XFUS Asset Initialized. Will upload {new ByteSize(uploadFile.Length)} across {uploadProgress.PendingBlocks.Length} blocks.");
         _logger.LogInformation($"XFUS Asset Initialized. Will upload {uploadFile.Name} at size of {new ByteSize(uploadFile.Length)}.");
 
@@ -92,7 +92,7 @@ internal class XfusUploader : IXfusUploader
 
             try
             {
-                uploadProgress = await ContinueAssetAsync(httpClient, xfusUploadInfo.XfusId, ct).ConfigureAwait(false);
+                uploadProgress = await ContinueAssetAsync(httpClient, xfusUploadInfo.XfusId, deltaUpload, ct).ConfigureAwait(false);
                 progress.BlocksLeftToUpload = uploadProgress.PendingBlocks?.Length ?? 0;
                 progress.ReportProgress();
 
@@ -126,7 +126,7 @@ internal class XfusUploader : IXfusUploader
         _logger.LogInformation($"{uploadFile.Name} Upload complete in: (HH:MM:SS) {hours}:{minutes}:{seconds}.");
     }
 
-    private async Task<UploadProgress> InitializeAssetAsync(HttpClient httpClient, Guid assetId, FileInfo uploadFile, CancellationToken ct)
+    private async Task<UploadProgress> InitializeAssetAsync(HttpClient httpClient, Guid assetId, FileInfo uploadFile, bool deltaUpload, CancellationToken ct)
     {
         var properties = new UploadProperties
         {
@@ -137,7 +137,7 @@ internal class XfusUploader : IXfusUploader
             }
         };
 
-        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", properties);
+        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", deltaUpload, properties);
         using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
 
         var response = await httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
@@ -146,6 +146,7 @@ internal class XfusUploader : IXfusUploader
             throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
         }
 
+        _logger.LogDebug("XFUS AssetId: {assetId}", assetId);
         var uploadProgress = await response.Content.ReadFromJsonAsync<UploadProgress>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
         return uploadProgress;
     }
@@ -213,9 +214,9 @@ internal class XfusUploader : IXfusUploader
         }
     }
 
-    private static async Task<UploadProgress> ContinueAssetAsync(HttpMessageInvoker httpClient, Guid assetId, CancellationToken ct)
+    private static async Task<UploadProgress> ContinueAssetAsync(HttpMessageInvoker httpClient, Guid assetId, bool deltaUpload, CancellationToken ct)
     {
-        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", string.Empty);
+        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", deltaUpload, string.Empty);
 
         var response = await httpClient.SendAsync(req, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
@@ -227,11 +228,17 @@ internal class XfusUploader : IXfusUploader
         return uploadProgress;
     }
 
-    private static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, T content)
+    private static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, bool deltaUpload, T content)
     {
         var request = new HttpRequestMessage(method, url);
         request.Content = new StringContent(JsonSerializer.Serialize(content, DefaultJsonSerializerOptions));
         request.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Json);
+
+        if (deltaUpload)
+        {
+            request.Headers.Add("X-MS-EnableDeltaUploads", "True");
+        }
+
         return request;
     }
 
