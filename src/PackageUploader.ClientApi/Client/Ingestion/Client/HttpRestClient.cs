@@ -31,6 +31,7 @@ internal abstract class HttpRestClient : IHttpRestClient
 
     private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
     private const LogLevel VerboseLogLevel = LogLevel.Trace;
+    private const string SDKVersion = "SDK-V1.5.0";
 
     protected HttpRestClient(ILogger logger, HttpClient httpClient)
     {
@@ -160,6 +161,7 @@ internal abstract class HttpRestClient : IHttpRestClient
             request.Content = JsonContent.Create(inputValue, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions);
         }
         request.Headers.Add("Request-ID", Guid.NewGuid().ToString());
+        request.Headers.Add("MethodOfAccess", SDKVersion);
 
         if (customHeaders is not null && customHeaders.Any())
         {
