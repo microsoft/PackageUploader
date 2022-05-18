@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
-namespace PackageUploader.ClientApi.Client.Xfus;
+using Microsoft.Extensions.Logging;
+using System;
+
+namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
 internal class XfusBlockProgressReporter
 {
@@ -27,7 +26,7 @@ internal class XfusBlockProgressReporter
 
     public void ReportProgress()
     {
-        var ratio = (float)BlocksLeftToUpload / (float)BlocksToUpload;
+        var ratio = BlocksLeftToUpload / (float)BlocksToUpload;
         var percentage = 100 - (int)Math.Round(100 * ratio);
 
         if (percentage > PercentComplete)

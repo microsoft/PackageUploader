@@ -1,4 +1,7 @@
-﻿using PackageUploader.ClientApi.Client.Xfus.Config;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using PackageUploader.ClientApi.Client.Xfus.Config;
 using PackageUploader.ClientApi.Client.Xfus.Exceptions;
 using PackageUploader.ClientApi.Client.Xfus.Models.Internal;
 using Microsoft.Extensions.Logging;
@@ -13,8 +16,9 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using System.Linq;
 
-namespace PackageUploader.ClientApi.Client.Xfus;
+namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
 internal class XfusApiController
 {
@@ -26,16 +30,23 @@ internal class XfusApiController
     };
     private ILogger<XfusUploader> _logger;
     private UploadConfig _uploadConfig;
+    private readonly HttpClient _httpClient;
 
-    public XfusApiController(ILogger<XfusUploader> logger, UploadConfig uploadConfig)
+    public XfusApiController(ILogger<XfusUploader> logger, HttpClient httpClient, UploadConfig uploadConfig)
     {
         _logger = logger;
         _uploadConfig = uploadConfig;
+        _httpClient = httpClient;
     }
 
-    internal async Task UploadBlocksAsync(HttpClient httpClient, Block[] blockToBeUploaded, int maxBlockSize, FileInfo uploadFile, Guid assetId, XfusBlockProgressReporter blockProgressReporter, CancellationToken ct)
+    internal async Task UploadBlocksAsync(Block[] blockToBeUploaded, FileInfo uploadFile, Guid assetId, XfusBlockProgressReporter blockProgressReporter, CancellationToken ct)
     {
-        var bufferPool = new BufferPool(maxBlockSize);
+        // We want to use the biggest block size because it is most likely to be the most frequent block size
+        // among different upload scenarios. In addition, by over-allocating memory, we minimize potential
+        // memory usage spikes during the middle of an upload as blocks are created and reused.
+        var maximumBlockSize = (int)blockToBeUploaded.Max(x => x.Size);
+
+        var bufferPool = new BufferPool(maximumBlockSize);
         var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _uploadConfig.MaxParallelism };
         var uploadBlock = new ActionBlock<Block>(async block =>
         {
@@ -55,7 +66,7 @@ internal class XfusApiController
                 // when trying to send http request.
                 Array.Resize(ref buffer, bytesRead);
 
-                await UploadBlockFromPayloadAsync(httpClient, block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
+                await UploadBlockFromPayloadAsync(block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
 
                 blockProgressReporter.BlocksLeftToUpload--;
                 blockProgressReporter.BytesUploaded += bytesRead;
@@ -83,18 +94,18 @@ internal class XfusApiController
         await uploadBlock.Completion.ConfigureAwait(false);
     }
 
-    internal static async Task UploadBlockFromPayloadAsync(HttpMessageInvoker httpClient, long contentLength, Guid assetId, long blockId, byte[] payload, CancellationToken ct)
+    internal async Task UploadBlockFromPayloadAsync(long contentLength, Guid assetId, long blockId, byte[] payload, CancellationToken ct)
     {
         using var req = CreateStreamRequest(HttpMethod.Put, $"{assetId}/blocks/{blockId}/source/payload", payload, contentLength);
 
-        var response = await httpClient.SendAsync(req, ct).ConfigureAwait(false);
+        var response = await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
         }
     }
 
-    internal async Task<UploadProgress> InitializeAssetAsync(HttpClient httpClient, Guid assetId, FileInfo uploadFile, bool deltaUpload, CancellationToken ct)
+    internal async Task<UploadProgress> InitializeAssetAsync(Guid assetId, FileInfo uploadFile, bool deltaUpload, CancellationToken ct)
     {
         var properties = new UploadProperties
         {
@@ -108,7 +119,7 @@ internal class XfusApiController
         using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", deltaUpload, properties);
         using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
 
-        var response = await httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
+        var response = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
@@ -119,11 +130,11 @@ internal class XfusApiController
         return uploadProgress;
     }
 
-    internal async Task<UploadProgress> ContinueAssetAsync(HttpMessageInvoker httpClient, Guid assetId, bool deltaUpload, CancellationToken ct)
+    internal async Task<UploadProgress> ContinueAssetAsync(Guid assetId, bool deltaUpload, CancellationToken ct)
     {
         using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", deltaUpload, string.Empty);
 
-        var response = await httpClient.SendAsync(req, ct).ConfigureAwait(false);
+        var response = await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             throw new XfusServerException(response.StatusCode, response.ReasonPhrase);

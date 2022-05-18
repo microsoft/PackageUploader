@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PackageUploader.ClientApi.Client.Xfus;
+namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
 public interface IXfusUploader
 {

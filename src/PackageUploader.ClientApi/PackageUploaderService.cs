@@ -4,7 +4,7 @@
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
-using PackageUploader.ClientApi.Client.Xfus;
+using PackageUploader.ClientApi.Client.Xfus.Uploader;
 using PackageUploader.ClientApi.Models;
 using System;
 using System.Collections.Generic;
