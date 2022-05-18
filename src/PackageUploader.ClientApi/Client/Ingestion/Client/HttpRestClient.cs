@@ -27,7 +27,6 @@ internal abstract class HttpRestClient : IHttpRestClient
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
     private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
