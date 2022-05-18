@@ -143,7 +143,7 @@ public class PackageUploaderService : IPackageUploaderService
             throw new FileNotFoundException("Package file not found.", packageFile.FullName);
         }
 
-        var xvcTargetPlatform = ReadXvcTargetPlatformFromMetaData(packageFile, ct);
+        var xvcTargetPlatform = ReadXvcTargetPlatformFromMetaData(packageFile);
 
         _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
         var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, deltaUpload, xvcTargetPlatform, ct).ConfigureAwait(false);
@@ -583,7 +583,7 @@ public class PackageUploaderService : IPackageUploaderService
         return gameSubmission;
     }
 
-    private XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileInfo packageFile, CancellationToken ct)
+    private XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileInfo packageFile)
     {
         const int HeaderOffsetForXvcTargetPlatform = 1137;
 
