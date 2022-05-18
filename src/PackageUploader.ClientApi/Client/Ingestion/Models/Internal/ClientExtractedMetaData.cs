@@ -1,4 +1,7 @@
-﻿namespace PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+namespace PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
 
 public class ClientExtractedMetaData
 {
