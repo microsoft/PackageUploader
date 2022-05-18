@@ -151,8 +151,6 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         }
 
         _logger.LogInformation("Package id: {packageId}", ingestionGamePackage.Id);
-        _logger.LogDebug("Client XvcTargetPlatform: {xvcTargetPlatform}", xvcTargetPlatform);
-        _logger.LogDebug("API XvcTargetPlatform: {ingestionGamePackage.XvcTargetPlatform}", ingestionGamePackage.XvcTargetPlatform);
 
         var gamePackage = ingestionGamePackage.Map();
         return gamePackage;
