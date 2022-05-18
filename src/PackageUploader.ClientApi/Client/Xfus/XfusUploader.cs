@@ -65,44 +65,47 @@ internal class XfusUploader : IXfusUploader
         httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authToken);
 
         var uploadProgress = await InitializeAssetAsync(httpClient, xfusUploadInfo.XfusId, uploadFile, deltaUpload, ct).ConfigureAwait(false);
-        _logger.LogDebug($"XFUS Asset Initialized. Will upload {new ByteSize(uploadFile.Length)} across {uploadProgress.PendingBlocks.Length} blocks.");
-        _logger.LogInformation($"XFUS Asset Initialized. Will upload {uploadFile.Name} at size of {new ByteSize(uploadFile.Length)}.");
+        long totalBlockBytes = uploadProgress.PendingBlocks.Sum(x => x.Size);
+        _logger.LogInformation($"XFUS Asset Initialized. Will upload {new ByteSize(totalBlockBytes)} across {uploadProgress.PendingBlocks.Length} blocks.");
 
-        var progress = new Progress(_logger, uploadProgress.PendingBlocks.Length);
-        progress.ReportProgress();
-        long bytesUploaded = 0;
+        var blockProgressReporter = new BlockProgressReporter(_logger, uploadProgress.PendingBlocks.Length, totalBlockBytes);
+        blockProgressReporter.ReportProgress();
+        long totalBytesUploaded = totalBlockBytes;
+
         while (uploadProgress.Status != UploadStatus.Completed)
         {
-            if (uploadProgress.Status == UploadStatus.Busy)
-            {
-                await Task.Delay(uploadProgress.RequestDelay, ct).ConfigureAwait(false);
-            }
-            else if (uploadProgress.Status == UploadStatus.ReceivingBlocks &&
-                     uploadProgress.PendingBlocks != null && uploadProgress.PendingBlocks.Any())
+            var validBlocks = uploadProgress.PendingBlocks != null && uploadProgress.PendingBlocks.Any();
+            if (uploadProgress.Status == UploadStatus.ReceivingBlocks && validBlocks)
             {
                 // We want to use the biggest block size because it is most likely to be the most frequent block size
                 // among different upload scenarios. In addition, by over-allocating memory, we minimize potential
                 // memory usage spikes during the middle of an upload as blocks are created and reused.
                 var maximumBlockSize = (int)uploadProgress.PendingBlocks.Max(x => x.Size);
 
-                bytesUploaded = await UploadBlocksAsync(httpClient, uploadProgress.PendingBlocks, maximumBlockSize,
-                        uploadFile, xfusUploadInfo.XfusId, bytesUploaded, progress, ct)
-                    .ConfigureAwait(false);
+                await UploadBlocksAsync(httpClient, uploadProgress.PendingBlocks, maximumBlockSize, uploadFile, xfusUploadInfo.XfusId, blockProgressReporter, ct).ConfigureAwait(false);
             }
 
             try
-            {
+            { 
                 uploadProgress = await ContinueAssetAsync(httpClient, xfusUploadInfo.XfusId, deltaUpload, ct).ConfigureAwait(false);
-                progress.BlocksLeftToUpload = uploadProgress.PendingBlocks?.Length ?? 0;
-                progress.ReportProgress();
 
-                if (uploadProgress.Status == UploadStatus.Busy)
+                if (uploadProgress.Status == UploadStatus.ReceivingBlocks)
                 {
+                    totalBlockBytes = uploadProgress.PendingBlocks.Sum(x => x.Size);
+                    totalBytesUploaded += totalBlockBytes;
+
+                    blockProgressReporter = new BlockProgressReporter(_logger, uploadProgress.PendingBlocks.Length, totalBlockBytes);
+                    _logger.LogInformation($"XFUS Asset Continuation. Will upload {new ByteSize(totalBlockBytes)} across {uploadProgress.PendingBlocks.Length} blocks.");
+                }
+                else if (uploadProgress.Status == UploadStatus.Busy)
+                {
+                    var deltaMessage = deltaUpload ? " (likely waiting for delta plan calculation from XFUS API)" : string.Empty;
+                    _logger.LogInformation($"XFUS API is busy and requested we retry in: (HH:MM:SS) {uploadProgress.RequestDelay}...{deltaMessage}");
                     await Task.Delay(uploadProgress.RequestDelay, ct).ConfigureAwait(false);
                 }
                 else if (uploadProgress.Status == UploadStatus.Completed)
                 {
-                    _logger.LogTrace($"Upload complete. Bytes: {bytesUploaded}");
+                    _logger.LogTrace($"Upload complete. Total uploaded: {new ByteSize(totalBytesUploaded)}");
                 }
             }
             catch (XfusServerException serverException)
@@ -151,8 +154,8 @@ internal class XfusUploader : IXfusUploader
         return uploadProgress;
     }
 
-    private async Task<long> UploadBlocksAsync(HttpClient httpClient, Block[] blockToBeUploaded, int maxBlockSize,
-        FileInfo uploadFile, Guid assetId, long bytesUploaded, Progress progress, CancellationToken ct)
+    private async Task UploadBlocksAsync(HttpClient httpClient, Block[] blockToBeUploaded, int maxBlockSize,
+        FileInfo uploadFile, Guid assetId, BlockProgressReporter blockProgressReporter, CancellationToken ct)
     {
         var bufferPool = new BufferPool(maxBlockSize);
         var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _uploadConfig.MaxParallelism };
@@ -176,10 +179,10 @@ internal class XfusUploader : IXfusUploader
 
                     await UploadBlockFromPayloadAsync(httpClient, block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
 
-                    progress.BlocksLeftToUpload--;
-                    bytesUploaded += bytesRead;
-                    _logger.LogTrace($"Uploaded block {block.Id}. Total uploaded: {new ByteSize(bytesUploaded)} / {new ByteSize(uploadFile.Length)}.");
-                    progress.ReportProgress();
+                    blockProgressReporter.BlocksLeftToUpload--;
+                    blockProgressReporter.BytesUploaded += bytesRead;
+                    _logger.LogTrace($"Uploaded block {block.Id}. Total uploaded: {new ByteSize(blockProgressReporter.BytesUploaded)} / {new ByteSize(blockProgressReporter.TotalBlockBytes)}.");
+                    blockProgressReporter.ReportProgress();
                 }
                 // Swallow exceptions so other chunk upload can proceed without ActionBlock terminating
                 // from a midway-failed chunk upload. We'll re-upload failed chunks later on so this is ok.
@@ -200,7 +203,6 @@ internal class XfusUploader : IXfusUploader
 
         uploadBlock.Complete();
         await uploadBlock.Completion.ConfigureAwait(false);
-        return bytesUploaded;
     }
 
     private static async Task UploadBlockFromPayloadAsync(HttpMessageInvoker httpClient, long contentLength, Guid assetId, long blockId, byte[] payload, CancellationToken ct)
@@ -251,20 +253,22 @@ internal class XfusUploader : IXfusUploader
         return request;
     }
 
-    private class Progress
+    private class BlockProgressReporter
     {
         private readonly ILogger _logger;
 
         public int BlocksToUpload { get; }
         public int BlocksLeftToUpload { get; set; }
-        public int PercentComplete { get; private set; }
+        public int PercentComplete { get; private set; } = -1;
+        public long BytesUploaded { get; set; }
+        public long TotalBlockBytes { get; }
 
-        public Progress(ILogger logger, int blocksToUpload)
+        public BlockProgressReporter(ILogger logger, int blocksToUpload, long totalBlockBytes)
         {
             _logger = logger;
             BlocksToUpload = blocksToUpload;
             BlocksLeftToUpload = blocksToUpload;
-            PercentComplete = -1;
+            TotalBlockBytes = totalBlockBytes;
         }
 
         public void ReportProgress()
