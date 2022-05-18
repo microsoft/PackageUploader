@@ -122,12 +122,7 @@ internal class XfusUploader : IXfusUploader
         }
 
         timer.Stop();
-
-        var hours = timer.Elapsed.Hours < 10 ? $"0{timer.Elapsed.Hours}" : $"{timer.Elapsed.Hours}";
-        var minutes = timer.Elapsed.Minutes < 10 ? $"0{timer.Elapsed.Minutes}" : $"{timer.Elapsed.Minutes}";
-        var seconds = timer.Elapsed.Seconds < 10 ? $"0{timer.Elapsed.Seconds}" : $"{timer.Elapsed.Seconds}";
-
-        _logger.LogInformation($"{uploadFile.Name} Upload complete in: (HH:MM:SS) {hours}:{minutes}:{seconds}.");
+        _logger.LogInformation($"{uploadFile.Name} Upload complete in: (HH:MM:SS) {timer.Elapsed:hh\\:mm\\:ss}.");
     }
 
     private async Task<UploadProgress> InitializeAssetAsync(HttpClient httpClient, Guid assetId, FileInfo uploadFile, bool deltaUpload, CancellationToken ct)
@@ -150,7 +145,7 @@ internal class XfusUploader : IXfusUploader
             throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
         }
 
-        _logger.LogDebug("XFUS AssetId: {assetId}", assetId);
+        _logger.LogInformation("XFUS AssetId: {assetId}", assetId);
         var uploadProgress = await response.Content.ReadFromJsonAsync<UploadProgress>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
         return uploadProgress;
     }
