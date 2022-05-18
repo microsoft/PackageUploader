@@ -88,6 +88,7 @@ internal class XfusUploader : IXfusUploader
             try
             { 
                 uploadProgress = await ContinueAssetAsync(httpClient, xfusUploadInfo.XfusId, deltaUpload, ct).ConfigureAwait(false);
+                _logger.LogDebug($"UploadProgress.Status after ContinueAsset: {uploadProgress.Status}");
 
                 if (uploadProgress.Status == UploadStatus.ReceivingBlocks)
                 {
