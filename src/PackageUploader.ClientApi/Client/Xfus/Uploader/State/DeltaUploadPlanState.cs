@@ -24,11 +24,11 @@ internal class DeltaUploadPlanState : XfusUploaderState
     internal override async Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, CancellationToken ct)
     {
         var uploadProgress = _uploadProgress;
-        _logger.LogInformation($"XFUS Asset Header uploaded. Please wait while the API calculates the Delta Upload Plan.");
+        _logger.LogInformation("XFUS Asset Header uploaded. Please wait while the API calculates the Delta Upload Plan.");
 
         while (uploadProgress.Status == UploadStatus.Busy)
         {
-            _logger.LogInformation($"XFUS Asset Header uploaded. Delta Upload Plan still calculating, retrying in (HH:MM:SS) {uploadProgress.RequestDelay}.");
+            _logger.LogInformation("XFUS Asset Header uploaded. Delta Upload Plan still calculating, retrying in (HH:MM:SS) {requestDelay}.", uploadProgress.RequestDelay.ToString("hh:mm:ss"));
             uploadProgress = await StepUploadAsync(uploadProgress, xfusUploadInfo, uploadFile, true, httpTimeoutMs, ct).ConfigureAwait(false);
         }
 

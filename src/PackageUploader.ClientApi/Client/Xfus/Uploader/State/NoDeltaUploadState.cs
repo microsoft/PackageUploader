@@ -19,11 +19,11 @@ internal class NoDeltaUploadState : XfusUploaderState
     internal override async Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, CancellationToken ct)
     {
         var uploadProgress = await InitializeAssetAsync(xfusUploadInfo, uploadFile, false, ct).ConfigureAwait(false);
-        _logger.LogInformation($"XFUS Asset Initialized. Will upload {new ByteSize(_xfusBlockProgressReporter.TotalBlockBytes)} across {uploadProgress.PendingBlocks.Length} blocks.");
+        _logger.LogInformation("XFUS Asset Initialized. Will upload {totalBlockBytes} across {pendingBlocks} blocks.", new ByteSize(_xfusBlockProgressReporter.TotalBlockBytes), uploadProgress.PendingBlocks.Length);
 
         await FullUploadAsync(uploadProgress, xfusUploadInfo, uploadFile, false, httpTimeoutMs, ct).ConfigureAwait(false);
 
-        _logger.LogTrace($"Upload complete. Total Uploaded: {new ByteSize(_totalBytesUploaded)}");
+        _logger.LogTrace("Upload complete. Total Uploaded: {totalBytesUploaded}", new ByteSize(_totalBytesUploaded));
         return null;
     }
 }

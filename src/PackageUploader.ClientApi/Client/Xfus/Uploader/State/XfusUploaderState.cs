@@ -52,7 +52,7 @@ internal abstract class XfusUploaderState
             if (!firstRun)
             {
                 var totalBlockBytes = uploadProgress.PendingBlocks.Sum(x => x.Size);
-                _logger.LogInformation($"XFUS Asset Continuation requested. Will upload {new ByteSize(totalBlockBytes)} across {uploadProgress.PendingBlocks.Length} blocks.");
+                _logger.LogInformation("XFUS Asset Continuation requested. Will upload {totalBlockBytes} across {pendingBlocks} blocks.", new ByteSize(totalBlockBytes), uploadProgress.PendingBlocks.Length);
             }
             firstRun = false;
         }
@@ -97,13 +97,13 @@ internal abstract class XfusUploaderState
             }
             else if (uploadProgress.Status == UploadStatus.Busy)
             {
-                _logger.LogInformation($"XFUS API is busy and requested we retry in: (HH:MM:SS) {uploadProgress.RequestDelay}...");
+                _logger.LogInformation("XFUS API is busy and requested we retry in: (HH:MM:SS) {requestDelay}...", uploadProgress.RequestDelay.ToString("hh:mm:ss"));
                 await Task.Delay(uploadProgress.RequestDelay, ct).ConfigureAwait(false);
             }
         }
         catch (XfusServerException serverException)
         {
-            _logger.LogDebug($"Exception: {serverException}");
+            _logger.LogDebug(serverException, "Server exception thrown.");
             if (serverException.IsRetryable || serverException.HttpStatusCode == HttpStatusCode.ServiceUnavailable)
             {
                 await Task.Delay(
