@@ -28,8 +28,9 @@ internal class XfusApiController
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
-    private ILogger<XfusUploader> _logger;
-    private UploadConfig _uploadConfig;
+
+    private readonly ILogger<XfusUploader> _logger;
+    private readonly UploadConfig _uploadConfig;
     private readonly HttpClient _httpClient;
 
     public XfusApiController(ILogger<XfusUploader> logger, HttpClient httpClient, UploadConfig uploadConfig)
@@ -56,9 +57,9 @@ internal class XfusApiController
                 buffer = bufferPool.GetBuffer(); // Take or create buffer from the pool
                 await using var stream = File.OpenRead(uploadFile.FullName);
                 stream.Seek(block.Offset, SeekOrigin.Begin);
-                var bytesRead = await stream.ReadAsync(buffer, 0, (int)block.Size, ct).ConfigureAwait(false);
+                var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, (int)block.Size), ct).ConfigureAwait(false);
 
-                _logger.LogTrace($"Uploading block {block.Id} with payload: {new ByteSize(bytesRead)}.");
+                _logger.LogTrace("Uploading block {blockId} with payload: {bytesRead}.", block.Id, new ByteSize(bytesRead));
 
                 // In certain scenarios like delta uploads, or the last chunk in an upload,
                 // the actual chunk size could be less than the largest chunk size.
@@ -70,14 +71,14 @@ internal class XfusApiController
 
                 blockProgressReporter.BlocksLeftToUpload--;
                 blockProgressReporter.BytesUploaded += bytesRead;
-                _logger.LogTrace($"Uploaded block {block.Id}. Total uploaded: {new ByteSize(blockProgressReporter.BytesUploaded)} / {new ByteSize(blockProgressReporter.TotalBlockBytes)}.");
+                _logger.LogTrace("Uploaded block {blockId}. Total uploaded: {bytesUploaded} / {totalBlockBytes}.", block.Id, new ByteSize(blockProgressReporter.BytesUploaded), new ByteSize(blockProgressReporter.TotalBlockBytes));
                 blockProgressReporter.ReportProgress();
             }
             // Swallow exceptions so other chunk upload can proceed without ActionBlock terminating
             // from a midway-failed chunk upload. We'll re-upload failed chunks later on so this is ok.
             catch (Exception e)
             {
-                _logger.LogTrace($"Block {block.Id} failed, will retry. {e}");
+                _logger.LogTrace(e, "Block {blockId} failed, will retry.", block.Id);
                 return;
             }
 

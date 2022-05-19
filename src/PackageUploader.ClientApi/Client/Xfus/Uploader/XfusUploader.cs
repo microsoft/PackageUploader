@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using PackageUploader.ClientApi.Client.Xfus.Config;
-using PackageUploader.ClientApi.Client.Xfus.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PackageUploader.ClientApi.Client.Xfus.Config;
+using PackageUploader.ClientApi.Client.Xfus.Models;
+using PackageUploader.ClientApi.Client.Xfus.Uploader.State;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -12,7 +13,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using PackageUploader.ClientApi.Client.Xfus.Uploader.State;
 
 namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
@@ -52,7 +52,7 @@ internal class XfusUploader : IXfusUploader
         }
 
         timer.Stop();
-        _logger.LogInformation($"{uploadFile.Name} Upload complete in: (HH:MM:SS) {timer.Elapsed:hh\\:mm\\:ss}.");
+        _logger.LogInformation("{uploadFileName} Upload complete in: (HH:MM:SS) {timerElapsed}.", uploadFile.Name, timer.Elapsed.ToString("hh:mm:ss"));
     }
 
     private HttpClient SetupHttpClient(XfusUploadInfo xfusUploadInfo)

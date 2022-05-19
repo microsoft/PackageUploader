@@ -32,7 +32,7 @@ internal class XfusBlockProgressReporter
         if (percentage > PercentComplete)
         {
             PercentComplete = percentage;
-            _logger.LogInformation($"Upload {percentage}% complete.");
+            _logger.LogInformation("Upload {percentage}% complete.", percentage);
         }
     }
 }
