@@ -97,7 +97,7 @@ internal abstract class XfusUploaderState
             }
             else if (uploadProgress.Status == UploadStatus.Busy)
             {
-                _logger.LogInformation("XFUS API is busy and requested we retry in: (HH:MM:SS) {requestDelay}...", uploadProgress.RequestDelay.ToString("hh:mm:ss"));
+                _logger.LogInformation("XFUS API is busy and requested we retry in: (HH:MM:SS) {requestDelay}...", uploadProgress.RequestDelay.ToString(@"hh\:mm\:ss"));
                 await Task.Delay(uploadProgress.RequestDelay, ct).ConfigureAwait(false);
             }
         }

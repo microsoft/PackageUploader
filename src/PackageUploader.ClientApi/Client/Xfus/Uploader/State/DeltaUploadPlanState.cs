@@ -28,7 +28,7 @@ internal class DeltaUploadPlanState : XfusUploaderState
 
         while (uploadProgress.Status == UploadStatus.Busy)
         {
-            _logger.LogInformation("XFUS Asset Header uploaded. Delta Upload Plan still calculating, retrying in (HH:MM:SS) {requestDelay}.", uploadProgress.RequestDelay.ToString("hh:mm:ss"));
+            _logger.LogInformation("XFUS Asset Header uploaded. Delta Upload Plan still calculating, retrying in (HH:MM:SS) {requestDelay}.", uploadProgress.RequestDelay.ToString(@"hh\:mm\:ss"));
             uploadProgress = await StepUploadAsync(uploadProgress, xfusUploadInfo, uploadFile, true, httpTimeoutMs, ct).ConfigureAwait(false);
         }
 

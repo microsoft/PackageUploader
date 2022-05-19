@@ -52,7 +52,7 @@ internal class XfusUploader : IXfusUploader
         }
 
         timer.Stop();
-        _logger.LogInformation("{uploadFileName} Upload complete in: (HH:MM:SS) {timerElapsed}.", uploadFile.Name, timer.Elapsed.ToString("hh:mm:ss"));
+        _logger.LogInformation("{uploadFileName} Upload complete in: (HH:MM:SS) {timerElapsed}.", uploadFile.Name, timer.Elapsed.ToString(@"hh\:mm\:ss"));
     }
 
     private HttpClient SetupHttpClient(XfusUploadInfo xfusUploadInfo)
