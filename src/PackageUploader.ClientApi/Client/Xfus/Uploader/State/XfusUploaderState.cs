@@ -47,7 +47,7 @@ internal abstract class XfusUploaderState
         while (uploadProgress.Status != UploadStatus.Completed)
         {
             await UploadBlocksAsync(uploadProgress, xfusUploadInfo, uploadFile, ct).ConfigureAwait(false);
-            uploadProgress = await CheckContinuationAsync(uploadProgress, xfusUploadInfo, deltaUpload, httpTimeoutMs, ct).ConfigureAwait(false);
+            uploadProgress = await CheckContinuationAsync(xfusUploadInfo, deltaUpload, httpTimeoutMs, ct).ConfigureAwait(false);
 
             if (!firstRun)
             {
@@ -68,7 +68,7 @@ internal abstract class XfusUploaderState
             {
                 continuationBlockComplete = true;
             }
-            uploadProgress = await CheckContinuationAsync(uploadProgress, xfusUploadInfo, deltaUpload, httpTimeoutMs, ct).ConfigureAwait(false);
+            uploadProgress = await CheckContinuationAsync(xfusUploadInfo, deltaUpload, httpTimeoutMs, ct).ConfigureAwait(false);
         }
         return uploadProgress;
     }
@@ -82,8 +82,9 @@ internal abstract class XfusUploaderState
         }
     }
 
-    private async Task<UploadProgress> CheckContinuationAsync(UploadProgress uploadProgress, XfusUploadInfo xfusUploadInfo, bool deltaUpload, int httpTimeoutMs, CancellationToken ct)
+    private async Task<UploadProgress> CheckContinuationAsync(XfusUploadInfo xfusUploadInfo, bool deltaUpload, int httpTimeoutMs, CancellationToken ct)
     {
+        UploadProgress uploadProgress;
         try
         {
             uploadProgress = await _xfusApiController.ContinueAssetAsync(xfusUploadInfo.XfusId, deltaUpload, ct).ConfigureAwait(false);
@@ -99,6 +100,10 @@ internal abstract class XfusUploaderState
             {
                 _logger.LogInformation("XFUS API is busy and requested we retry in: (HH:MM:SS) {requestDelay}...", uploadProgress.RequestDelay.ToString(@"hh\:mm\:ss"));
                 await Task.Delay(uploadProgress.RequestDelay, ct).ConfigureAwait(false);
+            }
+            else if (uploadProgress.Status == UploadStatus.Completed)
+            {
+                _totalBytesUploaded += _xfusBlockProgressReporter.BytesUploaded;
             }
         }
         catch (XfusServerException serverException)
