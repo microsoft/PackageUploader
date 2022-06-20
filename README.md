@@ -213,6 +213,8 @@ Product: {
   "flightName": "",
 
   "marketGroupName": "default",
+  
+  "deltaUpload": false,
 
   "packageFilePath": "C:\\Users\\someone\\Desktop\\StubPackage\\Builds\\TestPublisher.SomeDemoProductName_0.9.1.0_x64__fjtqkg6rpm1hy.msixvc",
   "gameAssets": {
