@@ -4,7 +4,7 @@
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
-using PackageUploader.ClientApi.Client.Xfus;
+using PackageUploader.ClientApi.Client.Xfus.Uploader;
 using PackageUploader.ClientApi.Models;
 using System;
 using System.Collections.Generic;
@@ -126,8 +126,8 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, CancellationToken ct)
-    {
+    public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, CancellationToken ct)
+        {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
         ArgumentNullException.ThrowIfNull(marketGroupPackage);
@@ -143,11 +143,13 @@ public class PackageUploaderService : IPackageUploaderService
             throw new FileNotFoundException("Package file not found.", packageFile.FullName);
         }
 
+        var xvcTargetPlatform = deltaUpload ? ReadXvcTargetPlatformFromMetaData(packageFile) : XvcTargetPlatform.NotSpecified;
+
         _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
-        var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, ct).ConfigureAwait(false);
+        var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, deltaUpload, xvcTargetPlatform, ct).ConfigureAwait(false);
 
         _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
-        await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, ct).ConfigureAwait(false);
+        await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, deltaUpload, ct).ConfigureAwait(false);
         _logger.LogDebug("Package file '{fileName}' uploaded.", packageFile.Name);
 
         package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
@@ -514,7 +516,8 @@ public class PackageUploaderService : IPackageUploaderService
             if (assetFile.Exists)
             {
                 var packageAsset = await _ingestionHttpClient.CreatePackageAssetRequestAsync(product.ProductId, processingPackage.Id, assetFile, assetType, ct).ConfigureAwait(false);
-                await _xfusUploader.UploadFileToXfusAsync(assetFile, packageAsset.UploadInfo, ct).ConfigureAwait(false);
+                var delta = false; // Assets do not need delta upload.
+                await _xfusUploader.UploadFileToXfusAsync(assetFile, packageAsset.UploadInfo, delta, ct).ConfigureAwait(false);
                 await _ingestionHttpClient.CommitPackageAssetAsync(product.ProductId, processingPackage.Id, packageAsset.Id, ct).ConfigureAwait(false);
             }
             else
@@ -578,5 +581,29 @@ public class PackageUploaderService : IPackageUploaderService
         });
 
         return gameSubmission;
+    }
+
+    private XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileInfo packageFile)
+    {
+        const int HeaderOffsetForXvcTargetPlatform = 1137;
+
+        byte data = 0;
+
+        using (var fileStream = File.OpenRead(packageFile.FullName))
+        using (var reader = new BinaryReader(fileStream))
+        {
+            reader.BaseStream.Seek(HeaderOffsetForXvcTargetPlatform, SeekOrigin.Begin);
+            data = reader.ReadByte();
+        }
+
+        var xvcTargetPlatform = (XvcTargetPlatform)data;
+
+        if (xvcTargetPlatform == XvcTargetPlatform.NotSpecified)
+        {
+            // Not specifying equates to Gen8.
+            xvcTargetPlatform = XvcTargetPlatform.ConsoleGen8;
+        }
+
+        return xvcTargetPlatform;
     }
 }

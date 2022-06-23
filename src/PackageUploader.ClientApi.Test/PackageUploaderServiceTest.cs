@@ -4,7 +4,7 @@
 using PackageUploader.ClientApi.Client.Ingestion;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
-using PackageUploader.ClientApi.Client.Xfus;
+using PackageUploader.ClientApi.Client.Xfus.Uploader;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;

@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using PackageUploader.ClientApi.Client.Xfus.Uploader;
 
 namespace PackageUploader.ClientApi.Client.Xfus;
 
