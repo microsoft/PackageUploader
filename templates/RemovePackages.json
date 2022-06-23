@@ -1,5 +1,5 @@
 {
-  "$schema": "https://product-ingestion-int.azureedge.net/schema/package-uploader-operation-configuration/2021-11-30",
+  "$schema": "https://product-ingestion.azureedge.net/schema/package-uploader-operation-configuration/2021-11-30",
 
   "operationName": "removePackages",
 
