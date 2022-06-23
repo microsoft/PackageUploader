@@ -33,7 +33,7 @@ internal class UploadXvcPackageOperation : Operation
         var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
         var marketGroupPackage = await _storeBrokerService.GetGameMarketGroupPackage(product, packageBranch, _config, ct).ConfigureAwait(false);
 
-        var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, marketGroupPackage, _config.PackageFilePath, _config.GameAssets, _config.MinutesToWaitForProcessing, ct).ConfigureAwait(false);
+        var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, marketGroupPackage, _config.PackageFilePath, _config.GameAssets, _config.MinutesToWaitForProcessing, _config.DeltaUpload, ct).ConfigureAwait(false);
         _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
 
         if (_config.AvailabilityDate is not null)

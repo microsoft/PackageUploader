@@ -213,6 +213,8 @@ Product: {
   "flightName": "",
 
   "marketGroupName": "default",
+  
+  "deltaUpload": false,
 
   "packageFilePath": "C:\\Users\\someone\\Desktop\\StubPackage\\Builds\\TestPublisher.SomeDemoProductName_0.9.1.0_x64__fjtqkg6rpm1hy.msixvc",
   "gameAssets": {
@@ -372,7 +374,7 @@ You have uploaded two packages to the same branch. Use the Partner Center portal
 **A:** No. We're currently working with the Partner Center team to make this possible. For now, each product you upload requires the creation of a unique Azure AD application.
 
 **Q:** Are delta uploads supported?<br>
-**A:** No. But they're coming. When the service is updated, delta uploads will start working right away and you should notice a significant improvement in upload speeds.
+**A:** Yes! For XVC and MSIXVC packages, delta upload will work the same as uploading direct in to Partner Center. Consult your DAM for how this works with your product and packages. UWP unfortunately is not supported and will not be in the future either.
 
 **Q:** Can I upload multiple packages for the same product at the same time?<br>
 **A:** No. You'll need to upload packages one at a time.

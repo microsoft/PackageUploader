@@ -119,7 +119,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         return selectedFlight.Map(branch);
     }
 
-    public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, CancellationToken ct)
+    public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, bool deltaUpload, XvcTargetPlatform xvcTargetPlatform, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(productId))
         {
@@ -141,7 +141,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
             throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
         }
 
-        var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId).Build();
+        var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId, deltaUpload, xvcTargetPlatform).Build();
 
         var ingestionGamePackage = await PostAsync<IngestionPackageCreationRequest, IngestionGamePackage>($"products/{productId}/packages", body, ct).ConfigureAwait(false);
 

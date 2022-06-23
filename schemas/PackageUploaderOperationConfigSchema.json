@@ -345,7 +345,11 @@
               "subValFilePath",
               "symbolsFilePath"
             ]
-          }
+          },
+          "deltaUpload": {
+            "description": "determine if delta upload should be used",
+            "type": "boolean"
+          } 
         },
         "required": [
           "gameAssets"

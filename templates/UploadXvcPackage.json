@@ -11,6 +11,8 @@
 
   "marketGroupName": "{{ default value is 'default' (case sensitive) }}",
 
+  "deltaUpload": false,
+
   "packageFilePath": "{{ required }}",
   "gameAssets": {
     "ekbFilePath": "{{ required }}",

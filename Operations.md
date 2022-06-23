@@ -65,6 +65,7 @@
 - **flightName**: *flightName* or *branchFriendlyName* required
 - **marketGroupName**: optional - if not set, it will use *default* as the market group (case sensitive)
 - **packageFilePath**: required - path to the package file
+- **deltaUpload**: optional - determine if delta upload should be used
 - **gameAssets**: required - paths to the game assets
   - **ekbFilePath**: required - path to the EKB file
   - **subValFilePath**: required - path to the SubVal File
