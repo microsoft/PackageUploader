@@ -33,7 +33,7 @@ internal class UploadUwpPackageOperation : Operation
         var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
         var marketGroupPackage = await _storeBrokerService.GetGameMarketGroupPackage(product, packageBranch, _config, ct).ConfigureAwait(false);
 
-        var delta = false; // Unfortunately UWP cannot and never will support delta upload.
+        const bool delta = false; // Unfortunately UWP cannot and never will support delta upload.
         var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, marketGroupPackage, _config.PackageFilePath, null, _config.MinutesToWaitForProcessing, delta, ct).ConfigureAwait(false);
         _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
 
