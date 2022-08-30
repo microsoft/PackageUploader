@@ -516,7 +516,7 @@ public class PackageUploaderService : IPackageUploaderService
             if (assetFile.Exists)
             {
                 var packageAsset = await _ingestionHttpClient.CreatePackageAssetRequestAsync(product.ProductId, processingPackage.Id, assetFile, assetType, ct).ConfigureAwait(false);
-                var delta = false; // Assets do not need delta upload.
+                const bool delta = false; // Assets do not need delta upload.
                 await _xfusUploader.UploadFileToXfusAsync(assetFile, packageAsset.UploadInfo, delta, ct).ConfigureAwait(false);
                 await _ingestionHttpClient.CommitPackageAssetAsync(product.ProductId, processingPackage.Id, packageAsset.Id, ct).ConfigureAwait(false);
             }
@@ -583,16 +583,16 @@ public class PackageUploaderService : IPackageUploaderService
         return gameSubmission;
     }
 
-    private XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileInfo packageFile)
+    private static XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileSystemInfo packageFile)
     {
-        const int HeaderOffsetForXvcTargetPlatform = 1137;
+        const int headerOffsetForXvcTargetPlatform = 1137;
 
-        byte data = 0;
+        byte data;
 
         using (var fileStream = File.OpenRead(packageFile.FullName))
         using (var reader = new BinaryReader(fileStream))
         {
-            reader.BaseStream.Seek(HeaderOffsetForXvcTargetPlatform, SeekOrigin.Begin);
+            reader.BaseStream.Seek(headerOffsetForXvcTargetPlatform, SeekOrigin.Begin);
             data = reader.ReadByte();
         }
 
