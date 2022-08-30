@@ -49,7 +49,7 @@ internal sealed class PublishPackagesOperation : Operation
         {
             throw new Exception($"{nameof(_config.FlightName)} or ({nameof(_config.BranchFriendlyName)} and {nameof(_config.DestinationSandboxName)}) is required.");
         }
-        
+
         // Log validation errors if any
         var validationFailed = false;
         if (submission.SubmissionValidationItems is not null && submission.SubmissionValidationItems.Any())
