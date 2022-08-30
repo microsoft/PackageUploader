@@ -32,7 +32,7 @@ internal abstract class Operation
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message);
+            _logger.LogError("{errorMessage}", e.Message);
             _logger.LogTrace(e, "Exception thrown.");
             return 3;
         }
