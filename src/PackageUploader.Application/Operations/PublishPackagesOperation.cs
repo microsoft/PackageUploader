@@ -49,8 +49,7 @@ internal sealed class PublishPackagesOperation : Operation
         {
             throw new Exception($"{nameof(_config.FlightName)} or ({nameof(_config.BranchFriendlyName)} and {nameof(_config.DestinationSandboxName)}) is required.");
         }
-
-
+        
         // Log validation errors if any
         var validationFailed = false;
         if (submission.SubmissionValidationItems is not null && submission.SubmissionValidationItems.Any())
@@ -65,6 +64,7 @@ internal sealed class PublishPackagesOperation : Operation
             });
         }
 
+        // Throw error if validation failed
         if (validationFailed)
         {
             throw new Exception("Submission Validation Failed");
