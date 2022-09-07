@@ -8,7 +8,9 @@ using PackageUploader.ClientApi.Client.Ingestion.Config;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
 using Polly.Extensions.Http;
+using Polly.Timeout;
 using System;
+using System.Net.Http;
 using System.Net.Mime;
 
 namespace PackageUploader.ClientApi.Client.Ingestion;
@@ -25,14 +27,18 @@ internal static class IngestionExtensions
 
                 var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
                 httpClient.BaseAddress = new Uri(ingestionConfig.BaseAddress);
-                httpClient.Timeout = TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs);
             })
             .AddHttpMessageHandler<IngestionAuthenticationDelegatingHandler>()
             .AddPolicyHandler((serviceProvider, _) =>
             {
                 var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
                 var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(ingestionConfig.MedianFirstRetryDelayMs), ingestionConfig.RetryCount);
-                return HttpPolicyExtensions.HandleTransientHttpError().WaitAndRetryAsync(delay);
+                return HttpPolicyExtensions.HandleTransientHttpError().Or<TimeoutRejectedException>().WaitAndRetryAsync(delay);
+            })
+            .AddPolicyHandler((serviceProvider, _) =>
+            {
+                var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
+                return Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs));
             });
 
         return services;

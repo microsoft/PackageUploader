@@ -56,6 +56,7 @@ internal class Program
         logging.ClearProviders();
         logging.SetMinimumLevel(LogLevel.Warning);
         logging.AddFilter("PackageUploader", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
+        logging.AddFilter<FileLoggerProvider>("PackageUploader", LogLevel.Trace);
         logging.AddSimpleFile(options =>
         {
             options.SingleLine = true;

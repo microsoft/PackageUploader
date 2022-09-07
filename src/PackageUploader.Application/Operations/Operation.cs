@@ -25,15 +25,15 @@ internal abstract class Operation
             await ProcessAsync(ct).ConfigureAwait(false);
             return 0;
         }
-        catch (TaskCanceledException)
-        {
-            _logger.LogWarning("Operation cancelled.");
-            return 1;
-        }
         catch (Exception e)
         {
-            _logger.LogError("{errorMessage}", e.Message);
             _logger.LogTrace(e, "Exception thrown.");
+            if (ct.IsCancellationRequested)
+            {
+                _logger.LogWarning("Operation cancelled.");
+                return 1;
+            }
+            _logger.LogError("{errorMessage}", e.Message);
             return 3;
         }
         finally
