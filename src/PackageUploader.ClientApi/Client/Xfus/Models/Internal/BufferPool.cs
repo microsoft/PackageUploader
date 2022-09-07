@@ -7,27 +7,27 @@ namespace PackageUploader.ClientApi.Client.Xfus.Models.Internal;
 
 internal sealed class BufferPool
 {
-    private readonly ConcurrentBag<byte[]> pool;
-    private readonly long bufferSize;
+    private readonly ConcurrentBag<byte[]> _pool;
+    private readonly long _bufferSize;
 
     /// <summary>
     /// Simple unbounded byte array pool
     /// </summary>
-    /// <typeparam name="bufferSize">The size of the buffers inside the pool.</typeparam>
+    /// <param name="bufferSize">The size of the buffers inside the pool.</param>
     public BufferPool(int bufferSize)
     {
-        this.bufferSize = bufferSize;
-        this.pool = new ConcurrentBag<byte[]>();
+        _bufferSize = bufferSize;
+        _pool = new ConcurrentBag<byte[]>();
     }
 
     /// <summary>
     /// Simple unbounded byte array pool
     /// </summary>
-    /// <typeparam name="bufferSize">The size of the buffers inside the pool.</typeparam>
+    /// <param name="bufferSize">The size of the buffers inside the pool.</param>
     public BufferPool(long bufferSize)
     {
-        this.bufferSize = bufferSize;
-        this.pool = new ConcurrentBag<byte[]>();
+        _bufferSize = bufferSize;
+        _pool = new ConcurrentBag<byte[]>();
     }
 
     /// <summary>
@@ -37,8 +37,7 @@ internal sealed class BufferPool
     /// <returns>A buffer from the pool or a new one if the pool was empty.</returns>
     public byte[] GetBuffer()
     {
-        byte[] buffer;
-        return this.pool.TryTake(out buffer) ? buffer : new byte[this.bufferSize];
+        return _pool.TryTake(out var buffer) ? buffer : new byte[_bufferSize];
     }
 
     /// <summary>
@@ -48,9 +47,9 @@ internal sealed class BufferPool
     /// <param name="buffer">The buffer to recycle.</param>
     public void RecycleBuffer(byte[] buffer)
     {
-        if (buffer != null && buffer.Length == this.bufferSize)
+        if (buffer != null && buffer.Length == _bufferSize)
         {
-            this.pool.Add(buffer);
+            _pool.Add(buffer);
         }
     }
 }

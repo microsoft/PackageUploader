@@ -28,7 +28,7 @@ internal static class IngestionExtensions
                 httpClient.Timeout = TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs);
             })
             .AddHttpMessageHandler<IngestionAuthenticationDelegatingHandler>()
-            .AddPolicyHandler((serviceProvider, httpRequestMessage) =>
+            .AddPolicyHandler((serviceProvider, _) =>
             {
                 var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
                 var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(ingestionConfig.MedianFirstRetryDelayMs), ingestionConfig.RetryCount);
