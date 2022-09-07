@@ -13,7 +13,7 @@ internal class ByteSize
     private const ulong TeraMultiplier = 1024uL * 1024uL * 1024uL * 1024uL;
     private const ulong PetaMultiplier = 1024uL * 1024uL * 1024uL * 1024uL * 1024uL;
     private const ulong ExaMultiplier = 1024uL * 1024uL * 1024uL * 1024uL * 1024uL * 1024uL;
-    private static readonly Dictionary<char, ulong> SizeMultipliers = new Dictionary<char, ulong>
+    private static readonly Dictionary<char, ulong> SizeMultipliers = new()
     {
         { 'E', ExaMultiplier },
         { 'P', PetaMultiplier },
@@ -27,26 +27,26 @@ internal class ByteSize
 
     public ByteSize(ulong bytes)
     {
-        this.SizeInBytes = bytes;
+        SizeInBytes = bytes;
     }
 
     public ByteSize(long bytes)
     {
-        this.SizeInBytes = (ulong)bytes;
+        SizeInBytes = (ulong)bytes;
     }
 
     public override string ToString()
     {
         foreach (var prefixToSize in SizeMultipliers)
         {
-            if (this.SizeInBytes >= prefixToSize.Value)
+            if (SizeInBytes >= prefixToSize.Value)
             {
-                var size = (double)this.SizeInBytes / (double)prefixToSize.Value;
+                var size = (double)SizeInBytes / prefixToSize.Value;
 
-                return size.ToString("0.##") + prefixToSize.Key.ToString() + "B";
+                return size.ToString("0.##") + prefixToSize.Key + "B";
             }
         }
 
-        return this.SizeInBytes + "B";
+        return SizeInBytes + "B";
     }
 }
