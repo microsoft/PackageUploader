@@ -92,7 +92,7 @@ The tool currently supports either app secrets or certificates. Perform one of t
 1.  Sign into Partner Center as a user with Manager level account permissions.
 2.  Select **Settings** (gear icon) in the top right, and then select **Account Settings**.
 3.  In the left pane select **User Management** and then select **Azure AD Applications**.
-4.  Select **Create Azure AD application**, select the Azure application you created in the previous steps and then select **Next**.<br>**NOTE:** If your application doesn’t appear, ensure that you created it in the same tenant that’s linked to Partner Center.
+4.  Select **Add Azure AD Application**, then click **Add Azure AD Application** again in the pop up that appears. Select the Azure application you created in the previous steps and then select **Next**.<br>**NOTE:** If your application doesn’t appear, ensure that you created it in the same tenant that’s linked to Partner Center.
 5.  On the top tab, select **Customize permissions**.
 6.  Find the product that you want to programmatically upload builds to. Grant your Azure application the **Read/Write** permission under **Publishing**. For more information, see [Add an Azure AD tenant to your account](https://docs.microsoft.com/partner-center/multi-tenant-account#add-an-azure-ad-tenant-to-your-account).
 
