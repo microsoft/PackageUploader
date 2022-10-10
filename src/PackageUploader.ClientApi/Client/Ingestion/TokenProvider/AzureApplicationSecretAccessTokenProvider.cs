@@ -47,7 +47,7 @@ public class AzureApplicationSecretAccessTokenProvider : IAccessTokenProvider
         var msalClient = ConfidentialClientApplicationBuilder
             .Create(_aadAuthInfo.ClientId)
             .WithClientSecret(_aadAuthInfo.ClientSecret)
-            .WithAuthority(authority, true)
+            .WithAuthority(authority)
             .Build();
 
         _logger.LogDebug("Requesting authentication token");

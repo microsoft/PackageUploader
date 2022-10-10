@@ -10,7 +10,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.NamingConventionBinder;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,7 +22,7 @@ internal static class ProgramExtensions
 {
     public static Command AddOperationHandler<T>(this Command command) where T : Operation
     {
-        command.SetHandler((IHost host, CancellationToken ct) => RunAsyncOperation<T>(host, ct));
+        command.Handler = CommandHandler.Create(async (IHost host, CancellationToken ct) => await RunAsyncOperation<T>(host, ct).ConfigureAwait(false));
         return command;
     }
 
@@ -29,14 +31,28 @@ internal static class ProgramExtensions
         var logger = host.Services.GetRequiredService<ILogger<Program>>();
         try
         {
+            var version = GetVersion();
+            logger.LogDebug("PackageUploader v.{version} is starting.", version);
             return await host.Services.GetRequiredService<T>().RunAsync(ct).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            logger.LogError(e.Message);
+            logger.LogError("{errorMessage}", e.Message);
             logger.LogTrace(e, "Exception thrown.");
             return 2;
         }
+    }
+
+    private static string GetVersion()
+    {
+        var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+        var assemblyVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        
+        if (assemblyVersionAttribute is not null)
+        {
+            return assemblyVersionAttribute.InformationalVersion;
+        }
+        return assembly.GetName().Version?.ToString() ?? string.Empty;
     }
 
     public static T GetOptionValue<T>(this InvocationContext invocationContext, Option<T> option)

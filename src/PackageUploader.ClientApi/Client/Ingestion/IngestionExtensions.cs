@@ -29,13 +29,13 @@ internal static class IngestionExtensions
                 httpClient.BaseAddress = new Uri(ingestionConfig.BaseAddress);
             })
             .AddHttpMessageHandler<IngestionAuthenticationDelegatingHandler>()
-            .AddPolicyHandler((serviceProvider, httpRequestMessage) =>
+            .AddPolicyHandler((serviceProvider, _) =>
             {
                 var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
                 var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(ingestionConfig.MedianFirstRetryDelayMs), ingestionConfig.RetryCount);
                 return HttpPolicyExtensions.HandleTransientHttpError().Or<TimeoutRejectedException>().WaitAndRetryAsync(delay);
             })
-            .AddPolicyHandler((serviceProvider, httpRequestMessage) =>
+            .AddPolicyHandler((serviceProvider, _) =>
             {
                 var ingestionConfig = serviceProvider.GetRequiredService<IOptions<IngestionConfig>>().Value;
                 return Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(ingestionConfig.HttpTimeoutMs));

@@ -33,7 +33,7 @@ internal abstract class Operation
                 _logger.LogWarning("Operation cancelled.");
                 return 1;
             }
-            _logger.LogError(e.Message);
+            _logger.LogError("{errorMessage}", e.Message);
             return 3;
         }
         finally

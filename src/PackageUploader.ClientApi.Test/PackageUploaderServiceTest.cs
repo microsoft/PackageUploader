@@ -26,7 +26,7 @@ public class PackageUploaderServiceTest
     private const string TestUnauthorizedProductId = "TestUnauthorizedProductId";
 
     private GameProduct _testProduct;
-    private PackageUploaderService _PackageUploaderService;
+    private PackageUploaderService _packageUploaderService;
 
     [TestInitialize]
     public void Initialize()
@@ -57,13 +57,13 @@ public class PackageUploaderServiceTest
 
         var xfusUploader = new Mock<IXfusUploader>();
 
-        _PackageUploaderService = new PackageUploaderService(ingestionClient.Object, xfusUploader.Object, logger);
+        _packageUploaderService = new PackageUploaderService(ingestionClient.Object, xfusUploader.Object, logger);
     }
 
     [TestMethod]
     public async Task GetProductByProductIdTest()
     {
-        var productResult = await _PackageUploaderService.GetProductByProductIdAsync(TestProductId, CancellationToken.None);
+        var productResult = await _packageUploaderService.GetProductByProductIdAsync(TestProductId, CancellationToken.None);
 
         Assert.IsNotNull(productResult);
         Assert.AreEqual(TestProductId, productResult.ProductId);
@@ -72,7 +72,7 @@ public class PackageUploaderServiceTest
     [TestMethod]
     public async Task GetProductByBigIdTest()
     {
-        var productResult = await _PackageUploaderService.GetProductByBigIdAsync(TestBigId, CancellationToken.None);
+        var productResult = await _packageUploaderService.GetProductByBigIdAsync(TestBigId, CancellationToken.None);
 
         Assert.IsNotNull(productResult);
         Assert.AreEqual(TestBigId, productResult.BigId);
@@ -81,13 +81,13 @@ public class PackageUploaderServiceTest
     [TestMethod]
     public async Task GetProductByProductIdNullTest()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _PackageUploaderService.GetProductByProductIdAsync(null, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _packageUploaderService.GetProductByProductIdAsync(null, CancellationToken.None));
     }
 
     [TestMethod]
     public async Task GetProductByBigIdNullTest()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _PackageUploaderService.GetProductByBigIdAsync(null, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _packageUploaderService.GetProductByBigIdAsync(null, CancellationToken.None));
     }
 
     [TestMethod]
@@ -96,7 +96,7 @@ public class PackageUploaderServiceTest
     [DataRow("     ")]
     public async Task GetProductByProductIdEmptyTest(string productId)
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _PackageUploaderService.GetProductByProductIdAsync(productId, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _packageUploaderService.GetProductByProductIdAsync(productId, CancellationToken.None));
     }
 
     [TestMethod]
@@ -105,30 +105,30 @@ public class PackageUploaderServiceTest
     [DataRow("     ")]
     public async Task GetProductByBigIdEmptyTest(string bigId)
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _PackageUploaderService.GetProductByBigIdAsync(bigId, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _packageUploaderService.GetProductByBigIdAsync(bigId, CancellationToken.None));
     }
 
     [TestMethod]
     public async Task GetProductByProductIdNotFoundTest()
     {
-        await Assert.ThrowsExceptionAsync<ProductNotFoundException>(() => _PackageUploaderService.GetProductByBigIdAsync("ProductIdNotFound", CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<ProductNotFoundException>(() => _packageUploaderService.GetProductByBigIdAsync("ProductIdNotFound", CancellationToken.None));
     }
 
     [TestMethod]
     public async Task GetProductByBigIdNotFoundTest()
     {
-        await Assert.ThrowsExceptionAsync<ProductNotFoundException>(() => _PackageUploaderService.GetProductByBigIdAsync("BigIdNotFound", CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<ProductNotFoundException>(() => _packageUploaderService.GetProductByBigIdAsync("BigIdNotFound", CancellationToken.None));
     }
         
     [TestMethod]
     public async Task GetProductByProductIdUnauthorizedTest()
     {
-        await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _PackageUploaderService.GetProductByProductIdAsync(TestUnauthorizedProductId, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _packageUploaderService.GetProductByProductIdAsync(TestUnauthorizedProductId, CancellationToken.None));
     }
 
     [TestMethod]
     public async Task GetProductByBigIdUnauthorizedTest()
     {
-        await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _PackageUploaderService.GetProductByBigIdAsync(TestUnauthorizedBigId, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _packageUploaderService.GetProductByBigIdAsync(TestUnauthorizedBigId, CancellationToken.None));
     }
 }

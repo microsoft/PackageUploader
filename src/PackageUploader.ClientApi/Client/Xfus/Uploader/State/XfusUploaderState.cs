@@ -18,8 +18,8 @@ internal abstract class XfusUploaderState
 {
     internal abstract Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, CancellationToken ct);
 
-    protected XfusApiController _xfusApiController;
-    protected ILogger _logger;
+    protected readonly XfusApiController _xfusApiController;
+    protected readonly ILogger _logger;
 
     protected XfusBlockProgressReporter _xfusBlockProgressReporter;
     protected long _totalBytesUploaded;
@@ -33,7 +33,7 @@ internal abstract class XfusUploaderState
     protected async Task<UploadProgress> InitializeAssetAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, bool deltaUpload, CancellationToken ct)
     {
         var uploadProgress = await _xfusApiController.InitializeAssetAsync(xfusUploadInfo.XfusId, uploadFile, deltaUpload, ct).ConfigureAwait(false);
-        long totalBlockBytes = uploadProgress.PendingBlocks.Sum(x => x.Size);
+        var totalBlockBytes = uploadProgress.PendingBlocks.Sum(x => x.Size);
 
         _xfusBlockProgressReporter = new XfusBlockProgressReporter(_logger, uploadProgress.PendingBlocks.Length, totalBlockBytes);
         _xfusBlockProgressReporter.ReportProgress();

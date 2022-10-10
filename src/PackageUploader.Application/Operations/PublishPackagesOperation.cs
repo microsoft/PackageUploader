@@ -49,17 +49,23 @@ internal sealed class PublishPackagesOperation : Operation
         {
             throw new Exception($"{nameof(_config.FlightName)} or ({nameof(_config.BranchFriendlyName)} and {nameof(_config.DestinationSandboxName)}) is required.");
         }
-
-        // Log validation errors if any
+        
+        var validationFailed = false;
         if (submission.SubmissionValidationItems is not null && submission.SubmissionValidationItems.Any())
         {
             submission.SubmissionValidationItems.ForEach(validationItem =>
             {
                 if (validationItem.Severity is GameSubmissionValidationSeverity.Error)
                 {
-                    _logger.Log(GetLogLevel(validationItem.Severity), validationItem.Message);
+                    validationFailed = true;
+                    _logger.Log(GetLogLevel(validationItem.Severity), "{validationMessage}", validationItem.Message);
                 }
             });
+        }
+        
+        if (validationFailed)
+        {
+            throw new Exception("Submission Validation Failed");
         }
     }
 
