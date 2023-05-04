@@ -31,7 +31,7 @@ internal abstract class HttpRestClient : IHttpRestClient
 
     private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
     private const LogLevel VerboseLogLevel = LogLevel.Trace;
-    private const string SdkVersion = "SDK-V1.5.0";
+    private const string SdkVersion = "SDK-V1.7.1";
 
     protected HttpRestClient(ILogger logger, HttpClient httpClient)
     {
