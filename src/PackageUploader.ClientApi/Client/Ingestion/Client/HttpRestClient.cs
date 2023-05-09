@@ -15,6 +15,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Client;
 
@@ -189,8 +190,7 @@ internal abstract class HttpRestClient : IHttpRestClient
         if (request.Content is not null)
         {
             var requestBody = await request.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            _logger.Log(VerboseLogLevel, "Request Body:");
-            _logger.Log(VerboseLogLevel, requestBody);
+            _logger.Log(VerboseLogLevel, "Request Body: {requestBody}", requestBody);
         }
     }
 
@@ -202,8 +202,16 @@ internal abstract class HttpRestClient : IHttpRestClient
         var serverRequestId = GetRequestIdFromHeaders(response.Headers);
         _logger.Log(VerboseLogLevel, "Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
         var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-        _logger.Log(VerboseLogLevel, "Response Body:");
-        _logger.Log(VerboseLogLevel, responseBody);
+
+        // Sanitizing token from responses
+        responseBody = Regex.Replace(responseBody, "\"token\":\\s*\"[^\"]+?([^\\/\"]+)\"", "\"token\":\"REDACTED\"");
+
+        // Sanitizing File Sas Uri from responses
+        var sasPropertyMatch = Regex.Match(responseBody, "\"fileSasUri\":\\s*\"[^\"]+?([^\\/\"]+)\"");
+        if (sasPropertyMatch.Success)
+            responseBody = responseBody.Replace(sasPropertyMatch.Groups[0].Value, sasPropertyMatch.Groups[0].Value.Split('?')[0] + "?REDACTED\"");
+
+        _logger.Log(VerboseLogLevel, "Response Body: {responseBody}", responseBody);
     }
 
     private void LogException(Exception ex)
