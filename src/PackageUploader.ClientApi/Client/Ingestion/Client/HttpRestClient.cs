@@ -15,7 +15,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using PackageUploader.ClientApi.Client.Ingestion.Sanitizers;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Client;
