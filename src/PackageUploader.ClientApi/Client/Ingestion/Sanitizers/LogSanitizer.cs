@@ -8,6 +8,9 @@ public static class LogSanitizer
 {
     public static string SanitizeJsonResponse(string jsonResponse)
     {
+        if (string.IsNullOrWhiteSpace(jsonResponse))
+            return jsonResponse;
+
         // Sanitizing token from responses
         var responseBody = Regex.Replace(jsonResponse, "\"token\":\\s*\"[^\"]+?([^\\/\"]+)\"", "\"token\":\"REDACTED\"");
 
