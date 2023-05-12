@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
+using PackageUploader.ClientApi.Client.Ingestion.Sanitizers;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using PackageUploader.ClientApi.Client.Ingestion.Sanitizers;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Client;
 
