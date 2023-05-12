@@ -1,18 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using PackageUploader.ClientApi.Client.Ingestion;
-using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
-using PackageUploader.ClientApi.Client.Ingestion.Models;
-using PackageUploader.ClientApi.Client.Xfus.Uploader;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using PackageUploader.ClientApi.Client.Ingestion.Sanitizers;
 
 namespace PackageUploader.ClientApi.Test;
