@@ -16,6 +16,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using PackageUploader.ClientApi.Client.Ingestion.Sanitizers;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Client;
 
@@ -202,14 +203,7 @@ internal abstract class HttpRestClient : IHttpRestClient
         var serverRequestId = GetRequestIdFromHeaders(response.Headers);
         _logger.Log(VerboseLogLevel, "Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
         var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-
-        // Sanitizing token from responses
-        responseBody = Regex.Replace(responseBody, "\"token\":\\s*\"[^\"]+?([^\\/\"]+)\"", "\"token\":\"REDACTED\"");
-
-        // Sanitizing File Sas Uri from responses
-        var sasPropertyMatch = Regex.Match(responseBody, "\"fileSasUri\":\\s*\"[^\"]+?([^\\/\"]+)\"");
-        if (sasPropertyMatch.Success)
-            responseBody = responseBody.Replace(sasPropertyMatch.Groups[0].Value, sasPropertyMatch.Groups[0].Value.Split('?')[0] + "?REDACTED\"");
+        responseBody = LogSanitizer.SanitizeJsonResponse(responseBody);
 
         _logger.Log(VerboseLogLevel, "Response Body: {responseBody}", responseBody);
     }
