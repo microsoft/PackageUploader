@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
+using PackageUploader.ClientApi.Client.Ingestion.Sanitizers;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -31,12 +32,13 @@ internal abstract class HttpRestClient : IHttpRestClient
 
     private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
     private const LogLevel VerboseLogLevel = LogLevel.Trace;
-    private const string SdkVersion = "SDK-V1.5.0";
+    private readonly string _sdkVersion;
 
-    protected HttpRestClient(ILogger logger, HttpClient httpClient)
+    protected HttpRestClient(ILogger logger, HttpClient httpClient, IngestionSdkVersion ingestionSdkVersion)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _sdkVersion = ingestionSdkVersion?.SdkVersion ?? "SDK-V1.0.0";
     }
 
     public async Task<T> GetAsync<T>(string subUrl, CancellationToken ct)
@@ -147,13 +149,13 @@ internal abstract class HttpRestClient : IHttpRestClient
         }
     }
 
-    private static HttpRequestMessage CreateJsonRequestMessage(HttpMethod method, string requestUri) =>
+    private HttpRequestMessage CreateJsonRequestMessage(HttpMethod method, string requestUri) =>
         CreateJsonRequestMessage(method, requestUri, (object) null, null);
 
-    private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue) =>
+    private HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue) =>
         CreateJsonRequestMessage(method, requestUri, inputValue, null);
 
-    private static HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, IDictionary<string, string> customHeaders)
+    private HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, IDictionary<string, string> customHeaders)
     {
         var request = new HttpRequestMessage(method, requestUri);
         if (inputValue is not null)
@@ -161,7 +163,7 @@ internal abstract class HttpRestClient : IHttpRestClient
             request.Content = JsonContent.Create(inputValue, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions);
         }
         request.Headers.Add("Request-ID", Guid.NewGuid().ToString());
-        request.Headers.Add("MethodOfAccess", SdkVersion);
+        request.Headers.Add("MethodOfAccess", _sdkVersion);
 
         if (customHeaders is not null && customHeaders.Any())
         {
@@ -189,8 +191,7 @@ internal abstract class HttpRestClient : IHttpRestClient
         if (request.Content is not null)
         {
             var requestBody = await request.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            _logger.Log(VerboseLogLevel, "Request Body:");
-            _logger.Log(VerboseLogLevel, requestBody);
+            _logger.Log(VerboseLogLevel, "Request Body: {requestBody}", requestBody);
         }
     }
 
@@ -202,8 +203,9 @@ internal abstract class HttpRestClient : IHttpRestClient
         var serverRequestId = GetRequestIdFromHeaders(response.Headers);
         _logger.Log(VerboseLogLevel, "Response {statusCodeInt} {statusCode}: {reasonPhrase} [ServerRequestId: {serverRequestId}]", (int)response.StatusCode, response.StatusCode, response.ReasonPhrase ?? "", serverRequestId);
         var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-        _logger.Log(VerboseLogLevel, "Response Body:");
-        _logger.Log(VerboseLogLevel, responseBody);
+        responseBody = LogSanitizer.SanitizeJsonResponse(responseBody);
+
+        _logger.Log(VerboseLogLevel, "Response Body: {responseBody}", responseBody);
     }
 
     private void LogException(Exception ex)
