@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace PackageUploader.ClientApi.Client.Ingestion;
 
-public class IngestionSdkVersion
+internal class IngestionSdkVersion
 {
     public string SdkVersion { get; }
 
