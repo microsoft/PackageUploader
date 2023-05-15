@@ -25,7 +25,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 {
     private readonly ILogger<IngestionHttpClient> _logger;
 
-    public IngestionHttpClient(ILogger<IngestionHttpClient> logger, HttpClient httpClient) : base(logger, httpClient)
+    public IngestionHttpClient(ILogger<IngestionHttpClient> logger, HttpClient httpClient, IngestionSdkVersion ingestionSdkVersion) : base(logger, httpClient, ingestionSdkVersion)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }

@@ -20,6 +20,7 @@ internal static class IngestionExtensions
     public static IServiceCollection AddIngestionService(this IServiceCollection services, IConfiguration config)
     {
         services.AddOptions<IngestionConfig>().Bind(config.GetSection(nameof(IngestionConfig))).ValidateDataAnnotations();
+        services.AddSingleton<IngestionSdkVersion>();
         services.AddScoped<IngestionAuthenticationDelegatingHandler>();
         services.AddHttpClient<IIngestionHttpClient, IngestionHttpClient>((serviceProvider, httpClient) =>
             {
