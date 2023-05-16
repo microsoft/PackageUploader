@@ -207,10 +207,11 @@ public class PackageUploaderService : IPackageUploaderService
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
 
-        _logger.LogDebug("Removing game package with filename '{packageFileName}'{withRegex} in product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFileName, useRegexMatch ? " (using regex)" : string.Empty, product.ProductId, packageBranch.CurrentDraftInstanceId);
+        _logger.LogDebug("Removing game package with filename '{packageFileName}'{withRegex} in product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFileName, useRegexMatch ? " (using regex match)" : string.Empty, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
 
+        var regex = useRegexMatch ? new Regex(packageFileName) : null;
         var packagesRemoved = 0;
 
         // Finding the package with the specified filename and removing it for each market group package
@@ -236,7 +237,7 @@ public class PackageUploaderService : IPackageUploaderService
                                 packages.Add(packageId, package);
                             }
 
-                            if ((useRegexMatch && Regex.IsMatch(package.FileName, packageFileName)) || string.Equals(package.FileName, packageFileName, StringComparison.OrdinalIgnoreCase))
+                            if ((regex is not null && regex.IsMatch(package.FileName)) || string.Equals(package.FileName, packageFileName, StringComparison.OrdinalIgnoreCase))
                             {
                                 _logger.LogDebug("Removing Package with id '{gamePackageId}', File name '{packageFileName}' from Market Group '{marketGroupName}'.", packageId, package.FileName, marketGroupName);
                                 packageIdsToRemove.Add(packageId);
