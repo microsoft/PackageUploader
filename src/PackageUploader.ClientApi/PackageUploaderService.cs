@@ -207,7 +207,7 @@ public class PackageUploaderService : IPackageUploaderService
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
 
-        _logger.LogDebug("Removing game package with filename '{packageFileName}'{withRegex} in product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFileName, useRegexMatch ? " (using regex match)" : string.Empty, product.ProductId, packageBranch.CurrentDraftInstanceId);
+        _logger.LogDebug("Removing game packages which filename {withRegex} with '{packageFileName}' in product id '{productId}' and draft id '{currentDraftInstanceID}'.",  useRegexMatch ? "has a regex match" : "matches", packageFileName, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
 
