@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -199,6 +200,69 @@ public class PackageUploaderService : IPackageUploaderService
 
         var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         return result;
+    }
+
+    public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, string packageFileName, bool useRegexMatch, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(product);
+        ArgumentNullException.ThrowIfNull(packageBranch);
+
+        _logger.LogDebug("Removing game package with filename '{packageFileName}'{withRegex} in product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFileName, useRegexMatch ? " (using regex)" : string.Empty, product.ProductId, packageBranch.CurrentDraftInstanceId);
+
+        var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+
+        var packagesRemoved = 0;
+
+        // Finding the package with the specified filename and removing it for each market group package
+        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+        {
+            if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
+            {
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
+            }
+            else
+            {
+                var packages = new Dictionary<string, GamePackage>();
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
+                {
+                    if (string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name))
+                    {
+                        var packageIdsToRemove = new List<string>();
+                        foreach (var packageId in marketGroupPackage.PackageIds)
+                        {
+                            if (!packages.TryGetValue(packageId, out var package))
+                            {
+                                package = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, packageId, ct).ConfigureAwait(false);
+                                packages.Add(packageId, package);
+                            }
+
+                            if ((useRegexMatch && Regex.IsMatch(package.FileName, packageFileName)) || string.Equals(package.FileName, packageFileName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                _logger.LogDebug("Removing Package with id '{gamePackageId}', File name '{packageFileName}' from Market Group '{marketGroupName}'.", packageId, package.FileName, marketGroupName);
+                                packageIdsToRemove.Add(packageId);
+                            }
+                        }
+
+                        foreach (var packageId in packageIdsToRemove)
+                        {
+                            packagesRemoved++;
+                            marketGroupPackage.PackageIds.Remove(packageId);
+                            marketGroupPackage.PackageAvailabilityDates.Remove(packageId);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (packagesRemoved > 0)
+        {
+            _logger.LogDebug("Removed {packagesRemoved} packages from {branchType} '{branchName}'.", packagesRemoved, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
+            var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
+            return result;
+        }
+
+        _logger.LogDebug("No packages removed from {branchType} '{branchName}'.", packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
+        return packageConfiguration;
     }
 
     public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, CancellationToken ct)
