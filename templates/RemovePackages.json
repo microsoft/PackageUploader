@@ -11,6 +11,9 @@
 
   "marketGroupName": "{{ optional - if informed it will only delete packages in the specified one (case sensitive) }}",
 
+  "packageFileName": "{{ optional - if informed it will only delete packages with this file name ",
+  "useRegexMatch": false,
+
   "aadAuthInfo": {
     "clientId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
     "tenantId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",

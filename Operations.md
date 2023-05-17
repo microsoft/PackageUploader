@@ -84,7 +84,7 @@
    - **useNagleAlgorithm**: (default and recommended: false)
   
 # RemovePackages
-###### Removes all game packages and assets from a branch
+###### Removes game packages and assets from a branch
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/RemovePackages.json))
 ##### Definition:
 - **operationName**: "RemovePackages",
@@ -98,7 +98,9 @@
 - **bigId**: *productId* or *bigId* required
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
 - **flightName**: *flightName* or *branchFriendlyName* required
-- **marketGroupName**: optional - if not set, it will remove all packages from all market groups (case sensitive)
+- **marketGroupName**: optional - if not set, it will remove packages from all market groups (case sensitive)
+- **packageFileName**: optional - if informed it will only delete packages with this file name; if not set, it will remove all packages
+- **useRegexMatch**: optional - if set, it will remove all packages that have a regex match with the pattern in *packageFileName*
 
 # ImportPackages
 ###### Imports all game packages from a branch to a destination branch
