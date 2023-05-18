@@ -400,15 +400,15 @@
       "then": {
         "properties": {
           "marketGroupName": {
-            "description": "if not set, it will remove all packages from all market groups (case sensitive)",
+            "description": "if not set, it will remove packages from all market groups (case sensitive)",
             "type": "string"
           },
           "packageFileName": {
-            "description": "optional - if informed it will only delete packages with this file name; if not set, it will remove all packages",
+            "description": "if informed it will only delete packages with this file name; if not set, it will remove all packages",
             "type": "string"
           },
           "useRegexMatch": {
-            "description": "optional - if set, it will remove all packages that have a regex match with the pattern in *packageFileName*",
+            "description": "if set, it will remove all packages that have a regex match with the pattern in \"packageFileName\"",
             "type": "boolean"
           }
         }
