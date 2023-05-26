@@ -32,13 +32,6 @@ internal class RemovePackagesOperation : Operation
         var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
         var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
-        if (string.IsNullOrWhiteSpace(_config.PackageFileName))
-        {
-            await _storeBrokerService.RemovePackagesAsync(product, packageBranch, _config.MarketGroupName, ct).ConfigureAwait(false);
-        }
-        else
-        {
-            await _storeBrokerService.RemovePackagesAsync(product, packageBranch, _config.MarketGroupName, _config.PackageFileName, _config.UseRegexMatch, ct).ConfigureAwait(false);
-        }
+        await _storeBrokerService.RemovePackagesAsync(product, packageBranch, _config.MarketGroupName, _config.PackageFileName, ct).ConfigureAwait(false);
     }
 }

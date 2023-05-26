@@ -169,49 +169,20 @@ public class PackageUploaderService : IPackageUploaderService
         return package;
     }
 
-    public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, CancellationToken ct)
+    public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, string packageFileName, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
 
-        _logger.LogDebug("Removing game packages in product id '{productId}' and draft id '{currentDraftInstanceID}'.", product.ProductId, packageBranch.CurrentDraftInstanceId);
+        _logger.LogDebug("Removing game packages with filename '{packageFileName}' in product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFileName, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
 
-        // Blanking all package ids for each market group package
-        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
-        {
-            if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
-            {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
-            }
-            else
-            {
-                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
-                {
-                    if (string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name))
-                    {
-                        marketGroupPackage.PackageIds = new List<string>();
-                        marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
-                    }
-                }
-            }
-        }
+        // Converting Wildcards in packageFileName to Regex
+        var regex = new Regex('^' + Regex.Escape(packageFileName).
+            Replace("\\*", ".*").
+            Replace("\\?", ".") + '$', RegexOptions.IgnoreCase);
 
-        var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
-        return result;
-    }
-
-    public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, string packageFileName, bool useRegexMatch, CancellationToken ct)
-    {
-        ArgumentNullException.ThrowIfNull(product);
-        ArgumentNullException.ThrowIfNull(packageBranch);
-
-        _logger.LogDebug("Removing game packages which filename {withRegex} with '{packageFileName}' in product id '{productId}' and draft id '{currentDraftInstanceID}'.",  useRegexMatch ? "has a regex match" : "matches", packageFileName, product.ProductId, packageBranch.CurrentDraftInstanceId);
-
-        var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-
-        var regex = useRegexMatch ? new Regex(packageFileName) : null;
         var packagesRemoved = 0;
 
         // Finding the package with the specified filename and removing it for each market group package
@@ -237,7 +208,7 @@ public class PackageUploaderService : IPackageUploaderService
                                 packages.Add(packageId, package);
                             }
 
-                            if ((regex is not null && regex.IsMatch(package.FileName)) || string.Equals(package.FileName, packageFileName, StringComparison.OrdinalIgnoreCase))
+                            if (regex.IsMatch(package.FileName))
                             {
                                 _logger.LogDebug("Removing Package with id '{gamePackageId}', File name '{packageFileName}' from Market Group '{marketGroupName}'.", packageId, package.FileName, marketGroupName);
                                 packageIdsToRemove.Add(packageId);
@@ -257,12 +228,12 @@ public class PackageUploaderService : IPackageUploaderService
 
         if (packagesRemoved > 0)
         {
-            _logger.LogDebug("Removed {packagesRemoved} packages from {branchType} '{branchName}'.", packagesRemoved, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
+            _logger.LogInformation("Removed {packagesRemoved} packages from {branchType} '{branchName}'.", packagesRemoved, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
             var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
             return result;
         }
 
-        _logger.LogDebug("No packages removed from {branchType} '{branchName}'.", packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
+        _logger.LogInformation("No packages removed from {branchType} '{branchName}'.", packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
         return packageConfiguration;
     }
 
