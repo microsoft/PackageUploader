@@ -115,7 +115,7 @@ public class PackageUploaderService : IPackageUploaderService
     }
 
     public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, CancellationToken ct)
-        {
+    {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
         ArgumentNullException.ThrowIfNull(marketGroupPackage);
@@ -183,27 +183,36 @@ public class PackageUploaderService : IPackageUploaderService
                 {
                     if (string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name))
                     {
-                        var packageIdsToRemove = new List<string>();
-                        foreach (var packageId in marketGroupPackage.PackageIds)
+                        if (packageFileName.Equals("*", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (!packages.TryGetValue(packageId, out var package))
-                            {
-                                package = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, packageId, ct).ConfigureAwait(false);
-                                packages.Add(packageId, package);
-                            }
-
-                            if (regex.IsMatch(package.FileName))
-                            {
-                                _logger.LogDebug("Removing Package with id '{gamePackageId}', File name '{packageFileName}' from Market Group '{marketGroupName}'.", packageId, package.FileName, marketGroupName);
-                                packageIdsToRemove.Add(packageId);
-                            }
+                            packagesRemoved += marketGroupPackage.PackageIds.Count;
+                            marketGroupPackage.PackageIds = new List<string>();
+                            marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
                         }
-
-                        foreach (var packageId in packageIdsToRemove)
+                        else
                         {
-                            packagesRemoved++;
-                            marketGroupPackage.PackageIds.Remove(packageId);
-                            marketGroupPackage.PackageAvailabilityDates.Remove(packageId);
+                            var packageIdsToRemove = new List<string>();
+                            foreach (var packageId in marketGroupPackage.PackageIds)
+                            {
+                                if (!packages.TryGetValue(packageId, out var package))
+                                {
+                                    package = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, packageId, ct).ConfigureAwait(false);
+                                    packages.Add(packageId, package);
+                                }
+
+                                if (regex.IsMatch(package.FileName))
+                                {
+                                    _logger.LogDebug("Removing Package with id '{gamePackageId}', File name '{packageFileName}' from Market Group '{marketGroupName}'.", packageId, package.FileName, marketGroupName);
+                                    packageIdsToRemove.Add(packageId);
+                                }
+                            }
+
+                            foreach (var packageId in packageIdsToRemove)
+                            {
+                                packagesRemoved++;
+                                marketGroupPackage.PackageIds.Remove(packageId);
+                                marketGroupPackage.PackageAvailabilityDates.Remove(packageId);
+                            }
                         }
                     }
                 }
