@@ -404,14 +404,13 @@
             "type": "string"
           },
           "packageFileName": {
-            "description": "if informed it will only delete packages with this file name; if not set, it will remove all packages",
+            "description": "it will delete packages with this file name (wildcards * and ? supported)",
             "type": "string"
-          },
-          "useRegexMatch": {
-            "description": "if set, it will remove all packages that have a regex match with the pattern in \"packageFileName\"",
-            "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "packageFileName"
+        ]
       }
     },
     {
