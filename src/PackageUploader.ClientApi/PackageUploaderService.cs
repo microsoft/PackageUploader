@@ -174,6 +174,11 @@ public class PackageUploaderService : IPackageUploaderService
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
 
+        if (string.IsNullOrWhiteSpace(packageFileName))
+        {
+            throw new ArgumentException($"{nameof(packageFileName)} cannot be null or empty.", nameof(packageFileName));
+        }
+
         _logger.LogDebug("Removing game packages with filename '{packageFileName}' in product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFileName, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
