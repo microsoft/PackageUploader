@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion;
+using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Client.Xfus.Uploader;
 using PackageUploader.ClientApi.Models;
@@ -31,10 +32,7 @@ public class PackageUploaderService : IPackageUploaderService
 
     public async Task<GameProduct> GetProductByBigIdAsync(string bigId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(bigId))
-        {
-            throw new ArgumentException($"{nameof(bigId)} cannot be null or empty.", nameof(bigId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(bigId);
 
         _logger.LogDebug("Requesting game product by BigId '{bigId}'.", bigId);
         return await _ingestionHttpClient.GetGameProductByBigIdAsync(bigId, ct).ConfigureAwait(false);
@@ -42,10 +40,7 @@ public class PackageUploaderService : IPackageUploaderService
 
     public async Task<GameProduct> GetProductByProductIdAsync(string productId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
 
         _logger.LogDebug("Requesting game product by ProductId '{productId}'.", productId);
         return await _ingestionHttpClient.GetGameProductByLongIdAsync(productId, ct).ConfigureAwait(false);
@@ -62,11 +57,7 @@ public class PackageUploaderService : IPackageUploaderService
     public async Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(GameProduct product, string branchFriendlyName, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
-
-        if (string.IsNullOrWhiteSpace(branchFriendlyName))
-        {
-            throw new ArgumentException($"{nameof(branchFriendlyName)} cannot be null or empty.", nameof(branchFriendlyName));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(branchFriendlyName);
 
         _logger.LogDebug("Requesting game package branch by branch friendly name '{branchFriendlyName}'.", branchFriendlyName);
         return await _ingestionHttpClient.GetPackageBranchByFriendlyNameAsync(product.ProductId, branchFriendlyName, ct).ConfigureAwait(false);
@@ -75,11 +66,7 @@ public class PackageUploaderService : IPackageUploaderService
     public async Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(GameProduct product, string flightName, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
-
-        if (string.IsNullOrWhiteSpace(flightName))
-        {
-            throw new ArgumentException($"{nameof(flightName)} cannot be null or empty.", nameof(flightName));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(flightName);
 
         _logger.LogDebug("Requesting game package flight by flight name '{flightName}'.", flightName);
         return await _ingestionHttpClient.GetPackageFlightByFlightNameAsync(product.ProductId, flightName, ct).ConfigureAwait(false);
@@ -132,11 +119,7 @@ public class PackageUploaderService : IPackageUploaderService
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
         ArgumentNullException.ThrowIfNull(marketGroupPackage);
-
-        if (string.IsNullOrWhiteSpace(packageFilePath))
-        {
-            throw new ArgumentException($"{nameof(packageFilePath)} cannot be null or empty.", nameof(packageFilePath));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(packageFilePath);
 
         var packageFile = new FileInfo(packageFilePath);
         if (!packageFile.Exists)
@@ -173,11 +156,7 @@ public class PackageUploaderService : IPackageUploaderService
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
-
-        if (string.IsNullOrWhiteSpace(packageFileName))
-        {
-            throw new ArgumentException($"{nameof(packageFileName)} cannot be null or empty.", nameof(packageFileName));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(packageFileName);
 
         _logger.LogDebug("Removing game packages with filename '{packageFileName}' in product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFileName, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
@@ -513,11 +492,7 @@ public class PackageUploaderService : IPackageUploaderService
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(originPackageBranch);
-
-        if (string.IsNullOrWhiteSpace(destinationSandboxName))
-        {
-            throw new ArgumentException($"{nameof(destinationSandboxName)} cannot be null or empty.", nameof(destinationSandboxName));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(destinationSandboxName);
 
         var gameSubmissionOptions = gameSubmissionConfiguration?.ToGameSubmissionOptions();
         var gameSubmission = await _ingestionHttpClient.CreateSandboxSubmissionRequestAsync(product.ProductId, originPackageBranch.CurrentDraftInstanceId, destinationSandboxName, gameSubmissionOptions, ct).ConfigureAwait(false);
