@@ -126,7 +126,7 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, CancellationToken ct)
+    public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, bool isXvc, CancellationToken ct)
         {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -143,7 +143,7 @@ public class PackageUploaderService : IPackageUploaderService
             throw new FileNotFoundException("Package file not found.", packageFile.FullName);
         }
 
-        var xvcTargetPlatform = deltaUpload ? ReadXvcTargetPlatformFromMetaData(packageFile) : XvcTargetPlatform.NotSpecified;
+        var xvcTargetPlatform = isXvc ? ReadXvcTargetPlatformFromMetaData(packageFile) : XvcTargetPlatform.NotSpecified;
 
         _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
         var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, deltaUpload, xvcTargetPlatform, ct).ConfigureAwait(false);
