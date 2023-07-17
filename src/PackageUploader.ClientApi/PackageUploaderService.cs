@@ -146,7 +146,7 @@ public class PackageUploaderService : IPackageUploaderService
         var xvcTargetPlatform = isXvc ? ReadXvcTargetPlatformFromMetaData(packageFile) : XvcTargetPlatform.NotSpecified;
 
         _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
-        var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, deltaUpload, xvcTargetPlatform, ct).ConfigureAwait(false);
+        var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, isXvc, xvcTargetPlatform, ct).ConfigureAwait(false);
 
         if (gameAssets is not null)
         {
