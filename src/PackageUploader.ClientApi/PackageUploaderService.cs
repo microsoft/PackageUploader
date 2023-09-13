@@ -114,6 +114,35 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
+    public async IAsyncEnumerable<GamePackage> GetGamePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(product);
+        ArgumentNullException.ThrowIfNull(packageBranch);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(marketGroupName);
+
+        var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+        if (packageConfiguration is null)
+        {
+            throw new Exception($"Package Configuration not found for {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
+        }
+
+        if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
+        {
+            throw new Exception($"{packageBranch.BranchType} '{packageBranch.Name}' does not have any Market Group Packages.");
+        }
+
+        var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(marketGroupName));
+        if (marketGroupPackage is null)
+        {
+            throw new Exception($"Market Group '{marketGroupName}' (case sensitive) not found in {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
+        }
+
+        foreach (var packageId in marketGroupPackage.PackageIds)
+        {
+            yield return await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, packageId, ct).ConfigureAwait(false);
+        }
+    }
+
     public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
