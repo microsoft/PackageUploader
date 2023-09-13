@@ -87,6 +87,7 @@ internal class Program
         services.AddOperation<RemovePackagesOperation, RemovePackagesOperationConfig>(context);
         services.AddOperation<ImportPackagesOperation, ImportPackagesOperationConfig>(context);
         services.AddOperation<PublishPackagesOperation, PublishPackagesOperationConfig>(context);
+        services.AddOperation<GetPackagesOperation, GetPackagesOperationConfig>(context);
     }
 
     private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
@@ -136,6 +137,10 @@ internal class Program
             {
                 ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
             }.AddOperationHandler<PublishPackagesOperation>(),
+            new Command("GetPackages", "Gets the list of packages from a branch or flight")
+            {
+                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+            }.AddOperationHandler<GetPackagesOperation>(),
         };
         rootCommand.AddGlobalOption(VerboseOption);
         rootCommand.AddGlobalOption(LogFileOption);
