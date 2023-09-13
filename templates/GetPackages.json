@@ -1,0 +1,21 @@
+{
+  "$schema": "https://product-ingestion.azureedge.net/schema/package-uploader-operation-configuration/2021-11-30",
+
+  "operationName": "getProduct",
+
+  "productId": "{{ productId or bigId required }}",
+  "bigId": "{{ productId or bigId required }}",
+
+  "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
+  "flightName": "{{ flightName or branchFriendlyName required }}",
+
+  "marketGroupName": "{{ default value is 'default' (case sensitive) }}",
+
+  "aadAuthInfo": {
+    "clientId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
+    "tenantId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
+    "certificateThumbprint": "{{ required when using authentication method *AppCert* }}",
+    "certificateStore": "{{ required when using authentication method *AppCert* }}",
+    "certificateLocation": "{{ required when using authentication method *AppCert* }}"
+  }
+}
