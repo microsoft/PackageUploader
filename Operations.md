@@ -12,6 +12,23 @@
 - **productId**: *productId* or *bigId* required
 - **bigId**: *productId* or *bigId* required
 
+# GetPackages
+###### Returns list of game packages from a branch
+#### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/GetPackages.json))
+##### Definition:
+- **operationName**: "GetPackages",
+- **aadAuthInfo**: required when using authentication method *AppCert* or *AppSecret*
+  - **tenantId**: required
+  - **clientId**: required
+  - **certificateThumbprint**: required when using authentication method *AppCert*
+  - **certificateStore**: optional when using authentication method *AppCert* (default *My*)
+  - **certificateLocation**: optional when using authentication method *AppCert* (default *CurrentUser*)
+- **productId**: *productId* or *bigId* required
+- **bigId**: *productId* or *bigId* required
+- **branchFriendlyName**: *flightName* or *branchFriendlyName* required
+- **flightName**: *flightName* or *branchFriendlyName* required
+- **marketGroupName**: optional - if not set, it will use *default* as the market group (case sensitive)
+
 # UploadUwpPackage
 ###### Uploads Uwp game package
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/UploadUwpPackage.json))
