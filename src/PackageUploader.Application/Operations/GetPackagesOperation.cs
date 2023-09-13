@@ -42,7 +42,8 @@ internal class GetPackagesOperation : Operation
             .ToListAsync(ct).ConfigureAwait(false);
 
         var packagesJson = PackagesToJson(packages);
-        _logger.LogInformation("Packages: {packages}", packagesJson);
+        _logger.LogInformation("Packages:");
+        Console.WriteLine(packagesJson);
 
         var fileName = $"packages_{product.ProductName}_{packageBranch.Name}_${_config.MarketGroupName}.json";
         await File.WriteAllTextAsync(fileName, packagesJson, ct).ConfigureAwait(false);

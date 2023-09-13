@@ -37,7 +37,8 @@ internal class GetProductOperation : Operation
         var product = new Product(gameProduct, gamePackageBranches);
 
         var productJson = product.ToJson();
-        _logger.LogInformation("Product: {product}", productJson);
+        _logger.LogInformation("Product:");
+        Console.WriteLine(productJson);
 
         var fileName = $"product_{product.ProductName}.json";
         await File.WriteAllTextAsync(fileName, productJson, ct).ConfigureAwait(false);
