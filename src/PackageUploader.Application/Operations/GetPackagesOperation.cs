@@ -9,6 +9,7 @@ using PackageUploader.Application.Models;
 using PackageUploader.ClientApi;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -38,10 +39,13 @@ internal class GetPackagesOperation : Operation
         var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
         var packages = await _storeBrokerService.GetGamePackagesAsync(product, packageBranch, _config.MarketGroupName, ct)
             .Select(gamePackage => new Package(gamePackage))
-            .ToListAsync(ct)
-            .ConfigureAwait(false);
+            .ToListAsync(ct).ConfigureAwait(false);
 
-        _logger.LogInformation("Packages: {packages}", PackagesToJson(packages));
+        var packagesJson = PackagesToJson(packages);
+        _logger.LogInformation("Packages: {packages}", packagesJson);
+
+        var fileName = $"packages_{product.ProductName}_{packageBranch.Name}_${_config.MarketGroupName}.json";
+        await File.WriteAllTextAsync(fileName, packagesJson, ct).ConfigureAwait(false);
     }
 
     private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
