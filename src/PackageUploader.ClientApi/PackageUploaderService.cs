@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -114,7 +115,7 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async IAsyncEnumerable<GamePackage> GetGamePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, CancellationToken ct)
+    public async IAsyncEnumerable<GamePackage> GetGamePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, [EnumeratorCancellation] CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
