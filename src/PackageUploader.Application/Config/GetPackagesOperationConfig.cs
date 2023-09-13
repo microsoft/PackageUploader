@@ -8,7 +8,7 @@ namespace PackageUploader.Application.Config;
 
 internal class GetPackagesOperationConfig : PackageBranchOperationConfig
 {
-    internal override string GetOperationName() => "GetBranch";
+    internal override string GetOperationName() => "GetPackages";
 
     public string MarketGroupName { get; set; } = "default";
 
