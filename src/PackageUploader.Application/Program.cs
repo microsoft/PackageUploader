@@ -27,6 +27,7 @@ internal class Program
     private const string LogTimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
 
     // Options
+    private static readonly Option<bool> DataOption = new (new[] { "-d", "--Data" }, "Do not log on console and only return data");
     private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls");
     private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file");
     private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app (only for AppSecret)");
@@ -67,11 +68,15 @@ internal class Program
             file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"PackageUploader_{DateTime.Now:yyyyMMddHHmmss}.log");
             file.Append = true;
         });
-        logging.AddSimpleConsole(options =>
+
+        if (!invocationContext.GetOptionValue(DataOption))
         {
-            options.SingleLine = true;
-            options.TimestampFormat = LogTimestampFormat;
-        });
+            logging.AddSimpleConsole(options =>
+            {
+                options.SingleLine = true;
+                options.TimestampFormat = LogTimestampFormat;
+            });
+        }
     }
 
     private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
@@ -115,7 +120,7 @@ internal class Program
         {
             new Command("GetProduct", "Gets metadata of the product")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, DataOption
             }.AddOperationHandler<GetProductOperation>(),
             new Command("UploadUwpPackage", "Uploads Uwp game package")
             {
@@ -139,7 +144,7 @@ internal class Program
             }.AddOperationHandler<PublishPackagesOperation>(),
             new Command("GetPackages", "Gets the list of packages from a branch or flight")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, DataOption
             }.AddOperationHandler<GetPackagesOperation>(),
         };
         rootCommand.AddGlobalOption(VerboseOption);
