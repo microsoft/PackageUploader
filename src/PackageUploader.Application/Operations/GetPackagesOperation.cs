@@ -9,7 +9,6 @@ using PackageUploader.Application.Models;
 using PackageUploader.ClientApi;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -44,9 +43,6 @@ internal class GetPackagesOperation : Operation
         var packagesJson = PackagesToJson(packages);
         _logger.LogInformation("Packages:");
         Console.WriteLine(packagesJson);
-
-        var fileName = $"packages_{product.ProductName}_{packageBranch.Name}_${_config.MarketGroupName}.json";
-        await File.WriteAllTextAsync(fileName, packagesJson, ct).ConfigureAwait(false);
     }
 
     private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()

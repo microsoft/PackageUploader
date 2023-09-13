@@ -8,7 +8,6 @@ using PackageUploader.Application.Extensions;
 using PackageUploader.Application.Models;
 using PackageUploader.ClientApi;
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,8 +38,5 @@ internal class GetProductOperation : Operation
         var productJson = product.ToJson();
         _logger.LogInformation("Product:");
         Console.WriteLine(productJson);
-
-        var fileName = $"product_{product.ProductName}.json";
-        await File.WriteAllTextAsync(fileName, productJson, ct).ConfigureAwait(false);
     }
 }
