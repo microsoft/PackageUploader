@@ -1,8 +1,9 @@
 parameters:
   - name: Version
+    default: '1.0.0'
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-latest
 
 variables:
   - name: projectName
@@ -36,13 +37,6 @@ stages:
             arguments: '--self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
             zipAfterPublish: false
             modifyOutputPath: false
-
-        - task: PublishPipelineArtifact@1
-          displayName: 'publish artifact to pipeline'
-          inputs:
-            targetPath: '$(Build.BinariesDirectory)'
-            artifact: '$(projectName).$(buildRuntime).pre'
-            publishLocation: 'pipeline'
 
         - task: EsrpCodeSigning@3
           condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
