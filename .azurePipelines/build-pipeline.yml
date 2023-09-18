@@ -41,7 +41,7 @@ stages:
           displayName: 'publish artifact to pipeline'
           inputs:
             targetPath: '$(Build.BinariesDirectory)'
-            artifact: '$(projectName)'
+            artifact: '$(projectName).$(buildRuntime).pre'
             publishLocation: 'pipeline'
 
         - task: EsrpCodeSigning@3
@@ -100,7 +100,7 @@ stages:
           displayName: 'publish artifact to pipeline'
           inputs:
             targetPath: '$(Build.ArtifactStagingDirectory)'
-            artifact: '$(projectName)'
+            artifact: '$(projectName).$(buildRuntime)'
             publishLocation: 'pipeline'
 
       - job: BuildLinux
@@ -134,5 +134,5 @@ stages:
           displayName: 'publish artifact to pipeline'
           inputs:
             targetPath: '$(Build.ArtifactStagingDirectory)'
-            artifact: '$(projectName)'
+            artifact: '$(projectName).$(buildRuntime)'
             publishLocation: 'pipeline'
