@@ -1,3 +1,5 @@
+trigger: none
+
 parameters:
   - name: Version
     default: '1.0.0'
