@@ -54,9 +54,12 @@ internal class Program
     private static void ConfigureLogging(HostBuilderContext context, ILoggingBuilder logging)
     {
         var invocationContext = context.GetInvocationContext();
+        var isData = invocationContext.GetOptionValue(DataOption);
         logging.ClearProviders();
-        logging.SetMinimumLevel(LogLevel.Warning);
-        logging.AddFilter("PackageUploader", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
+        logging.SetMinimumLevel(LogLevel.Error);
+        logging.AddFilter("PackageUploader",
+            isData ? LogLevel.Error :
+            invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
         logging.AddFilter<FileLoggerProvider>("PackageUploader", LogLevel.Trace);
         logging.AddSimpleFile(options =>
         {
@@ -68,15 +71,15 @@ internal class Program
             file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"PackageUploader_{DateTime.Now:yyyyMMddHHmmss}.log");
             file.Append = true;
         });
-
-        if (!invocationContext.GetOptionValue(DataOption))
+        if (isData)
         {
-            logging.AddSimpleConsole(options =>
-            {
-                options.SingleLine = true;
-                options.TimestampFormat = LogTimestampFormat;
-            });
+            logging.AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Error);
         }
+        logging.AddSimpleConsole(options =>
+        {
+            options.SingleLine = true;
+            options.TimestampFormat = LogTimestampFormat;
+        });
     }
 
     private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
