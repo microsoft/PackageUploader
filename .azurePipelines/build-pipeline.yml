@@ -13,7 +13,7 @@ variables:
   - name: buildConfiguration
     value: "release"
   - name: esrpConnectedServiceName
-    value: "ESRP CodeSigning"
+    value: "ESRP CodeSigning External"
   - name: version
     value: ${{ parameters.Version }}
 
