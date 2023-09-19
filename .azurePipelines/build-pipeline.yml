@@ -51,7 +51,7 @@ stages:
             inlineOperation: |
               [
               {
-                "KeyCode": "CP-230856",
+                "KeyCode": "CP-230012",
                 "OperationCode": "SigntoolSign",
                 "ToolName": "sign",
                 "ToolVersion": "1.0",
@@ -64,7 +64,7 @@ stages:
                 }
               },
               {
-                "KeyCode": "CP-230856",
+                "KeyCode": "CP-230012",
                 "OperationCode": "SigntoolVerify",
                 "ToolName": "sign",
                 "ToolVersion": "1.0",
