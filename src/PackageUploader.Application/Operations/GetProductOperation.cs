@@ -35,6 +35,8 @@ internal class GetProductOperation : Operation
 
         var product = new Product(gameProduct, gamePackageBranches);
 
-        _logger.LogInformation("Product: {product}", product.ToJson());
+        var productJson = product.ToJson();
+        _logger.LogInformation("Product:");
+        Console.WriteLine(productJson);
     }
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://product-ingestion.azureedge.net/schema/package-uploader-operation-configuration/2021-11-30",
 
-  "operationName": "uploadUwpPackage",
+  "operationName": "getPackages",
 
   "productId": "{{ productId or bigId required }}",
   "bigId": "{{ productId or bigId required }}",
@@ -11,39 +11,11 @@
 
   "marketGroupName": "{{ default value is 'default' (case sensitive) }}",
 
-  "packageFilePath": "{{ required }}",
-  "minutesToWaitForProcessing": 60,
-
-  "availabilityDate": {
-    "isEnabled": false,
-    "effectiveDate": "{{ optional - if informed it will set the availability date in this branch/marketGroupId for all the Uwp packages }}"
-  },
-
-  "mandatoryDate": {
-    "isEnabled": false,
-    "effectiveDate": "{{ optional - if informed it will set the mandatory date in this branch/marketGroupId for all the Uwp packages }}"
-  },
-
-  "gradualRollout": {
-    "isEnabled": false,
-    "percentage": 33,
-    "isSeekEnabled": false
-  },
-
   "aadAuthInfo": {
     "clientId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
     "tenantId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
     "certificateThumbprint": "{{ required when using authentication method *AppCert* }}",
     "certificateStore": "{{ required when using authentication method *AppCert* }}",
     "certificateLocation": "{{ required when using authentication method *AppCert* }}"
-  },
-
-  "uploadConfig": {
-    "httpTimeoutMs": 10000,
-    "httpUploadTimeoutMs": 300000,
-    "maxParallelism": 24,
-    "defaultConnectionLimit": -1,
-    "expect100Continue": false,
-    "useNagleAlgorithm": false
   }
 }

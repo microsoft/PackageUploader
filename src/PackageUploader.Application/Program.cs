@@ -27,6 +27,7 @@ internal class Program
     private const string LogTimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
 
     // Options
+    private static readonly Option<bool> DataOption = new (new[] { "-d", "--Data" }, "Do not log on console and only return data");
     private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls");
     private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file");
     private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app (only for AppSecret)");
@@ -53,9 +54,12 @@ internal class Program
     private static void ConfigureLogging(HostBuilderContext context, ILoggingBuilder logging)
     {
         var invocationContext = context.GetInvocationContext();
+        var isData = invocationContext.GetOptionValue(DataOption);
         logging.ClearProviders();
-        logging.SetMinimumLevel(LogLevel.Warning);
-        logging.AddFilter("PackageUploader", invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
+        logging.SetMinimumLevel(LogLevel.Error);
+        logging.AddFilter("PackageUploader",
+            isData ? LogLevel.Error :
+            invocationContext.GetOptionValue(VerboseOption) ? LogLevel.Trace : LogLevel.Information);
         logging.AddFilter<FileLoggerProvider>("PackageUploader", LogLevel.Trace);
         logging.AddSimpleFile(options =>
         {
@@ -67,6 +71,10 @@ internal class Program
             file.Path = logFile?.FullName ?? Path.Combine(Path.GetTempPath(), $"PackageUploader_{DateTime.Now:yyyyMMddHHmmss}.log");
             file.Append = true;
         });
+        if (isData)
+        {
+            logging.AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Error);
+        }
         logging.AddSimpleConsole(options =>
         {
             options.SingleLine = true;
@@ -87,6 +95,7 @@ internal class Program
         services.AddOperation<RemovePackagesOperation, RemovePackagesOperationConfig>(context);
         services.AddOperation<ImportPackagesOperation, ImportPackagesOperationConfig>(context);
         services.AddOperation<PublishPackagesOperation, PublishPackagesOperationConfig>(context);
+        services.AddOperation<GetPackagesOperation, GetPackagesOperationConfig>(context);
     }
 
     private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
@@ -114,7 +123,7 @@ internal class Program
         {
             new Command("GetProduct", "Gets metadata of the product")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, DataOption
             }.AddOperationHandler<GetProductOperation>(),
             new Command("UploadUwpPackage", "Uploads Uwp game package")
             {
@@ -136,6 +145,10 @@ internal class Program
             {
                 ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
             }.AddOperationHandler<PublishPackagesOperation>(),
+            new Command("GetPackages", "Gets the list of packages from a branch or flight")
+            {
+                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, DataOption
+            }.AddOperationHandler<GetPackagesOperation>(),
         };
         rootCommand.AddGlobalOption(VerboseOption);
         rootCommand.AddGlobalOption(LogFileOption);

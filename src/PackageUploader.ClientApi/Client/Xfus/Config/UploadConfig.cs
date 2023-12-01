@@ -5,7 +5,7 @@ namespace PackageUploader.ClientApi.Client.Xfus.Config;
 
 public class UploadConfig
 {
-    public int HttpTimeoutMs { get; set; } = 5000;
+    public int HttpTimeoutMs { get; set; } = 10000;
 
     public int HttpUploadTimeoutMs { get; set; } = 300000;
 

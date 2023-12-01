@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -112,6 +113,35 @@ public class PackageUploaderService : IPackageUploaderService
 
         var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         return result;
+    }
+
+    public async IAsyncEnumerable<GamePackage> GetGamePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, [EnumeratorCancellation] CancellationToken ct)
+    {
+        ArgumentNullException.ThrowIfNull(product);
+        ArgumentNullException.ThrowIfNull(packageBranch);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(marketGroupName);
+
+        var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
+        if (packageConfiguration is null)
+        {
+            throw new Exception($"Package Configuration not found for {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
+        }
+
+        if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
+        {
+            throw new Exception($"{packageBranch.BranchType} '{packageBranch.Name}' does not have any Market Group Packages.");
+        }
+
+        var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(marketGroupName));
+        if (marketGroupPackage is null)
+        {
+            throw new Exception($"Market Group '{marketGroupName}' (case sensitive) not found in {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
+        }
+
+        foreach (var packageId in marketGroupPackage.PackageIds)
+        {
+            yield return await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, packageId, ct).ConfigureAwait(false);
+        }
     }
 
     public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, CancellationToken ct)
