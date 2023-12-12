@@ -21,4 +21,14 @@ public sealed class GamePackage : GamePackageResource
     /// If the package is certified
     /// </summary>
     public bool? IsCertified { get; set; }
+
+    /// <summary>
+    /// File name of the package
+    /// </summary>
+    public string FileName { get; set; }
+
+    /// <summary>
+    /// File size of the package
+    /// </summary>
+    public long? FileSize { get; set; }
 }

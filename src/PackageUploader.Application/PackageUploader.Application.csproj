@@ -3,7 +3,6 @@
   <PropertyGroup>
     <AssemblyName>PackageUploader</AssemblyName>
     <Copyright>© Microsoft Corporation</Copyright>
-    <RuntimeFrameworkVersion>6.0.2</RuntimeFrameworkVersion>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>

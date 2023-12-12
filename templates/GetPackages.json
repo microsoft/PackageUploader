@@ -1,7 +1,7 @@
 {
   "$schema": "https://product-ingestion.azureedge.net/schema/package-uploader-operation-configuration/2021-11-30",
 
-  "operationName": "removePackages",
+  "operationName": "getPackages",
 
   "productId": "{{ productId or bigId required }}",
   "bigId": "{{ productId or bigId required }}",
@@ -9,9 +9,7 @@
   "branchFriendlyName": "{{ flightName or branchFriendlyName required }}",
   "flightName": "{{ flightName or branchFriendlyName required }}",
 
-  "marketGroupName": "{{ optional - if informed it will only delete packages in the specified one (case sensitive) }}",
-
-  "packageFileName": "{{ required - it will delete packages with this file name (wildcards * and ? supported) }}",
+  "marketGroupName": "{{ default value is 'default' (case sensitive) }}",
 
   "aadAuthInfo": {
     "clientId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",

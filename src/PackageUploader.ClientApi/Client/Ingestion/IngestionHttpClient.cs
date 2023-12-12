@@ -32,10 +32,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         
     public async Task<GameProduct> GetGameProductByLongIdAsync(string longId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(longId))
-        {
-            throw new ArgumentException($"{nameof(longId)} cannot be null or empty.", nameof(longId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(longId);
 
         try
         {
@@ -52,10 +49,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GameProduct> GetGameProductByBigIdAsync(string bigId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(bigId))
-        {
-            throw new ArgumentException($"{nameof(bigId)} cannot be null or empty.", nameof(bigId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(bigId);
 
         var ingestionGameProducts = GetAsyncEnumerable<IngestionGameProduct>($"products?externalId={bigId}", ct);
         var ingestionGameProduct = await ingestionGameProducts.FirstOrDefaultAsync(ct).ConfigureAwait(false);
@@ -71,15 +65,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackageBranch> GetPackageBranchByFriendlyNameAsync(string productId, string branchFriendlyName, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(branchFriendlyName))
-        {
-            throw new ArgumentException($"{nameof(branchFriendlyName)} cannot be null or empty.", nameof(branchFriendlyName));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(branchFriendlyName);
 
         var branches = GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct);
 
@@ -96,15 +83,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackageFlight> GetPackageFlightByFlightNameAsync(string productId, string flightName, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(flightName))
-        {
-            throw new ArgumentException($"{nameof(flightName)} cannot be null or empty.", nameof(flightName));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(flightName);
 
         var flights = GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct);
 
@@ -121,25 +101,10 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, bool isXvc, XvcTargetPlatform xvcTargetPlatform, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
-        {
-            throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
-        }
-
-        if (string.IsNullOrWhiteSpace(fileName))
-        {
-            throw new ArgumentException($"{nameof(fileName)} cannot be null or empty.", nameof(fileName));
-        }
-
-        if (string.IsNullOrWhiteSpace(marketGroupId))
-        {
-            throw new ArgumentException($"{nameof(marketGroupId)} cannot be null or empty.", nameof(marketGroupId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(currentDraftInstanceId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(marketGroupId);
 
         var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId, isXvc, xvcTargetPlatform).Build();
 
@@ -158,15 +123,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackage> GetPackageByIdAsync(string productId, string packageId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(packageId))
-        {
-            throw new ArgumentException($"{nameof(packageId)} cannot be null or empty.", nameof(packageId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(packageId);
 
         var ingestionGamePackage = await GetAsync<IngestionGamePackage>($"products/{productId}/packages/{packageId}", ct).ConfigureAwait(false);
 
@@ -176,16 +134,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackageAsset> CreatePackageAssetRequestAsync(string productId, string packageId, FileInfo fileInfo, GamePackageAssetType packageAssetType, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(packageId))
-        {
-            throw new ArgumentException($"{nameof(packageId)} cannot be null or empty.", nameof(packageId));
-        }
-
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(packageId);
         ArgumentNullException.ThrowIfNull(fileInfo);
 
         var body = new IngestionGamePackageAssetBuilder(packageId, fileInfo, packageAssetType).Build();
@@ -198,11 +148,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackage> ProcessPackageRequestAsync(string productId, GamePackage gamePackage, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         ArgumentNullException.ThrowIfNull(gamePackage);
 
         gamePackage.State = GamePackageState.Uploaded;
@@ -215,20 +161,9 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackageAsset> CommitPackageAssetAsync(string productId, string packageId, string packageAssetId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(packageId))
-        {
-            throw new ArgumentException($"{nameof(packageId)} cannot be null or empty.", nameof(packageId));
-        }
-
-        if (string.IsNullOrWhiteSpace(packageAssetId))
-        {
-            throw new ArgumentException($"{nameof(packageAssetId)} cannot be null or empty.", nameof(packageAssetId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(packageId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(packageAssetId);
 
         var body = new IngestionGamePackageAsset();
 
@@ -240,15 +175,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackageConfiguration> GetPackageConfigurationAsync(string productId, string currentDraftInstanceId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
-        {
-            throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(currentDraftInstanceId);
 
         var packageSets = GetAsyncEnumerable<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
 
@@ -264,11 +192,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(string productId, GamePackageConfiguration gamePackageConfiguration, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         ArgumentNullException.ThrowIfNull(gamePackageConfiguration);
 
         var packageSet = await GetAsync<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", ct);
@@ -297,20 +221,9 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GameSubmission> CreateSandboxSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationSandboxName, GameSubmissionOptions gameSubmissionOptions, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
-        {
-            throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
-        }
-
-        if (string.IsNullOrWhiteSpace(destinationSandboxName))
-        {
-            throw new ArgumentException($"{nameof(destinationSandboxName)} cannot be null or empty.", nameof(destinationSandboxName));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(currentDraftInstanceId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(destinationSandboxName);
 
         var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationSandboxName, IngestionSubmissionTargetType.Sandbox, gameSubmissionOptions).Build();
 
@@ -333,20 +246,9 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GameSubmission> CreateFlightSubmissionRequestAsync(string productId, string currentDraftInstanceId, string destinationFlightId, GameSubmissionOptions gameSubmissionOptions, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(currentDraftInstanceId))
-        {
-            throw new ArgumentException($"{nameof(currentDraftInstanceId)} cannot be null or empty.", nameof(currentDraftInstanceId));
-        }
-
-        if (string.IsNullOrWhiteSpace(destinationFlightId))
-        {
-            throw new ArgumentException($"{nameof(destinationFlightId)} cannot be null or empty.", nameof(destinationFlightId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(currentDraftInstanceId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(destinationFlightId);
 
         var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationFlightId, IngestionSubmissionTargetType.Flight, gameSubmissionOptions).Build();
 
@@ -364,15 +266,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<GameSubmission> GetGameSubmissionAsync(string productId, string submissionId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
-
-        if (string.IsNullOrWhiteSpace(submissionId))
-        {
-            throw new ArgumentException($"{nameof(submissionId)} cannot be null or empty.", nameof(submissionId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        StringArgumentException.ThrowIfNullOrWhiteSpace(submissionId);
 
         var submission = await GetAsync<IngestionSubmission>($"products/{productId}/submissions/{submissionId}", ct).ConfigureAwait(false);
         if (submission is null)
@@ -392,10 +287,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     public async Task<IReadOnlyCollection<IGamePackageBranch>> GetPackageBranchesAsync(string productId, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-        {
-            throw new ArgumentException($"{nameof(productId)} cannot be null or empty.", nameof(productId));
-        }
+        StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
 
         var flights = await GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct).ToListAsync(ct).ConfigureAwait(false);
         var branches = await GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct).ToListAsync(ct).ConfigureAwait(false);

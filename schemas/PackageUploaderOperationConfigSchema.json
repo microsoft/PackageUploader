@@ -400,10 +400,17 @@
       "then": {
         "properties": {
           "marketGroupName": {
-            "description": "if not set, it will remove all packages from all market groups (case sensitive)",
+            "description": "if not set, it will remove packages from all market groups (case sensitive)",
+            "type": "string"
+          },
+          "packageFileName": {
+            "description": "it will delete packages with this file name (wildcards * and ? supported)",
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "packageFileName"
+        ]
       }
     },
     {

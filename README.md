@@ -126,9 +126,10 @@ Running the package uploader requires three arguments.
 | Operation | Description |
 | --- | ---|
 | **[GetProduct](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetProduct)** | Gets metadata for the product. This is useful for getting the productId, BigId, product name that's used in all configuration files. And a list of the BranchFriendlyNames and FlightNames of the product. |
+| **[GetPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetPackages)** | Gets a list of the packages in a branch or flight. |
 | **[UploadUwpPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadUwpPackage)** | Uploads a UWP game package. |
 | **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads a XVC game package and assets, including EKB, SubVal, and layout files. |
-| **[RemovePackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#RemovePackages)** | Removes all game packages and assets from a branch. We recommend keeping only your 10 most recent packages to ensure optimal performance. |
+| **[RemovePackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#RemovePackages)** | Removes game packages and assets from a branch. We recommend keeping only your 10 most recent packages to ensure optimal performance. |
 | **[ImportPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#ImportPackages)** | Imports all game packages from a branch to a destination branch. This enables you to copy your previously uploaded and published packages from one branch to another. |
 | **[PublishPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#PublishPackages)** | Publishes all game packages from a branch or flight to a destination sandbox or flight. You can set specific availability times in the configuration file. |
 
@@ -143,6 +144,7 @@ For more information on operation parameters, see [Operations](https://github.co
 | **-s, --ClientSecret <ClientSecret>** | The client secret of the Azure AD application (only for AppSecret) |
 | **-a, --Authentication <AppCert\|AppSecret\|Browser\|Default>** | The authentication method (default: AppSecret) |
 | **-v, --Verbose** | Log verbose messages, such as HTTP calls |
+| **-d, --Data** | Do not log on console and only return data (only for Get operations) |
 | **-l, --LogFile <LogFile>** | The location of the log file |
 | **-?, -h, --help** | Show Help and usage information |
 
