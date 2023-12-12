@@ -15,13 +15,13 @@ internal class IngestionPackageCreationRequestBuilder : IBuilder<IngestionPackag
     private readonly ClientExtractedMetaData _clientExtractedMetaData;
     private const string ResourceType = "PackageCreationRequest";
 
-    public IngestionPackageCreationRequestBuilder(string currentDraftInstanceId, string fileName, string marketGroupId, bool deltaUpload, XvcTargetPlatform xvcTargetPlatform)
+    public IngestionPackageCreationRequestBuilder(string currentDraftInstanceId, string fileName, string marketGroupId, bool ixXvc, XvcTargetPlatform xvcTargetPlatform)
     {
         _currentDraftInstanceId = currentDraftInstanceId ?? throw new ArgumentNullException(nameof(currentDraftInstanceId));
         _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
         _marketGroupId = marketGroupId ?? throw new ArgumentNullException(nameof(marketGroupId));
 
-        if (deltaUpload)
+        if (ixXvc)
         {
             _clientExtractedMetaData = CreateClientExtractedMetaData(xvcTargetPlatform);
         }

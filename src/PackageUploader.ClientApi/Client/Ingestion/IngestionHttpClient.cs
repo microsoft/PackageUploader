@@ -99,14 +99,14 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         return selectedFlight.Map(branch);
     }
 
-    public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, bool deltaUpload, XvcTargetPlatform xvcTargetPlatform, CancellationToken ct)
+    public async Task<GamePackage> CreatePackageRequestAsync(string productId, string currentDraftInstanceId, string fileName, string marketGroupId, bool isXvc, XvcTargetPlatform xvcTargetPlatform, CancellationToken ct)
     {
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(currentDraftInstanceId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         StringArgumentException.ThrowIfNullOrWhiteSpace(marketGroupId);
 
-        var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId, deltaUpload, xvcTargetPlatform).Build();
+        var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId, isXvc, xvcTargetPlatform).Build();
 
         var ingestionGamePackage = await PostAsync<IngestionPackageCreationRequest, IngestionGamePackage>($"products/{productId}/packages", body, ct).ConfigureAwait(false);
 
