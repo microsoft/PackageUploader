@@ -1,9 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 
 namespace PackageUploader.Application.Config;
+
+[OptionsValidator]
+internal partial class RemovePackagesOperationValidator : IValidateOptions<RemovePackagesOperationConfig>;
 
 internal class RemovePackagesOperationConfig : PackageBranchOperationConfig
 {

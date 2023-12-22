@@ -1,12 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Options;
 using PackageUploader.ClientApi.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace PackageUploader.Application.Config;
+
+[OptionsValidator]
+internal partial class PublishPackagesOperationValidator : IValidateOptions<PublishPackagesOperationConfig>;
 
 internal sealed class PublishPackagesOperationConfig : PackageBranchOperationConfig
 {
