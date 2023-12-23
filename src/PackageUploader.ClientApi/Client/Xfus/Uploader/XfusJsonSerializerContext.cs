@@ -7,5 +7,6 @@ using System.Text.Json.Serialization;
 namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
 [JsonSerializable(typeof(UploadProperties))]
+[JsonSerializable(typeof(UploadProgress))]
 internal partial class XfusJsonSerializerContext : JsonSerializerContext
 { }
