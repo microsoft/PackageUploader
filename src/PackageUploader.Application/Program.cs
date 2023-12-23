@@ -33,8 +33,6 @@ internal class Program
     private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "The location of the config file").Required();
     private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
 
-    internal enum ConfigFileFormat { Json, Xml, Ini, }
-
     private static async Task<int> Main(string[] args)
     {
         return await BuildCommandLine()
