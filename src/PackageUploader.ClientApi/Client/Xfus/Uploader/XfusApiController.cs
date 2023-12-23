@@ -1,22 +1,23 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Xfus.Config;
 using PackageUploader.ClientApi.Client.Xfus.Exceptions;
 using PackageUploader.ClientApi.Client.Xfus.Models.Internal;
-using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using System.Linq;
 
 namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
@@ -27,6 +28,9 @@ internal class XfusApiController
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        TypeInfoResolver = JsonSerializer.IsReflectionEnabledByDefault
+            ? new DefaultJsonTypeInfoResolver()
+            : XfusJsonSerializerContext.Default,
     };
 
     private readonly ILogger<XfusUploader> _logger;
@@ -145,7 +149,7 @@ internal class XfusApiController
         return uploadProgress;
     }
 
-    internal static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, bool deltaUpload, T content)
+    private static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, bool deltaUpload, T content)
     {
         var request = new HttpRequestMessage(method, url);
         request.Content = new StringContent(JsonSerializer.Serialize(content, DefaultJsonSerializerOptions));
@@ -159,7 +163,7 @@ internal class XfusApiController
         return request;
     }
 
-    internal static HttpRequestMessage CreateStreamRequest(HttpMethod method, string url, byte[] content, long contentLength)
+    private static HttpRequestMessage CreateStreamRequest(HttpMethod method, string url, byte[] content, long contentLength)
     {
         var request = new HttpRequestMessage(method, url);
         request.Content = new ByteArrayContent(content);

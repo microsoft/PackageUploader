@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Text.Json.Serialization;
 using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
+using System.Text.Json.Serialization;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Client;
 
