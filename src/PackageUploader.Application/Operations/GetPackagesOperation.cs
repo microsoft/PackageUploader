@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,17 +44,11 @@ internal class GetPackagesOperation : Operation
         Console.WriteLine(packagesJson);
     }
 
-    private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     public static string PackagesToJson(IEnumerable<Package> packages)
     {
         try
         {
-            var serializedObject = JsonSerializer.Serialize(packages, DefaultJsonSerializerOptions);
+            var serializedObject = JsonSerializer.Serialize(packages, PackageUploaderJsonSerializerContext.Default.IEnumerablePackage);
             return serializedObject;
         }
         catch (Exception ex)
