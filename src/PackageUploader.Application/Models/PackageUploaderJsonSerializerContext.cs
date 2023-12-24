@@ -8,8 +8,7 @@ namespace PackageUploader.Application.Models;
 
 [JsonSourceGenerationOptions(
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
-    WriteIndented = true
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase
 )]
 [JsonSerializable(typeof(IEnumerable<Package>))]
 [JsonSerializable(typeof(Product))]
