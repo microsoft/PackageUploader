@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -12,6 +14,9 @@ namespace PackageUploader.FileLogger;
 
 public static class FileLoggerExtensions
 {
+    internal const string RequiresDynamicCodeMessage = "Binding TOptions to configuration values may require generating dynamic code at runtime.";
+    internal const string TrimmingRequiresUnreferencedCodeMessage = "TOptions's dependent types may have their members trimmed. Ensure all required members are preserved.";
+
     /// <summary>
     /// Adds a file logger named 'File' to the factory.
     /// </summary>
@@ -20,12 +25,13 @@ public static class FileLoggerExtensions
     {
         builder.AddConfiguration();
 
-        builder.AddFileFormatter<JsonFileFormatter, JsonFileFormatterOptions>();
-        builder.AddFileFormatter<SimpleFileFormatter, SimpleFileFormatterOptions>();
+        builder.AddFileFormatter<JsonFileFormatter, JsonFileFormatterOptions, FileFormatterConfigureOptions>();
+        builder.AddFileFormatter<SimpleFileFormatter, SimpleFileFormatterOptions, FileFormatterConfigureOptions>();
 
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, FileLoggerProvider>());
-        LoggerProviderOptions.RegisterProviderOptions<FileLoggerOptions, FileLoggerProvider>(builder.Services);
-        LoggerProviderOptions.RegisterProviderOptions<FileWriterOptions, FileLoggerProvider>(builder.Services);
+
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<FileLoggerOptions>, FileLoggerConfigureOptions>());
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IOptionsChangeTokenSource<FileLoggerOptions>, LoggerProviderOptionsChangeTokenSource<FileLoggerOptions, FileLoggerProvider>>());
 
         return builder;
     }
@@ -46,15 +52,8 @@ public static class FileLoggerExtensions
     /// <param name="configureFile">A delegate to configure the <see cref="FileWriter"/>.</param>
     public static ILoggingBuilder AddFile(this ILoggingBuilder builder, Action<FileLoggerOptions> configure, Action<FileWriterOptions> configureFile)
     {
-        if (configure == null)
-        {
-            throw new ArgumentNullException(nameof(configure));
-        }
-
-        if (configureFile == null)
-        {
-            throw new ArgumentNullException(nameof(configureFile));
-        }
+        ArgumentNullException.ThrowIfNull(configure);
+        ArgumentNullException.ThrowIfNull(configureFile);
 
         builder.AddFile();
         builder.Services.Configure(configure);
@@ -126,10 +125,8 @@ public static class FileLoggerExtensions
     internal static ILoggingBuilder AddFileWithFormatter<TOptions>(this ILoggingBuilder builder, string name, Action<TOptions> configure, Action<FileWriterOptions> configureFile)
         where TOptions : FileFormatterOptions
     {
-        if (configure == null)
-        {
-            throw new ArgumentNullException(nameof(configure));
-        }
+        ArgumentNullException.ThrowIfNull(configure);
+
         builder.AddFormatterWithName(name);
         builder.Services.Configure(configure);
         builder.Services.Configure(configureFile);
@@ -146,17 +143,13 @@ public static class FileLoggerExtensions
     /// Adds a custom file logger formatter 'TFormatter' to be configured with options 'TOptions'.
     /// </summary>
     /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
-    public static ILoggingBuilder AddFileFormatter<TFormatter, TOptions>(this ILoggingBuilder builder)
+    [RequiresDynamicCode(RequiresDynamicCodeMessage)]
+    [RequiresUnreferencedCode(TrimmingRequiresUnreferencedCodeMessage)]
+    public static ILoggingBuilder AddFileFormatter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TFormatter, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TOptions>(this ILoggingBuilder builder)
         where TOptions : FileFormatterOptions
         where TFormatter : FileFormatter
     {
-        builder.AddConfiguration();
-
-        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<FileFormatter, TFormatter>());
-        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<TOptions>, FileLoggerFormatterConfigureOptions<TOptions>>());
-        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IOptionsChangeTokenSource<TOptions>, FileLoggerFormatterOptionsChangeTokenSource<TOptions>>());
-
-        return builder;
+        return AddFileFormatter<TFormatter, TOptions, FileLoggerFormatterConfigureOptions<TFormatter, TOptions>>(builder);
     }
 
     /// <summary>
@@ -164,35 +157,57 @@ public static class FileLoggerExtensions
     /// </summary>
     /// <param name="builder">The <see cref="ILoggingBuilder"/> to use.</param>
     /// <param name="configure">A delegate to configure options 'TOptions' for custom formatter 'TFormatter'.</param>
-    public static ILoggingBuilder AddFileFormatter<TFormatter, TOptions>(this ILoggingBuilder builder, Action<TOptions> configure)
+    [RequiresDynamicCode(RequiresDynamicCodeMessage)]
+    [RequiresUnreferencedCode(TrimmingRequiresUnreferencedCodeMessage)]
+    public static ILoggingBuilder AddFileFormatter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TFormatter, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TOptions>(this ILoggingBuilder builder, Action<TOptions> configure)
         where TOptions : FileFormatterOptions
         where TFormatter : FileFormatter
     {
-        if (configure == null)
-        {
-            throw new ArgumentNullException(nameof(configure));
-        }
+        ArgumentNullException.ThrowIfNull(configure);
 
         builder.AddFileFormatter<TFormatter, TOptions>();
         builder.Services.Configure(configure);
         return builder;
     }
+
+    private static ILoggingBuilder AddFileFormatter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TFormatter, TOptions, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TConfigureOptions>(this ILoggingBuilder builder)
+        where TOptions : FileFormatterOptions
+        where TFormatter : FileFormatter
+        where TConfigureOptions : class, IConfigureOptions<TOptions>
+    {
+        builder.AddConfiguration();
+
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<FileFormatter, TFormatter>());
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<TOptions>, TConfigureOptions>());
+        builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IOptionsChangeTokenSource<TOptions>, FileLoggerFormatterOptionsChangeTokenSource<TFormatter, TOptions>>());
+
+        return builder;
+    }
+
+    internal static IConfiguration GetFormatterOptionsSection(this ILoggerProviderConfiguration<FileLoggerProvider> providerConfiguration)
+    {
+        return providerConfiguration.Configuration.GetSection("FormatterOptions");
+    }
 }
 
-internal class FileLoggerFormatterConfigureOptions<TOptions> : ConfigureFromConfigurationOptions<TOptions>
+internal sealed class FileLoggerFormatterConfigureOptions<TFormatter, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TOptions> : ConfigureFromConfigurationOptions<TOptions>
     where TOptions : FileFormatterOptions
+    where TFormatter : FileFormatter
 {
+    [RequiresDynamicCode(FileLoggerExtensions.RequiresDynamicCodeMessage)]
+    [RequiresUnreferencedCode(FileLoggerExtensions.TrimmingRequiresUnreferencedCodeMessage)]
     public FileLoggerFormatterConfigureOptions(ILoggerProviderConfiguration<FileLoggerProvider> providerConfiguration) :
-        base(providerConfiguration.Configuration.GetSection("FormatterOptions"))
+        base(providerConfiguration.GetFormatterOptionsSection())
     {
     }
 }
 
-internal class FileLoggerFormatterOptionsChangeTokenSource<TOptions> : ConfigurationChangeTokenSource<TOptions>
+internal sealed class FileLoggerFormatterOptionsChangeTokenSource<TFormatter, TOptions> : ConfigurationChangeTokenSource<TOptions>
     where TOptions : FileFormatterOptions
+    where TFormatter : FileFormatter
 {
     public FileLoggerFormatterOptionsChangeTokenSource(ILoggerProviderConfiguration<FileLoggerProvider> providerConfiguration)
-        : base(providerConfiguration.Configuration.GetSection("FormatterOptions"))
+        : base(providerConfiguration.GetFormatterOptionsSection())
     {
     }
 }
