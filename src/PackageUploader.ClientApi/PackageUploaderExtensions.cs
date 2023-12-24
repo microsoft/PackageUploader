@@ -23,7 +23,7 @@ public static class IngestionExtensions
         AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret) =>
         services
             .AddScoped<IPackageUploaderService, PackageUploaderService>()
-            .AddIngestionService(config)
+            .AddIngestionService()
             .AddIngestionAuthentication(authenticationMethod)
             .AddXfusService(config);
 
