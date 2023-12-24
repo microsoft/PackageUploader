@@ -12,8 +12,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,14 +23,11 @@ internal abstract class HttpRestClient : IHttpRestClient
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
 
-    private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNameCaseInsensitive = true,
-        TypeInfoResolver = JsonSerializer.IsReflectionEnabledByDefault
-            ? new DefaultJsonTypeInfoResolver()
-            : IngestionJsonSerializerContext.Default,
-    };
+    //private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
+    //{
+    //    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    //    PropertyNameCaseInsensitive = true
+    //};
 
     private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
     private const LogLevel VerboseLogLevel = LogLevel.Trace;
@@ -45,7 +40,7 @@ internal abstract class HttpRestClient : IHttpRestClient
         _sdkVersion = ingestionSdkVersion?.SdkVersion ?? "SDK-V1.0.0";
     }
 
-    public async Task<T> GetAsync<T>(string subUrl, CancellationToken ct)
+    public async Task<T> GetAsync<T>(string subUrl, JsonTypeInfo<T> jsonTypeInfo, CancellationToken ct)
     {
         try
         {
@@ -56,7 +51,7 @@ internal abstract class HttpRestClient : IHttpRestClient
             await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+            var result = await response.Content.ReadFromJsonAsync(jsonTypeInfo, ct).ConfigureAwait(false);
             return result;
         }
         catch (Exception ex)
@@ -66,12 +61,12 @@ internal abstract class HttpRestClient : IHttpRestClient
         }
     }
 
-    public async IAsyncEnumerable<T> GetAsyncEnumerable<T>(string subUrl, [EnumeratorCancellation] CancellationToken ct)
+    public async IAsyncEnumerable<T> GetAsyncEnumerable<T>(string subUrl, JsonTypeInfo<PagedCollection<T>> jsonTypeInfo, [EnumeratorCancellation] CancellationToken ct)
     {
         var nextLink = subUrl;
         do
         {
-            var response = await GetAsync<PagedCollection<T>>(nextLink, ct).ConfigureAwait(false);
+            var response = await GetAsync(nextLink, jsonTypeInfo, ct).ConfigureAwait(false);
 
             if (response.Value is null)
             {
@@ -91,23 +86,23 @@ internal abstract class HttpRestClient : IHttpRestClient
         } while (!string.IsNullOrWhiteSpace(nextLink) && !ct.IsCancellationRequested);
     }
 
-    public async Task<T> PostAsync<T>(string subUrl, T body, CancellationToken ct)
+    public async Task<T> PostAsync<T>(string subUrl, T body, JsonTypeInfo<T> jsonTypeInfo, CancellationToken ct)
     {
-        return await PostAsync<T, T>(subUrl, body, ct);
+        return await PostAsync(subUrl, body, jsonTypeInfo, jsonTypeInfo, ct);
     }
 
-    public async Task<TOut> PostAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
+    public async Task<TOut> PostAsync<TIn, TOut>(string subUrl, TIn body, JsonTypeInfo<TIn> jsonTInInfo, JsonTypeInfo<TOut> jsonTOutInfo, CancellationToken ct)
     {
         try
         {
-            var request = CreateJsonRequestMessage(HttpMethod.Post, subUrl, body);
+            var request = CreateJsonRequestMessage(HttpMethod.Post, subUrl, body, jsonTInInfo);
 
             await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
             using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
             await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+            var result = await response.Content.ReadFromJsonAsync(jsonTOutInfo, ct).ConfigureAwait(false);
             return result;
         }
         catch (Exception ex)
@@ -117,33 +112,33 @@ internal abstract class HttpRestClient : IHttpRestClient
         }
     }
 
-    public async Task<T> PutAsync<T>(string subUrl, T body, CancellationToken ct)
+    public async Task<T> PutAsync<T>(string subUrl, T body, JsonTypeInfo<T> jsonTypeInfo, CancellationToken ct)
     {
-        return await PutAsync(subUrl, body, null, ct).ConfigureAwait(false);
+        return await PutAsync(subUrl, body, jsonTypeInfo, null, ct).ConfigureAwait(false);
     }
 
-    public async Task<T> PutAsync<T>(string subUrl, T body, IDictionary<string, string> customHeaders, CancellationToken ct)
+    public async Task<T> PutAsync<T>(string subUrl, T body, JsonTypeInfo<T> jsonTypeInfo, IDictionary<string, string> customHeaders, CancellationToken ct)
     {
-        return await PutAsync<T, T>(subUrl, body, customHeaders, ct).ConfigureAwait(false);
+        return await PutAsync(subUrl, body, jsonTypeInfo, jsonTypeInfo, customHeaders, ct).ConfigureAwait(false);
     }
 
-    public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, CancellationToken ct)
+    public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, JsonTypeInfo<TIn> jsonTInInfo, JsonTypeInfo<TOut> jsonTOutInfo, CancellationToken ct)
     {
-        return await PutAsync<TIn, TOut>(subUrl, body, null, ct).ConfigureAwait(false);
+        return await PutAsync(subUrl, body, jsonTInInfo, jsonTOutInfo, null, ct).ConfigureAwait(false);
     }
 
-    public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, IDictionary<string, string> customHeaders, CancellationToken ct)
+    public async Task<TOut> PutAsync<TIn, TOut>(string subUrl, TIn body, JsonTypeInfo<TIn> jsonTInInfo, JsonTypeInfo<TOut> jsonTOutInfo, IDictionary<string, string> customHeaders, CancellationToken ct)
     {
         try
         {
-            var request = CreateJsonRequestMessage(HttpMethod.Put, subUrl, body, customHeaders);
+            var request = CreateJsonRequestMessage(HttpMethod.Put, subUrl, body, jsonTInInfo, customHeaders);
 
             await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
             using var response = await _httpClient.SendAsync(request, ct);
             await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadFromJsonAsync<TOut>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+            var result = await response.Content.ReadFromJsonAsync(jsonTOutInfo, ct).ConfigureAwait(false);
             return result;
         }
         catch (Exception ex)
@@ -154,17 +149,17 @@ internal abstract class HttpRestClient : IHttpRestClient
     }
 
     private HttpRequestMessage CreateJsonRequestMessage(HttpMethod method, string requestUri) =>
-        CreateJsonRequestMessage(method, requestUri, (object) null, null);
+        CreateJsonRequestMessage(method, requestUri, null, IngestionJsonSerializerContext.Default.Object, null);
 
-    private HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue) =>
-        CreateJsonRequestMessage(method, requestUri, inputValue, null);
+    private HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, JsonTypeInfo<T> jsonTypeInfo) =>
+        CreateJsonRequestMessage(method, requestUri, inputValue, jsonTypeInfo, null);
 
-    private HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, IDictionary<string, string> customHeaders)
+    private HttpRequestMessage CreateJsonRequestMessage<T>(HttpMethod method, string requestUri, T inputValue, JsonTypeInfo<T> jsonTypeInfo, IDictionary<string, string> customHeaders)
     {
         var request = new HttpRequestMessage(method, requestUri);
         if (inputValue is not null)
         {
-            request.Content = JsonContent.Create(inputValue, JsonMediaTypeHeaderValue, DefaultJsonSerializerOptions);
+            request.Content = JsonContent.Create(inputValue, jsonTypeInfo, JsonMediaTypeHeaderValue);
         }
         request.Headers.Add("Request-ID", Guid.NewGuid().ToString());
         request.Headers.Add("MethodOfAccess", _sdkVersion);

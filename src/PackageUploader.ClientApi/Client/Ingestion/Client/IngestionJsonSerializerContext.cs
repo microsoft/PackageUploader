@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Client;
 
+[JsonSerializable(typeof(object))]
 [JsonSerializable(typeof(PagedCollection<IngestionGamePackage>))]
 [JsonSerializable(typeof(PagedCollection<IngestionGameProduct>))]
 [JsonSerializable(typeof(PagedCollection<IngestionBranch>))]
