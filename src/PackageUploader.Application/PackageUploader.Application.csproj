@@ -8,7 +8,7 @@
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PublishAot>true</PublishAot>
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
-
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <DebugType>none</DebugType>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
