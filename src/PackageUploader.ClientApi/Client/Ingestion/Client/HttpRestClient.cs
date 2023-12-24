@@ -23,12 +23,6 @@ internal abstract class HttpRestClient : IHttpRestClient
     private readonly ILogger _logger;
     private readonly HttpClient _httpClient;
 
-    //private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
-    //{
-    //    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    //    PropertyNameCaseInsensitive = true
-    //};
-
     private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
     private const LogLevel VerboseLogLevel = LogLevel.Trace;
     private readonly string _sdkVersion;

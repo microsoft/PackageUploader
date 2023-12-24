@@ -6,7 +6,11 @@ using System.Text.Json.Serialization;
 
 namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
-// TODO: Add options
+[JsonSourceGenerationOptions(
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    PropertyNameCaseInsensitive = true
+)]
 [JsonSerializable(typeof(UploadProperties))]
 [JsonSerializable(typeof(UploadProgress))]
 internal partial class XfusJsonSerializerContext : JsonSerializerContext

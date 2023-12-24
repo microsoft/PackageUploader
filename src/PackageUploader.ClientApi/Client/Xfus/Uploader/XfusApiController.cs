@@ -22,13 +22,6 @@ namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
 internal class XfusApiController
 {
-    //private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
-    //{
-    //    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    //    PropertyNameCaseInsensitive = true,
-    //    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    //};
-
     private readonly ILogger<XfusUploader> _logger;
     private readonly UploadConfig _uploadConfig;
     private readonly HttpClient _httpClient;
