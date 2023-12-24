@@ -48,10 +48,9 @@ internal static class AccessTokenProviderExtensions
         return services;
     }
 
-    private static IServiceCollection AddAccessTokenProviderOptions(this IServiceCollection services)
+    private static void AddAccessTokenProviderOptions(this IServiceCollection services)
     {
         services.AddSingleton<IValidateOptions<AccessTokenProviderConfig>, AccessTokenProviderConfigValidator>();
         services.AddOptions<AccessTokenProviderConfig>().BindConfiguration(nameof(AccessTokenProviderConfig));
-        return services;
     }
 }
