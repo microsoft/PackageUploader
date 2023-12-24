@@ -26,7 +26,7 @@ internal class Program
     private const string LogTimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
 
     // Options
-    private static readonly Option<bool> DataOption = new (new[] { "-d", "--Data" }, "Do not log on console and only return data");
+    public static readonly Option<bool> DataOption = new (new[] { "-d", "--Data" }, "Do not log on console and only return data");
     private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls");
     private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file");
     private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app (only for AppSecret)");
