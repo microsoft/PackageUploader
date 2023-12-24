@@ -18,11 +18,6 @@ public sealed class GamePackage : GamePackageResource
     public XfusUploadInfo UploadInfo { get; internal init; }
 
     /// <summary>
-    /// If the package is certified
-    /// </summary>
-    public bool? IsCertified { get; set; }
-
-    /// <summary>
     /// File name of the package
     /// </summary>
     public string FileName { get; set; }

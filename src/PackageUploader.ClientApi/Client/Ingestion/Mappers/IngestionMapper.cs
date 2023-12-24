@@ -80,7 +80,6 @@ internal static class IngestionMapper
             UploadInfo = ingestionGamePackage.UploadInfo.Map(),
             ETag = ingestionGamePackage.ETag,
             ODataETag = ingestionGamePackage.ODataETag,
-            IsCertified = ingestionGamePackage.IsCertified,
             FileName = ingestionGamePackage.FileName,
             FileSize = ingestionGamePackage.FileSize,
         };
