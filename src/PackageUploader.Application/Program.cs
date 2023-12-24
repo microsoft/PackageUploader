@@ -83,7 +83,7 @@ internal class Program
         var invocationContext = context.GetInvocationContext();
 
         services.AddLogging();
-        services.AddPackageUploaderService(context.Configuration, invocationContext.GetOptionValue(AuthenticationMethodOption));
+        services.AddPackageUploaderService(invocationContext.GetOptionValue(AuthenticationMethodOption));
         services.AddOperations(context);
     }
 

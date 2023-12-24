@@ -4,7 +4,6 @@
 using PackageUploader.ClientApi.Client.Ingestion;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 using PackageUploader.ClientApi.Client.Xfus;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace PackageUploader.ClientApi;
@@ -19,13 +18,13 @@ public static class IngestionExtensions
         Browser,
     }
 
-    public static IServiceCollection AddPackageUploaderService(this IServiceCollection services, IConfiguration config, 
+    public static IServiceCollection AddPackageUploaderService(this IServiceCollection services,
         AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret) =>
         services
             .AddScoped<IPackageUploaderService, PackageUploaderService>()
             .AddIngestionService()
             .AddIngestionAuthentication(authenticationMethod)
-            .AddXfusService(config);
+            .AddXfusService();
 
     private static IServiceCollection AddIngestionAuthentication(this IServiceCollection services, 
         AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret) =>

@@ -1,26 +1,26 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using PackageUploader.ClientApi.Client.Xfus.Config;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using PackageUploader.ClientApi.Client.Xfus.Config;
+using PackageUploader.ClientApi.Client.Xfus.Uploader;
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using PackageUploader.ClientApi.Client.Xfus.Uploader;
 
 namespace PackageUploader.ClientApi.Client.Xfus;
 
 internal static class XfusExtensions
 {
-    public static IServiceCollection AddXfusService(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddXfusService(this IServiceCollection services)
     {
         // Xfus
-        services.AddOptions<UploadConfig>().Bind(config.GetSection(nameof(UploadConfig))).ValidateDataAnnotations();
+        services.AddSingleton<IValidateOptions<UploadConfig>, UploadConfigValidator>();
+        services.AddOptions<UploadConfig>().BindConfiguration(nameof(UploadConfig));
         services.AddScoped<IXfusUploader, XfusUploader>();
         services.AddHttpClient(XfusUploader.HttpClientName, (serviceProvider, httpClient) =>
         {
