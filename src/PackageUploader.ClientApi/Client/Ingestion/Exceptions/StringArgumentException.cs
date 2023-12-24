@@ -15,6 +15,9 @@ internal static class StringArgumentException
     public static void ThrowIfNullOrWhiteSpace([NotNull] string argument, [CallerArgumentExpression("argument")] string paramName = null)
     {
         if (string.IsNullOrWhiteSpace(argument))
-            throw new ArgumentException("Value cannot be null, empty or consist only of white-space characters.", paramName);
+        {
+            ArgumentNullException.ThrowIfNull(argument);
+            throw new ArgumentException("Argument is empty or consists only of white-space characters", paramName);
+        }
     }
 }
