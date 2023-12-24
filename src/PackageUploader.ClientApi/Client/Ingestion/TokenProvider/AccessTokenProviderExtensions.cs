@@ -1,40 +1,57 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 
 internal static class AccessTokenProviderExtensions
 {
-    public static IServiceCollection AddAzureApplicationSecretAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
-        services.AddAccessTokenProvider<AzureApplicationSecretAccessTokenProvider, AzureApplicationSecretAuthInfo>(config);
-
-    public static IServiceCollection AddAzureApplicationCertificateAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
-        services.AddAccessTokenProvider<AzureApplicationCertificateAccessTokenProvider, AzureApplicationCertificateAuthInfo>(config);
-
-    public static IServiceCollection AddDefaultAzureCredentialAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
-        services.AddAccessTokenProvider<DefaultAzureCredentialAccessTokenProvider>(config);
-
-    public static IServiceCollection AddInteractiveBrowserCredentialAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
-        services.AddAccessTokenProvider<InteractiveBrowserCredentialAccessTokenProvider>(config);
-
-    private static IServiceCollection AddAccessTokenProvider<TProvider, TAuthInfo>(this IServiceCollection services, IConfiguration config)
-        where TProvider : class, IAccessTokenProvider where TAuthInfo : AadAuthInfo
+    public static IServiceCollection AddAzureApplicationSecretAccessTokenProvider(this IServiceCollection services)
     {
-        services.AddOptions<TAuthInfo>().Bind(config.GetSection(AadAuthInfo.ConfigName)).ValidateDataAnnotations();
-        services.AddAccessTokenProvider<TProvider>(config);
+        services.AddSingleton<IValidateOptions<AzureApplicationSecretAuthInfo>, AzureApplicationSecretAuthInfoValidator>();
+        services.AddOptions<AzureApplicationSecretAuthInfo>().BindConfiguration(AadAuthInfo.ConfigName);
+
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, AzureApplicationSecretAccessTokenProvider>();
+
         return services;
     }
 
-    private static IServiceCollection AddAccessTokenProvider<TProvider>(this IServiceCollection services, IConfiguration config)
-        where TProvider : class, IAccessTokenProvider
+    public static IServiceCollection AddAzureApplicationCertificateAccessTokenProvider(this IServiceCollection services)
     {
-        services.AddOptions<AccessTokenProviderConfig>().Bind(config.GetSection(nameof(AccessTokenProviderConfig))).ValidateDataAnnotations();
-        services.AddScoped<IAccessTokenProvider, TProvider>();
+        services.AddSingleton<IValidateOptions<AzureApplicationCertificateAuthInfo>, AzureApplicationCertificateAuthInfoValidator>();
+        services.AddOptions<AzureApplicationCertificateAuthInfo>().BindConfiguration(AadAuthInfo.ConfigName);
+
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, AzureApplicationCertificateAccessTokenProvider>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddDefaultAzureCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, DefaultAzureCredentialAccessTokenProvider>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddInteractiveBrowserCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, InteractiveBrowserCredentialAccessTokenProvider>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddAccessTokenProviderOptions(this IServiceCollection services)
+    {
+        services.AddSingleton<IValidateOptions<AccessTokenProviderConfig>, AccessTokenProviderConfigValidator>();
+        services.AddOptions<AccessTokenProviderConfig>().BindConfiguration(nameof(AccessTokenProviderConfig));
         return services;
     }
 }
