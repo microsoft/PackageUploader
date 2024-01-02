@@ -128,7 +128,7 @@ internal abstract class HttpRestClient : IHttpRestClient
             var request = CreateJsonRequestMessage(HttpMethod.Put, subUrl, body, jsonTInInfo, customHeaders);
 
             await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
-            using var response = await _httpClient.SendAsync(request, ct);
+            using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
             await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
