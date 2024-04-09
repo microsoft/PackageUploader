@@ -110,6 +110,8 @@ stages:
             value: "linux-x64"
 
         steps:
+        - task: NuGetAuthenticate@1
+
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
