@@ -42,4 +42,9 @@ internal class IngestionMarketGroupPackage
     /// Dictionary of per region, per package scheduled release dates for XVC and MSIXVC packages
     /// </summary>
     public Dictionary<string, DateTime?> PackageAvailabilityDates { get; set; }
+
+    /// <summary>
+    /// Dictionary of per package metadata (e.g. predownload date) for XVC and MSIXVC packages
+    /// </summary>
+    public Dictionary<string, IngestionMarketGroupPackageMetadata> PackageIdToMetadataMap { get; set; }
 }

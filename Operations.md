@@ -75,6 +75,8 @@
 - **availabilityDate**: optional - if informed it will configure custom availability date for your XVC/MSIXVC packages [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
    - **isEnabled**: optional (default false) - it will enable/disable custom availability date
    - **effectiveDate**: optional - if informed it will set the package availability date (date format example: "2021-10-24T21:00:00.000Z")
+- **packageMetadata**: optional - if informed it will configure custom metadata for your XVC/MSIXVC packages. It supports the following properties
+   - **preDownloadDate**: optional (default is equivalent to availabilityDate) - it will configure when package will be available for download (date format example: "2021-10-24T21:00:00.000Z")
 - **uploadConfig**: optional - httpClient configuration to be used to upload the files
    - **httpTimeoutMs**: (default and recommended: 5000)
    - **httpUploadTimeoutMs**: (default and recommended: 300000)
@@ -126,6 +128,8 @@
 - **mandatoryDate**: optional - if informed it will configure custom mandatory date for your UWP market groups in the destination branch/flight [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#mandatory-update)
    - **isEnabled**: optional (default false) - it will enable/disable custom mandatory date
    - **effectiveDate**: optional - if informed it will set the mandatory date (date format example: "2021-10-24T21:00:00.000Z")
+- **packageMetadata**: optional - if informed it will configure custom metadata for your XVC/MSIXVC packages. It supports the following properties
+   - **preDownloadDate**: optional (default is equivalent to availabilityDate) - it will configure when package will be available for download (date format example: "2021-10-24T21:00:00.000Z")
 - **gradualRollout**: optional - if informed it will configure gradual rollout for your UWP packages in the destination branch/flight [Learn more](https://docs.microsoft.com/en-gb/windows/uwp/publish/upload-app-packages#gradual-package-rollout)
    - **isEnabled**:  optional (default false) - it will enable/disable gradual rollout
    - **percentage**: optional - rollout to start with

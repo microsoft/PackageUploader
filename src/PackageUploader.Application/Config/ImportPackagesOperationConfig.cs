@@ -20,7 +20,7 @@ internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGa
     public GamePackageDate AvailabilityDate { get; set; }
     public GamePackageDate MandatoryDate { get; set; }
     public GameGradualRolloutInfo GradualRollout { get; set; }
-
+    public MarketGroupPackageMetadata PackageMetadata { get; set; }
     public bool Overwrite { get; set; }
 
     protected override void Validate(IList<ValidationResult> validationResults)

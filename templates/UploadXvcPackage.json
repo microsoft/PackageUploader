@@ -27,6 +27,10 @@
     "effectiveDate": "{{ optional - if informed it will set the availability date in this branch/marketGroupId for this Xvc package }}"
   },
 
+  "packageMetadata": {
+    "preDownloadDate": "{{ optional - if informed it will set the predownload date in this branch/marketGroupId for this Xvc package }}"
+  },
+
   "aadAuthInfo": {
     "clientId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",
     "tenantId": "{{ required when using authentication method *AppCert* or *AppSecret* }}",

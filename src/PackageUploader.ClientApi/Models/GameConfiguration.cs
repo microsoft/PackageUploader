@@ -21,4 +21,9 @@ public class GameConfiguration : IGameConfiguration
     /// Gradual rollout information (Uwp packages)
     /// </summary>
     public GameGradualRolloutInfo GradualRollout { get; set; }
+
+    /// <summary>
+    /// Metadata about packages like predownload date (Xvc packages)
+    /// </summary>
+    public MarketGroupPackageMetadata PackageMetadata { get; set; }
 }

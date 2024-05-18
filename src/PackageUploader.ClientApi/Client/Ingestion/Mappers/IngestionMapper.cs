@@ -168,6 +168,7 @@ internal static class IngestionMapper
             MandatoryUpdateInfo = ingestionMarketGroupPackage.MandatoryUpdateInfo.Map(),
             AvailabilityDate = ingestionMarketGroupPackage.AvailabilityDate,
             PackageAvailabilityDates = ingestionMarketGroupPackage.PackageAvailabilityDates,
+            PackageIdToMetadataMap = ingestionMarketGroupPackage.PackageIdToMetadataMap?.ToDictionary(a => a.Key, a => a.Value?.Map()),
         };
 
     private static GameMandatoryUpdateInfo Map(this IngestionMandatoryUpdateInfo ingestionMandatoryUpdateInfo) =>
@@ -209,6 +210,7 @@ internal static class IngestionMapper
             Markets = gameMarketGroupPackage.Markets,
             Name = gameMarketGroupPackage.Name,
             PackageAvailabilityDates = gameMarketGroupPackage.PackageAvailabilityDates?.ToDictionary(a => a.Key, a => a.Value?.ToUniversalTime()),
+            PackageIdToMetadataMap = gameMarketGroupPackage.PackageIdToMetadataMap?.ToDictionary(a => a.Key, a => a.Value?.Map()),
             PackageIds = gameMarketGroupPackage.PackageIds,
         };
 
@@ -257,5 +259,17 @@ internal static class IngestionMapper
             GroupIds = ingestionFlight.GroupIds,
             Name = ingestionFlight.Name,
             CurrentDraftInstanceId = gamePackageBranch.CurrentDraftInstanceId,
+        };
+
+    private static MarketGroupPackageMetadata Map(this IngestionMarketGroupPackageMetadata ingestionMarketGroupPackageMetadata) =>
+        ingestionMarketGroupPackageMetadata is null ? null : new()
+        {
+            JsonExtensionData = ingestionMarketGroupPackageMetadata.JsonExtensionData?.ToDictionary(a => a.Key, a => a.Value),
+        };
+
+    private static IngestionMarketGroupPackageMetadata Map(this MarketGroupPackageMetadata marketGroupPackageMetadata) =>
+        marketGroupPackageMetadata is null ? null : new()
+        {
+            JsonExtensionData = marketGroupPackageMetadata.JsonExtensionData?.ToDictionary(a => a.Key, a => a.Value),
         };
 }
