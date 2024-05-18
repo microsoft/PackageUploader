@@ -66,10 +66,11 @@ internal static class ProgramExtensions
         return option;
     }
 
-    public static void AddOperation<T1, T2>(this IServiceCollection services, HostBuilderContext context) where T1 : Operation where T2 : BaseOperationConfig
+    public static IServiceCollection AddOperation<T1, T2>(this IServiceCollection services, HostBuilderContext context) where T1 : Operation where T2 : BaseOperationConfig
     {
         services.AddScoped<T1>();
         services.AddOptions<T2>().Bind(context.Configuration).ValidateDataAnnotations();
+        return services;
     }
 
     public static IConfigurationBuilder AddConfigFile(this IConfigurationBuilder builder, FileInfo configFile, Program.ConfigFileFormat configFileFormat) =>
