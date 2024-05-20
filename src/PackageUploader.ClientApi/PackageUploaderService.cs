@@ -463,6 +463,7 @@ public class PackageUploaderService : IPackageUploaderService
                                     }
                                 }
                             }
+
                             AddPackageMetadata(destinationMarketGroupPackage, packageIdsToAdd, packageMetadata);
                         }
                     }
@@ -639,30 +640,6 @@ public class PackageUploaderService : IPackageUploaderService
         return gameSubmission;
     }
 
-    private static XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileSystemInfo packageFile)
-    {
-        const int headerOffsetForXvcTargetPlatform = 1137;
-
-        byte data;
-
-        using (var fileStream = File.OpenRead(packageFile.FullName))
-        using (var reader = new BinaryReader(fileStream))
-        {
-            reader.BaseStream.Seek(headerOffsetForXvcTargetPlatform, SeekOrigin.Begin);
-            data = reader.ReadByte();
-        }
-
-        var xvcTargetPlatform = (XvcTargetPlatform)data;
-
-        if (xvcTargetPlatform == XvcTargetPlatform.NotSpecified)
-        {
-            // Not specifying equates to Gen8.
-            xvcTargetPlatform = XvcTargetPlatform.ConsoleGen8;
-        }
-
-        return xvcTargetPlatform;
-    }
-
     private void SetXvcAvailabilityDate(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, GamePackageConfiguration packageConfiguration)
     {
         if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
@@ -701,85 +678,83 @@ public class PackageUploaderService : IPackageUploaderService
 
     private void SetPackageMetadata(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, MarketGroupPackageMetadata packageMetadata, GamePackageConfiguration packageConfiguration)
     {
-        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+        if (packageConfiguration.MarketGroupPackages == null || !packageConfiguration.MarketGroupPackages.Any())
         {
-            if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
-              {
-                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
-              }
-              else
-              {
-                  foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
-                  {
-                      if (marketGroupPackage.PackageIds.Contains(gamePackage.Id))
-                      {
-                          if (string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name))
-                          {
-                              if (marketGroupPackage.PackageIdToMetadataMap is null)
-                              {
-                                  marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, MarketGroupPackageMetadata>();
-                              }
-
-                              marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = packageMetadata;
-                          }
-                      }
-                  }
-              }
+            return;
         }
-    }
 
-    private void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, MarketGroupPackageMetadata packageMetadata)
-    {
-        if (packageIdsToAdd.Any())
+        if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
         {
-            if (destinationMarketGroupPackage.PackageIdToMetadataMap is not null)
+            _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
+            return;
+        }
+        
+        foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
+        {
+            if (marketGroupPackage.PackageIds.Contains(gamePackage.Id))
             {
-                foreach (var packageId in packageIdsToAdd)
+                if (string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name))
                 {
-                    if (packageMetadata is not null)
+                    if (marketGroupPackage.PackageIdToMetadataMap is null)
                     {
-                        destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = packageMetadata;
+                        marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, MarketGroupPackageMetadata>();
                     }
-                    else
-                    {
-                        destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = null;
-                    }
+
+                    marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = packageMetadata;
                 }
             }
         }
     }
 
-    private void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, MarketGroupPackageMetadata packageMetadata)
+    private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, MarketGroupPackageMetadata packageMetadata)
     {
-        var originalPackageIdToMetadataMap =
-                            destinationMarketGroupPackage.PackageIdToMetadataMap is null
-                                ? new Dictionary<string, MarketGroupPackageMetadata>()
-                                : new Dictionary<string, MarketGroupPackageMetadata>(destinationMarketGroupPackage.PackageIdToMetadataMap);
+        if (packageIdsToAdd.Any() && destinationMarketGroupPackage.PackageIdToMetadataMap is not null)
+        {
+            foreach (var packageId in packageIdsToAdd)
+            {
+                destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = packageMetadata;
+            }
+        }
+    }
 
-        destinationMarketGroupPackage.PackageIds = originMarketGroupPackage.PackageIds;
+    private static void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, MarketGroupPackageMetadata packageMetadata)
+    {
+        var originalPackageIdToMetadataMap = destinationMarketGroupPackage.PackageIdToMetadataMap ?? new Dictionary<string, MarketGroupPackageMetadata>();
         destinationMarketGroupPackage.PackageIdToMetadataMap = originMarketGroupPackage.PackageIdToMetadataMap;
+
         if (destinationMarketGroupPackage.PackageIdToMetadataMap is not null)
         {
-            foreach (var (packageId, _) in destinationMarketGroupPackage.PackageIdToMetadataMap)
+            var destinationPkgIds = destinationMarketGroupPackage.PackageIdToMetadataMap.Keys.ToList();
+            foreach (var packageId in destinationPkgIds)
             {
-                if (originalPackageIdToMetadataMap.ContainsKey(packageId))
-                {
-                    // If the package was already there, we keep the metadata
-                    destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = originalPackageIdToMetadataMap[packageId];
-                }
-                else
-                {
-                    // If the package was not there, we set the metadata
-                    if (packageMetadata is not null)
-                    {
-                        destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = packageMetadata;
-                    }
-                    else
-                    {
-                        destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = null;
-                    }
-                }
+              destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = originalPackageIdToMetadataMap.ContainsKey(packageId)
+                  ? originalPackageIdToMetadataMap[packageId]
+                  : packageMetadata;
             }
         }
+    }
+
+    private static XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileSystemInfo packageFile)
+    {
+        const int headerOffsetForXvcTargetPlatform = 1137;
+
+        byte data;
+
+        using (var fileStream = File.OpenRead(packageFile.FullName))
+        using (var reader = new BinaryReader(fileStream))
+        {
+            reader.BaseStream.Seek(headerOffsetForXvcTargetPlatform, SeekOrigin.Begin);
+            data = reader.ReadByte();
+        }
+
+        var xvcTargetPlatform = (XvcTargetPlatform)data;
+
+        if (xvcTargetPlatform == XvcTargetPlatform.NotSpecified)
+        {
+            // Not specifying equates to Gen8.
+            xvcTargetPlatform = XvcTargetPlatform.ConsoleGen8;
+        }
+
+        return xvcTargetPlatform;
     }
 }
