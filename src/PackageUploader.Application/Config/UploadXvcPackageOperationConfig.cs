@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
 
@@ -16,5 +18,11 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
 
     public bool DeltaUpload { get; set; } = false;
 
-    public MarketGroupPackageMetadata PackageMetadata { get; set; }
+    public IDictionary<string, object> PackageMetadata { get; set; }
+
+    // While reading configuration, jsonextensiondata is not supported, thus used the below method to get the metadata
+    public MarketGroupPackageMetadata GetMarketGroupPackageMetadata()
+    {
+        return JsonSerializer.Deserialize<MarketGroupPackageMetadata>(JsonSerializer.Serialize(PackageMetadata));
+    }
 }

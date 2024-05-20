@@ -443,6 +443,7 @@ public class PackageUploaderService : IPackageUploaderService
                     }
                     else
                     {
+                        destinationMarketGroupPackage.PackageIds ??= new List<string>();
                         var packageIdsToAdd = originMarketGroupPackage.PackageIds.Where(packageId => !destinationMarketGroupPackage.PackageIds.Contains(packageId)).ToList();
                         if (packageIdsToAdd.Any())
                         {
@@ -464,7 +465,10 @@ public class PackageUploaderService : IPackageUploaderService
                                 }
                             }
 
-                            AddPackageMetadata(destinationMarketGroupPackage, packageIdsToAdd, packageMetadata);
+                            if(packageMetadata is not null)
+                            {
+                                AddPackageMetadata(destinationMarketGroupPackage, packageIdsToAdd, packageMetadata);
+                            }
                         }
                     }
 
@@ -708,12 +712,10 @@ public class PackageUploaderService : IPackageUploaderService
 
     private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, MarketGroupPackageMetadata packageMetadata)
     {
-        if (packageIdsToAdd.Any() && destinationMarketGroupPackage.PackageIdToMetadataMap is not null)
+        destinationMarketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, MarketGroupPackageMetadata>();
+        foreach (var packageId in packageIdsToAdd)
         {
-            foreach (var packageId in packageIdsToAdd)
-            {
-                destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = packageMetadata;
-            }
+            destinationMarketGroupPackage.PackageIdToMetadataMap.Add(packageId, packageMetadata);
         }
     }
 

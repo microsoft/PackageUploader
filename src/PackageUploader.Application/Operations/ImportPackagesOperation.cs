@@ -33,6 +33,6 @@ internal class ImportPackagesOperation : Operation
         var originPackageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
         var destinationPackageBranch = await _storeBrokerService.GetDestinationGamePackageBranch(product, _config, ct).ConfigureAwait(false);
 
-        await _storeBrokerService.ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, _config.MarketGroupName, _config.Overwrite, _config, _config.PackageMetadata, ct).ConfigureAwait(false);
+        await _storeBrokerService.ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, _config.MarketGroupName, _config.Overwrite, _config, _config.GetMarketGroupPackageMetadata(), ct).ConfigureAwait(false);
     }
 }

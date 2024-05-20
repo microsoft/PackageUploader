@@ -5,6 +5,7 @@ using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace PackageUploader.Application.Config;
 
@@ -20,7 +21,7 @@ internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGa
     public GamePackageDate AvailabilityDate { get; set; }
     public GamePackageDate MandatoryDate { get; set; }
     public GameGradualRolloutInfo GradualRollout { get; set; }
-    public MarketGroupPackageMetadata PackageMetadata { get; set; }
+    public IDictionary<string, object> PackageMetadata { get; set; }
     public bool Overwrite { get; set; }
 
     protected override void Validate(IList<ValidationResult> validationResults)
@@ -36,4 +37,11 @@ internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGa
             validationResults.Add(new ValidationResult($"Only one {nameof(DestinationBranchFriendlyName)} or {nameof(DestinationFlightName)} field is allowed.", new[] { nameof(DestinationBranchFriendlyName), nameof(DestinationFlightName) }));
         }
     }
+
+    // While reading configuration, jsonextensiondata is not supported, thus used the below method to get the metadata
+    public MarketGroupPackageMetadata GetMarketGroupPackageMetadata()
+    {
+        return JsonSerializer.Deserialize<MarketGroupPackageMetadata>(JsonSerializer.Serialize(PackageMetadata));
+    }
+
 }
