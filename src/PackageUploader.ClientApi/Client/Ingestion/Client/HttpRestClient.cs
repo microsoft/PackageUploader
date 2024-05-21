@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -50,11 +51,30 @@ internal abstract class HttpRestClient : IHttpRestClient
             await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
             using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
             await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+    
+            if (response.StatusCode is HttpStatusCode.Redirect or HttpStatusCode.MovedPermanently or HttpStatusCode.Found 
+                or HttpStatusCode.SeeOther or HttpStatusCode.TemporaryRedirect)
+            {
+                string redirectUrl = response.Headers.Location?.ToString();
+                var redirectRequest = CreateJsonRequestMessage(HttpMethod.Get, redirectUrl);
 
-            var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
-            return result;
+                await LogRequestVerboseAsync(redirectRequest, ct).ConfigureAwait(false);
+                using var redirectResponse = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+                await LogResponseVerboseAsync(redirectResponse, ct).ConfigureAwait(false);
+                redirectResponse.EnsureSuccessStatusCode();
+                
+                var redirectResult = await redirectResponse.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+                return redirectResult;
+            }
+            else
+            {
+                response.EnsureSuccessStatusCode();
+
+                var result = await response.Content.ReadFromJsonAsync<T>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+                return result;
+            }
         }
+        
         catch (Exception ex)
         {
             LogException(ex);
