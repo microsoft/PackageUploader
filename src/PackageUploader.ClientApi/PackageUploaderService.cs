@@ -282,7 +282,7 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAndPackageMetadataAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, MarketGroupPackageMetadata packageMetadata, CancellationToken ct)
+    public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAndPackageMetadataAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, MarketGroupPackageMetadataConfig packageMetadata, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -364,7 +364,7 @@ public class PackageUploaderService : IPackageUploaderService
         return await ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, marketGroupName, overwrite, null, null, ct);
     }
 
-    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, MarketGroupPackageMetadata packageMetadata, CancellationToken ct)
+    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, MarketGroupPackageMetadataConfig packageMetadata, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(originPackageBranch);
@@ -680,7 +680,7 @@ public class PackageUploaderService : IPackageUploaderService
         }
     }
 
-    private void SetPackageMetadata(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, MarketGroupPackageMetadata packageMetadata, GamePackageConfiguration packageConfiguration)
+    private void SetPackageMetadata(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, MarketGroupPackageMetadataConfig packageMetadata, GamePackageConfiguration packageConfiguration)
     {
         if (packageConfiguration.MarketGroupPackages == null || !packageConfiguration.MarketGroupPackages.Any())
         {
@@ -704,22 +704,22 @@ public class PackageUploaderService : IPackageUploaderService
                         marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, MarketGroupPackageMetadata>();
                     }
 
-                    marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = packageMetadata;
+                    marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = CaculatePackageMetadata(packageMetadata);
                 }
             }
         }
     }
 
-    private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, MarketGroupPackageMetadata packageMetadata)
+    private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, MarketGroupPackageMetadataConfig packageMetadata)
     {
         destinationMarketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, MarketGroupPackageMetadata>();
         foreach (var packageId in packageIdsToAdd)
         {
-            destinationMarketGroupPackage.PackageIdToMetadataMap.Add(packageId, packageMetadata);
+            destinationMarketGroupPackage.PackageIdToMetadataMap.Add(packageId, CaculatePackageMetadata(packageMetadata));
         }
     }
 
-    private static void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, MarketGroupPackageMetadata packageMetadata)
+    private static void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, MarketGroupPackageMetadataConfig packageMetadata)
     {
         var originalPackageIdToMetadataMap = destinationMarketGroupPackage.PackageIdToMetadataMap ?? new Dictionary<string, MarketGroupPackageMetadata>();
         destinationMarketGroupPackage.PackageIdToMetadataMap = originMarketGroupPackage.PackageIdToMetadataMap;
@@ -731,12 +731,20 @@ public class PackageUploaderService : IPackageUploaderService
             {
               destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = originalPackageIdToMetadataMap.ContainsKey(packageId)
                   ? originalPackageIdToMetadataMap[packageId]
-                  : packageMetadata;
+                  : CaculatePackageMetadata(packageMetadata);
             }
         }
     }
 
-    private static XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileSystemInfo packageFile)
+    private static MarketGroupPackageMetadata CaculatePackageMetadata(MarketGroupPackageMetadataConfig packageMetadata)
+    {
+        return new MarketGroupPackageMetadata
+        {
+            PreDownloadDate = packageMetadata?.PreDownloadDate?.IsEnabled == true ? packageMetadata.PreDownloadDate.EffectiveDate : null,
+        };
+    }
+
+  private static XvcTargetPlatform ReadXvcTargetPlatformFromMetaData(FileSystemInfo packageFile)
     {
         const int headerOffsetForXvcTargetPlatform = 1137;
 

@@ -264,12 +264,12 @@ internal static class IngestionMapper
     private static MarketGroupPackageMetadata Map(this IngestionMarketGroupPackageMetadata ingestionMarketGroupPackageMetadata) =>
         ingestionMarketGroupPackageMetadata is null ? null : new()
         {
-            JsonExtensionData = ingestionMarketGroupPackageMetadata.JsonExtensionData?.ToDictionary(a => a.Key, a => a.Value),
+            PreDownloadDate = ingestionMarketGroupPackageMetadata.PreDownloadDate,
         };
 
     private static IngestionMarketGroupPackageMetadata Map(this MarketGroupPackageMetadata marketGroupPackageMetadata) =>
         marketGroupPackageMetadata is null ? null : new()
         {
-            JsonExtensionData = marketGroupPackageMetadata.JsonExtensionData?.ToDictionary(a => a.Key, a => a.Value),
+            PreDownloadDate = marketGroupPackageMetadata.PreDownloadDate,
         };
 }

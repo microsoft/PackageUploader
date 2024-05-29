@@ -38,7 +38,7 @@ internal class UploadXvcPackageOperation : Operation
 
         if (_config.AvailabilityDate is not null || _config.PackageMetadata is not null)
         {
-            await _storeBrokerService.SetXvcAvailabilityDateAndPackageMetadataAsync(product, packageBranch, gamePackage, _config.MarketGroupName, _config.AvailabilityDate, _config.GetMarketGroupPackageMetadata(), ct).ConfigureAwait(false);
+            await _storeBrokerService.SetXvcAvailabilityDateAndPackageMetadataAsync(product, packageBranch, gamePackage, _config.MarketGroupName, _config.AvailabilityDate, _config.PackageMetadata, ct).ConfigureAwait(false);
             _logger.LogInformation("AvailabilityDate And PackageMetadata is set");
         }
     }
