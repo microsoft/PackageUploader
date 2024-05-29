@@ -15,5 +15,5 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig
 
     public bool DeltaUpload { get; set; } = false;
 
-    public MarketGroupPackageMetadataConfig PackageMetadata { get; set; }
+    public MarketGroupPackageMetadataConfiguration PackageMetadata { get; set; }
 }

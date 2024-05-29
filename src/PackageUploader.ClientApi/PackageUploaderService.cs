@@ -282,7 +282,7 @@ public class PackageUploaderService : IPackageUploaderService
         return result;
     }
 
-    public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAndPackageMetadataAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, MarketGroupPackageMetadataConfig packageMetadata, CancellationToken ct)
+    public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAndPackageMetadataAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, MarketGroupPackageMetadataConfiguration packageMetadata, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -364,7 +364,7 @@ public class PackageUploaderService : IPackageUploaderService
         return await ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, marketGroupName, overwrite, null, null, ct);
     }
 
-    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, MarketGroupPackageMetadataConfig packageMetadata, CancellationToken ct)
+    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, MarketGroupPackageMetadataConfiguration packageMetadata, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(originPackageBranch);
@@ -680,7 +680,7 @@ public class PackageUploaderService : IPackageUploaderService
         }
     }
 
-    private void SetPackageMetadata(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, MarketGroupPackageMetadataConfig packageMetadata, GamePackageConfiguration packageConfiguration)
+    private void SetPackageMetadata(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, MarketGroupPackageMetadataConfiguration packageMetadata, GamePackageConfiguration packageConfiguration)
     {
         if (packageConfiguration.MarketGroupPackages == null || !packageConfiguration.MarketGroupPackages.Any())
         {
@@ -710,7 +710,7 @@ public class PackageUploaderService : IPackageUploaderService
         }
     }
 
-    private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, MarketGroupPackageMetadataConfig packageMetadata)
+    private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, MarketGroupPackageMetadataConfiguration packageMetadata)
     {
         destinationMarketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, MarketGroupPackageMetadata>();
         foreach (var packageId in packageIdsToAdd)
@@ -719,7 +719,7 @@ public class PackageUploaderService : IPackageUploaderService
         }
     }
 
-    private static void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, MarketGroupPackageMetadataConfig packageMetadata)
+    private static void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, MarketGroupPackageMetadataConfiguration packageMetadata)
     {
         var originalPackageIdToMetadataMap = destinationMarketGroupPackage.PackageIdToMetadataMap ?? new Dictionary<string, MarketGroupPackageMetadata>();
         destinationMarketGroupPackage.PackageIdToMetadataMap = originMarketGroupPackage.PackageIdToMetadataMap;
@@ -736,7 +736,7 @@ public class PackageUploaderService : IPackageUploaderService
         }
     }
 
-    private static MarketGroupPackageMetadata CaculatePackageMetadata(MarketGroupPackageMetadataConfig packageMetadata)
+    private static MarketGroupPackageMetadata CaculatePackageMetadata(MarketGroupPackageMetadataConfiguration packageMetadata)
     {
         return new MarketGroupPackageMetadata
         {

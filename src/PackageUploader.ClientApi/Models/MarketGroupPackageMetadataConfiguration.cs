@@ -3,7 +3,7 @@
 
 namespace PackageUploader.ClientApi.Models;
 
-public class MarketGroupPackageMetadataConfig
+public class MarketGroupPackageMetadataConfiguration
 {
     public GamePackageDate PreDownloadDate { get; set; }
 }
