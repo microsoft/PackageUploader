@@ -95,7 +95,7 @@ public class PackageUploaderService : IPackageUploaderService
                     PackageIds = new List<string>(),
                     AvailabilityDate = null,
                     PackageAvailabilityDates = new Dictionary<string, DateTime?>(),
-                    PackageIdToMetadataMap = new Dictionary<string, MarketGroupPackageMetadata>(),
+                    PackageIdToMetadataMap = new Dictionary<string, GameMarketGroupPackageMetadata>(),
                     MandatoryUpdateInfo = null,
                 },
             };
@@ -223,7 +223,7 @@ public class PackageUploaderService : IPackageUploaderService
                             packagesRemoved += marketGroupPackage.PackageIds.Count;
                             marketGroupPackage.PackageIds = new List<string>();
                             marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
-                            marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, MarketGroupPackageMetadata>();
+                            marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, GameMarketGroupPackageMetadata>();
                         }
                         else
                         {
@@ -267,46 +267,34 @@ public class PackageUploaderService : IPackageUploaderService
         return packageConfiguration;
     }
 
-    public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, CancellationToken ct)
+    public async Task<GamePackageConfiguration> SetXvcConfigurationAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, IXvcGameConfiguration gameConfiguration, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
         ArgumentNullException.ThrowIfNull(gamePackage);
-        ArgumentNullException.ThrowIfNull(availabilityDate);
+        ArgumentNullException.ThrowIfNull(gameConfiguration);
 
-        _logger.LogDebug("Setting the availability date to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
+        _logger.LogDebug("Setting the dates to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-        SetXvcAvailabilityDate(packageBranch, gamePackage, marketGroupName, availabilityDate, packageConfiguration);
-        var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
-        return result;
-    }
-
-    public async Task<GamePackageConfiguration> SetXvcAvailabilityDateAndPackageMetadataAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, MarketGroupPackageMetadataConfiguration packageMetadata, CancellationToken ct)
-    {
-        ArgumentNullException.ThrowIfNull(product);
-        ArgumentNullException.ThrowIfNull(packageBranch);
-        ArgumentNullException.ThrowIfNull(gamePackage);
-
-        _logger.LogDebug("Setting the packagemetadata and availabilityDate to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
-        var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-
-        if (packageMetadata != null)
-        {
-            SetPackageMetadata(packageBranch, gamePackage, marketGroupName, packageMetadata, packageConfiguration);
-        }
 
         // Setting the availability date
-        if(availabilityDate != null)
+        if (gameConfiguration.AvailabilityDate != null)
         {
-            SetXvcAvailabilityDate(packageBranch, gamePackage, marketGroupName, availabilityDate, packageConfiguration);
+            SetXvcAvailabilityDate(packageBranch, gamePackage, marketGroupName, gameConfiguration.AvailabilityDate, packageConfiguration);
+        }
+
+        if (gameConfiguration.PreDownloadDate != null)
+        {
+
+            SetPackageMetadata(packageBranch, gamePackage, marketGroupName, gameConfiguration.PreDownloadDate, packageConfiguration);
         }
 
         var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         return result;
     }
 
-    public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, IGameConfiguration gameConfiguration, CancellationToken ct)
+    public async Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, IUwpGameConfiguration gameConfiguration, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
@@ -361,10 +349,10 @@ public class PackageUploaderService : IPackageUploaderService
 
     public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, CancellationToken ct)
     {
-        return await ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, marketGroupName, overwrite, null, null, ct);
+        return await ImportPackagesAsync(product, originPackageBranch, destinationPackageBranch, marketGroupName, overwrite, null, ct);
     }
 
-    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, MarketGroupPackageMetadataConfiguration packageMetadata, CancellationToken ct)
+    public async Task<GamePackageConfiguration> ImportPackagesAsync(GameProduct product, IGamePackageBranch originPackageBranch, IGamePackageBranch destinationPackageBranch, string marketGroupName, bool overwrite, IGameConfiguration gameConfiguration, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(originPackageBranch);
@@ -439,7 +427,7 @@ public class PackageUploaderService : IPackageUploaderService
                             }
                         }
 
-                        OverWritePackageMetadata(originMarketGroupPackage, destinationMarketGroupPackage, packageMetadata);
+                        OverWritePackageMetadata(originMarketGroupPackage, destinationMarketGroupPackage, gameConfiguration.PreDownloadDate);
                     }
                     else
                     {
@@ -465,9 +453,9 @@ public class PackageUploaderService : IPackageUploaderService
                                 }
                             }
 
-                            if(packageMetadata is not null)
+                            if(gameConfiguration.PreDownloadDate is not null)
                             {
-                                AddPackageMetadata(destinationMarketGroupPackage, packageIdsToAdd, packageMetadata);
+                                AddPackageMetadata(destinationMarketGroupPackage, packageIdsToAdd, gameConfiguration.PreDownloadDate);
                             }
                         }
                     }
@@ -680,7 +668,7 @@ public class PackageUploaderService : IPackageUploaderService
         }
     }
 
-    private void SetPackageMetadata(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, MarketGroupPackageMetadataConfiguration packageMetadata, GamePackageConfiguration packageConfiguration)
+    private void SetPackageMetadata(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate preDownloadDate, GamePackageConfiguration packageConfiguration)
     {
         if (packageConfiguration.MarketGroupPackages == null || !packageConfiguration.MarketGroupPackages.Any())
         {
@@ -701,27 +689,27 @@ public class PackageUploaderService : IPackageUploaderService
                 {
                     if (marketGroupPackage.PackageIdToMetadataMap is null)
                     {
-                        marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, MarketGroupPackageMetadata>();
+                        marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, GameMarketGroupPackageMetadata>();
                     }
 
-                    marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = CaculatePackageMetadata(packageMetadata);
+                    marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = CalculatePackageMetadata(preDownloadDate);
                 }
             }
         }
     }
 
-    private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, MarketGroupPackageMetadataConfiguration packageMetadata)
+    private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, GamePackageDate preDownloadDate)
     {
-        destinationMarketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, MarketGroupPackageMetadata>();
+        destinationMarketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, GameMarketGroupPackageMetadata>();
         foreach (var packageId in packageIdsToAdd)
         {
-            destinationMarketGroupPackage.PackageIdToMetadataMap.Add(packageId, CaculatePackageMetadata(packageMetadata));
+            destinationMarketGroupPackage.PackageIdToMetadataMap.Add(packageId, CalculatePackageMetadata(preDownloadDate));
         }
     }
 
-    private static void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, MarketGroupPackageMetadataConfiguration packageMetadata)
+    private static void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, GamePackageDate preDownloadDate)
     {
-        var originalPackageIdToMetadataMap = destinationMarketGroupPackage.PackageIdToMetadataMap ?? new Dictionary<string, MarketGroupPackageMetadata>();
+        var originalPackageIdToMetadataMap = destinationMarketGroupPackage.PackageIdToMetadataMap ?? new Dictionary<string, GameMarketGroupPackageMetadata>();
         destinationMarketGroupPackage.PackageIdToMetadataMap = originMarketGroupPackage.PackageIdToMetadataMap;
 
         if (destinationMarketGroupPackage.PackageIdToMetadataMap is not null)
@@ -729,18 +717,16 @@ public class PackageUploaderService : IPackageUploaderService
             var destinationPkgIds = destinationMarketGroupPackage.PackageIdToMetadataMap.Keys.ToList();
             foreach (var packageId in destinationPkgIds)
             {
-              destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = originalPackageIdToMetadataMap.ContainsKey(packageId)
-                  ? originalPackageIdToMetadataMap[packageId]
-                  : CaculatePackageMetadata(packageMetadata);
+              destinationMarketGroupPackage.PackageIdToMetadataMap[packageId] = originalPackageIdToMetadataMap.TryGetValue(packageId, out var value) ? value : CalculatePackageMetadata(preDownloadDate);
             }
         }
     }
 
-    private static MarketGroupPackageMetadata CaculatePackageMetadata(MarketGroupPackageMetadataConfiguration packageMetadata)
+    private static GameMarketGroupPackageMetadata CalculatePackageMetadata(GamePackageDate preDownloadDate)
     {
-        return new MarketGroupPackageMetadata
+        return new GameMarketGroupPackageMetadata
         {
-            PreDownloadDate = packageMetadata?.PreDownloadDate?.IsEnabled == true ? packageMetadata.PreDownloadDate.EffectiveDate : null,
+            PreDownloadDate = preDownloadDate?.IsEnabled == true ? preDownloadDate.EffectiveDate : null,
         };
     }
 

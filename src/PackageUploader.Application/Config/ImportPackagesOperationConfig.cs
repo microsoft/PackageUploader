@@ -18,9 +18,9 @@ internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGa
     public string DestinationFlightName { get; set; }
 
     public GamePackageDate AvailabilityDate { get; set; }
+    public GamePackageDate PreDownloadDate { get; set; }
     public GamePackageDate MandatoryDate { get; set; }
     public GameGradualRolloutInfo GradualRollout { get; set; }
-    public MarketGroupPackageMetadataConfiguration PackageMetadata { get; set; }
     public bool Overwrite { get; set; }
 
     protected override void Validate(IList<ValidationResult> validationResults)

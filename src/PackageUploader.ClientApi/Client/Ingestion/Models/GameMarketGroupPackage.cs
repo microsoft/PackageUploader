@@ -46,5 +46,5 @@ public sealed class GameMarketGroupPackage
     /// <summary>
     /// Dictionary of per package metadata (e.g. predownload date) for XVC and MSIXVC packages
     /// </summary>
-    public Dictionary<string, MarketGroupPackageMetadata> PackageIdToMetadataMap { get; set; }
+    public Dictionary<string, GameMarketGroupPackageMetadata> PackageIdToMetadataMap { get; set; }
 }

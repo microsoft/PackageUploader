@@ -261,13 +261,13 @@ internal static class IngestionMapper
             CurrentDraftInstanceId = gamePackageBranch.CurrentDraftInstanceId,
         };
 
-    private static MarketGroupPackageMetadata Map(this IngestionMarketGroupPackageMetadata ingestionMarketGroupPackageMetadata) =>
+    private static GameMarketGroupPackageMetadata Map(this IngestionMarketGroupPackageMetadata ingestionMarketGroupPackageMetadata) =>
         ingestionMarketGroupPackageMetadata is null ? null : new()
         {
             PreDownloadDate = ingestionMarketGroupPackageMetadata.PreDownloadDate,
         };
 
-    private static IngestionMarketGroupPackageMetadata Map(this MarketGroupPackageMetadata marketGroupPackageMetadata) =>
+    private static IngestionMarketGroupPackageMetadata Map(this GameMarketGroupPackageMetadata marketGroupPackageMetadata) =>
         marketGroupPackageMetadata is null ? null : new()
         {
             PreDownloadDate = marketGroupPackageMetadata.PreDownloadDate,
