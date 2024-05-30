@@ -36,10 +36,10 @@ internal class UploadXvcPackageOperation : Operation
         var gamePackage = await _storeBrokerService.UploadGamePackageAsync(product, packageBranch, marketGroupPackage, _config.PackageFilePath, _config.GameAssets, _config.MinutesToWaitForProcessing, _config.DeltaUpload, isXvc: true, ct).ConfigureAwait(false);
         _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
 
-        if (_config.AvailabilityDate is not null || _config.PackageMetadata is not null)
+        if (_config.AvailabilityDate is not null || _config.PreDownloadDate is not null)
         {
-            await _storeBrokerService.SetXvcAvailabilityDateAndPackageMetadataAsync(product, packageBranch, gamePackage, _config.MarketGroupName, _config.AvailabilityDate, _config.PackageMetadata, ct).ConfigureAwait(false);
-            _logger.LogInformation("AvailabilityDate And PackageMetadata is set");
+            await _storeBrokerService.SetXvcConfigurationAsync(product, packageBranch, gamePackage, _config.MarketGroupName, _config, ct).ConfigureAwait(false);
+            _logger.LogInformation("Configuration set for Xvc packages");
         }
     }
 }

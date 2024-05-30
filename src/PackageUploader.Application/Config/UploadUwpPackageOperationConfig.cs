@@ -6,7 +6,7 @@ using PackageUploader.ClientApi.Models;
 
 namespace PackageUploader.Application.Config;
 
-internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig, IGameConfiguration
+internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig, IUwpGameConfiguration
 {
     internal override string GetOperationName() => "UploadUwpPackage";
 

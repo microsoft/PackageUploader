@@ -5,7 +5,7 @@ using System;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Models;
 
-public class MarketGroupPackageMetadata
+public class GameMarketGroupPackageMetadata
 {
     public DateTime? PreDownloadDate { get; set; }
 }
