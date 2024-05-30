@@ -35,5 +35,15 @@ internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGa
         {
             validationResults.Add(new ValidationResult($"Only one {nameof(DestinationBranchFriendlyName)} or {nameof(DestinationFlightName)} field is allowed.", new[] { nameof(DestinationBranchFriendlyName), nameof(DestinationFlightName) }));
         }
-    }
+
+        if (PreDownloadDate?.IsEnabled == true && (AvailabilityDate?.IsEnabled != true))
+        {
+            validationResults.Add(new ValidationResult($"{nameof(PreDownloadDate)} needs {nameof(AvailabilityDate)}.", new[] { nameof(PreDownloadDate), nameof(AvailabilityDate) }));
+        }
+
+        if (PreDownloadDate?.IsEnabled == true && AvailabilityDate?.IsEnabled == true && PreDownloadDate.EffectiveDate > AvailabilityDate.EffectiveDate)
+        {
+            validationResults.Add(new ValidationResult($"{nameof(PreDownloadDate)} needs to be before {nameof(AvailabilityDate)}.", new[] { nameof(PreDownloadDate), nameof(AvailabilityDate) }));
+        }
+  }
 }

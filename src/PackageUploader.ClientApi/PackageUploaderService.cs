@@ -280,13 +280,13 @@ public class PackageUploaderService : IPackageUploaderService
         if (packageConfiguration.MarketGroupPackages == null || !packageConfiguration.MarketGroupPackages.Any())
         {
             _logger.LogWarning("MarketGroupPackagesNotFound");
-            return;
+            return default;
         }
 
         if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
         {
             _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
-            return;
+            return default;
         }
 
         foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages
