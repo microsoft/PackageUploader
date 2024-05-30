@@ -277,17 +277,34 @@ public class PackageUploaderService : IPackageUploaderService
         _logger.LogDebug("Setting the dates to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-
-        // Setting the availability date
-        if (gameConfiguration.AvailabilityDate != null)
+        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
         {
-            SetXvcAvailabilityDate(packageBranch, gamePackage, marketGroupName, gameConfiguration.AvailabilityDate, packageConfiguration);
-        }
+            if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
+            {
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
+            }
+            else
+            {
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages
+                             .Where(marketGroupPackage => marketGroupPackage.PackageIds.Contains(gamePackage.Id))
+                             .Where(marketGroupPackage => string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name)))
+                {
+                    // Availability Date
+                    if (gameConfiguration.AvailabilityDate.IsEnabled)
+                    {
+                        marketGroupPackage.PackageAvailabilityDates ??= new Dictionary<string, DateTime?>();
+                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = gameConfiguration.AvailabilityDate.EffectiveDate;
+                    }
+                    else if (marketGroupPackage.PackageAvailabilityDates is not null)
+                    {
+                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = null;
+                    }
 
-        if (gameConfiguration.PreDownloadDate != null)
-        {
-
-            SetPackageMetadata(packageBranch, gamePackage, marketGroupName, gameConfiguration.PreDownloadDate, packageConfiguration);
+                    // PreDownload Date
+                    marketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, GameMarketGroupPackageMetadata>();
+                    marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = CalculatePackageMetadata(gameConfiguration.PreDownloadDate);
+                }
+            }
         }
 
         var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
@@ -312,27 +329,25 @@ public class PackageUploaderService : IPackageUploaderService
             }
             else
             {
-                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages
+                             .Where(marketGroupPackage => string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name)))
                 {
-                    if (string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name))
+                    // Setting the availability date
+                    if (gameConfiguration.AvailabilityDate is not null)
                     {
-                        // Setting the availability date
-                        if (gameConfiguration.AvailabilityDate is not null)
-                        {
-                            marketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
-                                ? gameConfiguration.AvailabilityDate.EffectiveDate
-                                : null;
-                        }
+                        marketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
+                            ? gameConfiguration.AvailabilityDate.EffectiveDate
+                            : null;
+                    }
 
-                        // Setting the mandatory date
-                        if (gameConfiguration.MandatoryDate is not null)
+                    // Setting the mandatory date
+                    if (gameConfiguration.MandatoryDate is not null)
+                    {
+                        marketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                         {
-                            marketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
-                            {
-                                IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                                EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
-                            };
-                        }
+                            IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
+                            EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
+                        };
                     }
                 }
             }
@@ -405,10 +420,10 @@ public class PackageUploaderService : IPackageUploaderService
                         {
                             foreach (var (packageId, _) in destinationMarketGroupPackage.PackageAvailabilityDates)
                             {
-                                if (originalPackageAvailabilityDates.ContainsKey(packageId))
+                                if (originalPackageAvailabilityDates.TryGetValue(packageId, out var availabilityDate))
                                 {
                                     // If the package was already there, we keep the availability date
-                                    destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = originalPackageAvailabilityDates[packageId];
+                                    destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = availabilityDate;
                                 }
                                 else
                                 {
@@ -630,72 +645,6 @@ public class PackageUploaderService : IPackageUploaderService
         });
 
         return gameSubmission;
-    }
-
-    private void SetXvcAvailabilityDate(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate availabilityDate, GamePackageConfiguration packageConfiguration)
-    {
-        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
-        {
-            if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
-            {
-              _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
-            }
-            else
-            {
-                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
-                {
-                    if (marketGroupPackage.PackageIds.Contains(gamePackage.Id))
-                    {
-                        if (string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name))
-                        {
-                            if (availabilityDate.IsEnabled)
-                            {
-                                if (marketGroupPackage.PackageAvailabilityDates is null)
-                                {
-                                    marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
-                                }
-
-                                marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = availabilityDate.EffectiveDate;
-                            }
-                            else if (marketGroupPackage.PackageAvailabilityDates is not null)
-                            {
-                                marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = null;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void SetPackageMetadata(IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, GamePackageDate preDownloadDate, GamePackageConfiguration packageConfiguration)
-    {
-        if (packageConfiguration.MarketGroupPackages == null || !packageConfiguration.MarketGroupPackages.Any())
-        {
-            return;
-        }
-
-        if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
-        {
-            _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
-            return;
-        }
-        
-        foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages)
-        {
-            if (marketGroupPackage.PackageIds.Contains(gamePackage.Id))
-            {
-                if (string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name))
-                {
-                    if (marketGroupPackage.PackageIdToMetadataMap is null)
-                    {
-                        marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, GameMarketGroupPackageMetadata>();
-                    }
-
-                    marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = CalculatePackageMetadata(preDownloadDate);
-                }
-            }
-        }
     }
 
     private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, GamePackageDate preDownloadDate)
