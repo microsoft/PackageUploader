@@ -22,12 +22,12 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
     {
         base.Validate(validationResults);
 
-        if (PreDownloadDate is not null && PreDownloadDate.IsEnabled && (AvailabilityDate is null || AvailabilityDate.IsEnabled == false))
+        if (PreDownloadDate?.IsEnabled && (AvailabilityDate?.IsEnabled == false))
         {
             validationResults.Add(new ValidationResult($"{nameof(PreDownloadDate)} needs {nameof(AvailabilityDate)}.", new[] { nameof(PreDownloadDate), nameof(AvailabilityDate) }));
         }
 
-        if (PreDownloadDate is not null && PreDownloadDate.IsEnabled && AvailabilityDate is not null && AvailabilityDate.IsEnabled && PreDownloadDate.EffectiveDate > AvailabilityDate.EffectiveDate)
+        if (PreDownloadDate?.IsEnabled && AvailabilityDate?.IsEnabled && PreDownloadDate.EffectiveDate > AvailabilityDate.EffectiveDate)
         {
             validationResults.Add(new ValidationResult($"{nameof(PreDownloadDate)} needs to be before {nameof(AvailabilityDate)}.", new[] { nameof(PreDownloadDate), nameof(AvailabilityDate) }));
         }
