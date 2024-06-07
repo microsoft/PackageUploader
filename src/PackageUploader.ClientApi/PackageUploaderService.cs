@@ -277,37 +277,36 @@ public class PackageUploaderService : IPackageUploaderService
         _logger.LogDebug("Setting the dates to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-        if (packageConfiguration.MarketGroupPackages == null || !packageConfiguration.MarketGroupPackages.Any())
+        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
         {
-            _logger.LogWarning("MarketGroupPackagesNotFound");
-            return default;
-        }
-
-        if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
-        {
-            _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
-            return default;
-        }
-
-        foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages
-                     .Where(marketGroupPackage => marketGroupPackage.PackageIds.Contains(gamePackage.Id))
-                     .Where(marketGroupPackage => string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name)))
-        {
-            // Availability Date
-            if (gameConfiguration.AvailabilityDate.IsEnabled)
+            if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
-                marketGroupPackage.PackageAvailabilityDates ??= new Dictionary<string, DateTime?>();
-                marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = gameConfiguration.AvailabilityDate.EffectiveDate;
+                _logger.LogWarning("Market Group '{marketGroupName}' (case sensitive) not found in {branchType} '{branchName}'.", marketGroupName, packageBranch.BranchType.ToString().ToLower(), packageBranch.Name);
             }
-            else if (marketGroupPackage.PackageAvailabilityDates is not null)
+            else
             {
-                marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = null;
-            }
 
-            // PreDownload Date
-            marketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, GameMarketGroupPackageMetadata>();
-            marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = CalculatePackageMetadata(gameConfiguration.PreDownloadDate);
-        }
+                foreach (var marketGroupPackage in packageConfiguration.MarketGroupPackages
+                             .Where(marketGroupPackage => marketGroupPackage.PackageIds.Contains(gamePackage.Id))
+                             .Where(marketGroupPackage => string.IsNullOrWhiteSpace(marketGroupName) || marketGroupName.Equals(marketGroupPackage.Name)))
+                {
+                    // Availability Date
+                    if (gameConfiguration.AvailabilityDate.IsEnabled)
+                    {
+                        marketGroupPackage.PackageAvailabilityDates ??= new Dictionary<string, DateTime?>();
+                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = gameConfiguration.AvailabilityDate.EffectiveDate;
+                    }
+                    else if (marketGroupPackage.PackageAvailabilityDates is not null)
+                    {
+                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = null;
+                    }
+
+                    // PreDownload Date
+                    marketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, GameMarketGroupPackageMetadata>();
+                    marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = CalculatePackageMetadata(gameConfiguration.PreDownloadDate);
+                }
+            }
+         }
 
         var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         return result;
