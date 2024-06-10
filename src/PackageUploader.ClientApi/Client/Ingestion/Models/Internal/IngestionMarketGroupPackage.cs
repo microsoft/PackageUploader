@@ -29,12 +29,12 @@ internal class IngestionMarketGroupPackage
     public List<string> PackageIds { get; set; }
 
     /// <summary>
-    /// Mandatory update
+    /// Mandatory update for UWP packages
     /// </summary>
     public IngestionMandatoryUpdateInfo MandatoryUpdateInfo { get; set; }
 
     /// <summary>
-    /// Schedule release date per region
+    /// Schedule release date per region for UWP packages
     /// </summary>
     public DateTime? AvailabilityDate { get; set; }
 
@@ -42,4 +42,9 @@ internal class IngestionMarketGroupPackage
     /// Dictionary of per region, per package scheduled release dates for XVC and MSIXVC packages
     /// </summary>
     public Dictionary<string, DateTime?> PackageAvailabilityDates { get; set; }
+
+    /// <summary>
+    /// Dictionary of per package metadata (e.g. predownload date) for XVC and MSIXVC packages
+    /// </summary>
+    public Dictionary<string, IngestionMarketGroupPackageMetadata> PackageIdToMetadataMap { get; set; }
 }

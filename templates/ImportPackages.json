@@ -24,6 +24,11 @@
     "effectiveDate": "{{ optional - if informed it will set the mandatory date in the destination branch for the Uwp packages (if any) }}"
   },
 
+  "preDownloadDate": {
+    "isEnabled": false,
+    "effectiveDate": "{{ optional - if informed it will set the pre-download date in the destination branch for the Xvc packages (if any) }}"
+  },
+
   "gradualRollout": {
     "isEnabled": false,
     "percentage": 33,

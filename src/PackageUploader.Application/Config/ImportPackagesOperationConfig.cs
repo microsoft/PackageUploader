@@ -18,9 +18,9 @@ internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGa
     public string DestinationFlightName { get; set; }
 
     public GamePackageDate AvailabilityDate { get; set; }
+    public GamePackageDate PreDownloadDate { get; set; }
     public GamePackageDate MandatoryDate { get; set; }
     public GameGradualRolloutInfo GradualRollout { get; set; }
-
     public bool Overwrite { get; set; }
 
     protected override void Validate(IList<ValidationResult> validationResults)
@@ -35,5 +35,15 @@ internal class ImportPackagesOperationConfig : PackageBranchOperationConfig, IGa
         {
             validationResults.Add(new ValidationResult($"Only one {nameof(DestinationBranchFriendlyName)} or {nameof(DestinationFlightName)} field is allowed.", new[] { nameof(DestinationBranchFriendlyName), nameof(DestinationFlightName) }));
         }
-    }
+
+        if (PreDownloadDate?.IsEnabled == true && (AvailabilityDate?.IsEnabled != true))
+        {
+            validationResults.Add(new ValidationResult($"{nameof(PreDownloadDate)} needs {nameof(AvailabilityDate)}.", new[] { nameof(PreDownloadDate), nameof(AvailabilityDate) }));
+        }
+
+        if (PreDownloadDate?.IsEnabled == true && AvailabilityDate?.IsEnabled == true && PreDownloadDate.EffectiveDate > AvailabilityDate.EffectiveDate)
+        {
+            validationResults.Add(new ValidationResult($"{nameof(PreDownloadDate)} needs to be before {nameof(AvailabilityDate)}.", new[] { nameof(PreDownloadDate), nameof(AvailabilityDate) }));
+        }
+  }
 }
