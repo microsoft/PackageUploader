@@ -10,14 +10,17 @@ namespace PackageUploader.Application.Config;
 [OptionsValidator]
 internal partial class GetPackagesOperationValidator : IValidateOptions<GetPackagesOperationConfig>;
 
-internal class GetPackagesOperationConfig : PackageBranchOperationConfig
+internal class GetPackagesOperationConfig : PackageBranchOperationConfig, IValidatableObject
 {
     internal override string GetOperationName() => "GetPackages";
 
     public string MarketGroupName { get; set; } = "default";
 
-    protected override void Validate(List<ValidationResult> validationResults)
+    public new IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        foreach (var validationResult in base.Validate(validationContext))
+            yield return validationResult;
+
         if (string.IsNullOrWhiteSpace(MarketGroupName))
         {
             MarketGroupName = "default";

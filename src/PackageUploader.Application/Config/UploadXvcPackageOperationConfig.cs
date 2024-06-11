@@ -11,7 +11,7 @@ namespace PackageUploader.Application.Config;
 [OptionsValidator]
 internal partial class UploadXvcPackageOperationValidator : IValidateOptions<UploadXvcPackageOperationConfig>;
 
-internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, IXvcGameConfiguration
+internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, IXvcGameConfiguration, IValidatableObject
 {
     internal override string GetOperationName() => "UploadXvcPackage";
 
@@ -23,18 +23,24 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
 
     public GamePackageDate PreDownloadDate { get; set; }
 
-    protected override void Validate(List<ValidationResult> validationResults)
+    public new IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        base.Validate(validationResults);
+        foreach (var validationResult in base.Validate(validationContext))
+            yield return validationResult;
+
+        if (PreDownloadDate is { IsEnabled: true, EffectiveDate: null })
+        {
+            yield return new ValidationResult($"If {nameof(PreDownloadDate)} {nameof(PreDownloadDate.IsEnabled)} is true, {nameof(PreDownloadDate.EffectiveDate)} needs to be set.", [nameof(PreDownloadDate)]);
+        }
 
         if (PreDownloadDate?.IsEnabled == true && (AvailabilityDate?.IsEnabled != true))
         {
-            validationResults.Add(new ValidationResult($"{nameof(PreDownloadDate)} needs {nameof(AvailabilityDate)}.", [nameof(PreDownloadDate), nameof(AvailabilityDate)]));
+            yield return new ValidationResult($"{nameof(PreDownloadDate)} needs {nameof(AvailabilityDate)}.", [nameof(PreDownloadDate), nameof(AvailabilityDate)]);
         }
 
         if (PreDownloadDate?.IsEnabled == true && AvailabilityDate?.IsEnabled == true && PreDownloadDate.EffectiveDate > AvailabilityDate.EffectiveDate)
         {
-            validationResults.Add(new ValidationResult($"{nameof(PreDownloadDate)} needs to be before {nameof(AvailabilityDate)}.", [nameof(PreDownloadDate), nameof(AvailabilityDate)]));
+            yield return new ValidationResult($"{nameof(PreDownloadDate)} needs to be before {nameof(AvailabilityDate)}.", [nameof(PreDownloadDate), nameof(AvailabilityDate)]);
         }
     }
 }
