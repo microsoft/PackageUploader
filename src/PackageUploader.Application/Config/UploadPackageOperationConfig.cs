@@ -19,7 +19,7 @@ internal abstract class UploadPackageOperationConfig : PackageBranchOperationCon
 
     public GamePackageDate AvailabilityDate { get; set; }
 
-    protected override void Validate(IList<ValidationResult> validationResults)
+    protected override void Validate(List<ValidationResult> validationResults)
     {
         if (string.IsNullOrWhiteSpace(MarketGroupName))
         {

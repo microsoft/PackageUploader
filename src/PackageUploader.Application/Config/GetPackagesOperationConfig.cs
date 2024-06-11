@@ -16,7 +16,7 @@ internal class GetPackagesOperationConfig : PackageBranchOperationConfig
 
     public string MarketGroupName { get; set; } = "default";
 
-    protected override void Validate(IList<ValidationResult> validationResults)
+    protected override void Validate(List<ValidationResult> validationResults)
     {
         if (string.IsNullOrWhiteSpace(MarketGroupName))
         {

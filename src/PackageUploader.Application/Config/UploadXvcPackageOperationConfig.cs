@@ -23,7 +23,7 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
 
     public GamePackageDate PreDownloadDate { get; set; }
 
-    protected override void Validate(IList<ValidationResult> validationResults)
+    protected override void Validate(List<ValidationResult> validationResults)
     {
         base.Validate(validationResults);
 
