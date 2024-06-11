@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using PackageUploader.ClientApi.Client.Ingestion.Config;
@@ -17,9 +16,10 @@ namespace PackageUploader.ClientApi.Client.Ingestion;
 
 internal static class IngestionExtensions
 {
-    public static IServiceCollection AddIngestionService(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddIngestionService(this IServiceCollection services)
     {
-        services.AddOptions<IngestionConfig>().Bind(config.GetSection(nameof(IngestionConfig))).ValidateDataAnnotations();
+        services.AddSingleton<IValidateOptions<IngestionConfig>, IngestionConfigValidator>();
+        services.AddOptions<IngestionConfig>().BindConfiguration(nameof(IngestionConfig));
         services.AddSingleton<IngestionSdkVersion>();
         services.AddScoped<IngestionAuthenticationDelegatingHandler>();
         services.AddHttpClient<IIngestionHttpClient, IngestionHttpClient>((serviceProvider, httpClient) =>

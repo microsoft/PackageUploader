@@ -36,7 +36,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         try
         {
-            var ingestionGameProduct = await GetAsync<IngestionGameProduct>($"products/{longId}", ct).ConfigureAwait(false);
+            var ingestionGameProduct = await GetAsync($"products/{longId}", IngestionJsonSerializerContext.Default.IngestionGameProduct, ct).ConfigureAwait(false);
 
             var gameProduct = ingestionGameProduct.Map();
             return gameProduct;
@@ -51,7 +51,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
     {
         StringArgumentException.ThrowIfNullOrWhiteSpace(bigId);
 
-        var ingestionGameProducts = GetAsyncEnumerable<IngestionGameProduct>($"products?externalId={bigId}", ct);
+        var ingestionGameProducts = GetAsyncEnumerable($"products?externalId={bigId}", IngestionJsonSerializerContext.Default.PagedCollectionIngestionGameProduct, ct);
         var ingestionGameProduct = await ingestionGameProducts.FirstOrDefaultAsync(ct).ConfigureAwait(false);
 
         if (ingestionGameProduct is null)
@@ -68,7 +68,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(branchFriendlyName);
 
-        var branches = GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct);
+        var branches = GetAsyncEnumerable($"products/{productId}/branches/getByModule(module=Package)", IngestionJsonSerializerContext.Default.PagedCollectionIngestionBranch, ct);
 
         var ingestionGamePackageBranch = await branches.FirstOrDefaultAsync(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
 
@@ -86,7 +86,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(flightName);
 
-        var flights = GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct);
+        var flights = GetAsyncEnumerable($"products/{productId}/flights", IngestionJsonSerializerContext.Default.PagedCollectionIngestionFlight, ct);
 
         var selectedFlight = await flights.FirstOrDefaultAsync(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
 
@@ -108,7 +108,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId, isXvc, xvcTargetPlatform).Build();
 
-        var ingestionGamePackage = await PostAsync<IngestionPackageCreationRequest, IngestionGamePackage>($"products/{productId}/packages", body, ct).ConfigureAwait(false);
+        var ingestionGamePackage = await PostAsync($"products/{productId}/packages", body, IngestionJsonSerializerContext.Default.IngestionPackageCreationRequest, IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
 
         if (!ingestionGamePackage.State.Equals("PendingUpload", StringComparison.OrdinalIgnoreCase))
         {
@@ -126,7 +126,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(packageId);
 
-        var ingestionGamePackage = await GetAsync<IngestionGamePackage>($"products/{productId}/packages/{packageId}", ct).ConfigureAwait(false);
+        var ingestionGamePackage = await GetAsync($"products/{productId}/packages/{packageId}", IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
 
         var gamePackage = ingestionGamePackage.Map();
         return gamePackage;
@@ -140,7 +140,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var body = new IngestionGamePackageAssetBuilder(packageId, fileInfo, packageAssetType).Build();
 
-        var ingestionGamePackageAsset = await PostAsync($"products/{productId}/packages/{packageId}/packageAssets", body, ct).ConfigureAwait(false);
+        var ingestionGamePackageAsset = await PostAsync($"products/{productId}/packages/{packageId}/packageAssets", body, IngestionJsonSerializerContext.Default.IngestionGamePackageAsset, ct).ConfigureAwait(false);
 
         var gamePackageAsset = ingestionGamePackageAsset.Map();
         return gamePackageAsset;
@@ -154,7 +154,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         gamePackage.State = GamePackageState.Uploaded;
         var body = gamePackage.Map();
 
-        var ingestionGamePackage = await PutAsync($"products/{productId}/packages/{gamePackage.Id}", body, ct);
+        var ingestionGamePackage = await PutAsync($"products/{productId}/packages/{gamePackage.Id}", body, IngestionJsonSerializerContext.Default.IngestionGamePackage, ct);
         var newGamePackage = ingestionGamePackage.Map();
         return newGamePackage;
     }
@@ -167,7 +167,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var body = new IngestionGamePackageAsset();
 
-        var ingestionGamePackageAsset = await PutAsync($"products/{productId}/packages/{packageId}/packageAssets/{packageAssetId}/commit", body, ct).ConfigureAwait(false);
+        var ingestionGamePackageAsset = await PutAsync($"products/{productId}/packages/{packageId}/packageAssets/{packageAssetId}/commit", body, IngestionJsonSerializerContext.Default.IngestionGamePackageAsset, ct).ConfigureAwait(false);
 
         var gamePackageAsset = ingestionGamePackageAsset.Map();
         return gamePackageAsset;
@@ -178,7 +178,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(currentDraftInstanceId);
 
-        var packageSets = GetAsyncEnumerable<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", ct);
+        var packageSets = GetAsyncEnumerable($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", IngestionJsonSerializerContext.Default.PagedCollectionIngestionGamePackageConfiguration, ct);
 
         var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
         if (packageSet is null)
@@ -195,7 +195,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         ArgumentNullException.ThrowIfNull(gamePackageConfiguration);
 
-        var packageSet = await GetAsync<IngestionGamePackageConfiguration>($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", ct);
+        var packageSet = await GetAsync($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", IngestionJsonSerializerContext.Default.IngestionGamePackageConfiguration, ct);
             
         if (packageSet is null)
         {
@@ -210,7 +210,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
             { "If-Match", packageSet.ODataETag},
         };
 
-        var result = await PutAsync($"products/{productId}/packageConfigurations/{newPackageSet.Id}", packageSet, customHeaders, ct).ConfigureAwait(false);
+        var result = await PutAsync($"products/{productId}/packageConfigurations/{newPackageSet.Id}", packageSet, IngestionJsonSerializerContext.Default.IngestionGamePackageConfiguration, customHeaders, ct).ConfigureAwait(false);
         return result.Map();
     }
 
@@ -227,7 +227,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationSandboxName, IngestionSubmissionTargetType.Sandbox, gameSubmissionOptions).Build();
 
-        var submission = await PostAsync<IngestionSubmissionCreationRequest, IngestionSubmission>($"products/{productId}/submissions", body, ct).ConfigureAwait(false);
+        var submission = await PostAsync($"products/{productId}/submissions", body, IngestionJsonSerializerContext.Default.IngestionSubmissionCreationRequest, IngestionJsonSerializerContext.Default.IngestionSubmission, ct).ConfigureAwait(false);
 
         var gameSubmission = submission.Map();
 
@@ -252,7 +252,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var body = new IngestionSubmissionCreationRequestBuilder(currentDraftInstanceId, destinationFlightId, IngestionSubmissionTargetType.Flight, gameSubmissionOptions).Build();
 
-        var submission = await PostAsync<IngestionSubmissionCreationRequest, IngestionSubmission>($"products/{productId}/submissions", body, ct).ConfigureAwait(false);
+        var submission = await PostAsync($"products/{productId}/submissions", body, IngestionJsonSerializerContext.Default.IngestionSubmissionCreationRequest, IngestionJsonSerializerContext.Default.IngestionSubmission, ct).ConfigureAwait(false);
 
         var gameSubmission = submission.Map();
 
@@ -269,7 +269,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(submissionId);
 
-        var submission = await GetAsync<IngestionSubmission>($"products/{productId}/submissions/{submissionId}", ct).ConfigureAwait(false);
+        var submission = await GetAsync($"products/{productId}/submissions/{submissionId}", IngestionJsonSerializerContext.Default.IngestionSubmission, ct).ConfigureAwait(false);
         if (submission is null)
         {
             throw new SubmissionNotFoundException($"Submission for product '{productId}' and submissionId '{submissionId}' not found.");
@@ -289,8 +289,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
     {
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
 
-        var flights = await GetAsyncEnumerable<IngestionFlight>($"products/{productId}/flights", ct).ToListAsync(ct).ConfigureAwait(false);
-        var branches = await GetAsyncEnumerable<IngestionBranch>($"products/{productId}/branches/getByModule(module=Package)", ct).ToListAsync(ct).ConfigureAwait(false);
+        var flights = await GetAsyncEnumerable($"products/{productId}/flights", IngestionJsonSerializerContext.Default.PagedCollectionIngestionFlight, ct).ToListAsync(ct).ConfigureAwait(false);
+        var branches = await GetAsyncEnumerable($"products/{productId}/branches/getByModule(module=Package)", IngestionJsonSerializerContext.Default.PagedCollectionIngestionBranch, ct).ToListAsync(ct).ConfigureAwait(false);
 
         var gamePackageBranches = new List<IGamePackageBranch>();
         foreach (var flight in flights)
@@ -312,7 +312,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
     private async Task<List<GameSubmissionValidationItem>> GetGameSubmissionValidationItemsFromFailureAsync(string productId, string submissionId, CancellationToken ct)
     {
-        var validations = GetAsyncEnumerable<IngestionSubmissionValidationItem>($"products/{productId}/submissions/{submissionId}/validations", ct);
+        var validations = GetAsyncEnumerable($"products/{productId}/submissions/{submissionId}/validations", IngestionJsonSerializerContext.Default.PagedCollectionIngestionSubmissionValidationItem, ct);
 
         var items = await validations.Select(x => x.Map()).ToListAsync(ct);
         return items;

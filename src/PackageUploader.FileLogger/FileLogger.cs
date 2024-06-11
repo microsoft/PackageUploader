@@ -33,10 +33,9 @@ internal class FileLogger : ILogger
         {
             return;
         }
-        if (formatter == null)
-        {
-            throw new ArgumentNullException(nameof(formatter));
-        }
+
+        ArgumentNullException.ThrowIfNull(formatter);
+
         _stringWriter ??= new StringWriter();
         var logEntry = new LogEntry<TState>(logLevel, _name, eventId, state, exception, formatter);
         Formatter.Write(in logEntry, ScopeProvider, _stringWriter);

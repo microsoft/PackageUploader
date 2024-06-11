@@ -128,7 +128,7 @@ internal class JsonFileFormatter : FileFormatter, IDisposable
         }
     }
 
-    private void WriteItem(Utf8JsonWriter writer, KeyValuePair<string, object> item)
+    private static void WriteItem(Utf8JsonWriter writer, KeyValuePair<string, object> item)
     {
         var key = item.Key;
         switch (item.Value)
