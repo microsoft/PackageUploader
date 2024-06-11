@@ -41,8 +41,8 @@ public class Product
         BigId = gameProduct.BigId;
         ProductName = gameProduct.ProductName;
         
-        BranchFriendlyNames = new List<string>();
-        FlightNames = new List<string>();
+        BranchFriendlyNames = [];
+        FlightNames = [];
         foreach (var branch in branches)
         {
             if (branch.BranchType is GamePackageBranchType.Flight)

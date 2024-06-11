@@ -37,7 +37,7 @@ internal class IngestionPackageCreationRequestBuilder : IBuilder<IngestionPackag
             ClientExtractedMetaData = _clientExtractedMetaData,
         };
 
-    private ClientExtractedMetaData CreateClientExtractedMetaData(XvcTargetPlatform xvcTargetPlatform)
+    private static ClientExtractedMetaData CreateClientExtractedMetaData(XvcTargetPlatform xvcTargetPlatform)
     {
         var xvcReader = new XvcReader
         {

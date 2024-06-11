@@ -29,22 +29,22 @@ internal class IngestionSubmissionCreationRequestBuilder : IBuilder<IngestionSub
         new()
         {
             ResourceType = ResourceType,
-            Targets = new List<TypeValuePair>
-            {
+            Targets =
+            [
                 new()
                 {
                     Type = _targetType.ToString(),
                     Value = _target,
                 }
-            },
-            Resources = new List<TypeValuePair>
-            {
+            ],
+            Resources =
+            [
                 new()
                 {
                     Type = IngestionBranchModuleType.Package.ToString(),
                     Value = _currentDraftInstanceId,
                 }
-            },
+            ],
             PublishOption = _options.Map(),
         };
 }

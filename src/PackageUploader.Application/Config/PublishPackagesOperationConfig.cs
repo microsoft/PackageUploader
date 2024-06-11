@@ -22,19 +22,19 @@ internal sealed class PublishPackagesOperationConfig : PackageBranchOperationCon
 
     private const string RetailSandboxName = "RETAIL";
 
-    protected override void Validate(IList<ValidationResult> validationResults)
+    protected override void Validate(List<ValidationResult> validationResults)
     {
         if ((!string.IsNullOrWhiteSpace(FlightName) || string.IsNullOrWhiteSpace(BranchFriendlyName) || string.IsNullOrWhiteSpace(DestinationSandboxName)) &&
             (string.IsNullOrWhiteSpace(FlightName) || !string.IsNullOrWhiteSpace(BranchFriendlyName) || !string.IsNullOrWhiteSpace(DestinationSandboxName)))
         {
             validationResults.Add(new ValidationResult($"{nameof(FlightName)} or ({nameof(BranchFriendlyName)} and {nameof(DestinationSandboxName)}) field is required.",
-                new[] { nameof(FlightName), nameof(BranchFriendlyName), nameof(DestinationSandboxName) }));
+                [nameof(FlightName), nameof(BranchFriendlyName), nameof(DestinationSandboxName)]));
         }
 
         if (!string.IsNullOrWhiteSpace(DestinationSandboxName) && DestinationSandboxName.Equals(RetailSandboxName, StringComparison.OrdinalIgnoreCase))
         {
             validationResults.Add(new ValidationResult($"Publishing packages to {RetailSandboxName} sandbox is not permitted through this tool.", 
-                new[] { nameof(DestinationSandboxName) }));
+                [nameof(DestinationSandboxName)]));
         }
     }
 }

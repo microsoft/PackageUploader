@@ -11,16 +11,16 @@ internal abstract class PackageBranchOperationConfig : BaseOperationConfig
     public string BranchFriendlyName { get; set; }
     public string FlightName { get; set; }
 
-    protected override void Validate(IList<ValidationResult> validationResults)
+    protected override void Validate(List<ValidationResult> validationResults)
     {
         if (string.IsNullOrWhiteSpace(BranchFriendlyName) && string.IsNullOrWhiteSpace(FlightName))
         {
-            validationResults.Add(new ValidationResult($"{nameof(BranchFriendlyName)} or {nameof(FlightName)} field is required.", new[] { nameof(BranchFriendlyName), nameof(FlightName) }));
+            validationResults.Add(new ValidationResult($"{nameof(BranchFriendlyName)} or {nameof(FlightName)} field is required.", [nameof(BranchFriendlyName), nameof(FlightName)]));
         }
 
         if (!string.IsNullOrWhiteSpace(BranchFriendlyName) && !string.IsNullOrWhiteSpace(FlightName))
         {
-            validationResults.Add(new ValidationResult($"Only one {nameof(BranchFriendlyName)} or {nameof(FlightName)} field is allowed.", new[] { nameof(BranchFriendlyName), nameof(FlightName) }));
+            validationResults.Add(new ValidationResult($"Only one {nameof(BranchFriendlyName)} or {nameof(FlightName)} field is allowed.", [nameof(BranchFriendlyName), nameof(FlightName)]));
         }
     }
 }

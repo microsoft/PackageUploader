@@ -26,26 +26,26 @@ internal abstract class BaseOperationConfig : IValidatableObject
         return validationResults;
     }
 
-    protected virtual void Validate(IList<ValidationResult> validationResults)
+    protected virtual void Validate(List<ValidationResult> validationResults)
     {
     }
 
-    private void ValidateBase(IList<ValidationResult> validationResults)
+    private void ValidateBase(List<ValidationResult> validationResults)
     {
         var operationName = GetOperationName();
         if (!string.Equals(operationName, OperationName, StringComparison.OrdinalIgnoreCase))
         {
-            validationResults.Add(new ValidationResult($"{nameof(OperationName)} field is not {operationName}.", new [] { nameof(OperationName) }));
+            validationResults.Add(new ValidationResult($"{nameof(OperationName)} field is not {operationName}.", [nameof(OperationName)]));
         }
 
         if (string.IsNullOrWhiteSpace(ProductId) && string.IsNullOrWhiteSpace(BigId))
         {
-            validationResults.Add(new ValidationResult($"{nameof(ProductId)} or {nameof(BigId)} field is required.", new[] { nameof(ProductId), nameof(BigId) }));
+            validationResults.Add(new ValidationResult($"{nameof(ProductId)} or {nameof(BigId)} field is required.", [nameof(ProductId), nameof(BigId)]));
         }
 
         if (!string.IsNullOrWhiteSpace(ProductId) && !string.IsNullOrWhiteSpace(BigId))
         {
-            validationResults.Add(new ValidationResult($"Only one {nameof(ProductId)} or {nameof(BigId)} field is allowed.", new[] { nameof(ProductId), nameof(BigId) }));
+            validationResults.Add(new ValidationResult($"Only one {nameof(ProductId)} or {nameof(BigId)} field is allowed.", [nameof(ProductId), nameof(BigId)]));
         }
     }
 }
