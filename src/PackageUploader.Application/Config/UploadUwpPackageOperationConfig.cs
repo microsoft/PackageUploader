@@ -10,7 +10,7 @@ namespace PackageUploader.Application.Config;
 [OptionsValidator]
 internal partial class UploadUwpPackageOperationValidator : IValidateOptions<UploadUwpPackageOperationConfig>;
 
-internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig, IGameConfiguration
+internal class UploadUwpPackageOperationConfig : UploadPackageOperationConfig, IUwpGameConfiguration
 {
     internal override string GetOperationName() => "UploadUwpPackage";
 
