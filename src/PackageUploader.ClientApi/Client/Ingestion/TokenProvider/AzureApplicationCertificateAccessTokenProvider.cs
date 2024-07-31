@@ -67,12 +67,8 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
 
         _logger.LogDebug("Requesting authentication token");
         var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
-        var result = await msalClient.AcquireTokenForClient(scopes).ExecuteAsync(ct).ConfigureAwait(false);
-
-        if (result is null)
-        {
-            throw new Exception("Failure while acquiring token.");
-        }
+        var result = await msalClient.AcquireTokenForClient(scopes).ExecuteAsync(ct).ConfigureAwait(false) 
+            ?? throw new Exception("Failure while acquiring token.");
 
         return new IngestionAccessToken
         {

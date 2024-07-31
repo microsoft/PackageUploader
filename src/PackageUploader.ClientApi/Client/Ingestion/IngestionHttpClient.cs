@@ -52,12 +52,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(bigId);
 
         var ingestionGameProducts = GetAsyncEnumerable($"products?externalId={bigId}", IngestionJsonSerializerContext.Default.PagedCollectionIngestionGameProduct, ct);
-        var ingestionGameProduct = await ingestionGameProducts.FirstOrDefaultAsync(ct).ConfigureAwait(false);
-
-        if (ingestionGameProduct is null)
-        {
-            throw new ProductNotFoundException($"Product with big id '{bigId}' not found.");
-        }
+        var ingestionGameProduct = await ingestionGameProducts.FirstOrDefaultAsync(ct).ConfigureAwait(false)
+            ?? throw new ProductNotFoundException($"Product with big id '{bigId}' not found.");
 
         var gameProduct = ingestionGameProduct.Map();
         return gameProduct;
@@ -70,12 +66,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var branches = GetAsyncEnumerable($"products/{productId}/branches/getByModule(module=Package)", IngestionJsonSerializerContext.Default.PagedCollectionIngestionBranch, ct);
 
-        var ingestionGamePackageBranch = await branches.FirstOrDefaultAsync(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
-
-        if (ingestionGamePackageBranch is null)
-        {
-            throw new PackageBranchNotFoundException($"Package branch with friendly name '{branchFriendlyName}' not found.");
-        }
+        var ingestionGamePackageBranch = await branches.FirstOrDefaultAsync(b => b.FriendlyName is not null && b.FriendlyName.Equals(branchFriendlyName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false)
+            ?? throw new PackageBranchNotFoundException($"Package branch with friendly name '{branchFriendlyName}' not found.");
 
         var gamePackageBranch = ingestionGamePackageBranch.Map();
         return gamePackageBranch;
@@ -88,13 +80,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var flights = GetAsyncEnumerable($"products/{productId}/flights", IngestionJsonSerializerContext.Default.PagedCollectionIngestionFlight, ct);
 
-        var selectedFlight = await flights.FirstOrDefaultAsync(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false);
-
-        if (selectedFlight is null)
-        {
-            throw new PackageBranchNotFoundException($"Package branch with flight name '{flightName}' not found.");
-        }
-
+        var selectedFlight = await flights.FirstOrDefaultAsync(f => f.Name is not null && f.Name.Equals(flightName, StringComparison.OrdinalIgnoreCase), ct).ConfigureAwait(false) ?? throw new PackageBranchNotFoundException($"Package branch with flight name '{flightName}' not found.");
         var branch = await GetPackageBranchByFriendlyNameAsync(productId, selectedFlight.Id, ct).ConfigureAwait(false);
         return selectedFlight.Map(branch);
     }
@@ -180,11 +166,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
 
         var packageSets = GetAsyncEnumerable($"products/{productId}/packageConfigurations/getByInstanceID(instanceID={currentDraftInstanceId})", IngestionJsonSerializerContext.Default.PagedCollectionIngestionGamePackageConfiguration, ct);
 
-        var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false);
-        if (packageSet is null)
-        {
-            throw new PackageConfigurationNotFoundException($"Package configuration for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
-        }
+        var packageSet = await packageSets.FirstOrDefaultAsync(ct).ConfigureAwait(false)
+            ?? throw new PackageConfigurationNotFoundException($"Package configuration for product '{productId}' and currentDraftInstanceId '{currentDraftInstanceId}' not found.");
 
         var gamePackageConfiguration = packageSet.Map();
         return gamePackageConfiguration;
@@ -195,12 +178,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         ArgumentNullException.ThrowIfNull(gamePackageConfiguration);
 
-        var packageSet = await GetAsync($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", IngestionJsonSerializerContext.Default.IngestionGamePackageConfiguration, ct);
-            
-        if (packageSet is null)
-        {
-            throw new PackageConfigurationNotFoundException($"Package configuration for product '{productId}' and packageConfigurationId '{gamePackageConfiguration.Id}' not found.");
-        }
+        var packageSet = await GetAsync($"products/{productId}/packageConfigurations/{gamePackageConfiguration.Id}", IngestionJsonSerializerContext.Default.IngestionGamePackageConfiguration, ct)
+            ?? throw new PackageConfigurationNotFoundException($"Package configuration for product '{productId}' and packageConfigurationId '{gamePackageConfiguration.Id}' not found.");
 
         var newPackageSet = packageSet.Merge(gamePackageConfiguration);
 
@@ -269,11 +248,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(submissionId);
 
-        var submission = await GetAsync($"products/{productId}/submissions/{submissionId}", IngestionJsonSerializerContext.Default.IngestionSubmission, ct).ConfigureAwait(false);
-        if (submission is null)
-        {
-            throw new SubmissionNotFoundException($"Submission for product '{productId}' and submissionId '{submissionId}' not found.");
-        }
+        var submission = await GetAsync($"products/{productId}/submissions/{submissionId}", IngestionJsonSerializerContext.Default.IngestionSubmission, ct).ConfigureAwait(false)
+            ?? throw new SubmissionNotFoundException($"Submission for product '{productId}' and submissionId '{submissionId}' not found.");
 
         var gameSubmission = submission.Map();
 
@@ -295,12 +271,8 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         var gamePackageBranches = new List<IGamePackageBranch>();
         foreach (var flight in flights)
         {
-            var branch = branches.SingleOrDefault(b => b.FriendlyName.Equals(flight.Id));
-
-            if (branch is null)
-            {
-                throw new PackageBranchNotFoundException($"Package branch with flight name '{flight.Name}' not found.");
-            }
+            var branch = branches.SingleOrDefault(b => b.FriendlyName.Equals(flight.Id))
+                ?? throw new PackageBranchNotFoundException($"Package branch with flight name '{flight.Name}' not found.");
 
             gamePackageBranches.Add(flight.Map(branch));
             branches.Remove(branch);
