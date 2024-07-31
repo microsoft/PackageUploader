@@ -5,7 +5,6 @@ using PackageUploader.ClientApi.Client.Ingestion.Mappers;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
 using System;
-using System.Collections.Generic;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Builders;
 

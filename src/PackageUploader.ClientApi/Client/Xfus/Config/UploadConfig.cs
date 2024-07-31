@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Options;
-using PackageUploader.ClientApi.Client.Ingestion.Config;
 using System.ComponentModel.DataAnnotations;
 
 namespace PackageUploader.ClientApi.Client.Xfus.Config;
