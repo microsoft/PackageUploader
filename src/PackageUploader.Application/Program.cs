@@ -26,12 +26,12 @@ internal class Program
     private const string LogTimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
 
     // Options
-    public static readonly Option<bool> DataOption = new (new[] { "-d", "--Data" }, "Do not log on console and only return data");
-    private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls");
-    private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file");
-    private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app (only for AppSecret)");
-    private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "The location of the config file").Required();
-    private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
+    public static readonly Option<bool> DataOption = new (["-d", "--Data"], "Do not log on console and only return data");
+    private static readonly Option<bool> VerboseOption = new (["-v", "--Verbose"], "Log verbose messages such as http calls");
+    private static readonly Option<FileInfo> LogFileOption = new(["-l", "--LogFile"], "The location of the log file");
+    private static readonly Option<string> ClientSecretOption = new (["-s", "--ClientSecret"], "The client secret of the AAD app (only for AppSecret)");
+    private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(["-c", "--ConfigFile"], "The location of the config file").Required();
+    private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(["-a", "--Authentication"], () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
 
     private static async Task<int> Main(string[] args)
     {
