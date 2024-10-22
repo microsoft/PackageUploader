@@ -17,6 +17,8 @@ public static class IngestionExtensions
         AppCert,
         Default, 
         Browser,
+
+        AzureCli,
     }
 
     public static IServiceCollection AddPackageUploaderService(this IServiceCollection services, IConfiguration config, 
@@ -38,6 +40,7 @@ public static class IngestionExtensions
             AuthenticationMethod.AppCert => services.AddAzureApplicationCertificateAccessTokenProvider(config),
             AuthenticationMethod.Browser => services.AddInteractiveBrowserCredentialAccessTokenProvider(config),
             AuthenticationMethod.Default => services.AddDefaultAzureCredentialAccessTokenProvider(config),
+            AuthenticationMethod.AzureCli => services.AddAzureCliAccessTokenProvider(config),
             _ => services.AddAzureApplicationSecretAccessTokenProvider(config),
         };
 }
