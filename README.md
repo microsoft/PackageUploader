@@ -142,7 +142,7 @@ For more information on operation parameters, see [Operations](https://github.co
 | **-c, --ConfigFile <ConfigFile> (REQUIRED)** | The location of the configuration file |
 | **-f, --ConfigFileFormat <Ini\|Json\|Xml>** | The format of the configuration file (default: Json) |
 | **-s, --ClientSecret <ClientSecret>** | The client secret of the Azure AD application (only for AppSecret) |
-| **-a, --Authentication <AppCert\|AppSecret\|Browser\|Default>** | The authentication method (default: AppSecret) |
+| **-a, --Authentication <AppCert\|AppSecret\|Browser\|Default\|AzureCli>** | The authentication method (default: AppSecret) |
 | **-v, --Verbose** | Log verbose messages, such as HTTP calls |
 | **-d, --Data** | Do not log on console and only return data (only for Get operations) |
 | **-l, --LogFile <LogFile>** | The location of the log file |
