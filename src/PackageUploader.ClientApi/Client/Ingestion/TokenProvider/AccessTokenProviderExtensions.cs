@@ -32,6 +32,14 @@ internal static class AccessTokenProviderExtensions
         return services;
     }
 
+    public static IServiceCollection AddAzureCliCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, AzureCliCredentialAccessTokenProvider>();
+
+        return services;
+    }
+
     public static IServiceCollection AddDefaultAzureCredentialAccessTokenProvider(this IServiceCollection services)
     {
         services.AddAccessTokenProviderOptions();
