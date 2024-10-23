@@ -40,6 +40,17 @@ internal static class AccessTokenProviderExtensions
         return services;
     }
 
+    public static IServiceCollection AddManagedIdentityCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddSingleton<IValidateOptions<ManagedIdentityAuthInfo>, ManagedIdentityAuthInfoValidator>();
+        services.AddOptions<ManagedIdentityAuthInfo>().BindConfiguration(ManagedIdentityAuthInfo.ConfigName);
+
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, ManagedIdentityCredentialAccessTokenProvider>();
+
+        return services;
+    }
+
     public static IServiceCollection AddDefaultAzureCredentialAccessTokenProvider(this IServiceCollection services)
     {
         services.AddAccessTokenProviderOptions();

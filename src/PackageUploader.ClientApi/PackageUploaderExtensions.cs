@@ -17,6 +17,7 @@ public static class IngestionExtensions
         Default, 
         Browser,
         AzureCli,
+        ManagedIdentity,
     }
 
     public static IServiceCollection AddPackageUploaderService(this IServiceCollection services,
@@ -36,6 +37,7 @@ public static class IngestionExtensions
             AuthenticationMethod.Browser => services.AddInteractiveBrowserCredentialAccessTokenProvider(),
             AuthenticationMethod.Default => services.AddDefaultAzureCredentialAccessTokenProvider(),
             AuthenticationMethod.AzureCli => services.AddAzureCliCredentialAccessTokenProvider(),
+            AuthenticationMethod.ManagedIdentity => services.AddManagedIdentityCredentialAccessTokenProvider(),
             _ => services.AddAzureApplicationSecretAccessTokenProvider(),
         };
 }
