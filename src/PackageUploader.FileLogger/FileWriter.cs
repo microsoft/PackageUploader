@@ -9,7 +9,7 @@ namespace PackageUploader.FileLogger;
 
 internal class FileWriter : IFileWriter
 {
-    private readonly TextWriter _textWriter;
+    private readonly StreamWriter _streamWriter;
 
     public FileWriter(FileWriterOptions options)
     {
@@ -22,17 +22,17 @@ internal class FileWriter : IFileWriter
         }
 
         Stream outputStream = File.Open(path, options.Append ? FileMode.Append : FileMode.Create, FileAccess.Write, FileShare.Read);
-        _textWriter = new StreamWriter(outputStream, options.Encoding ?? new UTF8Encoding(false));
+        _streamWriter = new StreamWriter(outputStream, options.Encoding ?? new UTF8Encoding(false));
     }
 
     public void Write(string message)
     {
-        _textWriter.Write(message);
-        _textWriter.Flush();
+        _streamWriter.Write(message);
+        _streamWriter.Flush();
     }
 
     public void Dispose()
     {
-        _textWriter?.Dispose();
+        _streamWriter?.Dispose();
     }
 }

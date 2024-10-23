@@ -82,23 +82,23 @@ public class PackageUploaderService : IPackageUploaderService
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
 
-        if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
+        if (packageConfiguration.MarketGroupPackages is null || packageConfiguration.MarketGroupPackages.Count == 0)
         {
             _logger.LogDebug("Initializing game package configuration in branch '{branchName}'.", packageConfiguration.BranchName);
-            packageConfiguration.MarketGroupPackages = new List<GameMarketGroupPackage>
-            {
+            packageConfiguration.MarketGroupPackages =
+            [
                 new()
                 {
                     MarketGroupId = "default",
                     Name = "default",
                     Markets = null,
-                    PackageIds = new List<string>(),
+                    PackageIds = [],
                     AvailabilityDate = null,
-                    PackageAvailabilityDates = new Dictionary<string, DateTime?>(),
-                    PackageIdToMetadataMap = new Dictionary<string, GameMarketGroupPackageMetadata>(),
+                    PackageAvailabilityDates = [],
+                    PackageIdToMetadataMap = [],
                     MandatoryUpdateInfo = null,
                 },
-            };
+            ];
             packageConfiguration = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         }
 
@@ -122,22 +122,16 @@ public class PackageUploaderService : IPackageUploaderService
         ArgumentNullException.ThrowIfNull(packageBranch);
         StringArgumentException.ThrowIfNullOrWhiteSpace(marketGroupName);
 
-        var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-        if (packageConfiguration is null)
-        {
-            throw new Exception($"Package Configuration not found for {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
-        }
+        var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false) 
+            ?? throw new Exception($"Package Configuration not found for {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
 
-        if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
+        if (packageConfiguration.MarketGroupPackages is null || packageConfiguration.MarketGroupPackages.Count == 0)
         {
             throw new Exception($"{packageBranch.BranchType} '{packageBranch.Name}' does not have any Market Group Packages.");
         }
 
-        var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(marketGroupName));
-        if (marketGroupPackage is null)
-        {
-            throw new Exception($"Market Group '{marketGroupName}' (case sensitive) not found in {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
-        }
+        var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(marketGroupName))
+            ?? throw new Exception($"Market Group '{marketGroupName}' (case sensitive) not found in {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
 
         foreach (var packageId in marketGroupPackage.PackageIds)
         {
@@ -205,7 +199,7 @@ public class PackageUploaderService : IPackageUploaderService
         var packagesRemoved = 0;
 
         // Finding the package with the specified filename and removing it for each market group package
-        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Count > 0)
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
@@ -221,9 +215,9 @@ public class PackageUploaderService : IPackageUploaderService
                         if (packageFileName.Equals("*", StringComparison.OrdinalIgnoreCase))
                         {
                             packagesRemoved += marketGroupPackage.PackageIds.Count;
-                            marketGroupPackage.PackageIds = new List<string>();
-                            marketGroupPackage.PackageAvailabilityDates = new Dictionary<string, DateTime?>();
-                            marketGroupPackage.PackageIdToMetadataMap = new Dictionary<string, GameMarketGroupPackageMetadata>();
+                            marketGroupPackage.PackageIds = [];
+                            marketGroupPackage.PackageAvailabilityDates = [];
+                            marketGroupPackage.PackageIdToMetadataMap = [];
                         }
                         else
                         {
@@ -277,7 +271,7 @@ public class PackageUploaderService : IPackageUploaderService
         _logger.LogDebug("Setting the dates to package with id '{gamePackageId}' in '{productId}' and draft id '{currentDraftInstanceID}'.", gamePackage.Id, product.ProductId, packageBranch.CurrentDraftInstanceId);
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
-        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Count > 0)
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
@@ -293,7 +287,7 @@ public class PackageUploaderService : IPackageUploaderService
                     // Availability Date
                     if (gameConfiguration.AvailabilityDate.IsEnabled)
                     {
-                        marketGroupPackage.PackageAvailabilityDates ??= new Dictionary<string, DateTime?>();
+                        marketGroupPackage.PackageAvailabilityDates ??= [];
                         marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = gameConfiguration.AvailabilityDate.EffectiveDate;
                     }
                     else if (marketGroupPackage.PackageAvailabilityDates is not null)
@@ -302,11 +296,11 @@ public class PackageUploaderService : IPackageUploaderService
                     }
 
                     // PreDownload Date
-                    marketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, GameMarketGroupPackageMetadata>();
+                    marketGroupPackage.PackageIdToMetadataMap ??= [];
                     marketGroupPackage.PackageIdToMetadataMap[gamePackage.Id] = CalculatePackageMetadata(gameConfiguration.PreDownloadDate);
                 }
             }
-         }
+        }
 
         var result = await _ingestionHttpClient.UpdatePackageConfigurationAsync(product.ProductId, packageConfiguration, ct).ConfigureAwait(false);
         return result;
@@ -322,7 +316,7 @@ public class PackageUploaderService : IPackageUploaderService
 
         var packageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
 
-        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Any())
+        if (packageConfiguration.MarketGroupPackages is not null && packageConfiguration.MarketGroupPackages.Count > 0)
         {
             if (!string.IsNullOrWhiteSpace(marketGroupName) && !packageConfiguration.MarketGroupPackages.Any(x => x.Name.Equals(marketGroupName)))
             {
@@ -385,10 +379,10 @@ public class PackageUploaderService : IPackageUploaderService
         var destinationPackageConfiguration = await _ingestionHttpClient.GetPackageConfigurationAsync(product.ProductId, destinationPackageBranch.CurrentDraftInstanceId, ct).ConfigureAwait(false);
 
         // Importing packages from originMarketGroupPackage to destinationPackageConfiguration
-        if (originPackageConfiguration.MarketGroupPackages is not null && originPackageConfiguration.MarketGroupPackages.Any())
+        if (originPackageConfiguration.MarketGroupPackages is not null && originPackageConfiguration.MarketGroupPackages.Count > 0)
         {
             // initializing MarketGroupPackages if needed
-            destinationPackageConfiguration.MarketGroupPackages ??= new List<GameMarketGroupPackage>();
+            destinationPackageConfiguration.MarketGroupPackages ??= [];
 
             foreach (var originMarketGroupPackage in originPackageConfiguration.MarketGroupPackages)
             {
@@ -412,7 +406,7 @@ public class PackageUploaderService : IPackageUploaderService
                     {
                         var originalPackageAvailabilityDates =
                             destinationMarketGroupPackage.PackageAvailabilityDates is null
-                                ? new Dictionary<string, DateTime?>()
+                                ? []
                                 : new Dictionary<string, DateTime?>(destinationMarketGroupPackage.PackageAvailabilityDates);
 
                         destinationMarketGroupPackage.PackageIds = originMarketGroupPackage.PackageIds;
@@ -447,9 +441,9 @@ public class PackageUploaderService : IPackageUploaderService
                     }
                     else
                     {
-                        destinationMarketGroupPackage.PackageIds ??= new List<string>();
+                        destinationMarketGroupPackage.PackageIds ??= [];
                         var packageIdsToAdd = originMarketGroupPackage.PackageIds.Where(packageId => !destinationMarketGroupPackage.PackageIds.Contains(packageId)).ToList();
-                        if (packageIdsToAdd.Any())
+                        if (packageIdsToAdd.Count > 0)
                         {
                             destinationMarketGroupPackage.PackageIds.AddRange(packageIdsToAdd);
                             if (destinationMarketGroupPackage.PackageAvailabilityDates is not null)
@@ -611,11 +605,12 @@ public class PackageUploaderService : IPackageUploaderService
             minutesToWait -= checkIntervalMinutes;
         }
 
-        _logger.LogInformation(processingPackage.State switch
+        _logger.LogInformation("Package state: {packageState}", processingPackage.State switch
         {
-            GamePackageState.InProcessing => "Package still in processing.",
-            GamePackageState.Processed => "Package processed.",
-            _ => $"Package state: {processingPackage.State}",
+            GamePackageState.InProcessing => "In processing",
+            GamePackageState.ProcessFailed => "Process failed",
+            GamePackageState.PendingUpload => "Pending upload",
+            _ => processingPackage.State,
         });
 
         return processingPackage;
@@ -637,12 +632,11 @@ public class PackageUploaderService : IPackageUploaderService
             minutesToWait -= 1;
         }
 
-        _logger.LogInformation(gameSubmission.GameSubmissionState switch
+        _logger.LogInformation("Submission state: {gameSubmissionState}", gameSubmission.GameSubmissionState switch
         {
-            GameSubmissionState.Failed => "Failed to publish.",
-            GameSubmissionState.Published => "Game published.",
-            GameSubmissionState.InProgress => "Publish still in progress.",
-            _ => $"Submission state: {gameSubmission.GameSubmissionState}",
+            GameSubmissionState.InProgress => "In progress",
+            GameSubmissionState.NotStarted => "Not started",
+            _ => gameSubmission.GameSubmissionState,
         });
 
         return gameSubmission;
@@ -650,7 +644,7 @@ public class PackageUploaderService : IPackageUploaderService
 
     private static void AddPackageMetadata(GameMarketGroupPackage destinationMarketGroupPackage, List<string> packageIdsToAdd, GamePackageDate preDownloadDate)
     {
-        destinationMarketGroupPackage.PackageIdToMetadataMap ??= new Dictionary<string, GameMarketGroupPackageMetadata>();
+        destinationMarketGroupPackage.PackageIdToMetadataMap ??= [];
         foreach (var packageId in packageIdsToAdd)
         {
             destinationMarketGroupPackage.PackageIdToMetadataMap.Add(packageId, CalculatePackageMetadata(preDownloadDate));
@@ -659,7 +653,7 @@ public class PackageUploaderService : IPackageUploaderService
 
     private static void OverWritePackageMetadata(GameMarketGroupPackage originMarketGroupPackage, GameMarketGroupPackage destinationMarketGroupPackage, GamePackageDate preDownloadDate)
     {
-        var originalPackageIdToMetadataMap = destinationMarketGroupPackage.PackageIdToMetadataMap ?? new Dictionary<string, GameMarketGroupPackageMetadata>();
+        var originalPackageIdToMetadataMap = destinationMarketGroupPackage.PackageIdToMetadataMap ?? [];
         destinationMarketGroupPackage.PackageIdToMetadataMap = originMarketGroupPackage.PackageIdToMetadataMap;
 
         if (destinationMarketGroupPackage.PackageIdToMetadataMap is not null)

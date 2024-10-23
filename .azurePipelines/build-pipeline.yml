@@ -4,9 +4,6 @@ parameters:
   - name: Version
     default: '1.0.0'
 
-pool:
-  vmImage: windows-latest
-
 variables:
   - name: projectName
     value: "PackageUploader"
@@ -24,12 +21,16 @@ stages:
     jobs:
       - job: BuildWindows
         displayName: Build win-x64
+        pool:
+          vmImage: windows-latest
 
         variables:
           - name: buildRuntime
             value: "win-x64"
 
         steps:
+        - task: NuGetAuthenticate@1
+
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
@@ -101,12 +102,16 @@ stages:
 
       - job: BuildLinux
         displayName: Build linux-x64
+        pool:
+          vmImage: ubuntu-latest
 
         variables:
           - name: buildRuntime
             value: "linux-x64"
 
         steps:
+        - task: NuGetAuthenticate@1
+
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:

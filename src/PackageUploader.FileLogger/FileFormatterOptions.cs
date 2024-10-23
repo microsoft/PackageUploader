@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Configuration;
+
 namespace PackageUploader.FileLogger;
 
 /// <summary>
@@ -22,4 +24,6 @@ public class FileFormatterOptions
     /// Gets or sets indication whether or not UTC timezone should be used to for timestamps in logging messages. Defaults to <c>false</c>.
     /// </summary>
     public bool UseUtcTimestamp { get; set; }
+
+    internal virtual void Configure(IConfiguration configuration) => configuration.Bind(this);
 }
