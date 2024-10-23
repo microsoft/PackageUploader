@@ -12,7 +12,7 @@ internal partial class ManagedIdentityAuthInfoValidator : IValidateOptions<Manag
 
 public sealed class ManagedIdentityAuthInfo
 {
-    public const string ConfigName = nameof(ManagedIdentityAuthInfo);
+    public const string ConfigName = nameof(AadAuthInfo);
 
     [Required]
     public string ClientId { get; set; }
