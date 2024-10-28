@@ -67,6 +67,25 @@ internal static class AccessTokenProviderExtensions
         return services;
     }
 
+    public static IServiceCollection AddEnvironmentCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, EnvironmentCredentialAccessTokenProvider>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddAzurePipelinesCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddSingleton<IValidateOptions<AzurePipelinesAuthInfo>, AzurePipelinesAuthInfoValidator>();
+        services.AddOptions<AzurePipelinesAuthInfo>().BindConfiguration(AadAuthInfo.ConfigName);
+
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, AzurePipelinesCredentialAccessTokenProvider>();
+
+        return services;
+    }
+
     private static void AddAccessTokenProviderOptions(this IServiceCollection services)
     {
         services.AddSingleton<IValidateOptions<AccessTokenProviderConfig>, AccessTokenProviderConfigValidator>();
