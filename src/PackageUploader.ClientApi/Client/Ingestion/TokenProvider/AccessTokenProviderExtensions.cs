@@ -78,7 +78,7 @@ internal static class AccessTokenProviderExtensions
     public static IServiceCollection AddAzurePipelinesCredentialAccessTokenProvider(this IServiceCollection services)
     {
         services.AddSingleton<IValidateOptions<AzurePipelinesAuthInfo>, AzurePipelinesAuthInfoValidator>();
-        services.AddOptions<AzurePipelinesAuthInfo>().BindConfiguration(AadAuthInfo.ConfigName);
+        services.AddOptions<AzurePipelinesAuthInfo>().BindConfiguration(AzurePipelinesAuthInfo.ConfigName);
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, AzurePipelinesCredentialAccessTokenProvider>();

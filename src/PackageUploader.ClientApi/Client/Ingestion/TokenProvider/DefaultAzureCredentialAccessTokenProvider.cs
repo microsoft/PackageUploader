@@ -14,8 +14,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 public class DefaultAzureCredentialAccessTokenProvider : CredentialAccessTokenProvider, IAccessTokenProvider
 {
     public DefaultAzureCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger<DefaultAzureCredentialAccessTokenProvider> logger) : base(config, logger)
-    {
-    }
+    { }
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {

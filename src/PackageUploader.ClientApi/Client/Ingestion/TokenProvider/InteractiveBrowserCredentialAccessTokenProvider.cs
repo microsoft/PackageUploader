@@ -14,8 +14,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 public class InteractiveBrowserCredentialAccessTokenProvider : CredentialAccessTokenProvider, IAccessTokenProvider
 {
     public InteractiveBrowserCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger<InteractiveBrowserCredentialAccessTokenProvider> logger) : base(config, logger)
-    {
-    }
+    { }
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {

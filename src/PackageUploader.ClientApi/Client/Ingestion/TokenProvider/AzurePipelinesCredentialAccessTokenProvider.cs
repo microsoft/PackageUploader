@@ -25,9 +25,8 @@ public class AzurePipelinesCredentialAccessTokenProvider : CredentialAccessToken
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
         var azureCredentialOptions = SetTokenCredentialOptions(new AzurePipelinesCredentialOptions());
-        var systemAccessToken = Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
         var azureCredential = new AzurePipelinesCredential(_azurePipelinesAuthInfo.TenantId, _azurePipelinesAuthInfo.ClientId, _azurePipelinesAuthInfo.ServiceConnectionId,
-            systemAccessToken, azureCredentialOptions);
+            _azurePipelinesAuthInfo.SystemAccessToken, azureCredentialOptions);
 
         return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
     }
