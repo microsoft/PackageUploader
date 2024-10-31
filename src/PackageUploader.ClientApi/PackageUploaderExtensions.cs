@@ -19,7 +19,7 @@ public static class IngestionExtensions
         AzureCli,
         ManagedIdentity,
         Environment,
-        Pipelines,
+        AzurePipelines,
     }
 
     public static IServiceCollection AddPackageUploaderService(this IServiceCollection services,
@@ -41,7 +41,7 @@ public static class IngestionExtensions
             AuthenticationMethod.AzureCli => services.AddAzureCliCredentialAccessTokenProvider(),
             AuthenticationMethod.ManagedIdentity => services.AddManagedIdentityCredentialAccessTokenProvider(),
             AuthenticationMethod.Environment => services.AddEnvironmentCredentialAccessTokenProvider(),
-            AuthenticationMethod.Pipelines => services.AddAzurePipelinesCredentialAccessTokenProvider(),
+            AuthenticationMethod.AzurePipelines => services.AddAzurePipelinesCredentialAccessTokenProvider(),
             _ => services.AddAzureApplicationSecretAccessTokenProvider(),
         };
 }
