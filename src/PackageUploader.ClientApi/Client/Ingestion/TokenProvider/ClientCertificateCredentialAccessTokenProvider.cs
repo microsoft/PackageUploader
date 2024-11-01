@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Azure.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Identity.Client;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using System;
@@ -14,18 +14,14 @@ using System.Threading.Tasks;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 
-public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvider
+public class ClientCertificateCredentialAccessTokenProvider : CredentialAccessTokenProvider, IAccessTokenProvider
 {
-    private readonly ILogger<AzureApplicationCertificateAccessTokenProvider> _logger;
-    private readonly AccessTokenProviderConfig _config;
     private readonly AzureApplicationCertificateAuthInfo _aadAuthInfo;
     private readonly X509Certificate2 _certificate;
 
-    public AzureApplicationCertificateAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationCertificateAuthInfo> aadAuthInfo, 
-        ILogger<AzureApplicationCertificateAccessTokenProvider> logger)
+    public ClientCertificateCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationCertificateAuthInfo> aadAuthInfo, 
+        ILogger<ClientCertificateCredentialAccessTokenProvider> logger) : base(config, logger)
     {
-        _logger = logger;
-        _config = config.Value;
         _aadAuthInfo = aadAuthInfo?.Value ?? throw new ArgumentNullException(nameof(aadAuthInfo), $"{nameof(aadAuthInfo)} cannot be null.");
 
         if (string.IsNullOrWhiteSpace(_aadAuthInfo.TenantId))
@@ -48,61 +44,34 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
             throw new ArgumentException($"CertificateThumbprint or CertificateSubject not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
         }
 
-        if (string.IsNullOrWhiteSpace(_aadAuthInfo.CertificateThumbprint))
+        if (!string.IsNullOrWhiteSpace(_aadAuthInfo.CertificateThumbprint))
+        {
+            var certificates = GetCertificatesByThumbprint();
+            _certificate = (certificates?.Count) switch
+            {
+                1 => certificates[0],
+                > 1 => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} found more than once.", nameof(aadAuthInfo)),
+                _ => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.", nameof(aadAuthInfo)),
+            };
+        }
+        else
         {
             var certificates = GetCertificatesBySubject();
             _certificate = (certificates?.Count) switch
             {
                 1 => certificates[0],
                 > 1 => certificates.OrderByDescending(x => x.NotBefore).First(),
-                _ => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.",
-                    nameof(aadAuthInfo)),
-            };
-        }
-        else
-        {
-            var certificates = GetCertificatesByThumbprint();
-            _certificate = (certificates?.Count) switch
-            {
-                1 => certificates[0],
-                > 1 => throw new ArgumentException(
-                    $"Certificate provided in {AadAuthInfo.ConfigName} found more than once.", nameof(aadAuthInfo)),
-                _ => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.",
-                    nameof(aadAuthInfo)),
+                _ => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.", nameof(aadAuthInfo)),
             };
         }
     }
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
-        var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
-        var msalClient = ConfidentialClientApplicationBuilder
-            .Create(_aadAuthInfo.ClientId)
-            .WithCertificate(_certificate)
-            .WithAuthority(authority)
-            .Build();
+        var azureCredentialOptions = SetTokenCredentialOptions(new ClientCertificateCredentialOptions());
+        var azureCredential = new ClientCertificateCredential(_aadAuthInfo.TenantId, _aadAuthInfo.ClientId, _certificate, azureCredentialOptions);
 
-        _logger.LogDebug("Requesting authentication token");
-        var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
-        var result = await msalClient.AcquireTokenForClient(scopes).ExecuteAsync(ct).ConfigureAwait(false) 
-            ?? throw new Exception("Failure while acquiring token.");
-
-        return new IngestionAccessToken
-        {
-            AccessToken = result.AccessToken,
-            ExpiresOn = result.ExpiresOn,
-        };
-    }
-
-    private X509Certificate2Collection GetCertificates()
-    {
-        using var store = new X509Store(_aadAuthInfo.CertificateStore, _aadAuthInfo.CertificateLocation);
-
-        store.Open(OpenFlags.ReadOnly);
-        var certs = store.Certificates.Find(X509FindType.FindByThumbprint, _aadAuthInfo.CertificateThumbprint, false);
-        store.Close();
-
-        return certs;
+        return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
     }
 
     private X509Certificate2Collection GetCertificatesByThumbprint()

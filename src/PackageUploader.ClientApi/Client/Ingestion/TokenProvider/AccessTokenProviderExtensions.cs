@@ -86,6 +86,28 @@ internal static class AccessTokenProviderExtensions
         return services;
     }
 
+    public static IServiceCollection AddClientSecretCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddSingleton<IValidateOptions<AzureApplicationSecretAuthInfo>, AzureApplicationSecretAuthInfoValidator>();
+        services.AddOptions<AzureApplicationSecretAuthInfo>().BindConfiguration(AadAuthInfo.ConfigName);
+
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, ClientSecretCredentialAccessTokenProvider>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddClientCertificateCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddSingleton<IValidateOptions<AzureApplicationCertificateAuthInfo>, AzureApplicationCertificateAuthInfoValidator>();
+        services.AddOptions<AzureApplicationCertificateAuthInfo>().BindConfiguration(AadAuthInfo.ConfigName);
+
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, ClientCertificateCredentialAccessTokenProvider>();
+
+        return services;
+    }
+    
     private static void AddAccessTokenProviderOptions(this IServiceCollection services)
     {
         services.AddSingleton<IValidateOptions<AccessTokenProviderConfig>, AccessTokenProviderConfigValidator>();

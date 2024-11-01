@@ -20,10 +20,12 @@ public static class IngestionExtensions
         ManagedIdentity,
         Environment,
         AzurePipelines,
+        ClientSecret,
+        ClientCertificate,
     }
 
     public static IServiceCollection AddPackageUploaderService(this IServiceCollection services,
-        AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret) =>
+        AuthenticationMethod authenticationMethod = AuthenticationMethod.Default) =>
         services
             .AddScoped<IPackageUploaderService, PackageUploaderService>()
             .AddIngestionService()
@@ -31,7 +33,7 @@ public static class IngestionExtensions
             .AddXfusService();
 
     private static IServiceCollection AddIngestionAuthentication(this IServiceCollection services, 
-        AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret) =>
+        AuthenticationMethod authenticationMethod = AuthenticationMethod.Default) =>
         authenticationMethod switch
         {
             AuthenticationMethod.AppSecret => services.AddAzureApplicationSecretAccessTokenProvider(),
@@ -42,6 +44,8 @@ public static class IngestionExtensions
             AuthenticationMethod.ManagedIdentity => services.AddManagedIdentityCredentialAccessTokenProvider(),
             AuthenticationMethod.Environment => services.AddEnvironmentCredentialAccessTokenProvider(),
             AuthenticationMethod.AzurePipelines => services.AddAzurePipelinesCredentialAccessTokenProvider(),
+            AuthenticationMethod.ClientSecret => services.AddClientSecretCredentialAccessTokenProvider(),
+            AuthenticationMethod.ClientCertificate => services.AddClientCertificateCredentialAccessTokenProvider(),
             _ => services.AddAzureApplicationSecretAccessTokenProvider(),
         };
 }
