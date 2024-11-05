@@ -7,8 +7,6 @@ using Microsoft.Identity.Client;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using System;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +17,6 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
     private readonly ILogger<AzureApplicationCertificateAccessTokenProvider> _logger;
     private readonly AccessTokenProviderConfig _config;
     private readonly AzureApplicationCertificateAuthInfo _aadAuthInfo;
-    private readonly X509Certificate2 _certificate;
 
     public AzureApplicationCertificateAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationCertificateAuthInfo> aadAuthInfo, 
         ILogger<AzureApplicationCertificateAccessTokenProvider> logger)
@@ -47,38 +44,15 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
         {
             throw new ArgumentException($"CertificateThumbprint or CertificateSubject not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
         }
-
-        if (string.IsNullOrWhiteSpace(_aadAuthInfo.CertificateThumbprint))
-        {
-            var certificates = GetCertificatesBySubject();
-            _certificate = (certificates?.Count) switch
-            {
-                1 => certificates[0],
-                > 1 => certificates.OrderByDescending(x => x.NotBefore).First(),
-                _ => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.",
-                    nameof(aadAuthInfo)),
-            };
-        }
-        else
-        {
-            var certificates = GetCertificatesByThumbprint();
-            _certificate = (certificates?.Count) switch
-            {
-                1 => certificates[0],
-                > 1 => throw new ArgumentException(
-                    $"Certificate provided in {AadAuthInfo.ConfigName} found more than once.", nameof(aadAuthInfo)),
-                _ => throw new ArgumentException($"Certificate provided in {AadAuthInfo.ConfigName} not found.",
-                    nameof(aadAuthInfo)),
-            };
-        }
     }
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
+        var certificate = _aadAuthInfo.GetCertificate();
         var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
         var msalClient = ConfidentialClientApplicationBuilder
             .Create(_aadAuthInfo.ClientId)
-            .WithCertificate(_certificate)
+            .WithCertificate(certificate)
             .WithAuthority(authority)
             .Build();
 
@@ -92,38 +66,5 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
             AccessToken = result.AccessToken,
             ExpiresOn = result.ExpiresOn,
         };
-    }
-
-    private X509Certificate2Collection GetCertificates()
-    {
-        using var store = new X509Store(_aadAuthInfo.CertificateStore, _aadAuthInfo.CertificateLocation);
-
-        store.Open(OpenFlags.ReadOnly);
-        var certs = store.Certificates.Find(X509FindType.FindByThumbprint, _aadAuthInfo.CertificateThumbprint, false);
-        store.Close();
-
-        return certs;
-    }
-
-    private X509Certificate2Collection GetCertificatesByThumbprint()
-    {
-        using var store = new X509Store(_aadAuthInfo.CertificateStore, _aadAuthInfo.CertificateLocation);
-
-        store.Open(OpenFlags.ReadOnly);
-        var certs = store.Certificates.Find(X509FindType.FindByThumbprint, _aadAuthInfo.CertificateThumbprint, false);
-        store.Close();
-
-        return certs;
-    }
-
-    private X509Certificate2Collection GetCertificatesBySubject()
-    {
-        using var store = new X509Store(_aadAuthInfo.CertificateStore, _aadAuthInfo.CertificateLocation);
-
-        store.Open(OpenFlags.ReadOnly);
-        var certs = store.Certificates.Find(X509FindType.FindBySubjectName, _aadAuthInfo.CertificateSubject, false);
-        store.Close();
-
-        return certs;
     }
 }
