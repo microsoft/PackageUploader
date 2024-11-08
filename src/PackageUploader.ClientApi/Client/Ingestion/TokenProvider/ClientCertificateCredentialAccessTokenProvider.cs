@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Azure.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Identity.Client;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using System;
@@ -12,17 +12,13 @@ using System.Threading.Tasks;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 
-public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvider
+public class ClientCertificateCredentialAccessTokenProvider : CredentialAccessTokenProvider, IAccessTokenProvider
 {
-    private readonly ILogger<AzureApplicationCertificateAccessTokenProvider> _logger;
-    private readonly AccessTokenProviderConfig _config;
     private readonly AzureApplicationCertificateAuthInfo _aadAuthInfo;
 
-    public AzureApplicationCertificateAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationCertificateAuthInfo> aadAuthInfo, 
-        ILogger<AzureApplicationCertificateAccessTokenProvider> logger)
+    public ClientCertificateCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationCertificateAuthInfo> aadAuthInfo, 
+        ILogger<ClientCertificateCredentialAccessTokenProvider> logger) : base(config, logger)
     {
-        _logger = logger;
-        _config = config.Value;
         _aadAuthInfo = aadAuthInfo?.Value ?? throw new ArgumentNullException(nameof(aadAuthInfo), $"{nameof(aadAuthInfo)} cannot be null.");
 
         if (string.IsNullOrWhiteSpace(_aadAuthInfo.TenantId))
@@ -49,22 +45,9 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
         var certificate = _aadAuthInfo.GetCertificate();
-        var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
-        var msalClient = ConfidentialClientApplicationBuilder
-            .Create(_aadAuthInfo.ClientId)
-            .WithCertificate(certificate)
-            .WithAuthority(authority)
-            .Build();
+        var azureCredentialOptions = SetTokenCredentialOptions(new ClientCertificateCredentialOptions());
+        var azureCredential = new ClientCertificateCredential(_aadAuthInfo.TenantId, _aadAuthInfo.ClientId, certificate, azureCredentialOptions);
 
-        _logger.LogDebug("Requesting authentication token");
-        var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
-        var result = await msalClient.AcquireTokenForClient(scopes).ExecuteAsync(ct).ConfigureAwait(false) 
-            ?? throw new Exception("Failure while acquiring token.");
-
-        return new IngestionAccessToken
-        {
-            AccessToken = result.AccessToken,
-            ExpiresOn = result.ExpiresOn,
-        };
+        return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
     }
 }

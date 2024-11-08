@@ -2,11 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Options;
 
 namespace PackageUploader.FileLogger;
 
-internal class FormatterOptionsMonitor<TOptions> : IOptionsMonitor<TOptions> where TOptions : FileFormatterOptions
+internal sealed class FormatterOptionsMonitor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] TOptions> :
+    IOptionsMonitor<TOptions>
+    where TOptions : FileFormatterOptions
 {
     private readonly TOptions _options;
     public FormatterOptionsMonitor(TOptions options)

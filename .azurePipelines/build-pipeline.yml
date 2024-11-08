@@ -4,16 +4,11 @@ parameters:
   - name: Version
     default: '1.0.0'
 
-pool:
-  vmImage: windows-latest
-
 variables:
   - name: projectName
     value: "PackageUploader"
   - name: buildConfiguration
     value: "release"
-  - name: esrpConnectedServiceName
-    value: "ESRP CodeSigning External"
   - name: version
     value: ${{ parameters.Version }}
 
@@ -24,12 +19,16 @@ stages:
     jobs:
       - job: BuildWindows
         displayName: Build win-x64
+        pool:
+          vmImage: windows-latest
 
         variables:
           - name: buildRuntime
             value: "win-x64"
 
         steps:
+        - task: NuGetAuthenticate@1
+
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
@@ -39,49 +38,6 @@ stages:
             arguments: '--self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
             zipAfterPublish: false
             modifyOutputPath: false
-
-        - task: EsrpCodeSigning@3
-          condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-          displayName: 'Code sign binary files'
-          inputs:
-            ConnectedServiceName: $(esrpConnectedServiceName)
-            FolderPath: '$(Build.BinariesDirectory)'
-            Pattern: '*.exe'
-            signConfigType: 'inlineSignParams'
-            inlineOperation: |
-              [
-              {
-                "KeyCode": "CP-230012",
-                "OperationCode": "SigntoolSign",
-                "ToolName": "sign",
-                "ToolVersion": "1.0",
-                "Parameters": {
-                "OpusName": "Microsoft",
-                "OpusInfo": "https://www.microsoft.com",
-                "FileDigest": "/fd SHA256",
-                "PageHash": "/NPH",
-                "TimeStamp": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
-                }
-              },
-              {
-                "KeyCode": "CP-230012",
-                "OperationCode": "SigntoolVerify",
-                "ToolName": "sign",
-                "ToolVersion": "1.0",
-                "Parameters": {}
-              }
-              ]
-            SessionTimeout: '60'
-            MaxConcurrency: '50'
-            MaxRetryAttempts: '5'
-
-        - task: PowerShell@2
-          condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-          displayName: 'Remove signing result file'
-          inputs:
-            targetType: 'inline'
-            script: 'Remove-Item * -Include *.md'
-            workingDirectory: '$(Build.BinariesDirectory)'
 
         - task: ArchiveFiles@2
           displayName: 'Zip files to Staging directory'
@@ -101,12 +57,16 @@ stages:
 
       - job: BuildLinux
         displayName: Build linux-x64
+        pool:
+          vmImage: ubuntu-latest
 
         variables:
           - name: buildRuntime
             value: "linux-x64"
 
         steps:
+        - task: NuGetAuthenticate@1
+
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:

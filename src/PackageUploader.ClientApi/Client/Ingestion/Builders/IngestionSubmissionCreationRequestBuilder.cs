@@ -5,7 +5,6 @@ using PackageUploader.ClientApi.Client.Ingestion.Mappers;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
 using System;
-using System.Collections.Generic;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Builders;
 
@@ -29,22 +28,22 @@ internal class IngestionSubmissionCreationRequestBuilder : IBuilder<IngestionSub
         new()
         {
             ResourceType = ResourceType,
-            Targets = new List<TypeValuePair>
-            {
+            Targets =
+            [
                 new()
                 {
                     Type = _targetType.ToString(),
                     Value = _target,
                 }
-            },
-            Resources = new List<TypeValuePair>
-            {
+            ],
+            Resources =
+            [
                 new()
                 {
                     Type = IngestionBranchModuleType.Package.ToString(),
                     Value = _currentDraftInstanceId,
                 }
-            },
+            ],
             PublishOption = _options.Map(),
         };
 }

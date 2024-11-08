@@ -1,16 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using PackageUploader.Application.Config;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using PackageUploader.Application.Extensions;
 using PackageUploader.Application.Operations;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using PackageUploader.FileLogger;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
 using System.CommandLine;
 using System.CommandLine.Builder;
@@ -27,15 +26,12 @@ internal class Program
     private const string LogTimestampFormat = "yyyy-MM-dd HH:mm:ss.fff ";
 
     // Options
-    private static readonly Option<bool> DataOption = new (new[] { "-d", "--Data" }, "Do not log on console and only return data");
-    private static readonly Option<bool> VerboseOption = new (new[] { "-v", "--Verbose" }, "Log verbose messages such as http calls");
-    private static readonly Option<FileInfo> LogFileOption = new(new[] { "-l", "--LogFile" }, "The location of the log file");
-    private static readonly Option<string> ClientSecretOption = new (new[] { "-s", "--ClientSecret" }, "The client secret of the AAD app (only for AppSecret)");
-    private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(new[] { "-c", "--ConfigFile" }, "The location of the config file").Required();
-    private static readonly Option<ConfigFileFormat> ConfigFileFormatOption = new(new[] { "-f", "--ConfigFileFormat" }, () => ConfigFileFormat.Json, "The format of the config file");
-    private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(new[] { "-a", "--Authentication" }, () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
-
-    internal enum ConfigFileFormat { Json, Xml, Ini, }
+    public static readonly Option<bool> DataOption = new (["-d", "--Data"], "Do not log on console and only return data");
+    private static readonly Option<bool> VerboseOption = new (["-v", "--Verbose"], "Log verbose messages such as http calls");
+    private static readonly Option<FileInfo> LogFileOption = new(["-l", "--LogFile"], "The location of the log file");
+    private static readonly Option<string> ClientSecretOption = new (["-s", "--ClientSecret"], "The client secret of the AAD app (only for AppSecret)");
+    private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(["-c", "--ConfigFile"], "The location of the config file").Required();
+    private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(["-a", "--Authentication"], () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
 
     private static async Task<int> Main(string[] args)
     {
@@ -87,15 +83,8 @@ internal class Program
         var invocationContext = context.GetInvocationContext();
 
         services.AddLogging();
-        services.AddPackageUploaderService(context.Configuration, invocationContext.GetOptionValue(AuthenticationMethodOption));
-
-        services.AddOperation<GetProductOperation, GetProductOperationConfig>(context);
-        services.AddOperation<UploadUwpPackageOperation, UploadUwpPackageOperationConfig>(context);
-        services.AddOperation<UploadXvcPackageOperation, UploadXvcPackageOperationConfig>(context);
-        services.AddOperation<RemovePackagesOperation, RemovePackagesOperationConfig>(context);
-        services.AddOperation<ImportPackagesOperation, ImportPackagesOperationConfig>(context);
-        services.AddOperation<PublishPackagesOperation, PublishPackagesOperationConfig>(context);
-        services.AddOperation<GetPackagesOperation, GetPackagesOperationConfig>(context);
+        services.AddPackageUploaderService(invocationContext.GetOptionValue(AuthenticationMethodOption));
+        services.AddOperations(context);
     }
 
     private static void ConfigureAppConfiguration(HostBuilderContext context, IConfigurationBuilder builder, string[] args)
@@ -105,8 +94,7 @@ internal class Program
         var configFile = invocationContext.GetOptionValue(ConfigFileOption);
         if (configFile is not null)
         {
-            var configFileFormat = invocationContext.GetOptionValue(ConfigFileFormatOption);
-            builder.AddConfigFile(configFile, configFileFormat);
+            builder.AddJsonFile(configFile.FullName, false, false);
         }
 
         var authenticationMethod = invocationContext.GetOptionValue(AuthenticationMethodOption);
@@ -123,31 +111,31 @@ internal class Program
         {
             new Command("GetProduct", "Gets metadata of the product")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, DataOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, DataOption
             }.AddOperationHandler<GetProductOperation>(),
             new Command("UploadUwpPackage", "Uploads Uwp game package")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
             }.AddOperationHandler<UploadUwpPackageOperation>(),
             new Command("UploadXvcPackage", "Uploads Xvc game package and assets")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
             }.AddOperationHandler<UploadXvcPackageOperation>(),
             new Command("RemovePackages", "Removes all game packages and assets from a branch")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
             }.AddOperationHandler<RemovePackagesOperation>(),
             new Command("ImportPackages", "Imports all game packages from a branch to a destination branch")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
             }.AddOperationHandler<ImportPackagesOperation>(),
             new Command("PublishPackages", "Publishes all game packages from a branch or flight to a destination sandbox or flight")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
             }.AddOperationHandler<PublishPackagesOperation>(),
             new Command("GetPackages", "Gets the list of packages from a branch or flight")
             {
-                ConfigFileOption, ConfigFileFormatOption, ClientSecretOption, AuthenticationMethodOption, DataOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, DataOption
             }.AddOperationHandler<GetPackagesOperation>(),
         };
         rootCommand.AddGlobalOption(VerboseOption);
