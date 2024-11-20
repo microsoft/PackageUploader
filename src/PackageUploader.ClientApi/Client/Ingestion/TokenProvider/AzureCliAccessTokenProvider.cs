@@ -26,22 +26,11 @@ public class AzureCliAccessTokenProvider : IAccessTokenProvider
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
-        var azureCredentialOptions = new DefaultAzureCredentialOptions
+        var azureCredentialOptions = new AzureCliCredentialOptions
         {
             AuthorityHost = new Uri(_config.AadAuthorityBaseUrl),
-            ExcludeAzurePowerShellCredential = true,
-            ExcludeEnvironmentCredential = true,
-            ExcludeInteractiveBrowserCredential = true,
-            ExcludeSharedTokenCacheCredential = true,
-            ExcludeVisualStudioCodeCredential = true,
-            ExcludeVisualStudioCredential = true,
-            ExcludeManagedIdentityCredential = true,
-            // Only use Azure CLI credential. There are certain cases where other cred types take precendence over Azure CLI and therefore
-            // explicity exclude all other credential types.
-            ExcludeAzureDeveloperCliCredential = false,
-            ExcludeAzureCliCredential = false,
         };
-        var azureCredential = new DefaultAzureCredential(azureCredentialOptions);
+        var azureCredential = new AzureCliCredential(azureCredentialOptions);
 
         _logger.LogDebug("Requesting authentication token");
         var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
