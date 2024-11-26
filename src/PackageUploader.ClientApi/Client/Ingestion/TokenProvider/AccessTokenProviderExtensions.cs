@@ -19,6 +19,9 @@ internal static class AccessTokenProviderExtensions
     public static IServiceCollection AddDefaultAzureCredentialAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
         services.AddAccessTokenProvider<DefaultAzureCredentialAccessTokenProvider>(config);
 
+    public static IServiceCollection AddAzureCliAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
+        services.AddAccessTokenProvider<AzureCliAccessTokenProvider>(config);
+
     public static IServiceCollection AddInteractiveBrowserCredentialAccessTokenProvider(this IServiceCollection services, IConfiguration config) =>
         services.AddAccessTokenProvider<InteractiveBrowserCredentialAccessTokenProvider>(config);
 
