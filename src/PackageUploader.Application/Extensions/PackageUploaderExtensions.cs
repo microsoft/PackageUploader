@@ -57,24 +57,16 @@ internal static class PackageUploaderExtensions
         ArgumentNullException.ThrowIfNull(packageBranch);
         ArgumentNullException.ThrowIfNull(config);
 
-        var packageConfiguration = await storeBroker.GetPackageConfigurationAsync(product, packageBranch, ct).ConfigureAwait(false);
+        var packageConfiguration = await storeBroker.GetPackageConfigurationAsync(product, packageBranch, ct).ConfigureAwait(false)
+            ?? throw new Exception($"Package Configuration not found for {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
 
-        if (packageConfiguration is null)
-        {
-            throw new Exception($"Package Configuration not found for {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
-        }
-
-        if (packageConfiguration.MarketGroupPackages is null || !packageConfiguration.MarketGroupPackages.Any())
+        if (packageConfiguration.MarketGroupPackages is null || packageConfiguration.MarketGroupPackages.Count == 0)
         {
             throw new Exception($"{packageBranch.BranchType} '{packageBranch.Name}' does not have any Market Group Packages.");
         }
             
-        var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(config.MarketGroupName));
-
-        if (marketGroupPackage is null)
-        {
-            throw new Exception($"Market Group '{config.MarketGroupName}' (case sensitive) not found in {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
-        }
+        var marketGroupPackage = packageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(config.MarketGroupName))
+            ?? throw new Exception($"Market Group '{config.MarketGroupName}' (case sensitive) not found in {packageBranch.BranchType.ToString().ToLower()} '{packageBranch.Name}'.");
         return marketGroupPackage;
     }
 

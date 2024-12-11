@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PackageUploader.Application.Config;
 
-internal abstract class UploadPackageOperationConfig : PackageBranchOperationConfig
+internal abstract class UploadPackageOperationConfig : PackageBranchOperationConfig, IValidatableObject
 {
     public string MarketGroupName { get; set; } = "default";
 
@@ -19,11 +19,19 @@ internal abstract class UploadPackageOperationConfig : PackageBranchOperationCon
 
     public GamePackageDate AvailabilityDate { get; set; }
 
-    protected override void Validate(IList<ValidationResult> validationResults)
+    public new IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        foreach (var validationResult in base.Validate(validationContext))
+            yield return validationResult;
+
         if (string.IsNullOrWhiteSpace(MarketGroupName))
         {
             MarketGroupName = "default";
+        }
+
+        if (AvailabilityDate is { IsEnabled: true, EffectiveDate: null })
+        {
+            yield return new ValidationResult($"If {nameof(AvailabilityDate)} {nameof(AvailabilityDate.IsEnabled)} is true, {nameof(AvailabilityDate.EffectiveDate)} needs to be set.", [nameof(AvailabilityDate)]);
         }
     }
 }

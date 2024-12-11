@@ -7,11 +7,13 @@ using System.ComponentModel.DataAnnotations;
 namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 
 [OptionsValidator]
-internal partial class AzureApplicationSecretAuthInfoValidator : IValidateOptions<AzureApplicationSecretAuthInfo>
+internal partial class ManagedIdentityAuthInfoValidator : IValidateOptions<ManagedIdentityAuthInfo>
 { }
 
-public sealed class AzureApplicationSecretAuthInfo : AadAuthInfo
+public sealed class ManagedIdentityAuthInfo
 {
+    public const string ConfigName = nameof(AadAuthInfo);
+
     [Required]
-    public string ClientSecret { get; set; }
+    public string ClientId { get; set; }
 }

@@ -1,17 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using PackageUploader.Application.Config;
-using PackageUploader.Application.Operations;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using PackageUploader.Application.Config;
+using PackageUploader.Application.Operations;
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.NamingConventionBinder;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,19 +65,43 @@ internal static class ProgramExtensions
         return option;
     }
 
-    public static IServiceCollection AddOperation<T1, T2>(this IServiceCollection services, HostBuilderContext context) where T1 : Operation where T2 : BaseOperationConfig
+    public static IServiceCollection AddOperations(this IServiceCollection services, HostBuilderContext context)
     {
-        services.AddScoped<T1>();
-        services.AddOptions<T2>().Bind(context.Configuration).ValidateDataAnnotations();
+        services
+            .AddScoped<GetProductOperation>()
+            .AddSingleton<IValidateOptions<GetProductOperationConfig>, GetProductOperationValidator>()
+            .AddOptions<GetProductOperationConfig>().Bind(context.Configuration);
+
+        services
+            .AddScoped<GetPackagesOperation>()
+            .AddSingleton<IValidateOptions<GetPackagesOperationConfig>, GetPackagesOperationValidator>()
+            .AddOptions<GetPackagesOperationConfig>().Bind(context.Configuration);
+
+        services
+            .AddScoped<UploadUwpPackageOperation>()
+            .AddSingleton<IValidateOptions<UploadUwpPackageOperationConfig>, UploadUwpPackageOperationValidator>()
+            .AddOptions<UploadUwpPackageOperationConfig>().Bind(context.Configuration);
+
+        services
+            .AddScoped<UploadXvcPackageOperation>()
+            .AddSingleton<IValidateOptions<UploadXvcPackageOperationConfig>, UploadXvcPackageOperationValidator>()
+            .AddOptions<UploadXvcPackageOperationConfig>().Bind(context.Configuration);
+
+        services
+            .AddScoped<RemovePackagesOperation>()
+            .AddSingleton<IValidateOptions<RemovePackagesOperationConfig>, RemovePackagesOperationValidator>()
+            .AddOptions<RemovePackagesOperationConfig>().Bind(context.Configuration);
+
+        services
+            .AddScoped<ImportPackagesOperation>()
+            .AddSingleton<IValidateOptions<ImportPackagesOperationConfig>, ImportPackagesOperationValidator>()
+            .AddOptions<ImportPackagesOperationConfig>().Bind(context.Configuration);
+
+        services
+            .AddScoped<PublishPackagesOperation>()
+            .AddSingleton<IValidateOptions<PublishPackagesOperationConfig>, PublishPackagesOperationValidator>()
+            .AddOptions<PublishPackagesOperationConfig>().Bind(context.Configuration);
+
         return services;
     }
-
-    public static IConfigurationBuilder AddConfigFile(this IConfigurationBuilder builder, FileInfo configFile, Program.ConfigFileFormat configFileFormat) =>
-        configFileFormat switch
-        {
-            Program.ConfigFileFormat.Json => builder.AddJsonFile(configFile.FullName, false, false),
-            Program.ConfigFileFormat.Xml => builder.AddXmlFile(configFile.FullName, false, false),
-            Program.ConfigFileFormat.Ini => builder.AddIniFile(configFile.FullName, false, false),
-            _ => throw new ArgumentOutOfRangeException(nameof(configFileFormat), "Invalid config file format."),
-        };
 }

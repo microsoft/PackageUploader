@@ -11,15 +11,16 @@ using System.Threading.Tasks;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 
-public class DefaultAzureCredentialAccessTokenProvider : CredentialAccessTokenProvider, IAccessTokenProvider
+public class EnvironmentCredentialAccessTokenProvider : CredentialAccessTokenProvider, IAccessTokenProvider
 {
-    public DefaultAzureCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger<DefaultAzureCredentialAccessTokenProvider> logger) : base(config, logger)
-    { }
+    public EnvironmentCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger<EnvironmentCredentialAccessTokenProvider> logger) : base(config, logger)
+    {
+    }
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
-        var azureCredentialOptions = SetTokenCredentialOptions(new DefaultAzureCredentialOptions());
-        var azureCredential = new DefaultAzureCredential(azureCredentialOptions);
+        var azureCredentialOptions = SetTokenCredentialOptions(new EnvironmentCredentialOptions());
+        var azureCredential = new EnvironmentCredential(azureCredentialOptions);
 
         return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
     }

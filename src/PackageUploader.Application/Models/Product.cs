@@ -5,11 +5,10 @@ using PackageUploader.ClientApi.Client.Ingestion.Models;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace PackageUploader.Application.Models;
 
-internal class Product
+public class Product
 {
     /// <summary>
     /// Product Id, aka. LongId - looks like a long number
@@ -42,8 +41,8 @@ internal class Product
         BigId = gameProduct.BigId;
         ProductName = gameProduct.ProductName;
         
-        BranchFriendlyNames = new List<string>();
-        FlightNames = new List<string>();
+        BranchFriendlyNames = [];
+        FlightNames = [];
         foreach (var branch in branches)
         {
             if (branch.BranchType is GamePackageBranchType.Flight)
@@ -57,17 +56,11 @@ internal class Product
         }
     }
 
-    private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     public string ToJson()
     {
         try
         {
-            var serializedObject = JsonSerializer.Serialize(this, DefaultJsonSerializerOptions);
+            var serializedObject = JsonSerializer.Serialize(this, PackageUploaderJsonSerializerContext.Default.Product);
             return serializedObject;
         }
         catch (Exception ex)

@@ -75,7 +75,7 @@ internal abstract class XfusUploaderState
 
     private async Task UploadBlocksAsync(UploadProgress uploadProgress, XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, CancellationToken ct)
     {
-        var validBlocks = uploadProgress != null && uploadProgress.PendingBlocks != null && uploadProgress.PendingBlocks.Any();
+        var validBlocks = uploadProgress is { PendingBlocks.Length: > 0 };
         if (validBlocks && uploadProgress.Status == UploadStatus.ReceivingBlocks)
         {
             await _xfusApiController.UploadBlocksAsync(uploadProgress.PendingBlocks, uploadFile, xfusUploadInfo.XfusId, _xfusBlockProgressReporter, ct).ConfigureAwait(false);

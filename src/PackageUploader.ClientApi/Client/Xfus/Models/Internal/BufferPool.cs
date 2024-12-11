@@ -17,7 +17,7 @@ internal sealed class BufferPool
     public BufferPool(int bufferSize)
     {
         _bufferSize = bufferSize;
-        _pool = new ConcurrentBag<byte[]>();
+        _pool = [];
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ internal sealed class BufferPool
     public BufferPool(long bufferSize)
     {
         _bufferSize = bufferSize;
-        _pool = new ConcurrentBag<byte[]>();
+        _pool = [];
     }
 
     /// <summary>

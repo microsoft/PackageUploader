@@ -30,7 +30,7 @@ public class FileLoggerProvider : ILoggerProvider, ISupportExternalScope
     /// <param name="options">The options to create <see cref="FileLogger"/> instances with.</param>
     /// <param name="fileWriterOptions">The options to create <see cref="FileWriter"/> instance with.</param>
     public FileLoggerProvider(IOptionsMonitor<FileLoggerOptions> options, IOptionsMonitor<FileWriterOptions> fileWriterOptions)
-        : this(options, fileWriterOptions, Enumerable.Empty<FileFormatter>()) { }
+        : this(options, fileWriterOptions, []) { }
 
     /// <summary>
     /// Creates an instance of <see cref="FileLoggerProvider"/>.
@@ -105,6 +105,7 @@ public class FileLoggerProvider : ILoggerProvider, ISupportExternalScope
     {
         _optionsReloadToken?.Dispose();
         _messageQueue.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     /// <inheritdoc />

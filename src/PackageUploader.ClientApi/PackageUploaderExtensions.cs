@@ -4,7 +4,6 @@
 using PackageUploader.ClientApi.Client.Ingestion;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 using PackageUploader.ClientApi.Client.Xfus;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace PackageUploader.ClientApi;
@@ -18,28 +17,35 @@ public static class IngestionExtensions
         Default, 
         Browser,
         AzureCli,
+        ManagedIdentity,
+        Environment,
+        AzurePipelines,
+        ClientSecret,
+        ClientCertificate,
     }
 
-    public static IServiceCollection AddPackageUploaderService(this IServiceCollection services, IConfiguration config, 
-        AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret)
-    {
-        services.AddScoped<IPackageUploaderService, PackageUploaderService>();
-        services.AddIngestionService(config);
-        services.AddIngestionAuthentication(config, authenticationMethod);
-        services.AddXfusService(config);
+    public static IServiceCollection AddPackageUploaderService(this IServiceCollection services,
+        AuthenticationMethod authenticationMethod = AuthenticationMethod.Default) =>
+        services
+            .AddScoped<IPackageUploaderService, PackageUploaderService>()
+            .AddIngestionService()
+            .AddIngestionAuthentication(authenticationMethod)
+            .AddXfusService();
 
-        return services;
-    }
-
-    private static IServiceCollection AddIngestionAuthentication(this IServiceCollection services, IConfiguration config, 
-        AuthenticationMethod authenticationMethod = AuthenticationMethod.AppSecret) =>
+    private static IServiceCollection AddIngestionAuthentication(this IServiceCollection services, 
+        AuthenticationMethod authenticationMethod = AuthenticationMethod.Default) =>
         authenticationMethod switch
         {
-            AuthenticationMethod.AppSecret => services.AddAzureApplicationSecretAccessTokenProvider(config),
-            AuthenticationMethod.AppCert => services.AddAzureApplicationCertificateAccessTokenProvider(config),
-            AuthenticationMethod.Browser => services.AddInteractiveBrowserCredentialAccessTokenProvider(config),
-            AuthenticationMethod.Default => services.AddDefaultAzureCredentialAccessTokenProvider(config),
-            AuthenticationMethod.AzureCli => services.AddAzureCliAccessTokenProvider(config),
-            _ => services.AddAzureApplicationSecretAccessTokenProvider(config),
+            AuthenticationMethod.AppSecret => services.AddAzureApplicationSecretAccessTokenProvider(),
+            AuthenticationMethod.AppCert => services.AddAzureApplicationCertificateAccessTokenProvider(),
+            AuthenticationMethod.Browser => services.AddInteractiveBrowserCredentialAccessTokenProvider(),
+            AuthenticationMethod.Default => services.AddDefaultAzureCredentialAccessTokenProvider(),
+            AuthenticationMethod.AzureCli => services.AddAzureCliCredentialAccessTokenProvider(),
+            AuthenticationMethod.ManagedIdentity => services.AddManagedIdentityCredentialAccessTokenProvider(),
+            AuthenticationMethod.Environment => services.AddEnvironmentCredentialAccessTokenProvider(),
+            AuthenticationMethod.AzurePipelines => services.AddAzurePipelinesCredentialAccessTokenProvider(),
+            AuthenticationMethod.ClientSecret => services.AddClientSecretCredentialAccessTokenProvider(),
+            AuthenticationMethod.ClientCertificate => services.AddClientCertificateCredentialAccessTokenProvider(),
+            _ => services.AddAzureApplicationSecretAccessTokenProvider(),
         };
 }

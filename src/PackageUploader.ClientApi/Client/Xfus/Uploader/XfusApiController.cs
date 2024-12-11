@@ -1,34 +1,27 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Xfus.Config;
 using PackageUploader.ClientApi.Client.Xfus.Exceptions;
 using PackageUploader.ClientApi.Client.Xfus.Models.Internal;
-using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using System.Linq;
 
 namespace PackageUploader.ClientApi.Client.Xfus.Uploader;
 
 internal class XfusApiController
 {
-    private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     private readonly ILogger<XfusUploader> _logger;
     private readonly UploadConfig _uploadConfig;
     private readonly HttpClient _httpClient;
@@ -117,7 +110,7 @@ internal class XfusApiController
             }
         };
 
-        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", deltaUpload, properties);
+        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", deltaUpload, properties, XfusJsonSerializerContext.Default.UploadProperties);
         using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
 
         var response = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
@@ -127,13 +120,13 @@ internal class XfusApiController
         }
 
         _logger.LogInformation("XFUS AssetId: {assetId}", assetId);
-        var uploadProgress = await response.Content.ReadFromJsonAsync<UploadProgress>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+        var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
         return uploadProgress;
     }
 
     internal async Task<UploadProgress> ContinueAssetAsync(Guid assetId, bool deltaUpload, CancellationToken ct)
     {
-        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", deltaUpload, string.Empty);
+        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", deltaUpload, string.Empty, XfusJsonSerializerContext.Default.String);
 
         var response = await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
@@ -141,14 +134,14 @@ internal class XfusApiController
             throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
         }
 
-        var uploadProgress = await response.Content.ReadFromJsonAsync<UploadProgress>(DefaultJsonSerializerOptions, ct).ConfigureAwait(false);
+        var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
         return uploadProgress;
     }
 
-    internal static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, bool deltaUpload, T content)
+    private static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, bool deltaUpload, T content, JsonTypeInfo<T> jsonTypeInfo)
     {
         var request = new HttpRequestMessage(method, url);
-        request.Content = new StringContent(JsonSerializer.Serialize(content, DefaultJsonSerializerOptions));
+        request.Content = new StringContent(JsonSerializer.Serialize(content, jsonTypeInfo));
         request.Content.Headers.ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Json);
 
         if (deltaUpload)
@@ -159,7 +152,7 @@ internal class XfusApiController
         return request;
     }
 
-    internal static HttpRequestMessage CreateStreamRequest(HttpMethod method, string url, byte[] content, long contentLength)
+    private static HttpRequestMessage CreateStreamRequest(HttpMethod method, string url, byte[] content, long contentLength)
     {
         var request = new HttpRequestMessage(method, url);
         request.Content = new ByteArrayContent(content);
