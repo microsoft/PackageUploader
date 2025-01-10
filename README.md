@@ -22,7 +22,7 @@ This article covers the following:
 
 ## Introduction
 
-Package Uploader is a .NET 6.0-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
+Package Uploader is a .NET-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
 
 Package Uploader has a command-line tool and a dynamic linked library (DLL) that you can integrate into your build pipelines or other development workflows.
 
