@@ -107,7 +107,7 @@ Alternatively, you can also build it.
 1. [Download .NET 8 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
 2. Open a powershell prompt, and then browse to the folder where you downloaded the Package Uploader.
 3. Browse to the `src` folder and then run `./publish.win-x64.ps1`.
-4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net6.0\win-x64\publish` directory.
+4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net8.0\win-x64\publish` directory.
 
 <a id="run-the-package-uploader"></a>
 
@@ -177,7 +177,7 @@ For more information on operation parameters, see [Operations](https://github.co
 
 ## Example GetProduct operation
    
-**NOTE:** When using a certificate you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information on other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-6.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
+**NOTE:** When using a certificate you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information on other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-8.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
    
 ### Example GetProduct configuration file using certificate authorization
 
@@ -219,7 +219,7 @@ Product: {
 
 ### Example UploadXvcPackage configuration file using certificate authentication
 
-**NOTE:** When using a certificate you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information on other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-6.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
+**NOTE:** When using a certificate you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information on other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-8.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
 
 ```json
 {
