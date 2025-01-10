@@ -22,7 +22,7 @@ This article covers the following:
 
 ## Introduction
 
-Package Uploader is a .NET-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
+Package Uploader is a .NET 8.0-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
 
 Package Uploader has a command-line tool and a dynamic linked library (DLL) that you can integrate into your build pipelines or other development workflows.
 
@@ -104,7 +104,7 @@ To use the Package Uploader, you can download the latest executable from the [Re
 
 Alternatively, you can also build it.
 
-1. [Download .NET 6 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
+1. [Download .NET 8 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
 2. Open a powershell prompt, and then browse to the folder where you downloaded the Package Uploader.
 3. Browse to the `src` folder and then run `./publish.win-x64.ps1`.
 4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net6.0\win-x64\publish` directory.
