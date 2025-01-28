@@ -22,7 +22,7 @@ This article covers the following:
 
 ## Introduction
 
-Package Uploader is a .NET 6.0-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
+Package Uploader is a .NET 8.0-based cross-platform application and library that enables game developers to interact programmatically with Partner Center.
 
 Package Uploader has a command-line tool and a dynamic linked library (DLL) that you can integrate into your build pipelines or other development workflows.
 
@@ -104,10 +104,10 @@ To use the Package Uploader, you can download the latest executable from the [Re
 
 Alternatively, you can also build it.
 
-1. [Download .NET 6 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
+1. [Download .NET 8 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
 2. Open a powershell prompt, and then browse to the folder where you downloaded the Package Uploader.
 3. Browse to the `src` folder and then run `./publish.win-x64.ps1`.
-4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net6.0\win-x64\publish` directory.
+4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net8.0\win-x64\publish` directory.
 
 <a id="run-the-package-uploader"></a>
 
@@ -142,11 +142,28 @@ For more information on operation parameters, see [Operations](https://github.co
 | **-c, --ConfigFile <ConfigFile> (REQUIRED)** | The location of the configuration file |
 | **-f, --ConfigFileFormat <Ini\|Json\|Xml>** | The format of the configuration file (default: Json) |
 | **-s, --ClientSecret <ClientSecret>** | The client secret of the Azure AD application (only for AppSecret) |
-| **-a, --Authentication <AppCert\|AppSecret\|Browser\|Default\|AzureCli\|ManagedIdentity>** | The authentication method (default: AppSecret) |
+| **-a, --Authentication <[Authentication method](#available-authentication-methods)>** | The authentication method (default: AppSecret) |
 | **-v, --Verbose** | Log verbose messages, such as HTTP calls |
 | **-d, --Data** | Do not log on console and only return data (only for Get operations) |
 | **-l, --LogFile <LogFile>** | The location of the log file |
 | **-?, -h, --help** | Show Help and usage information |
+
+<a id="available-authentication-methods"></a>
+
+### Available Authentication methods
+
+| Authentication method | Description |
+| --- | ---|
+| AppSecret | Uses a confidential client application to authenticate with Microsoft Entra using a client secret. |
+| AppCert | Uses a confidential client application to authenticate with Microsoft Entra using a client certificate. |
+| Default | Uses the Azure Identity DefaultAzureCredential method to authenticate with Microsoft Entra. Simplifies authentication by combining credentials. See Usage guidance for [DefaultAzureCredential](https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication/credential-chains?tabs=dac#defaultazurecredential-overview). |
+| Browser | Uses the Azure Identity InteractiveBrowserCredential method to authenticate with Microsoft Entra. A TokenCredential implementation which launches the system default browser to interactively authenticate a user, and obtain an access token. The browser will only be launched to authenticate the user once, then will silently acquire access tokens through the users refresh token as long as it's valid. |
+| AzureCli | Uses the Azure Identity AzureCliCredential method to authenticate with Microsoft Entra. If the user is authenticated to Azure using Azure CLI's az login command, authenticate the app to Azure using that same account. |
+| ManagedIdentity | Uses the Azure Identity ManagedIdentityCredential method to authenticate with Microsoft Entra. Attempts authentication using a managed identity that has been assigned to the deployment environment. This authentication type works for all Azure-hosted environments that support managed identity. More information about configuring managed identities can be found [here](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview). |
+| Environment | Uses the Azure Identity EnvironmentCredential method to authenticate with Microsoft Entra. Enables authentication to Microsoft Entra ID using a client secret or certificate, or as a user with a username and password, using environment variables. Order and environment variables can be found [here](https://learn.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential). |
+| AzurePipelines | Uses the Azure Identity AzurePipelinesCredential method to authenticate with Microsoft Entra. Credential which authenticates using an Azure Pipelines service connection. For usage instructions, see [Authenticating in Azure Pipelines with service connections](https://aka.ms/azsdk/net/identity/azurepipelinescredential/usage). |
+| ClientSecret | Uses the Azure Identity ClientSecretCredential method to authenticate with Microsoft Entra. Enables authentication to Microsoft Entra ID using a client secret that was generated for an App Registration. More information on how to configure a client secret can be found [here](https://learn.microsoft.com/entra/identity-platform/quickstart-configure-app-access-web-apis#add-credentials-to-your-web-application). |
+| ClientCertificate | Uses the Azure Identity ClientCertificateCredential method to authenticate with Microsoft Entra. Enables authentication of a service principal to Microsoft Entra ID using a X509 certificate that is assigned to its App Registration. More information on how to configure certificate authentication can be found [here](https://learn.microsoft.com/entra/identity-platform/certificate-credentials#register-your-certificate-with-microsoft-identity-platform). |
 
 <a id="putting-it-all-together"></a>
 
@@ -160,7 +177,7 @@ For more information on operation parameters, see [Operations](https://github.co
 
 ## Example GetProduct operation
    
-**NOTE:** When using a certificate you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information on other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-6.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
+**NOTE:** When using a certificate you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information on other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-8.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
    
 ### Example GetProduct configuration file using certificate authorization
 
@@ -202,7 +219,7 @@ Product: {
 
 ### Example UploadXvcPackage configuration file using certificate authentication
 
-**NOTE:** When using a certificate you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information on other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-6.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
+**NOTE:** When using a certificate you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information on other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-8.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
 
 ```json
 {
