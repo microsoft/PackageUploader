@@ -172,7 +172,11 @@ For more information on operation parameters, see [Operations](https://github.co
 2. Browse to the root of your wrapper directory, and then run the following command:<br>
 `.\PackageUploader.exe <OperationName> -c <ConfigFile> -a <AuthenticationMethod>`
 
-<a id="example-getproduct-operation"></a>
+## Operation config file creation
+
+To perform operations, a configuration file is required. Configuration files can be set with different values, some of which may be mandatory. For example, certain operations can use either `productId` or `bigId`, but the program will require at least one of them.
+
+For full documentation on each property of each operation, please refer to the [operations documentation](https://github.com/microsoft/PackageUploader/blob/main/Operations.md).
 
 ## Example GetProduct operation
    
@@ -184,15 +188,7 @@ For more information on operation parameters, see [Operations](https://github.co
 {
   "operationName": "GetProduct",
 
-  "bigId": "9FAKEBIGID",
-
-  "aadAuthInfo": {
-    "clientId": "00000000-0000-0000-000000000000",
-    "tenantId": "00000000-0000-0000-000000000000",
-    "certificateThumbprint": "lotsofnumbersandlettersinahexformat8A334EE",
-    "certificateStore": "Root", 
-    "certificateLocation": "LocalMachine"
-  }
+  "bigId": "9FAKEBIGID"
 }
 ```
 
@@ -204,9 +200,8 @@ For more information on operation parameters, see [Operations](https://github.co
 
 ### Example GetProduct operation output
 
-```
+```json
 Product: {
-  "productId":"00000000000000000000",
   "bigId":"9FAKEBIGID",
   "productName":" Test product (Hidden)",
   "branchFriendlyNames": ["Main", "Branch1", "Branch2", "Branch3"],
@@ -226,11 +221,9 @@ Product: {
 {
   "operationName": "UploadXvcPackage",
 
-  "productId": "",
   "bigId": "9FAKEBIGID ",
 
   "branchFriendlyName": "Main",
-  "flightName": "",
 
   "marketGroupName": "default",
   
@@ -250,13 +243,6 @@ Product: {
     "effectiveDate": ""
   },
 
-  "aadAuthInfo": {
-    "clientId": "00000000-0000-0000-000000000000", 
-    "tenantId": "00000000-0000-0000-000000000000",
-    "certificateThumbprint": "lotsofnumbersandlettersinahexformat8A334EE",
-    "certificateStore": "Root", 
-    "certificateLocation": "LocalMachine"
-  },  
   "uploadConfig": {
     "httpTimeoutMs": 5000,
     "httpUploadTimeoutMs": 300000,
@@ -312,10 +298,7 @@ Product: {
 {
   "operationName": "PublishPackages",
 
-  "productId": "",
   "bigId": "9FAKEBIGID",
-
-  "flightName": "",
   
   "branchFriendlyName": "Main",
   "destinationSandboxName": "QXNKBL.1",
@@ -326,11 +309,6 @@ Product: {
     "releaseTime": "",
     "isManualPublish" : false,
     "certificationNotes": "No Notes for CERT at this time"
-  },
-
-  "aadAuthInfo": {
-    "clientId": "00000000-0000-0000-000000000000", 
-    "tenantId": "00000000-0000-0000-000000000000"
   }
 } 
 ```
