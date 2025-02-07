@@ -42,14 +42,13 @@ Programmatic manipulation of packages for a particular product requires the foll
 
 * The product must already exist in Partner Center. The tool currently doesn't support product creation.
 * The branch for the target upload must already exist in Partner Center. The tool currently doesn't support branch creation.
-* The target product must have been previously fully published to a sandbox before the Package Uploader can be used. A full publishing includes all modules like properties, store listing, pricing and availabilities, and packages.
-* Access to create Azure application registrations in the Azure Active Directory (Azure AD) tenant connected to the target Partner Center account.
+* Access to create Azure application registrations in the Azure Active Directory (Azure AD) tenant connected to the target Partner Center account if you plan on setting up certificate-based or secret-based authorization.
 * You only need a valid certificate if you plan on setting up certificate-based authorization.
 * The Package Uploader executable.
 
 <a id="service-creation-and-authentication"></a>
 
-## Service creation and authentication
+## Service creation and authentication for Azure AD applications
 
 ### Create an Azure AD application for authentication
 
@@ -70,7 +69,7 @@ For more information, see [Quickstart: Register an app in the Microsoft identity
 
 ### Setup authorization 
 
-The tool currently supports either app secrets or certificates. Perform one of the following procedures to setup authorization.
+The tool supports app secrets or certificates. Perform one of the following procedures to setup authorization.
 
 #### Create a secret key
 
@@ -113,11 +112,11 @@ Alternatively, you can also build it.
 
 ## Run the Package Uploader
 
-Running the package uploader requires three arguments.
+Important arguments for running the package uploader.
 
 | Argument | Description |
 | --- | ---|
-| **Operation Name** | The operation represents the action that you want to perform. It should match the name of the configuration file that you pass when running the tool.
+| **Operation name** | The [operation](#available-operations) represents the action that you want to perform. It should match the name of the configuration file that you pass when running the tool.
 | **Configuration file** | The configuration file contains all the information that's required to perform the intended action. It specifies your product information, file locations, and the tenant authorized to complete the action. Copy a template from the templates folder and fill in the required fields to ensure you have all the data necessary.
 | **Client secret** | This is the alphanumeric value that you previously generated, which is required to authenticate with Partner Center and your product.
 
@@ -171,9 +170,13 @@ For more information on operation parameters, see [Operations](https://github.co
 
 1. Open PowerShell by using the **Start** menu.
 2. Browse to the root of your wrapper directory, and then run the following command:<br>
-`.\PackageUploader.exe <OperationName> -c <ConfigFile> -s <ClientSecret>`
+`.\PackageUploader.exe <OperationName> -c <ConfigFile> -a <AuthenticationMethod>`
 
-<a id="example-getproduct-operation"></a>
+## Operation config file creation
+
+To perform operations, a configuration file is required. Configuration files can be set with different values, some of which may be mandatory. For example, certain operations can use either `productId` or `bigId`, but the program will require at least one of them.
+
+For full documentation on each property of each operation, please refer to the [operations documentation](https://github.com/microsoft/PackageUploader/blob/main/Operations.md).
 
 ## Example GetProduct operation
    
@@ -185,27 +188,20 @@ For more information on operation parameters, see [Operations](https://github.co
 {
   "operationName": "GetProduct",
 
-  "bigId": "9FAKEBIGID",
-
-  "aadAuthInfo": {
-    "clientId": "00000000-0000-0000-000000000000",
-    "tenantId": "00000000-0000-0000-000000000000",
-    "certificateThumbprint": "lotsofnumbersandlettersinahexformat8A334EE",
-    "certificateStore": "Root", 
-    "certificateLocation": "LocalMachine"
-  }
+  "bigId": "9FAKEBIGID"
 }
 ```
 
 ### Example running GetProduct operation
 
-`.\PackageUploader.exe GetProduct -c .\GetProduct.json -s superlongsecretalphannumericstring`
+```
+.\PackageUploader.exe GetProduct -c .\GetProduct.json -a Browser
+```
 
 ### Example GetProduct operation output
 
-```
+```json
 Product: {
-  "productId":"00000000000000000000",
   "bigId":"9FAKEBIGID",
   "productName":" Test product (Hidden)",
   "branchFriendlyNames": ["Main", "Branch1", "Branch2", "Branch3"],
@@ -225,11 +221,9 @@ Product: {
 {
   "operationName": "UploadXvcPackage",
 
-  "productId": "",
   "bigId": "9FAKEBIGID ",
 
   "branchFriendlyName": "Main",
-  "flightName": "",
 
   "marketGroupName": "default",
   
@@ -249,13 +243,6 @@ Product: {
     "effectiveDate": ""
   },
 
-  "aadAuthInfo": {
-    "clientId": "00000000-0000-0000-000000000000", 
-    "tenantId": "00000000-0000-0000-000000000000",
-    "certificateThumbprint": "lotsofnumbersandlettersinahexformat8A334EE",
-    "certificateStore": "Root", 
-    "certificateLocation": "LocalMachine"
-  },  
   "uploadConfig": {
     "httpTimeoutMs": 5000,
     "httpUploadTimeoutMs": 300000,
@@ -270,7 +257,7 @@ Product: {
 ### Example running UploadXvcPackage operation
 
 ```
-.\PackageUploader.exe UploadXvcPackage -c .\UploadXvcPackage.json -s superlongsecretalphannumericstring
+.\PackageUploader.exe UploadXvcPackage -c .\UploadXvcPackage.json -a Browser
 ```
 
 ### Example UploadXvcPackage operation output
@@ -311,10 +298,7 @@ Product: {
 {
   "operationName": "PublishPackages",
 
-  "productId": "",
   "bigId": "9FAKEBIGID",
-
-  "flightName": "",
   
   "branchFriendlyName": "Main",
   "destinationSandboxName": "QXNKBL.1",
@@ -325,11 +309,6 @@ Product: {
     "releaseTime": "",
     "isManualPublish" : false,
     "certificationNotes": "No Notes for CERT at this time"
-  },
-
-  "aadAuthInfo": {
-    "clientId": "00000000-0000-0000-000000000000", 
-    "tenantId": "00000000-0000-0000-000000000000"
   }
 } 
 ```
