@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             x:Class="PackageUploader.UI.View.PackageUploadView"
+             x:DataType="viewmodel:PackageUploadViewModel">
+
+    <ScrollView>
+        <Grid Padding="30,0" RowSpacing="25">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0"
+                   Text="Package Uploader Input Form"
+                   Style="{StaticResource Headline}"
+                   SemanticProperties.HeadingLevel="Level1" />
+
+            <Label Grid.Row="1"
+                   x:Name="SubHeadLine"
+                   Text="Upload your package to Partner Center"
+                   Style="{StaticResource SubHeadline}"
+                   SemanticProperties.HeadingLevel="Level2"
+                   SemanticProperties.Description="Upload your package to Partner Center" />
+
+            <ActivityIndicator Grid.Row="2"
+                               x:Name="WorkingIndicator"
+                               IsRunning="{Binding IsSpinnerRunning, Mode=OneWay}" />
+
+            <Grid Grid.Row="3" RowSpacing="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0"
+                       Text="Package Uploader Params"
+                       VerticalOptions="Center"
+                       HorizontalOptions="Start"
+                       Style="{StaticResource SubHeadline}"
+                       SemanticProperties.HeadingLevel="Level2"
+                       SemanticProperties.Description="Package Uploader Params" />
+
+                <Grid Grid.Row="1" ColumnSpacing="20" RowSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- First Column - First 3 parameters -->
+                    <Grid Grid.Column="0" Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
+                               Text="bigId"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Enter the bigId" />
+                        <Entry Grid.Column="1"
+                               x:Name="bigId"
+                               Placeholder="Enter bigId"
+                               Text="{Binding BigId, Mode=TwoWay}"
+                               SemanticProperties.Description="Enter the bigId" />
+                    </Grid>
+
+                    <Grid Grid.Column="0" Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
+                               Text="branchFriendlyName"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Enter the branchFriendlyName" />
+                        <Picker Grid.Column="1"
+                                x:Name="branchFriendlyName"
+                                ItemsSource="{Binding BranchFriendlyNames, Mode=OneWay}"
+                                SelectedItem="{Binding BranchFriendlyName, Mode=TwoWay}"
+                                SemanticProperties.Description="Enter the branchFriendlyName" />
+                    </Grid>
+
+                    <Grid Grid.Column="0" Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
+                               Text="flightName"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Enter the flightName" />
+                        <Picker Grid.Column="1"
+                                x:Name="flightName"
+                                ItemsSource="{Binding FlightNames, Mode=OneWay}"
+                                SelectedItem="{Binding FlightName, Mode=TwoWay}"
+                                SemanticProperties.Description="Enter the flightName" />
+                    </Grid>
+
+                    <!-- Second Column - Other 4 parameters -->
+                    <Grid Grid.Column="1" Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
+                               Text="marketGroupName"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Enter the marketGroupName" />
+                        <Entry Grid.Column="1"
+                               x:Name="marketGroupName"
+                               Placeholder="Enter marketGroupName"
+                               Text="{Binding MarketGroupName, Mode=TwoWay}"
+                               SemanticProperties.Description="Enter the marketGroupName" />
+                    </Grid>
+
+                    <Grid Grid.Column="1" Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
+                               Text="packageFilePath"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Enter the packageFilePath" />
+                        <Entry Grid.Column="1"
+                               x:Name="packageFilePath"
+                               Placeholder="Enter packageFilePath"
+                               Text="{Binding PackageFilePath, Mode=TwoWay}"
+                               SemanticProperties.Description="Enter the packageFilePath" />
+                    </Grid>
+
+                    <Grid Grid.Column="1" Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
+                               Text="ekbFilePath"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Enter the ekbFilePath" />
+                        <Entry Grid.Column="1"
+                               x:Name="ekbFilePath"
+                               Placeholder="Enter ekbFilePath"
+                               Text="{Binding EkbFilePath, Mode=TwoWay}"
+                               SemanticProperties.Description="Enter the ekbFilePath" />
+                    </Grid>
+
+                    <Grid Grid.Column="1" Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
+                               Text="subValFilePath"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Enter the subValFilePath" />
+                        <Entry Grid.Column="1"
+                               x:Name="subValFilePath"
+                               Placeholder="Enter subValFilePath"
+                               Text="{Binding SubValFilePath, Mode=TwoWay}"
+                               SemanticProperties.Description="Enter the subValFilePath" />
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <Button Grid.Row="5"
+                    x:Name="UploadPackage"
+                    Text="Upload Package" 
+                    SemanticProperties.Hint="Uploads the package to Partner Center"
+                    Command="{Binding UploadPackageCommand}"
+                    IsEnabled="{Binding IsPackageUploadEnabled}"
+                    HorizontalOptions="Fill" />
+        </Grid>
+    </ScrollView>
+
+</ContentPage>

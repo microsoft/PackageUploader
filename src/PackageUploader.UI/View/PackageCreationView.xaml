@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             x:Class="PackageUploader.UI.View.PackageCreationView"
+             x:DataType="viewmodel:PackageCreationViewModel">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+
+            <Label
+                Text="Package Creation Input Form"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+            <Label
+                x:Name="SubHeadLine"
+                Text="Create your XVC or MSIXVC package"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Create your XVC or MSIXVC package" />
+            <ActivityIndicator
+                x:Name="WorkingIndicator"
+                IsRunning="{Binding IsSpinnerRunning, Mode=OneWay}" />
+
+            <!-- ErrorMessage Label -->
+            <Label
+                Text="{Binding ErrorMessage}"
+                TextColor="Red"
+                FontAttributes="Bold"
+                IsVisible="{Binding IsErrorVisible}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+
+            <HorizontalStackLayout>
+                <VerticalStackLayout>
+                    <Label
+                        Text="Make Package Params"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
+                        Style="{StaticResource SubHeadline}"
+                        SemanticProperties.HeadingLevel="Level2"
+                        SemanticProperties.Description="Make Package Params" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label
+                            Text="Game Data Path"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Start"
+                            SemanticProperties.Description="Enter the Game Data Path" />
+                        <Entry
+                            x:Name="GameDataPath"
+                            Placeholder="Enter Game Data Path"
+                            Grid.Column="1"
+                            Text="{Binding GameDataPath, Mode=TwoWay}"
+                            SemanticProperties.Description="Enter the Game Data Path" />
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label
+                            Text="Mapping Data XML Name"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Start"
+                            SemanticProperties.Description="Enter the Mapping Data XML Name" />
+                        <Entry
+                            x:Name="MappingDataXMLName"
+                            Placeholder="Enter MappingDataXMLName"
+                            Grid.Column="1"
+                            Text="{Binding MappingDataXmlPath, Mode=TwoWay}"
+                            SemanticProperties.Description="Enter the MappingDataXMLName" />
+                    </Grid>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            <HorizontalStackLayout>
+                <Button
+                    x:Name="MakePkg"
+                    Text="Call MakePkg"
+                    SemanticProperties.Hint="Calls Make Package and populates rest of the fields"
+                    Command="{Binding MakePackageCommand}"
+                    IsEnabled="{Binding IsMakePkgEnabled}"
+                    HorizontalOptions="Fill" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             x:Class="PackageUploader.UI.View.MainPageView"
+             x:DataType="viewmodel:MainPageViewModel">
+
+    <VerticalStackLayout Padding="30,0" Spacing="25">
+        <Label Text="Welcome to the Xbox Package Tool" 
+               Style="{StaticResource Headline}" 
+               SemanticProperties.HeadingLevel="Level1" />
+
+        <Label Text="{Binding MakePkgUnavailableErrorMessage}"
+               TextColor="Red"
+               IsVisible="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}}" />
+
+        <Button Text="Create a New Package"
+                Command="{Binding NavigateToPackageCreationCommand}"
+                IsEnabled="{Binding IsMakePkgEnabled}"
+                HorizontalOptions="Fill" />
+
+        <Label Text="{Binding PackageUploaderUnavailableErrorMessage}"
+               TextColor="Red"
+               IsVisible="{Binding IsPackageUploaderEnabled, Converter={StaticResource InverseBooleanConverter}}" />
+
+        <Button Text="Upload an Existing Package"
+                Command="{Binding NavigateToPackageUploadCommand}"
+                IsEnabled="{Binding IsPackageUploaderEnabled}"
+                HorizontalOptions="Fill" />
+    </VerticalStackLayout>
+
+</ContentPage>
