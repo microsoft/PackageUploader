@@ -588,7 +588,7 @@ public class PackageUploaderService : IPackageUploaderService
 
     private async Task<GamePackage> WaitForPackageProcessingAsync(GameProduct product, GamePackage processingPackage, int minutesToWait, int checkIntervalMinutes, CancellationToken ct)
     {
-        await Task.Delay(TimeSpan.FromSeconds(10), ct).ConfigureAwait(false);
+        await Task.Delay(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
         GamePackage internalPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
             
         var checkIntervalTimeSpan = TimeSpan.FromMinutes(checkIntervalMinutes);

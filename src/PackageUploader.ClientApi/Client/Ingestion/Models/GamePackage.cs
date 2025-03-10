@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using PackageUploader.ClientApi.Client.Xfus.Models;
-using System.Numerics;
 
 namespace PackageUploader.ClientApi.Client.Ingestion.Models;
 
@@ -27,5 +26,4 @@ public sealed class GamePackage : GamePackageResource
     /// File size of the package
     /// </summary>
     public long? FileSize { get; set; }
-
 }
