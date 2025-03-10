@@ -120,18 +120,11 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         }
         catch(HttpRequestException e) when (e.StatusCode is HttpStatusCode.MovedPermanently)
         {
-            try
-            {
-                var redirectPackage = await GetAsyncWithErrors($"products/{productId}/packages/{packageId}", 
-                                                                IngestionJsonSerializerContext.Default.IngestionRedirectPackage, 
-                                                                new HashSet<HttpStatusCode>() {HttpStatusCode.MovedPermanently}, 
-                                                                ct).ConfigureAwait(false);
-                ingestionGamePackage = await GetAsync($"products/{productId}/packages/{redirectPackage.ToId}", IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
-            }
-            catch(Exception ex)
-            {
-                throw new Exception("Failed to get package by id", ex);
-            }
+            var redirectPackage = await GetAsyncWithErrors($"products/{productId}/packages/{packageId}", 
+                                                            IngestionJsonSerializerContext.Default.IngestionRedirectPackage, 
+                                                            new HashSet<HttpStatusCode>() {HttpStatusCode.MovedPermanently}, 
+                                                            ct).ConfigureAwait(false);
+            ingestionGamePackage = await GetAsync($"products/{productId}/packages/{redirectPackage.ToId}", IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
         }
 
         var gamePackage = ingestionGamePackage.Map();
