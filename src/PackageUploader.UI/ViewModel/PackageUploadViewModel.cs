@@ -138,9 +138,23 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _packageUploadTooltip, value);
     }
 
+    private string _successMessage = string.Empty;
+    public string SuccessMessage
+    {
+        get => _successMessage;
+        set => SetProperty(ref _successMessage, value);
+    }
+
+    private string _errorMessage = string.Empty;
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetProperty(ref _errorMessage, value);
+    }
+
     public ICommand UploadPackageCommand { get; }
 
-    private readonly string ConfileFilePath = Path.GetTempFileName();
+    private readonly string ConfileFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GeneratedConfig_{DateTime.Now:yyyyMMddHHmmss}.log");
     private readonly ArrayList processOutput = [];
     private Process? packageUploaderProcess;
 
@@ -173,8 +187,10 @@ public partial class PackageUploadViewModel : BaseViewModel
         string configFileText = System.Text.Json.JsonSerializer.Serialize(config);
         File.WriteAllText(ConfileFilePath, configFileText);
 
+        // Provide a file path so we can distinguish between UI and CLI flows.
+        string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GetInfo_{DateTime.Now:yyyyMMddHHmmss}.log");
         string pkgBuildExePath = _pathConfigurationService.PackageUploaderPath;
-        string cmdFormat = $"GetProduct -c {ConfileFilePath} -a default";
+        string cmdFormat = $"GetProduct -c {ConfileFilePath} -a default -l {logFilePath}";
 
         packageUploaderProcess = new Process();
         packageUploaderProcess.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(pkgBuildExePath);
@@ -255,6 +271,10 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private void StartUploadPackageProcess()
     {
+        // Clear any previous status messages when starting a new upload
+        SuccessMessage = string.Empty;
+        ErrorMessage = string.Empty;
+        
         IsSpinnerRunning = true;
 
         var config = new UploadConfig
@@ -270,14 +290,14 @@ public partial class PackageUploadViewModel : BaseViewModel
                 subValFilePath = SubValFilePath
             }
         };
-        SemanticScreenReader.Announce("Config created");
 
         string configFileText = System.Text.Json.JsonSerializer.Serialize(config);
         File.WriteAllText(ConfileFilePath, configFileText);
-        //SubHeadLine.Text = $"Config file created at {ConfileFilePath}";
 
+        // Provide a file path so we can distinguish between UI and CLI flows.
+        string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");
         string pkgBuildExePath = _pathConfigurationService.PackageUploaderPath;
-        string cmdFormat = $"UploadXvcPackage -c {ConfileFilePath} -a default";
+        string cmdFormat = $"UploadXvcPackage -c {ConfileFilePath} -a default -l {logFilePath}";
         packageUploaderProcess = new Process();
         packageUploaderProcess.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(pkgBuildExePath);
         packageUploaderProcess.StartInfo.FileName = pkgBuildExePath;
@@ -288,7 +308,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         packageUploaderProcess.StartInfo.CreateNoWindow = true;
         packageUploaderProcess.OutputDataReceived += (sender, args) =>
         {
-            if (!String.IsNullOrEmpty(args.Data)) // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.outputdatareceived?view=net-9.0
+            if (!String.IsNullOrEmpty(args.Data))
             {
                 processOutput.Add(args.Data);
             }
@@ -302,10 +322,18 @@ public partial class PackageUploadViewModel : BaseViewModel
         };
         packageUploaderProcess.Exited += (sender, args) =>
         {
-            string outputString = string.Join("", processOutput.ToArray());
+            string outputString = string.Join("\n", processOutput.ToArray());
             packageUploaderProcess.WaitForExit();
 
-            // After upload process completes
+            if (packageUploaderProcess.ExitCode == 0)
+            {
+                SuccessMessage = "Package uploaded successfully!";
+            }
+            else
+            {
+                ErrorMessage = $"Package upload failed with exit code: {packageUploaderProcess.ExitCode}";
+            }
+
             IsSpinnerRunning = false;
         };
         packageUploaderProcess.Start();

@@ -2,8 +2,15 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
              x:Class="PackageUploader.UI.View.PackageUploadView"
              x:DataType="viewmodel:PackageUploadViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <ScrollView>
         <Grid Padding="30,0" RowSpacing="25">
@@ -30,6 +37,20 @@
             <ActivityIndicator Grid.Row="2"
                                x:Name="WorkingIndicator"
                                IsRunning="{Binding IsSpinnerRunning, Mode=OneWay}" />
+
+            <VerticalStackLayout Grid.Row="2" Margin="0,50,0,0" HorizontalOptions="Center">
+                <Label Text="{Binding SuccessMessage}" 
+                       TextColor="{StaticResource Primary}"
+                       Style="{StaticResource SubHeadline}"
+                       HorizontalOptions="Center"
+                       IsVisible="{Binding SuccessMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+                
+                <Label Text="{Binding ErrorMessage}" 
+                       TextColor="Red"
+                       Style="{StaticResource SubHeadline}"
+                       HorizontalOptions="Center"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+            </VerticalStackLayout>
 
             <Grid Grid.Row="3" RowSpacing="10">
                 <Grid.RowDefinitions>

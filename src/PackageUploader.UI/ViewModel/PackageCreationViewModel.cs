@@ -165,7 +165,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             return;
         }
 
-        string cmdFormat = "pack /v /f {0} /d {1} /pd {2}";
+        string cmdFormat = "pack /v /l /f {0} /d {1} /pd {2}";
 
         makePackageProcess = new Process();
         makePackageProcess.StartInfo.FileName = _pathConfigurationService.MakePkgPath;
@@ -194,11 +194,15 @@ public partial class PackageCreationViewModel : BaseViewModel
         makePackageProcess.Exited += (sender, args) =>
         {
             IsSpinnerRunning = false;
-            string outputString = string.Join("", processOutput.ToArray());
+            string outputString = string.Join("\n", processOutput.ToArray());
 
             // Parse Make Package Output
             ProcessMakePackageOutput(outputString, tempBuildPath);
             makePackageProcess.WaitForExit();
+
+            // Log the output to a file for debugging
+            string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_MakePkg_{DateTime.Now:yyyyMMddHHmmss}.log");
+            File.WriteAllText(logFilePath, outputString);
 
             if (makePackageProcess.ExitCode != 0)
             {
