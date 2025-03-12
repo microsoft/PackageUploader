@@ -8,6 +8,7 @@ using System.Windows.Input;
 using PackageUploader.UI.Model;
 using PackageUploader.UI.View;
 using PackageUploader.UI.Services;
+using CommunityToolkit.Maui.Storage;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -57,19 +58,6 @@ public partial class PackageCreationViewModel : BaseViewModel
     
     public PackageModel Package => _packageModelService.Package;
 
-    public string BigId 
-    { 
-        get => Package.BigId; 
-        set 
-        { 
-            if (Package.BigId != value)
-            {
-                Package.BigId = value;
-                OnPropertyChanged();
-            }
-        } 
-    }
-
     public string PackageFilePath 
     { 
         get => Package.PackageFilePath; 
@@ -83,32 +71,6 @@ public partial class PackageCreationViewModel : BaseViewModel
         } 
     }
 
-    public string EkbFilePath 
-    { 
-        get => Package.EkbFilePath; 
-        set 
-        { 
-            if (Package.EkbFilePath != value)
-            {
-                Package.EkbFilePath = value;
-                OnPropertyChanged();
-            }
-        } 
-    }
-
-    public string SubValFilePath 
-    { 
-        get => Package.SubValFilePath; 
-        set 
-        { 
-            if (Package.SubValFilePath != value)
-            {
-                Package.SubValFilePath = value;
-                OnPropertyChanged();
-            }
-        } 
-    }
-
     private bool _isMakePkgEnabled = true;
     public bool IsMakePkgEnabled
     {
@@ -116,8 +78,32 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isMakePkgEnabled, value);
     }
 
+    private bool _hasGameDataPath;
+    public bool HasGameDataPath
+    {
+        get => _hasGameDataPath;
+        set => SetProperty(ref _hasGameDataPath, value);
+    }
+
+    private bool _isDragDropVisible = true;
+    public bool IsDragDropVisible
+    {
+        get => _isDragDropVisible && !HasGameDataPath;
+        set => SetProperty(ref _isDragDropVisible, value);
+    }
+
+    private string _dragDropMessage = "Drag and drop the Game Data folder here or click to browse";
+    public string DragDropMessage
+    {
+        get => _dragDropMessage;
+        set => SetProperty(ref _dragDropMessage, value);
+    }
+
     public ICommand MakePackageCommand { get; }
-    
+    public ICommand GameDataPathDroppedCommand { get; }
+    public ICommand BrowseGameDataPathCommand { get; }
+    public ICommand ResetGameDataPathCommand { get; }
+
     public PackageCreationViewModel(PackageModelService packageModelService, PathConfigurationService pathConfigurationService)
     {
         _packageModelService = packageModelService;
@@ -134,6 +120,9 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
 
         MakePackageCommand = new Command(StartMakePackageProcess);
+        GameDataPathDroppedCommand = new Command<string>(OnGameDataPathDropped);
+        BrowseGameDataPathCommand = new Command(OnBrowseGameDataPath);
+        ResetGameDataPathCommand = new Command(ResetGameDataPath);
     }
 
     private async void StartMakePackageProcess()
@@ -197,7 +186,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             string outputString = string.Join("\n", processOutput.ToArray());
 
             // Parse Make Package Output
-            ProcessMakePackageOutput(outputString, tempBuildPath);
+            ProcessMakePackageOutput(outputString);
             makePackageProcess.WaitForExit();
 
             // Log the output to a file for debugging
@@ -258,7 +247,12 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         makePackageProcess.Exited += (sender, args) =>
         {
+            string outputString = string.Join("\n", processOutput.ToArray());
             makePackageProcess.WaitForExit();
+
+            // Log the output to a file for debugging
+            string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GenMap_{DateTime.Now:yyyyMMddHHmmss}.log");
+            File.WriteAllText(logFilePath, outputString);
 
             if (makePackageProcess.ExitCode != 0)
             {
@@ -277,8 +271,30 @@ public partial class PackageCreationViewModel : BaseViewModel
         await makePackageProcess.WaitForExitAsync();
     }
 
-    [GeneratedRegex(@"ProductId is '\{(?<ProductId>[a-fA-F0-9]{8}(-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12})\}' derived from '(?<BigId>\w*?)'")]
-    private static partial Regex ProductIdRegex();
+    private void OnGameDataPathDropped(string path)
+    {
+        GameDataPath = path;
+        HasGameDataPath = true;
+        OnPropertyChanged(nameof(IsDragDropVisible));
+    }
+
+    private async void OnBrowseGameDataPath()
+    {
+        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
+        if (result.IsSuccessful)
+        {
+            GameDataPath = result.Folder.Path;
+            HasGameDataPath = true;
+            OnPropertyChanged(nameof(IsDragDropVisible));
+        }
+    }
+
+    private void ResetGameDataPath()
+    {
+        GameDataPath = string.Empty;
+        HasGameDataPath = false;
+        OnPropertyChanged(nameof(IsDragDropVisible));
+    }
 
     [GeneratedRegex(@"Successfully created package '(?<PackagePath>.*?\.xvc)'")]
     private static partial Regex XvcPackagePathRegex();
@@ -286,25 +302,9 @@ public partial class PackageCreationViewModel : BaseViewModel
     [GeneratedRegex(@"Successfully created package '(?<PackagePath>.*?\.msixvc)'")]
     private static partial Regex MsixvcPackagePathRegex();
 
-    [GeneratedRegex(@"See the Submission Validator log file at '(?<SubValFile>.*?\.xml)' for details")]
-    private static partial Regex SubValFilePathRegex();
-
-    private void ProcessMakePackageOutput(string outputString, string tempBuildPath)
+    private void ProcessMakePackageOutput(string outputString)
     {
-        MatchCollection productIdMatchCollection = ProductIdRegex().Matches(outputString);
-        
-        for (int i = 0; i < productIdMatchCollection.Count; i++)
-        {
-            string bigIdValue = productIdMatchCollection[i].Groups["BigId"].Value;
-            
-            if (bigIdValue != null)
-            {
-                BigId = bigIdValue;
-                break;
-            }
-        }
-        
-        // Package Path
+        // Package Path for XVC
         MatchCollection packagePathMatchCollection = XvcPackagePathRegex().Matches(outputString);
         
         for (int i = 0; i < packagePathMatchCollection.Count; i++)
@@ -317,39 +317,15 @@ public partial class PackageCreationViewModel : BaseViewModel
             }
         }
 
-        // Could also be an MSIXVC
-        packagePathMatchCollection = MsixvcPackagePathRegex().Matches(outputString);
+        // Package Path for MSIXVC
+        MatchCollection msixvcPackagePathMatchCollection = MsixvcPackagePathRegex().Matches(outputString);
 
-        for (int i = 0; i < packagePathMatchCollection.Count; i++)
+        for (int i = 0; i < msixvcPackagePathMatchCollection.Count; i++)
         {
-            string packagePathValue = packagePathMatchCollection[i].Groups["PackagePath"].Value;
+            string packagePathValue = msixvcPackagePathMatchCollection[i].Groups["PackagePath"].Value;
             if (packagePathValue != null)
             {
                 PackageFilePath = packagePathValue;
-                break;
-            }
-        }
-
-        // Ekb File Path
-        DirectoryInfo dirInf = new(tempBuildPath);
-        foreach (FileInfo file in dirInf.EnumerateFiles())
-        {
-            if (file.Extension == ".ekb")
-            {
-                EkbFilePath = file.FullName;
-                break;
-            }
-        }
-        
-        // SubVal File Path
-        MatchCollection subValFilePathMatchCollection = SubValFilePathRegex().Matches(outputString);
-        
-        for (int i = 0; i < subValFilePathMatchCollection.Count; i++)
-        {
-            string subValPathValue = subValFilePathMatchCollection[i].Groups["SubValFile"].Value;
-            if (subValPathValue != null)
-            {
-                SubValFilePath = subValPathValue;
                 break;
             }
         }

@@ -3,18 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
+             xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
              x:Class="PackageUploader.UI.View.PackageUploadView"
              x:DataType="viewmodel:PackageUploadViewModel">
 
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
     <ScrollView>
         <Grid Padding="30,0" RowSpacing="25">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -51,8 +54,51 @@
                        HorizontalOptions="Center"
                        IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
             </VerticalStackLayout>
+            
+            <!-- Package Drop Area  -->
+            <Grid Grid.Row="3" IsVisible="{Binding IsDragDropVisible}">
+                <controls:DropArea 
+                    Message="{Binding DragDropMessage}"
+                    FileDroppedCommand="{Binding FileDroppedCommand}"
+                    BrowseCommand="{Binding BrowseForPackageCommand}"
+                    AcceptedExtensions=".xvc,.msixvc"
+                    HeightRequest="100"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Center" />
+            </Grid>
 
-            <Grid Grid.Row="3" RowSpacing="10">
+            <!-- Package Selected Info -->
+            <Grid Grid.Row="3" IsVisible="{Binding HasPackage}" RowSpacing="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                
+                <Label Grid.Row="0" 
+                       Text="Selected Package" 
+                       Style="{StaticResource SubHeadline}" 
+                       HorizontalOptions="Start" />
+                       
+                <Grid Grid.Row="1" ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Column="0" 
+                           Text="{Binding PackageFilePath}" 
+                           LineBreakMode="MiddleTruncation"
+                           VerticalOptions="Center" />
+                           
+                    <Button Grid.Column="1" 
+                            Text="Reset" 
+                            Command="{Binding ResetPackageCommand}"
+                            WidthRequest="100" 
+                            HorizontalOptions="End" />
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Row="4" RowSpacing="25" IsVisible="{Binding HasPackage}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -61,12 +107,12 @@
                 <Label Grid.Row="0"
                        Text="Package Uploader Params"
                        VerticalOptions="Center"
-                       HorizontalOptions="Start"
+                       HorizontalOptions="Center"
                        Style="{StaticResource SubHeadline}"
                        SemanticProperties.HeadingLevel="Level2"
                        SemanticProperties.Description="Package Uploader Params" />
 
-                <Grid Grid.Row="1" ColumnSpacing="20" RowSpacing="10">
+                <Grid Grid.Row="1" ColumnSpacing="50" RowSpacing="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -78,14 +124,14 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <!-- First Column - First 3 parameters -->
-                    <Grid Grid.Column="0" Grid.Row="0">
+                    <!-- First Column - First 4 parameters -->
+                    <Grid Grid.Column="0" Grid.Row="0" ColumnSpacing="50">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width=".3*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0"
-                               Text="bigId"
+                               Text="StoreId / BigID"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
                                SemanticProperties.Description="Enter the bigId" />
@@ -96,13 +142,13 @@
                                SemanticProperties.Description="Enter the bigId" />
                     </Grid>
 
-                    <Grid Grid.Column="0" Grid.Row="1">
+                    <Grid Grid.Column="0" Grid.Row="1" ColumnSpacing="50">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width=".3*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0"
-                               Text="branchFriendlyName"
+                               Text="Branch"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
                                SemanticProperties.Description="Enter the branchFriendlyName" />
@@ -113,13 +159,13 @@
                                 SemanticProperties.Description="Enter the branchFriendlyName" />
                     </Grid>
 
-                    <Grid Grid.Column="0" Grid.Row="2">
+                    <Grid Grid.Column="0" Grid.Row="2" ColumnSpacing="50">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width=".3*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0"
-                               Text="flightName"
+                               Text="Flight"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
                                SemanticProperties.Description="Enter the flightName" />
@@ -130,14 +176,13 @@
                                 SemanticProperties.Description="Enter the flightName" />
                     </Grid>
 
-                    <!-- Second Column - Other 4 parameters -->
-                    <Grid Grid.Column="1" Grid.Row="0">
+                    <Grid Grid.Column="0" Grid.Row="3" ColumnSpacing="50">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width=".3*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0"
-                               Text="marketGroupName"
+                               Text="Market Group"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
                                SemanticProperties.Description="Enter the marketGroupName" />
@@ -148,13 +193,14 @@
                                SemanticProperties.Description="Enter the marketGroupName" />
                     </Grid>
 
-                    <Grid Grid.Column="1" Grid.Row="1">
+                    <!-- Second Column - Other 4 parameters -->
+                    <Grid Grid.Column="1" Grid.Row="0" ColumnSpacing="50">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width=".3*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0"
-                               Text="packageFilePath"
+                               Text="Package Path"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
                                SemanticProperties.Description="Enter the packageFilePath" />
@@ -165,13 +211,13 @@
                                SemanticProperties.Description="Enter the packageFilePath" />
                     </Grid>
 
-                    <Grid Grid.Column="1" Grid.Row="2">
+                    <Grid Grid.Column="1" Grid.Row="1" ColumnSpacing="50">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width=".3*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0"
-                               Text="ekbFilePath"
+                               Text="EKB File"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
                                SemanticProperties.Description="Enter the ekbFilePath" />
@@ -182,13 +228,13 @@
                                SemanticProperties.Description="Enter the ekbFilePath" />
                     </Grid>
 
-                    <Grid Grid.Column="1" Grid.Row="3">
+                    <Grid Grid.Column="1" Grid.Row="2" ColumnSpacing="50">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width=".3*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0"
-                               Text="subValFilePath"
+                               Text="Validator Log"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
                                SemanticProperties.Description="Enter the subValFilePath" />
@@ -198,6 +244,22 @@
                                Text="{Binding SubValFilePath, Mode=TwoWay}"
                                SemanticProperties.Description="Enter the subValFilePath" />
                     </Grid>
+                    <Grid Grid.Column="1" Grid.Row="3" ColumnSpacing="50">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width=".3*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
+                               Text="Symbol Bundle"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Enter the symbolBundleFilePath" />
+                        <Entry Grid.Column="1"
+                               x:Name="symbolBundleFilePath"
+                               Placeholder="Enter symbolBundleFilePath"
+                               Text="{Binding SymbolBundleFilePath, Mode=TwoWay}"
+                               SemanticProperties.Description="Enter the symbolBundleFilePath" />
+                    </Grid>
                 </Grid>
             </Grid>
 
@@ -206,7 +268,7 @@
                     Text="Upload Package" 
                     SemanticProperties.Hint="Uploads the package to Partner Center"
                     Command="{Binding UploadPackageCommand}"
-                    IsEnabled="{Binding IsPackageUploadEnabled}"
+                    IsEnabled="{Binding HasPackage}"
                     HorizontalOptions="Fill" />
         </Grid>
     </ScrollView>

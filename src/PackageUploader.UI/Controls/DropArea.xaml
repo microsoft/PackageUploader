@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PackageUploader.UI.Controls.DropArea"
+             x:Name="root">
+    
+    <Border BackgroundColor="#f5f5f5"
+            Stroke="#cccccc"
+            StrokeThickness="2"
+            StrokeShape="RoundRectangle 10,10,10,10"
+            StrokeDashArray="5,3"
+            Padding="20">
+        
+        <Grid VerticalOptions="Center" HorizontalOptions="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+                   
+            <Label Grid.Row="0" 
+                   Text="{Binding Message, Source={x:Reference root}}"
+                   TextColor="Black"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   Margin="0,10,0,0" />
+            
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding BrowseCommand, Source={x:Reference root}}" />
+            </Grid.GestureRecognizers>
+        </Grid>
+    </Border>
+</ContentView>

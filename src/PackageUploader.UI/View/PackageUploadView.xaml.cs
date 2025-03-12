@@ -12,4 +12,15 @@ public partial class PackageUploadView : ContentPage
         InitializeComponent();
         BindingContext = viewModel;
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        // Call the view model's OnAppearing method to refresh UI
+        if (BindingContext is PackageUploadViewModel viewModel)
+        {
+            viewModel.OnAppearing();
+        }
+    }
 }

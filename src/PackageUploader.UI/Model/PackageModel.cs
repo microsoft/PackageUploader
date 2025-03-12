@@ -9,4 +9,5 @@ public class PackageModel
     public string PackageFilePath { get; set; } = string.Empty;
     public string EkbFilePath { get; set; } = string.Empty;
     public string SubValFilePath { get; set; } = string.Empty;
+    public string SymbolBundleFilePath { get; internal set; } = string.Empty;
 }

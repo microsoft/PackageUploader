@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace PackageUploader.UI;
+namespace PackageUploader.UI.Model;
 
 #pragma warning disable IDE1006 // Naming Styles. Beginning with a lowercase letter matches the JSON schema for PackageUploader.
 

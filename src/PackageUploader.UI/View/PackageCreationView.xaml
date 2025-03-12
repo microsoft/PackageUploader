@@ -2,31 +2,44 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
              x:Class="PackageUploader.UI.View.PackageCreationView"
              x:DataType="viewmodel:PackageCreationViewModel">
 
     <ScrollView>
-        <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
+        <Grid Padding="30,0" RowSpacing="25">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
             <Label
+                Grid.Row="0"
                 Text="Package Creation Input Form"
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
 
             <Label
+                Grid.Row="1"
                 x:Name="SubHeadLine"
                 Text="Create your XVC or MSIXVC package"
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Create your XVC or MSIXVC package" />
             <ActivityIndicator
+                Grid.Row="2"
                 x:Name="WorkingIndicator"
                 IsRunning="{Binding IsSpinnerRunning, Mode=OneWay}" />
 
             <!-- ErrorMessage Label -->
             <Label
+                Grid.Row="3"
                 Text="{Binding ErrorMessage}"
                 TextColor="Red"
                 FontAttributes="Bold"
@@ -34,52 +47,73 @@
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
 
-            <HorizontalStackLayout>
-                <VerticalStackLayout>
-                    <Label
-                        Text="Make Package Params"
-                        VerticalOptions="Center"
-                        HorizontalOptions="Start"
-                        Style="{StaticResource SubHeadline}"
-                        SemanticProperties.HeadingLevel="Level2"
-                        SemanticProperties.Description="Make Package Params" />
-                    <Grid>
+            <Grid Grid.Row="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Row="0" Grid.ColumnSpan="2" IsVisible="{Binding IsDragDropVisible}">
+                    <controls:DropArea 
+                        Message="{Binding DragDropMessage}"
+                        FileDroppedCommand="{Binding GameDataPathDroppedCommand}"
+                        BrowseCommand="{Binding BrowseGameDataPathCommand}"
+                        AcceptedExtensions=":folder:"
+                        HeightRequest="100"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Center" />
+                </Grid>
+
+                <Grid Grid.ColumnSpan="2" Grid.Row="1" IsVisible="{Binding HasGameDataPath}" RowSpacing="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" 
+                           Text="Selected Game Data Path" 
+                           Style="{StaticResource SubHeadline}" 
+                           HorizontalOptions="Start" />
+                    <Grid Grid.Row="1" ColumnSpacing="10">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Label
-                            Text="Game Data Path"
-                            VerticalOptions="Center"
-                            HorizontalOptions="Start"
-                            SemanticProperties.Description="Enter the Game Data Path" />
-                        <Entry
-                            x:Name="GameDataPath"
-                            Placeholder="Enter Game Data Path"
-                            Grid.Column="1"
-                            Text="{Binding GameDataPath, Mode=TwoWay}"
-                            SemanticProperties.Description="Enter the Game Data Path" />
-                    </Grid>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Label
-                            Text="Mapping Data XML Name"
-                            VerticalOptions="Center"
-                            HorizontalOptions="Start"
-                            SemanticProperties.Description="Enter the Mapping Data XML Name" />
-                        <Entry
-                            x:Name="MappingDataXMLName"
-                            Placeholder="Enter MappingDataXMLName"
-                            Grid.Column="1"
-                            Text="{Binding MappingDataXmlPath, Mode=TwoWay}"
-                            SemanticProperties.Description="Enter the MappingDataXMLName" />
+                        <Label Grid.Column="0" 
+                               Text="{Binding GameDataPath}" 
+                               LineBreakMode="MiddleTruncation"
+                               VerticalOptions="Center" />
+                        <Button Grid.Column="1" 
+                                Text="Reset" 
+                                Command="{Binding ResetGameDataPathCommand}"
+                                WidthRequest="100" 
+                                HorizontalOptions="End" />
                     </Grid>
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
-            <HorizontalStackLayout>
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Row="5" ColumnSpacing="25">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label
+                    Text="Mapping Data XML Name (Optional)"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                    SemanticProperties.Description="Enter the Mapping Data XML Name (Optional)" />
+                <Entry
+                    x:Name="MappingDataXMLName"
+                    Placeholder="Enter MappingDataXMLName"
+                    Grid.Column="1"
+                    Text="{Binding MappingDataXmlPath, Mode=TwoWay}"
+                    SemanticProperties.Description="Enter the MappingDataXMLName" />
+            </Grid>
+
+            <Grid Grid.Row="6">
                 <Button
                     x:Name="MakePkg"
                     Text="Call MakePkg"
@@ -87,8 +121,8 @@
                     Command="{Binding MakePackageCommand}"
                     IsEnabled="{Binding IsMakePkgEnabled}"
                     HorizontalOptions="Fill" />
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
+            </Grid>
+        </Grid>
     </ScrollView>
 
 </ContentPage>
