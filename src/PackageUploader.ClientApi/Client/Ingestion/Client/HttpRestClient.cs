@@ -71,8 +71,7 @@ internal abstract class HttpRestClient : IHttpRestClient
             await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync(jsonTypeInfo, ct).ConfigureAwait(false);
-                return result;
+                throw new HttpIOException(HttpRequestError.InvalidResponse, "Unexpected Successful Response");
             }
             else if (allowableErrors.Contains(response.StatusCode))
             {
