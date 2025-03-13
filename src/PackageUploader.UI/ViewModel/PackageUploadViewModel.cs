@@ -319,7 +319,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     public bool IsBranchSelected => SelectedMode == "Branch";
     public bool IsFlightSelected => SelectedMode == "Flight";
 
-    public List<string> Modes { get; } = new List<string> { "Branch", "Flight" };
+    public List<string> Modes { get; } = ["Branch", "Flight"];
 
     public PackageUploadViewModel(PackageModelService packageModelService, IPackageUploaderService uploaderService)
     {

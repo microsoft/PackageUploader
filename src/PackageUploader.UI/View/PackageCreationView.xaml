@@ -32,10 +32,28 @@
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Create your XVC or MSIXVC package" />
-            <ActivityIndicator
-                Grid.Row="2"
-                x:Name="WorkingIndicator"
-                IsRunning="{Binding IsSpinnerRunning, Mode=OneWay}" />
+
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                
+                <ActivityIndicator
+                    Grid.Row="0"
+                    x:Name="WorkingIndicator"
+                    IsRunning="{Binding IsSpinnerRunning, Mode=OneWay}" />
+                
+                <ProgressBar
+                    Grid.Row="1"
+                    Progress="{Binding ProgressValue, Mode=OneWay}"
+                    IsVisible="{Binding IsProgressVisible}"
+                    ProgressColor="Green"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Fill"
+                    Margin="200,20,200,0"
+                    MinimumHeightRequest="25"/>
+            </Grid>
 
             <!-- ErrorMessage Label -->
             <Label

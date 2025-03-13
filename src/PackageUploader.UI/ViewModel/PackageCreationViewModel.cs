@@ -9,6 +9,7 @@ using PackageUploader.UI.Model;
 using PackageUploader.UI.View;
 using PackageUploader.UI.Services;
 using CommunityToolkit.Maui.Storage;
+using System.Text;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -56,6 +57,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isSpinnerRunning, value);
     }
     
+    private double _progressValue = 0;
+    public double ProgressValue
+    {
+        get => _progressValue;
+        set => SetProperty(ref _progressValue, value);
+    }
+
+    private bool _isProgressVisible = false;
+    public bool IsProgressVisible
+    {
+        get => _isProgressVisible;
+        set => SetProperty(ref _isProgressVisible, value);
+    }
+
     public PackageModel Package => _packageModelService.Package;
 
     public string PackageFilePath 
@@ -163,12 +178,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         makePackageProcess.StartInfo.RedirectStandardError = true;
         makePackageProcess.EnableRaisingEvents = true;
         makePackageProcess.StartInfo.CreateNoWindow = true;
-        
+
         makePackageProcess.OutputDataReceived += (sender, args) =>
         {
             if (!String.IsNullOrEmpty(args.Data))
             {
                 processOutput.Add(args.Data);
+                
+                // Check for encryption progress messages
+                var match = EncryptionProgressRegex().Match(args.Data);
+                if (match.Success && int.TryParse(match.Groups[1].Value, out int percentComplete))
+                {
+                    // Map the 0-100 range to .05 - .95 range
+                    ProgressValue = percentComplete / 100.0 * 0.9 + 0.05;
+                }
             }
         };
         
@@ -183,6 +206,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         makePackageProcess.Exited += (sender, args) =>
         {
             IsSpinnerRunning = false;
+            ProgressValue = 1;
             string outputString = string.Join("\n", processOutput.ToArray());
 
             // Parse Make Package Output
@@ -207,10 +231,13 @@ public partial class PackageCreationViewModel : BaseViewModel
             });
         };
 
+        ProgressValue = 0;
+        IsSpinnerRunning = true;
+        IsProgressVisible = true;
+
         makePackageProcess.Start();
         makePackageProcess.BeginOutputReadLine();
         makePackageProcess.BeginErrorReadLine();
-        IsSpinnerRunning = true;
     }
 
     private async Task GenerateMappingFile(string tempBuildPath)
@@ -301,6 +328,9 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     [GeneratedRegex(@"Successfully created package '(?<PackagePath>.*?\.msixvc)'")]
     private static partial Regex MsixvcPackagePathRegex();
+
+    [GeneratedRegex(@"Encrypted (\d+) %")]
+    private static partial Regex EncryptionProgressRegex();
 
     private void ProcessMakePackageOutput(string outputString)
     {
