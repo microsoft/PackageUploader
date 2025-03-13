@@ -15,7 +15,7 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <Grid Padding="30,0" RowSpacing="25">
+        <Grid Padding="30,0" RowSpacing="15">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -148,6 +148,23 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0"
+                               Text="Select Mode"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start"
+                               SemanticProperties.Description="Select Branch or Flight" />
+                        <Picker Grid.Column="1"
+                                x:Name="modePicker"
+                                ItemsSource="{Binding Modes, Mode=OneWay}"
+                                SelectedItem="{Binding SelectedMode, Mode=TwoWay}"
+                                SemanticProperties.Description="Select Branch or Flight" />
+                    </Grid>
+
+                    <Grid Grid.Column="0" Grid.Row="2" ColumnSpacing="50" IsVisible="{Binding IsBranchSelected}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width=".3*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0"
                                Text="Branch"
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
@@ -159,7 +176,7 @@
                                 SemanticProperties.Description="Enter the branchFriendlyName" />
                     </Grid>
 
-                    <Grid Grid.Column="0" Grid.Row="2" ColumnSpacing="50">
+                    <Grid Grid.Column="0" Grid.Row="2" ColumnSpacing="50" IsVisible="{Binding IsFlightSelected}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width=".3*" />
                             <ColumnDefinition Width="*" />
@@ -186,11 +203,11 @@
                                VerticalOptions="Center"
                                HorizontalOptions="Start"
                                SemanticProperties.Description="Enter the marketGroupName" />
-                        <Entry Grid.Column="1"
-                               x:Name="marketGroupName"
-                               Placeholder="Enter marketGroupName"
-                               Text="{Binding MarketGroupName, Mode=TwoWay}"
-                               SemanticProperties.Description="Enter the marketGroupName" />
+                        <Picker Grid.Column="1"
+                                x:Name="marketGroupName"
+                                ItemsSource="{Binding MarketGroupNames, Mode=OneWay}"
+                                SelectedItem="{Binding MarketGroupName, Mode=TwoWay}"
+                                SemanticProperties.Description="Enter the marketGroupName" />
                     </Grid>
 
                     <!-- Second Column - Other 4 parameters -->

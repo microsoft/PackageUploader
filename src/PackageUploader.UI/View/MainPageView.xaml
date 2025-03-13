@@ -19,13 +19,8 @@
                 IsEnabled="{Binding IsMakePkgEnabled}"
                 HorizontalOptions="Fill" />
 
-        <Label Text="{Binding PackageUploaderUnavailableErrorMessage}"
-               TextColor="Red"
-               IsVisible="{Binding IsPackageUploaderEnabled, Converter={StaticResource InverseBooleanConverter}}" />
-
         <Button Text="Upload an Existing Package"
                 Command="{Binding NavigateToPackageUploadCommand}"
-                IsEnabled="{Binding IsPackageUploaderEnabled}"
                 HorizontalOptions="Fill" />
     </VerticalStackLayout>
 

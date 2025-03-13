@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Xml;
-using PackageUploader.UI.Model;
+using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Models;
 using PackageUploader.UI.Services;
 
 namespace PackageUploader.UI.ViewModel;
@@ -14,7 +14,11 @@ namespace PackageUploader.UI.ViewModel;
 public partial class PackageUploadViewModel : BaseViewModel
 {
     private readonly PackageModelService _packageModelService;
-    private readonly PathConfigurationService _pathConfigurationService;
+    private readonly IPackageUploaderService _uploaderService;
+
+    private GameProduct? _gameProduct = null;
+    private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
+    private GamePackageConfiguration? _gamePackageConfiguration = null;
 
     private bool _isSpinnerRunning = false;
     public bool IsSpinnerRunning
@@ -23,21 +27,27 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _isSpinnerRunning, value);
     }
 
-    private string _branchFriendlyName = "Main";
+    private string _branchFriendlyName = string.Empty;
     public string BranchFriendlyName
     {
         get => _branchFriendlyName;
-        set => SetProperty(ref _branchFriendlyName, value);
+        set
+        {
+            if (SetProperty(ref _branchFriendlyName, value))
+            {
+                UpdateMarketGroups();
+            }
+        }
     }
 
-    private string _marketGroupName = "default";
+    private string _marketGroupName = string.Empty;
     public string MarketGroupName
     {
         get => _marketGroupName;
         set => SetProperty(ref _marketGroupName, value);
     }
 
-    private string[] _branchFriendlyNames = ["Main"];
+    private string[] _branchFriendlyNames = [];
     public string[] BranchFriendlyNames
     {
         get => _branchFriendlyNames;
@@ -54,7 +64,13 @@ public partial class PackageUploadViewModel : BaseViewModel
     public string FlightName
     {
         get => _flightName;
-        set => SetProperty(ref _flightName, value);
+        set
+        {
+            if (SetProperty(ref _flightName, value))
+            {
+                UpdateMarketGroups();
+            }
+        }
     }
 
     private string[] _flightNames = [];
@@ -69,8 +85,83 @@ public partial class PackageUploadViewModel : BaseViewModel
             }
         }
     }
-    
-    public PackageModel Package => _packageModelService.Package;
+
+    private string[] _marketGroupNames = [];
+    public string[] MarketGroupNames
+    {
+        get => _marketGroupNames;
+        set
+        {
+            if (SetProperty(ref _marketGroupNames, value))
+            {
+                OnPropertyChanged(nameof(MarketGroupName));
+            }
+        }
+    }
+
+    private async void UpdateMarketGroups()
+    {
+        if (_branchesAndFlights == null)
+        {
+            return;
+        }
+
+        IsSpinnerRunning = true;
+        try
+        {
+            ErrorMessage = string.Empty;
+
+            IGamePackageBranch? branchOrFlight = null;
+
+            if (IsBranchSelected)
+            {
+                branchOrFlight = _branchesAndFlights.FirstOrDefault(x => x.Name == BranchFriendlyName);
+            }
+            else
+            {
+                branchOrFlight = _branchesAndFlights.FirstOrDefault(x => x.Name == FlightName);
+            }
+
+            if (branchOrFlight != null)
+            {
+                _gamePackageConfiguration = await _uploaderService.GetPackageConfigurationAsync(_gameProduct, branchOrFlight, CancellationToken.None);
+
+                List<string> marketNames = [];
+                foreach (var market in _gamePackageConfiguration.MarketGroupPackages)
+                {
+                    marketNames.Add(market.Name);
+                }
+                MarketGroupNames = [.. marketNames];
+
+                MarketGroupName = MarketGroupNames.FirstOrDefault(string.Empty);
+
+                (UploadPackageCommand as Command)?.ChangeCanExecute();
+            }
+            else
+            {
+                MarketGroupNames = [];
+                MarketGroupName = string.Empty;
+
+                if (IsBranchSelected)
+                {
+                    ErrorMessage = "No Branches found for this product";
+                }
+                else
+                {
+                    ErrorMessage = "No Flight Groups found for this product";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error getting market groups: {ex.Message}";
+        }
+
+        (UploadPackageCommand as Command)?.ChangeCanExecute();
+        IsSpinnerRunning = false;
+    }
+
+    public Model.PackageModel Package => _packageModelService.Package;
     
     // Package properties accessed from the shared service
     public string BigId 
@@ -83,6 +174,8 @@ public partial class PackageUploadViewModel : BaseViewModel
                 Package.BigId = value;
                 OnPropertyChanged();
                 UpdatePackageState();
+
+                GetProductInfoAsync();
             }
         }
     }
@@ -179,8 +272,6 @@ public partial class PackageUploadViewModel : BaseViewModel
     public ICommand ResetPackageCommand { get; }
 
     private readonly string ConfileFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GeneratedConfig_{DateTime.Now:yyyyMMddHHmmss}.log");
-    private readonly ArrayList processOutput = [];
-    private Process? packageUploaderProcess;
 
     private bool _hasPackage = false;
     public bool HasPackage
@@ -210,28 +301,43 @@ public partial class PackageUploadViewModel : BaseViewModel
     }
     private static readonly string[] packageExtensions = [".xvc", ".msixvc"];
 
-    public PackageUploadViewModel(PackageModelService packageModelService, PathConfigurationService pathConfigurationService)
+    private string _selectedMode = "Branch";
+    public string SelectedMode
+    {
+        get => _selectedMode;
+        set
+        {
+            if (SetProperty(ref _selectedMode, value))
+            {
+                UpdateMarketGroups();
+                OnPropertyChanged(nameof(IsBranchSelected));
+                OnPropertyChanged(nameof(IsFlightSelected));
+            }
+        }
+    }
+
+    public bool IsBranchSelected => SelectedMode == "Branch";
+    public bool IsFlightSelected => SelectedMode == "Flight";
+
+    public List<string> Modes { get; } = new List<string> { "Branch", "Flight" };
+
+    public PackageUploadViewModel(PackageModelService packageModelService, IPackageUploaderService uploaderService)
     {
         _packageModelService = packageModelService;
-        _pathConfigurationService = pathConfigurationService;
-
-        if (File.Exists(_pathConfigurationService.PackageUploaderPath))
-        {
-            IsPackageUploadEnabled = true;
-        }
-        else
-        {
-            IsPackageUploadEnabled = false;
-            ErrorMessage = "PackageUploader.exe was not found. Package upload is unavailable.";
-        }
+        _uploaderService = uploaderService;
 
         // Initialize commands
         UploadPackageCommand = new Command(
-            StartUploadPackageProcess, 
-            () => IsPackageUploadEnabled && HasPackage);
+            UploadPackageProcessAsync,
+            () => IsUploadReady());
         BrowseForPackageCommand = new Command(async () => await BrowseForPackage());
         FileDroppedCommand = new Command<string>(ProcessDroppedFile);
         ResetPackageCommand = new Command(ResetPackage);
+    }
+
+    private bool IsUploadReady()
+    {
+        return HasPackage && _gameProduct != null && !string.IsNullOrEmpty(MarketGroupName);
     }
 
     private void UpdatePackageState()
@@ -252,7 +358,6 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (!string.IsNullOrEmpty(BigId))
             {
                 HasPackage = true;
-                StartGetProductInfo();
             }
 
             // Refresh all bound properties from the shared model
@@ -342,7 +447,6 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (!string.IsNullOrEmpty(BigId))
             {
                 HasPackage = true;
-                StartGetProductInfo();
             }
 
             OnPropertyChanged(nameof(IsDragDropVisible));
@@ -372,7 +476,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     {
         try
         {
-            XvcFile.GetBuildAndKeyId(packagePath, out Guid buildId, out Guid keyId);
+            Model.XvcFile.GetBuildAndKeyId(packagePath, out Guid buildId, out Guid keyId);
 
             // Get just the filename without extension to build up other file paths
             string? baseFolder = Path.GetDirectoryName(packagePath);
@@ -408,7 +512,14 @@ public partial class PackageUploadViewModel : BaseViewModel
                 SymbolBundleFilePath = string.Empty;
             }
 
-            BigId = storeId;
+            if (!string.IsNullOrEmpty(storeId))
+            {
+                BigId = storeId;
+            }
+            else
+            {
+                ErrorMessage = $"Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package.";
+            }
         }
         catch (Exception ex)
         {
@@ -449,7 +560,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     }
 
-    private void StartGetProductInfo()
+    private async void GetProductInfoAsync()
     {
         if (string.IsNullOrEmpty(BigId))
         {
@@ -460,112 +571,132 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             return;
         }
-        
-        var config = new GetProductConfig
-        {
-            bigId = BigId
-        };
-        string configFileText = System.Text.Json.JsonSerializer.Serialize(config);
-        File.WriteAllText(ConfileFilePath, configFileText);
 
-        // Provide a file path so we can distinguish between UI and CLI flows.
-        string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GetInfo_{DateTime.Now:yyyyMMddHHmmss}.log");
-        string pkgBuildExePath = _pathConfigurationService.PackageUploaderPath;
-        string cmdFormat = $"GetProduct -c {ConfileFilePath} -a default -l {logFilePath}";
-
-        packageUploaderProcess = new Process();
-        packageUploaderProcess.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(pkgBuildExePath);
-        packageUploaderProcess.StartInfo.FileName = pkgBuildExePath;
-        packageUploaderProcess.StartInfo.Arguments = cmdFormat;
-        packageUploaderProcess.StartInfo.RedirectStandardOutput = true;
-        packageUploaderProcess.StartInfo.RedirectStandardError = true;
-        packageUploaderProcess.EnableRaisingEvents = true;
-        packageUploaderProcess.StartInfo.CreateNoWindow = true;
-
-        packageUploaderProcess.OutputDataReceived += (sender, args) =>
-        {
-            if (!String.IsNullOrEmpty(args.Data))
-            {
-                processOutput.Add(args.Data);
-            }
-        };
-
-        packageUploaderProcess.ErrorDataReceived += (sender, args) =>
-        {
-            if (!String.IsNullOrEmpty(args.Data))
-            {
-                processOutput.Add(args.Data);
-            }
-        };
-
-        packageUploaderProcess.Exited += (sender, args) =>
-        {
-            IsSpinnerRunning = false;
-            string outputString = string.Join("\n", processOutput.ToArray());
-
-            // Parse Get Product Output
-            ProcessGetProductOutput(outputString);
-            packageUploaderProcess.WaitForExit();
-        };
-
-        packageUploaderProcess.Start();
-        packageUploaderProcess.BeginOutputReadLine();
-        packageUploaderProcess.BeginErrorReadLine();
         IsSpinnerRunning = true;
-    }
-
-    [GeneratedRegex(@"PackageUploader\.Application\.Operations\.GetProductOperation\[0\] Product: \{(?<ProductResponse>.*?)\}")]
-    private static partial Regex ProductResponseRegex();
-
-    private void ProcessGetProductOutput(string outputString)
-    {
-        if (outputString == null)
+        try
         {
-            return;
-        }
+            _gameProduct = await _uploaderService.GetProductByBigIdAsync(BigId, CancellationToken.None);
+            _branchesAndFlights = await _uploaderService.GetPackageBranchesAsync(_gameProduct, CancellationToken.None);
 
-        string? productResponseString = null;
-        MatchCollection productResponseCollection = ProductResponseRegex().Matches(outputString);
-
-        for (int i = 0; i < productResponseCollection.Count; i++)
-        {
-            productResponseString = "{" + productResponseCollection[i].Groups["ProductResponse"].Value + "}";
-            if (productResponseString != null)
+            List<string> branchNames = [];
+            List<string> flightNames = [];
+            foreach (var branch in _branchesAndFlights)
             {
-                break;
+                if (branch.BranchType == GamePackageBranchType.Branch)
+                {
+                    branchNames.Add(branch.Name);
+                }
+                else if (branch.BranchType == GamePackageBranchType.Flight)
+                {
+                    flightNames.Add(branch.Name);
+                }
             }
-        }
+            BranchFriendlyNames = [.. branchNames];
+            FlightNames = [.. flightNames];
 
-        if (productResponseString == null)
+            BranchFriendlyName = BranchFriendlyNames.FirstOrDefault(string.Empty);
+            FlightName = FlightNames.FirstOrDefault(string.Empty);
+
+            (UploadPackageCommand as Command)?.ChangeCanExecute();
+            ErrorMessage = string.Empty;
+        }
+        catch (ProductNotFoundException)
         {
-            return;
+            ErrorMessage = $"Product with BigId '{BigId}' not found. Configure your product at https://partner.microsoft.com/";
         }
-
-        GetProductResponse? response = System.Text.Json.JsonSerializer.Deserialize<GetProductResponse>(productResponseString);
-
-        if (response != null)
+        catch (Exception ex)
         {
-            BranchFriendlyNames = response.branchFriendlyNames;
-            FlightNames = response.flightNames;
+            ErrorMessage = $"Error getting product information: {ex.Message}";
         }
+
+        IsSpinnerRunning = false;
     }
 
-    private void StartUploadPackageProcess()
+    private async void UploadPackageProcessAsync()
     {
         // Clear any previous status messages when starting a new upload
         SuccessMessage = string.Empty;
         ErrorMessage = string.Empty;
-        
+
+        if (_gameProduct == null || _branchesAndFlights == null || _gamePackageConfiguration == null)
+        {
+            ErrorMessage = "Product information not available. Please enter a valid BigId and try again.";
+            return;
+        }
+
         IsSpinnerRunning = true;
 
-        var config = new UploadConfig
+        // We generate an uploader config for debugging or CLI use
+        GenerateUploaderConfig();
+
+        // Find the branch with BranchFriendlyName or FlightName
+        IGamePackageBranch? branchOrFlight = null;
+
+        if (IsBranchSelected)
+        {
+            branchOrFlight = _branchesAndFlights.FirstOrDefault(x => x.Name == BranchFriendlyName);
+        }
+        else
+        {
+            branchOrFlight = _branchesAndFlights.FirstOrDefault(x => x.Name == FlightName);
+        }
+
+        if (branchOrFlight == null)
+        {
+            if (IsFlightSelected)
+            {
+                if (string.IsNullOrEmpty(FlightName))
+                {
+                    ErrorMessage = "Selected product has no Flights";
+                }
+                else
+                {
+                    ErrorMessage = $"Flight '{FlightName}' not found.";
+                }
+            }
+            else
+            {
+                ErrorMessage = $"Branch '{BranchFriendlyName}' not found.";
+            }
+            IsSpinnerRunning = false;
+            return;
+        }
+
+        DateTime startTime = DateTime.Now;
+        try
+        {
+            var marketGroupPackage = _gamePackageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(MarketGroupName));
+
+            GamePackage gamePackage = await _uploaderService.UploadGamePackageAsync(
+                _gameProduct,
+                branchOrFlight,
+                marketGroupPackage,
+                PackageFilePath,
+                new GameAssets { EkbFilePath = EkbFilePath, SubValFilePath = SubValFilePath, SymbolsFilePath = SymbolBundleFilePath },
+                minutesToWaitForProcessing: 60,
+                deltaUpload: true,
+                isXvc: true,
+                CancellationToken.None);
+
+            SuccessMessage = $"Package uploaded successfully in {(DateTime.Now - startTime):hh\\:mm\\:ss}.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error uploading package: {ex.Message}";
+        }
+        IsSpinnerRunning = false;
+    }
+
+    private void GenerateUploaderConfig()
+    {
+        var config = new Model.UploadConfig
         {
             bigId = BigId,
             branchFriendlyName = BranchFriendlyName,
             flightName = FlightName,
             packageFilePath = PackageFilePath,
             marketGroupName = MarketGroupName,
-            gameAssets = new GameAssets
+            gameAssets = new Model.GameAssets
             {
                 ekbFilePath = EkbFilePath,
                 subValFilePath = SubValFilePath
@@ -574,51 +705,5 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         string configFileText = System.Text.Json.JsonSerializer.Serialize(config);
         File.WriteAllText(ConfileFilePath, configFileText);
-
-        // Provide a file path so we can distinguish between UI and CLI flows.
-        string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");
-        string pkgBuildExePath = _pathConfigurationService.PackageUploaderPath;
-        string cmdFormat = $"UploadXvcPackage -c {ConfileFilePath} -a default -l {logFilePath}";
-        packageUploaderProcess = new Process();
-        packageUploaderProcess.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(pkgBuildExePath);
-        packageUploaderProcess.StartInfo.FileName = pkgBuildExePath;
-        packageUploaderProcess.StartInfo.Arguments = cmdFormat;
-        packageUploaderProcess.StartInfo.RedirectStandardOutput = true;
-        packageUploaderProcess.StartInfo.RedirectStandardError = true;
-        packageUploaderProcess.EnableRaisingEvents = true;
-        packageUploaderProcess.StartInfo.CreateNoWindow = true;
-        packageUploaderProcess.OutputDataReceived += (sender, args) =>
-        {
-            if (!String.IsNullOrEmpty(args.Data))
-            {
-                processOutput.Add(args.Data);
-            }
-        };
-        packageUploaderProcess.ErrorDataReceived += (sender, args) =>
-        {
-            if (!String.IsNullOrEmpty(args.Data))
-            {
-                processOutput.Add(args.Data);
-            }
-        };
-        packageUploaderProcess.Exited += (sender, args) =>
-        {
-            string outputString = string.Join("\n", processOutput.ToArray());
-            packageUploaderProcess.WaitForExit();
-
-            if (packageUploaderProcess.ExitCode == 0)
-            {
-                SuccessMessage = "Package uploaded successfully!";
-            }
-            else
-            {
-                ErrorMessage = $"Package upload failed with exit code: {packageUploaderProcess.ExitCode}";
-            }
-
-            IsSpinnerRunning = false;
-        };
-        packageUploaderProcess.Start();
-        packageUploaderProcess.BeginOutputReadLine();
-        packageUploaderProcess.BeginErrorReadLine();
     }
 }

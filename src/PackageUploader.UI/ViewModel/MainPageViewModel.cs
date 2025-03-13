@@ -23,25 +23,11 @@ public partial class MainPageViewModel : BaseViewModel
         set => SetProperty(ref _isMakePkgEnabled, value);
     }
 
-    private bool _isPackageUploaderEnabled = true;
-    public bool IsPackageUploaderEnabled
-    {
-        get => _isPackageUploaderEnabled;
-        set => SetProperty(ref _isPackageUploaderEnabled, value);
-    }
-
     private string _makePkgUnavailableErrorMessage = string.Empty;
     public string MakePkgUnavailableErrorMessage
     {
         get => _makePkgUnavailableErrorMessage;
         set => SetProperty(ref _makePkgUnavailableErrorMessage, value);
-    }
-
-    private string _packageUploaderUnavailableErrorMessage = string.Empty;
-    public string PackageUploaderUnavailableErrorMessage
-    {
-        get => _packageUploaderUnavailableErrorMessage;
-        set => SetProperty(ref _packageUploaderUnavailableErrorMessage, value);
     }
 
     public MainPageViewModel(PathConfigurationService pathConfigurationService)
@@ -56,10 +42,9 @@ public partial class MainPageViewModel : BaseViewModel
         NavigateToPackageUploadCommand = new Command(async () =>
         {
             await Shell.Current.GoToAsync("///" + nameof(PackageUploadView));
-        }, () => IsPackageUploaderEnabled);
+        });
 
         string makePkgPath = ResolveExecutablePath("MakePkg.exe");
-        string packageUploaderPath = ResolveExecutablePath("PackageUploader.exe");
 
         if (File.Exists(makePkgPath))
         {
@@ -71,17 +56,6 @@ public partial class MainPageViewModel : BaseViewModel
             IsMakePkgEnabled = false;
             MakePkgUnavailableErrorMessage = "MakePkg.exe was not found. Please install the GDK in order to package game contents.";
         }
-
-        if (File.Exists(packageUploaderPath))
-        {
-            _pathConfigurationService.PackageUploaderPath = packageUploaderPath;
-            IsPackageUploaderEnabled = true;
-        }
-        else
-        {
-            IsPackageUploaderEnabled = false;
-            PackageUploaderUnavailableErrorMessage = "PackageUploader.exe was not found. Package upload is unavailable.";
-        }
     }
 
     private static string ResolveExecutablePath(string exeName)
@@ -91,7 +65,6 @@ public partial class MainPageViewModel : BaseViewModel
         // 2. In the CurrentDirectory
         // 3. In the GDK if it's installed
         // 4. In the directories specified by the PATH environment variable
-        // 5. In a relative output directory (DEBUG only)
 
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
@@ -134,13 +107,6 @@ public partial class MainPageViewModel : BaseViewModel
             return exePath;
         }
 
-#if DEBUG
-        if (!string.IsNullOrEmpty(assemblyDirectory))
-        {
-            var relativeUploaderPath = Path.Combine(assemblyDirectory, "..\\..\\..\\..\\..\\PackageUploader.Application\\bin\\Debug\\net8.0", exeName);
-            return relativeUploaderPath;
-        }
-#endif
         return string.Empty;
     }
 

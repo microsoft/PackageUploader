@@ -12,6 +12,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageUploader.FileLogger", "PackageUploader.FileLogger\PackageUploader.FileLogger.csproj", "{4E104E86-EFAE-48B8-8CF5-6537A551C177}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageUploader.UI", "PackageUploader.UI\PackageUploader.UI.csproj", "{05F4C384-719C-4A94-8D0F-5C05541A64B9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0769F5CA-C2ED-4B31-BB8C-73E5180CF679} = {0769F5CA-C2ED-4B31-BB8C-73E5180CF679}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
