@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using System.Windows.Input;
 using System.Xml;
 using PackageUploader.ClientApi;
@@ -159,6 +160,20 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         (UploadPackageCommand as Command)?.ChangeCanExecute();
         IsSpinnerRunning = false;
+    }
+
+    private double _progressValue = 0;
+    public double ProgressValue
+    {
+        get => _progressValue;
+        set => SetProperty(ref _progressValue, value);
+    }
+
+    private bool _isProgressVisible = false;
+    public bool IsProgressVisible
+    {
+        get => _isProgressVisible;
+        set => SetProperty(ref _isProgressVisible, value);
     }
 
     public Model.PackageModel Package => _packageModelService.Package;
@@ -370,6 +385,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
 
         // Clear any previous messages
+        IsProgressVisible = false;
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
     }
@@ -459,6 +475,8 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private void ResetPackage()
     {
+        IsSpinnerRunning = false;
+        IsProgressVisible = false;
         BigId = string.Empty;
         PackageFilePath = string.Empty;
         EkbFilePath = string.Empty;
@@ -624,7 +642,9 @@ public partial class PackageUploadViewModel : BaseViewModel
             return;
         }
 
+        ProgressValue = 0;
         IsSpinnerRunning = true;
+        IsProgressVisible = true;
 
         // We generate an uploader config for debugging or CLI use
         GenerateUploaderConfig();
@@ -659,13 +679,17 @@ public partial class PackageUploadViewModel : BaseViewModel
                 ErrorMessage = $"Branch '{BranchFriendlyName}' not found.";
             }
             IsSpinnerRunning = false;
+            IsProgressVisible = false;
             return;
         }
 
-        DateTime startTime = DateTime.Now;
+        var timer = new Stopwatch();
+        timer.Start();
         try
         {
             var marketGroupPackage = _gamePackageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(MarketGroupName));
+
+            IProgress<double> progress = new Progress<double>(value => ProgressValue = value);
 
             GamePackage gamePackage = await _uploaderService.UploadGamePackageAsync(
                 _gameProduct,
@@ -676,12 +700,16 @@ public partial class PackageUploadViewModel : BaseViewModel
                 minutesToWaitForProcessing: 60,
                 deltaUpload: true,
                 isXvc: true,
+                progress,
                 CancellationToken.None);
 
-            SuccessMessage = $"Package uploaded successfully in {(DateTime.Now - startTime):hh\\:mm\\:ss}.";
+            ProgressValue = 1;
+            timer.Stop();
+            SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
         }
         catch (Exception ex)
         {
+            IsProgressVisible = false;
             ErrorMessage = $"Error uploading package: {ex.Message}";
         }
         IsSpinnerRunning = false;

@@ -26,22 +26,13 @@
             </Grid.RowDefinitions>
 
             <Label Grid.Row="0"
-                   Text="Package Uploader Input Form"
-                   Style="{StaticResource Headline}"
-                   SemanticProperties.HeadingLevel="Level1" />
-
-            <Label Grid.Row="1"
                    x:Name="SubHeadLine"
                    Text="Upload your package to Partner Center"
                    Style="{StaticResource SubHeadline}"
                    SemanticProperties.HeadingLevel="Level2"
                    SemanticProperties.Description="Upload your package to Partner Center" />
 
-            <ActivityIndicator Grid.Row="2"
-                               x:Name="WorkingIndicator"
-                               IsRunning="{Binding IsSpinnerRunning, Mode=OneWay}" />
-
-            <VerticalStackLayout Grid.Row="2" Margin="0,50,0,0" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Row="1" HorizontalOptions="Center">
                 <Label Text="{Binding SuccessMessage}" 
                        TextColor="{StaticResource Primary}"
                        Style="{StaticResource SubHeadline}"
@@ -54,7 +45,29 @@
                        HorizontalOptions="Center"
                        IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}}" />
             </VerticalStackLayout>
-            
+
+            <Grid Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ActivityIndicator
+                    Grid.Row="0"
+                    x:Name="WorkingIndicator"
+                    IsRunning="{Binding IsSpinnerRunning, Mode=OneWay}" />
+
+                <ProgressBar
+                    Grid.Row="1"
+                    Progress="{Binding ProgressValue, Mode=OneWay}"
+                    IsVisible="{Binding IsProgressVisible}"
+                    ProgressColor="Green"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Fill"
+                    Margin="200,20,200,0"
+                    MinimumHeightRequest="25"/>
+            </Grid>
+
             <!-- Package Drop Area  -->
             <Grid Grid.Row="3" IsVisible="{Binding IsDragDropVisible}">
                 <controls:DropArea 
@@ -105,7 +118,7 @@
                 </Grid.RowDefinitions>
 
                 <Label Grid.Row="0"
-                       Text="Package Uploader Params"
+                       Text="Package Uploader Parameters"
                        VerticalOptions="Center"
                        HorizontalOptions="Center"
                        Style="{StaticResource SubHeadline}"

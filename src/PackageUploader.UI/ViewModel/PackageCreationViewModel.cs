@@ -169,7 +169,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             return;
         }
 
-        string cmdFormat = "pack /v /l /f {0} /d {1} /pd {2}";
+        string cmdFormat = "pack /v /f {0} /d {1} /pd {2}";
 
         makePackageProcess = new Process();
         makePackageProcess.StartInfo.FileName = _pathConfigurationService.MakePkgPath;
