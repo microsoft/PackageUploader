@@ -13,6 +13,13 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using PackageUploader.ClientApi.Client.Ingestion.Client;
+using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Moq.Protected;
+using System.Net.Http.Json;
+using PackageUploader.ClientApi.Client.Ingestion.Mappers;
 
 namespace PackageUploader.ClientApi.Test;
 
@@ -22,11 +29,17 @@ public class PackageUploaderServiceTest
     private const string TestBigId = "TestBigId";
     private const string TestProductId = "TestProductId";
 
+    private const string TestMovedPackageId = "TestMovedPackageId";
+    private const string TestMovedPackageToId = "TestMovedPackageToId";
+
     private const string TestUnauthorizedBigId = "TestUnauthorizedBigId";
     private const string TestUnauthorizedProductId = "TestUnauthorizedProductId";
 
     private GameProduct _testProduct;
     private PackageUploaderService _packageUploaderService;
+    private IngestionRedirectPackage _redirectPackage;
+    private IngestionGamePackage _movedPackage;
+    private IngestionHttpClient _ingestionClient;
 
     [TestInitialize]
     public void Initialize()
@@ -35,6 +48,18 @@ public class PackageUploaderServiceTest
         {
             BigId = TestBigId,
             ProductId = TestProductId,
+        };
+
+        _redirectPackage = new IngestionRedirectPackage
+        {
+            Id = TestMovedPackageId,
+            ToId = TestMovedPackageToId,
+            ProcessingState = GamePackageState.Processed.ToString()
+        };
+        _movedPackage = new IngestionGamePackage
+        {
+            Id = TestMovedPackageToId,
+            State = GamePackageState.Processed.ToString(),
         };
 
         var logger = new NullLogger<PackageUploaderService>();
@@ -58,6 +83,20 @@ public class PackageUploaderServiceTest
         var xfusUploader = new Mock<IXfusUploader>();
 
         _packageUploaderService = new PackageUploaderService(ingestionClient.Object, xfusUploader.Object, logger);
+
+        var httpClient = new Mock<HttpClient>();
+        // Helpful References:
+        // https://stackoverflow.com/questions/36425008/mocking-httpclient-in-unit-tests
+        //https://stackoverflow.com/questions/60094386/moq-verify-on-a-mocked-httpclienthandler-cant-access-the-content-object-becau
+        httpClient.Setup(p => p.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.ToString().Contains($"products/{TestProductId}/packages/{TestMovedPackageId}")), 
+                                          It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => new HttpResponseMessage(HttpStatusCode.MovedPermanently) { Content = JsonContent.Create<IngestionRedirectPackage>(_redirectPackage) });
+        httpClient.Setup(p => p.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.ToString().Contains($"products/{TestProductId}/packages/{TestMovedPackageToId}")),
+                                          It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create<IngestionGamePackage>(_movedPackage) });
+
+        var loggerIngestionClient = new NullLogger<IngestionHttpClient>();
+        _ingestionClient = new IngestionHttpClient(loggerIngestionClient, httpClient.Object, null);
     }
 
     [TestMethod]
@@ -130,5 +169,14 @@ public class PackageUploaderServiceTest
     public async Task GetProductByBigIdUnauthorizedTest()
     {
         await Assert.ThrowsExceptionAsync<HttpRequestException>(() => _packageUploaderService.GetProductByBigIdAsync(TestUnauthorizedBigId, CancellationToken.None));
+    }
+
+    [TestMethod]
+    public async Task GetPackageByIdAsyncRedirectTest()
+    {
+        var packageResult = await _ingestionClient.GetPackageByIdAsync(TestProductId, TestMovedPackageId, CancellationToken.None);
+        Assert.IsNotNull(packageResult);
+        Assert.AreEqual(TestMovedPackageToId, packageResult.Id);
+        Assert.AreEqual(_movedPackage.State, packageResult.State.ToString());
     }
 }
