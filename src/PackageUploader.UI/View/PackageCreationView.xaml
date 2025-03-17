@@ -132,13 +132,28 @@
             </Grid>
 
             <Grid Grid.Row="6">
-                <Button
-                    x:Name="MakePkg"
-                    Text="Call MakePkg"
-                    SemanticProperties.Hint="Calls Make Package and populates rest of the fields"
-                    Command="{Binding MakePackageCommand}"
-                    IsEnabled="{Binding IsMakePkgEnabled}"
-                    HorizontalOptions="Fill" />
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Margin="5"
+                        x:Name="MakePkg"
+                        Text="Call MakePkg"
+                        SemanticProperties.Hint="Calls Make Package and populates rest of the fields"
+                        Command="{Binding MakePackageCommand}"
+                        IsEnabled="{Binding IsMakePkgEnabled}"
+                        HorizontalOptions="Fill" />
+
+                <Button Grid.Column="1"
+                        Margin="5"
+                        x:Name="CancelCreation"
+                        Text="Cancel Creation" 
+                        SemanticProperties.Hint="Cancels the ongoing package creation"
+                        Command="{Binding CancelCreationCommand}"
+                        IsEnabled="{Binding IsCreationInProgress}"
+                        HorizontalOptions="Fill" />
             </Grid>
         </Grid>
     </ScrollView>

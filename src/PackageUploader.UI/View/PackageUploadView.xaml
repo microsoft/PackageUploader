@@ -293,13 +293,30 @@
                 </Grid>
             </Grid>
 
-            <Button Grid.Row="5"
-                    x:Name="UploadPackage"
-                    Text="Upload Package" 
-                    SemanticProperties.Hint="Uploads the package to Partner Center"
-                    Command="{Binding UploadPackageCommand}"
-                    IsEnabled="{Binding HasPackage}"
-                    HorizontalOptions="Fill" />
+            <Grid Grid.Row="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Margin="5"
+                        x:Name="UploadPackage"
+                        Text="Upload Package" 
+                        SemanticProperties.Hint="Uploads the package to Partner Center"
+                        Command="{Binding UploadPackageCommand}"
+                        IsEnabled="{Binding HasPackage}"
+                        HorizontalOptions="Fill" />
+
+                <Button Grid.Column="1"
+                        Margin="5"
+                        x:Name="CancelUpload"
+                        Text="Cancel Upload" 
+                        SemanticProperties.Hint="Cancels the ongoing package upload"
+                        Command="{Binding CancelUploadCommand}"
+                        IsEnabled="{Binding IsUploadInProgress}"
+                        HorizontalOptions="Fill" />
+            </Grid>
         </Grid>
     </ScrollView>
 

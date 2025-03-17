@@ -21,6 +21,13 @@ public partial class PackageUploadViewModel : BaseViewModel
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
     private GamePackageConfiguration? _gamePackageConfiguration = null;
 
+    private bool _isUploadInProgress = false;
+    public bool IsUploadInProgress
+    {
+        get => _isUploadInProgress;
+        set => SetProperty(ref _isUploadInProgress, value);
+    }
+
     private bool _isSpinnerRunning = false;
     public bool IsSpinnerRunning
     {
@@ -285,6 +292,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     public ICommand BrowseForPackageCommand { get; }
     public ICommand FileDroppedCommand { get; }
     public ICommand ResetPackageCommand { get; }
+    public ICommand CancelUploadCommand { get; }
 
     private readonly string ConfileFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GeneratedConfig_{DateTime.Now:yyyyMMddHHmmss}.log");
 
@@ -336,6 +344,8 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     public List<string> Modes { get; } = ["Branch", "Flight"];
 
+    private CancellationTokenSource? _uploadCancellationTokenSource;
+
     public PackageUploadViewModel(PackageModelService packageModelService, IPackageUploaderService uploaderService)
     {
         _packageModelService = packageModelService;
@@ -348,6 +358,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         BrowseForPackageCommand = new Command(async () => await BrowseForPackage());
         FileDroppedCommand = new Command<string>(ProcessDroppedFile);
         ResetPackageCommand = new Command(ResetPackage);
+        CancelUploadCommand = new Command(CancelUpload);
     }
 
     private bool IsUploadReady()
@@ -476,6 +487,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     private void ResetPackage()
     {
         IsSpinnerRunning = false;
+        IsUploadInProgress = false;
         IsProgressVisible = false;
         BigId = string.Empty;
         PackageFilePath = string.Empty;
@@ -644,6 +656,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         ProgressValue = 0;
         IsSpinnerRunning = true;
+        IsUploadInProgress = true;
         IsProgressVisible = true;
 
         // We generate an uploader config for debugging or CLI use
@@ -680,11 +693,16 @@ public partial class PackageUploadViewModel : BaseViewModel
             }
             IsSpinnerRunning = false;
             IsProgressVisible = false;
+            IsUploadInProgress = false;
             return;
         }
 
         var timer = new Stopwatch();
         timer.Start();
+
+        _uploadCancellationTokenSource = new CancellationTokenSource();
+        var ct = _uploadCancellationTokenSource.Token;
+
         try
         {
             var marketGroupPackage = _gamePackageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(MarketGroupName));
@@ -701,18 +719,32 @@ public partial class PackageUploadViewModel : BaseViewModel
                 deltaUpload: true,
                 isXvc: true,
                 progress,
-                CancellationToken.None);
+                ct);
 
             ProgressValue = 1;
             timer.Stop();
             SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
         }
+        catch (OperationCanceledException)
+        {
+            ErrorMessage = "Upload cancelled.";
+        }
         catch (Exception ex)
         {
-            IsProgressVisible = false;
             ErrorMessage = $"Error uploading package: {ex.Message}";
         }
-        IsSpinnerRunning = false;
+        finally
+        {
+            IsSpinnerRunning = false;
+            IsUploadInProgress = false;
+            IsProgressVisible = false;
+            _uploadCancellationTokenSource = null;
+        }
+    }
+
+    private void CancelUpload()
+    {
+        _uploadCancellationTokenSource?.Cancel();
     }
 
     private void GenerateUploaderConfig()
