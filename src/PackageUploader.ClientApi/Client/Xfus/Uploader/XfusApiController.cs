@@ -66,7 +66,7 @@ internal class XfusApiController
                 blockProgressReporter.BytesUploaded += bytesRead;
                 _logger.LogTrace("Uploaded block {blockId}. Total uploaded: {bytesUploaded} / {totalBlockBytes}.", block.Id, new ByteSize(blockProgressReporter.BytesUploaded), new ByteSize(blockProgressReporter.TotalBlockBytes));
                 blockProgressReporter.ReportProgress();
-                bytesProgress.Report((ulong)bytesRead);
+                bytesProgress?.Report((ulong)bytesRead);
             }
             // Swallow exceptions so other chunk upload can proceed without ActionBlock terminating
             // from a midway-failed chunk upload. We'll re-upload failed chunks later on so this is ok.
