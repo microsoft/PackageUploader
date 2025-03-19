@@ -1,6 +1,6 @@
 # Package Uploader
 
-This article describes how to automate uploading of packages to Partner Center by using the Package Uploader tool.
+This article describes how to automate uploading of game packages to Partner Center by using the Package Uploader tool.
 
 You can download the latest version of the Package Uploader tool on GitHub [https://github.com/microsoft/PackageUploader](https://github.com/microsoft/PackageUploader).
 
@@ -382,6 +382,9 @@ You have uploaded two packages to the same branch. Use the Partner Center portal
 
 **Q:** Can I use the Package Uploader to automate and update other parts of Partner Center besides uploads?<br>
 **A:** No. This isn't currently available. The scope was only uploads and publishing. The API teams are currently working to expand this to automate other parts of Partner Center.
+
+**Q:** Can I use the Package Uploader for an application that isn't a game?<br>
+**A:** No. This tool only works for games and cannot be used for apps.
 
 **Q:** If I want to change how the wrapper works who do I reach out to?<br>
 **A:** It's completely open source. You can change the wrapper as you want. Use, adjust, and contribute on GitHub!
