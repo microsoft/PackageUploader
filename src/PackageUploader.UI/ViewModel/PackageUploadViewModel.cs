@@ -9,6 +9,7 @@ using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
 using PackageUploader.UI.Providers;
+using PackageUploader.UI.Utility;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -20,6 +21,9 @@ public partial class PackageUploadViewModel : BaseViewModel
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
     private GamePackageConfiguration? _gamePackageConfiguration = null;
+
+    private OneTimeHolder<String>? _savedBranchMemory = null;
+    private OneTimeHolder<String>? _savedFlightMemory = null;
 
     private bool _isUploadInProgress = false;
     public bool IsUploadInProgress
@@ -63,6 +67,11 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             if (SetProperty(ref _branchFriendlyNames, value))
             {
+                string? branchName = _savedBranchMemory?.Value;
+                if (!String.IsNullOrEmpty(branchName) && String.IsNullOrEmpty(BranchFriendlyName))
+                {
+                    BranchFriendlyName = branchName;
+                }
                 OnPropertyChanged(nameof(BranchFriendlyName));
             }
         }
@@ -368,6 +377,12 @@ public partial class PackageUploadViewModel : BaseViewModel
         ResetPackageCommand = new Command(ResetPackage);
         CancelUploadCommand = new Command(CancelUpload);
 
+        SelectedMode = GetPropertyFromApplicationPreferences(nameof(SelectedMode));
+        MarketGroupName = GetPropertyFromApplicationPreferences(nameof(MarketGroupName));
+        FlightName = GetPropertyFromApplicationPreferences(nameof(FlightName));
+        _savedFlightMemory = new OneTimeHolder<String>(FlightName);
+        BranchFriendlyName = GetPropertyFromApplicationPreferences(nameof(BranchFriendlyName));
+        _savedBranchMemory = new OneTimeHolder<String>(BranchFriendlyName);
         if (string.IsNullOrEmpty(PackageFilePath))
         {
 
@@ -376,12 +391,9 @@ public partial class PackageUploadViewModel : BaseViewModel
             {
                 IsDragDropVisible = false;
                 ExtractPackageInformation(PackageFilePath);
+                UpdateMarketGroups();
             }
         }
-        SelectedMode = GetPropertyFromApplicationPreferences(nameof(SelectedMode));
-        MarketGroupName = GetPropertyFromApplicationPreferences(nameof(MarketGroupName));
-        FlightName = GetPropertyFromApplicationPreferences(nameof(FlightName));
-        BranchFriendlyName = GetPropertyFromApplicationPreferences(nameof(BranchFriendlyName));
 
     }
 
@@ -648,8 +660,18 @@ public partial class PackageUploadViewModel : BaseViewModel
             BranchFriendlyNames = [.. branchNames];
             FlightNames = [.. flightNames];
 
-            BranchFriendlyName = BranchFriendlyNames.FirstOrDefault(string.Empty);
-            FlightName = FlightNames.FirstOrDefault(string.Empty);
+            if(string.IsNullOrEmpty(BranchFriendlyName) || !branchNames.Contains(BranchFriendlyName))
+            {
+                BranchFriendlyName = BranchFriendlyNames.FirstOrDefault(string.Empty);
+            }
+            //BranchFriendlyName = BranchFriendlyNames.FirstOrDefault(string.Empty);
+            if(string.IsNullOrEmpty(FlightName) || !flightNames.Contains(FlightName))
+            {
+                FlightName = FlightNames.FirstOrDefault(string.Empty);
+            }
+            //FlightName = FlightNames.FirstOrDefault(string.Empty);
+            OnPropertyChanged(nameof(BranchFriendlyName));
+            OnPropertyChanged(nameof(FlightName));
 
             (UploadPackageCommand as Command)?.ChangeCanExecute();
             ErrorMessage = string.Empty;
