@@ -8,13 +8,13 @@ using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
-using PackageUploader.UI.Services;
+using PackageUploader.UI.Providers;
 
 namespace PackageUploader.UI.ViewModel;
 
 public partial class PackageUploadViewModel : BaseViewModel
 {
-    private readonly PackageModelService _packageModelService;
+    private readonly PackageModelProvider _packageModelService;
     private readonly IPackageUploaderService _uploaderService;
 
     private GameProduct? _gameProduct = null;
@@ -141,7 +141,10 @@ public partial class PackageUploadViewModel : BaseViewModel
                 }
                 MarketGroupNames = [.. marketNames];
 
-                MarketGroupName = MarketGroupNames.FirstOrDefault(string.Empty);
+                if (!string.IsNullOrEmpty(MarketGroupName) || !marketNames.Contains(MarketGroupName))
+                {
+                    MarketGroupName = MarketGroupNames.FirstOrDefault(string.Empty);
+                }
 
                 (UploadPackageCommand as Command)?.ChangeCanExecute();
             }
@@ -196,6 +199,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                 Package.BigId = value;
                 OnPropertyChanged();
                 UpdatePackageState();
+                SetPropertyInApplicationPreferences(value);
 
                 GetProductInfoAsync();
             }
@@ -210,6 +214,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.PackageFilePath != value)
             {
                 Package.PackageFilePath = value;
+                SetPropertyInApplicationPreferences(value);
                 OnPropertyChanged();
             }
         }
@@ -223,6 +228,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.EkbFilePath != value)
             {
                 Package.EkbFilePath = value;
+                SetPropertyInApplicationPreferences(value);
                 OnPropertyChanged();
             }
         }
@@ -236,6 +242,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.SubValFilePath != value)
             {
                 Package.SubValFilePath = value;
+                SetPropertyInApplicationPreferences(value);
                 OnPropertyChanged();
             }
         }
@@ -249,6 +256,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.SymbolBundleFilePath != value)
             {
                 Package.SymbolBundleFilePath = value;
+                SetPropertyInApplicationPreferences(value);
                 OnPropertyChanged();
             }
         }
@@ -346,7 +354,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private CancellationTokenSource? _uploadCancellationTokenSource;
 
-    public PackageUploadViewModel(PackageModelService packageModelService, IPackageUploaderService uploaderService)
+    public PackageUploadViewModel(PackageModelProvider packageModelService, IPackageUploaderService uploaderService)
     {
         _packageModelService = packageModelService;
         _uploaderService = uploaderService;
@@ -359,6 +367,22 @@ public partial class PackageUploadViewModel : BaseViewModel
         FileDroppedCommand = new Command<string>(ProcessDroppedFile);
         ResetPackageCommand = new Command(ResetPackage);
         CancelUploadCommand = new Command(CancelUpload);
+
+        if (string.IsNullOrEmpty(PackageFilePath))
+        {
+
+            PackageFilePath = GetPropertyFromApplicationPreferences(nameof(PackageFilePath));
+            if (!string.IsNullOrEmpty(PackageFilePath))
+            {
+                IsDragDropVisible = false;
+                ExtractPackageInformation(PackageFilePath);
+            }
+        }
+        SelectedMode = GetPropertyFromApplicationPreferences(nameof(SelectedMode));
+        MarketGroupName = GetPropertyFromApplicationPreferences(nameof(MarketGroupName));
+        FlightName = GetPropertyFromApplicationPreferences(nameof(FlightName));
+        BranchFriendlyName = GetPropertyFromApplicationPreferences(nameof(BranchFriendlyName));
+
     }
 
     private bool IsUploadReady()

@@ -4,14 +4,14 @@
 using System.Reflection;
 using System.Windows.Input;
 using Microsoft.Win32;
-using PackageUploader.UI.Services;
+using PackageUploader.UI.Providers;
 using PackageUploader.UI.View;
 
 namespace PackageUploader.UI.ViewModel;
 
 public partial class MainPageViewModel : BaseViewModel
 {
-    private readonly PathConfigurationService _pathConfigurationService;
+    private readonly PathConfigurationProvider _pathConfigurationService;
     
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
@@ -30,7 +30,7 @@ public partial class MainPageViewModel : BaseViewModel
         set => SetProperty(ref _makePkgUnavailableErrorMessage, value);
     }
 
-    public MainPageViewModel(PathConfigurationService pathConfigurationService)
+    public MainPageViewModel(PathConfigurationProvider pathConfigurationService)
     {
         _pathConfigurationService = pathConfigurationService;
         

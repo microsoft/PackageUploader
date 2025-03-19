@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Input;
 using PackageUploader.UI.Model;
 using PackageUploader.UI.View;
-using PackageUploader.UI.Services;
+using PackageUploader.UI.Providers;
 using CommunityToolkit.Maui.Storage;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -17,8 +17,8 @@ namespace PackageUploader.UI.ViewModel;
 public partial class PackageCreationViewModel : BaseViewModel
 {
     private const uint CtrlCTerminationCode = 0xc000013a;
-    private readonly PackageModelService _packageModelService;
-    private readonly PathConfigurationService _pathConfigurationService;
+    private readonly PackageModelProvider _packageModelService;
+    private readonly PathConfigurationProvider _pathConfigurationService;
 
     private Process? _makePackageProcess;
 
@@ -44,7 +44,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     public string GameDataPath
     {
         get => _gameDataPath;
-        set => SetProperty(ref _gameDataPath, value);
+        set=> SetProperty(ref _gameDataPath, value);
     }
 
     private string _mappingDataXmlPath = string.Empty;
@@ -131,7 +131,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     public ICommand ResetGameDataPathCommand { get; }
     public ICommand CancelCreationCommand { get; }
 
-    public PackageCreationViewModel(PackageModelService packageModelService, PathConfigurationService pathConfigurationService)
+    public PackageCreationViewModel(PackageModelProvider packageModelService, PathConfigurationProvider pathConfigurationService)
     {
         _packageModelService = packageModelService;
         _pathConfigurationService = pathConfigurationService;
@@ -156,6 +156,15 @@ public partial class PackageCreationViewModel : BaseViewModel
         BrowseGameDataPathCommand = new Command(OnBrowseGameDataPath);
         ResetGameDataPathCommand = new Command(ResetGameDataPath);
         CancelCreationCommand = new Command(CancelCreation);
+
+        GameDataPath = GetPropertyFromApplicationPreferences(nameof(GameDataPath));
+        if(GameDataPath != string.Empty)
+        {
+            IsDragDropVisible = false;
+            HasGameDataPath = true;
+        }
+        MappingDataXmlPath = GetPropertyFromApplicationPreferences(nameof(MappingDataXmlPath));
+
     }
 
 #if WINDOWS

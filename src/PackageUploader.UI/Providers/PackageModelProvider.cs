@@ -5,9 +5,9 @@ using PackageUploader.UI.Model;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace PackageUploader.UI.Services;
+namespace PackageUploader.UI.Providers;
 
-public partial class PackageModelService : INotifyPropertyChanged
+public partial class PackageModelProvider : INotifyPropertyChanged
 {
     private PackageModel _package;
 
@@ -21,7 +21,7 @@ public partial class PackageModelService : INotifyPropertyChanged
         }
     }
 
-    public PackageModelService()
+    public PackageModelProvider()
     {
         _package = new PackageModel();
     }

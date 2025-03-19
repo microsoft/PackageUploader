@@ -4,9 +4,9 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace PackageUploader.UI.Services;
+namespace PackageUploader.UI.Providers;
 
-public partial class PathConfigurationService : INotifyPropertyChanged
+public partial class PathConfigurationProvider : INotifyPropertyChanged
 {
     private string _makePkgPath = string.Empty;
     public string MakePkgPath

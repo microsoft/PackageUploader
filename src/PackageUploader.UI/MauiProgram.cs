@@ -5,7 +5,7 @@ using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi;
 using PackageUploader.FileLogger;
-using PackageUploader.UI.Services;
+using PackageUploader.UI.Providers;
 using PackageUploader.UI.View;
 using PackageUploader.UI.ViewModel;
 using static PackageUploader.ClientApi.IngestionExtensions;
@@ -29,9 +29,9 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        // Register Services
-        builder.Services.AddSingleton<PackageModelService>();
-        builder.Services.AddSingleton<PathConfigurationService>();
+        // Register Providers
+        builder.Services.AddSingleton<PackageModelProvider>();
+        builder.Services.AddSingleton<PathConfigurationProvider>();
         builder.Services.AddPackageUploaderService(AuthenticationMethod.Default);
 
         // Register ViewModels

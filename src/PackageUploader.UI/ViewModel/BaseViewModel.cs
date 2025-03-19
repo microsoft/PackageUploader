@@ -21,7 +21,19 @@ public partial class BaseViewModel : INotifyPropertyChanged
             return false;
 
         field = value;
+        Microsoft.Maui.Storage.Preferences.Set(this.GetType().Name+"_"+propertyName, value?.ToString());
         OnPropertyChanged(propertyName);
         return true;
+    }
+
+    protected bool SetPropertyInApplicationPreferences(string value, [CallerMemberName] string? propertyName = null)
+    {
+        Microsoft.Maui.Storage.Preferences.Set(this.GetType().Name + "_" + propertyName, value);
+        return true;
+    }
+
+    protected String GetPropertyFromApplicationPreferences(string fieldName)
+    {
+        return Microsoft.Maui.Storage.Preferences.Get(this.GetType().Name + "_" + fieldName, string.Empty);
     }
 }
