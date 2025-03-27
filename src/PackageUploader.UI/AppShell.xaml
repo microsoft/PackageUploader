@@ -12,6 +12,10 @@
         ContentTemplate="{DataTemplate view:MainPageView}"
         Route="MainPageView" />
     <ShellContent
+        Title="Login Page"
+        ContentTemplate="{DataTemplate view:LoginView}"
+        Route="LoginView" />
+    <ShellContent
         Title="Create a New Package"
         ContentTemplate="{DataTemplate view:PackageCreationView}"
         Route="PackageCreationView" />

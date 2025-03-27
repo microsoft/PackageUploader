@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
+             x:Class="PackageUploader.UI.View.LoginView"
+             x:DataType="viewmodel:LoginViewModel">
+    <VerticalStackLayout>
+        <Label
+            x:Name="LoginTextField"
+            Text="{Binding LoginCommandText}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+        <Button
+            Text="Click to Login"
+            Command="{Binding LoginCommand}" />
+    </VerticalStackLayout>
+</ContentPage>

@@ -15,6 +15,7 @@ public partial class MainPageViewModel : BaseViewModel
     
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
+    public ICommand NavigateToLoginPage { get; }
 
     private bool _isMakePkgEnabled = true;
     public bool IsMakePkgEnabled 
@@ -42,6 +43,10 @@ public partial class MainPageViewModel : BaseViewModel
         NavigateToPackageUploadCommand = new Command(async () =>
         {
             await Shell.Current.GoToAsync("///" + nameof(PackageUploadView));
+        });
+        NavigateToLoginPage = new Command(async () =>
+        {
+            await Shell.Current.GoToAsync("///" + nameof(LoginView));
         });
 
         string makePkgPath = ResolveExecutablePath("MakePkg.exe");

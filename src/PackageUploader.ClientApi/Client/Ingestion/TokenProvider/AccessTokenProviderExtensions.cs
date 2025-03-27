@@ -67,6 +67,14 @@ internal static class AccessTokenProviderExtensions
         return services;
     }
 
+    public static IServiceCollection AddCacheableInteractiveBrowserCredentialAccessTokenProvider(this IServiceCollection services)
+    {
+        services.AddAccessTokenProviderOptions();
+        services.AddScoped<IAccessTokenProvider, CachableInteractiveBrowserCredentialAccessToken>();
+
+        return services;
+    }
+
     public static IServiceCollection AddEnvironmentCredentialAccessTokenProvider(this IServiceCollection services)
     {
         services.AddAccessTokenProviderOptions();

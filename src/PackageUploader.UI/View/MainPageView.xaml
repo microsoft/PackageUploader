@@ -14,6 +14,10 @@
                TextColor="Red"
                IsVisible="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}}" />
 
+        <Button Text="Login Page"
+                Command="{Binding NavigateToLoginPage}"
+                HorizontalOptions="Fill" />
+
         <Button Text="Create a New Package"
                 Command="{Binding NavigateToPackageCreationCommand}"
                 IsEnabled="{Binding IsMakePkgEnabled}"
