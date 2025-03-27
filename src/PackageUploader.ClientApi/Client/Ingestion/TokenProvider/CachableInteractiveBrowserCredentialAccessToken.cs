@@ -31,7 +31,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
             // See: https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/identity/Azure.Identity/samples/TokenCache.md
             AuthenticationRecord record = null;
             string recordPath = Path.Combine(TokenCacheDir, TokenCacheName);
-            if (File.Exists(recordPath)) // With thanks to the Greenbelt team
+            if (File.Exists(recordPath)) 
             {
                 using (var stream = new FileStream(recordPath, FileMode.Open, FileAccess.Read))
                 {
