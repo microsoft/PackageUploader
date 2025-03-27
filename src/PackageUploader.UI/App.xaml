@@ -13,6 +13,7 @@
             
             <!-- Value Converters -->
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
