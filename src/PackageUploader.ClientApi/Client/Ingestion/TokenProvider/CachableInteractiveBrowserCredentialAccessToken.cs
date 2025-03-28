@@ -20,7 +20,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
     {
         // See: https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/wiki/Cross-platform-Token-Cache
         // See: https://github.com/AzureAD/microsoft-authentication-extensions-for-dotnet/blob/main/sample/ManualTestApp/Config.cs
-        private static string TokenCacheName = ".PackageUploader_Cache.bin";
+        private static string TokenCacheName = ".2PackageUploader_Cache.bin";
         private static string TokenCacheDir = MsalCacheHelper.UserRootDirectory;
 
         public CachableInteractiveBrowserCredentialAccessToken(IOptions<AccessTokenProviderConfig> config, ILogger<CachableInteractiveBrowserCredentialAccessToken> logger) : base(config, logger)

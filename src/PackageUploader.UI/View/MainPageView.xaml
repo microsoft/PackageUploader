@@ -1,31 +1,120 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              x:Class="PackageUploader.UI.View.MainPageView"
-             x:DataType="viewmodel:MainPageViewModel">
+             x:DataType="viewmodel:MainPageViewModel"
+             BackgroundColor="#25282C">
 
     <VerticalStackLayout Padding="30,0" Spacing="25">
-        <Label Text="Welcome to the Xbox Package Tool" 
-               Style="{StaticResource Headline}" 
-               SemanticProperties.HeadingLevel="Level1" />
+        <Label Text="Make a package and upload it to partner center" 
+               Style="{StaticResource Headline}"
+               TextColor="White"
+               SemanticProperties.HeadingLevel="Level1" 
+               HorizontalOptions="Start"/>
+        <Label Text="The Packet Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload."  
+               HorizontalOptions="Start"
+               TextColor="White"
+               LineBreakMode="WordWrap"/>
 
         <Label Text="{Binding MakePkgUnavailableErrorMessage}"
                TextColor="Red"
                IsVisible="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}}" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="0.2*"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="0.05*"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Row="0" 
+                    Grid.ColumnSpan="3" 
+                    BackgroundColor="#202326" 
+                    Padding="8" 
+                    IsVisible="{Binding NotLoggedIn}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20,20,20,20" />
+                </Border.StrokeShape>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Sign in"
+                       Style="{StaticResource Headline}"
+                       SemanticProperties.HeadingLevel="Level2"
+                       HorizontalOptions="Start"
+                       TextColor="White"
+                       HorizontalTextAlignment="Start" />
+                    <Label Text="For seamless acess to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files."
+                       HorizontalOptions="Start" 
+                       TextColor="#9FA0A1"
+                       LineBreakMode="WordWrap"/>
+                    <Button Text="Login Page"
+                        Command="{Binding NavigateToLoginPage}"
+                        HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Border>
 
-        <Button Text="Login Page"
-                Command="{Binding NavigateToLoginPage}"
-                HorizontalOptions="Fill" />
+            <Label Grid.ColumnSpan="2" Grid.Row="1" />
 
-        <Button Text="Create a New Package"
-                Command="{Binding NavigateToPackageCreationCommand}"
-                IsEnabled="{Binding IsMakePkgEnabled}"
-                HorizontalOptions="Fill" />
+            <Border Grid.Column="0" Grid.Row="2" BackgroundColor="#202326" Padding="5">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20,20,20,20" />
+                </Border.StrokeShape>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Make a package"
+                       Style="{StaticResource Headline}"
+                       SemanticProperties.HeadingLevel="Level2"
+                       HorizontalOptions="Start" 
+                       TextColor="White" />
+                    <Label LineBreakMode="WordWrap" TextColor="#9FA0A1">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file " 
+                                      TextColor="#9FA0A1"/>
+                                <Span Text="(Learn more)"
+                                    TextColor="#9FA0A1"
+                                    TextDecorations="Underline">
+                                    <Span.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding PackagingLearnMoreURL}"
+                                                      CommandParameter="https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/packaging/gc-packaging-toc" />
+                                    </Span.GestureRecognizers>
+                                </Span>
+                                <Span Text=", then upload." 
+                                      TextColor="#9FA0A1"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Button Text="Create package"
+                        Command="{Binding NavigateToPackageCreationCommand}"
+                        IsEnabled="{Binding IsMakePkgEnabled}"
+                        HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Border>
 
-        <Button Text="Upload an Existing Package"
-                Command="{Binding NavigateToPackageUploadCommand}"
-                HorizontalOptions="Fill" />
+            <Border Grid.Column="2" Grid.Row="2" BackgroundColor="#202326" Padding="9">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20,20,20,20" />
+                </Border.StrokeShape>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Upload a package (sign in required)"
+                       Style="{StaticResource Headline}"
+                       SemanticProperties.HeadingLevel="Level2"
+                       TextColor="White"
+                       HorizontalOptions="Start" />
+                    <Label LineBreakMode="WordWrap"
+                       Text="Upload your game package to Parnter Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account."
+                       HorizontalOptions="Start"
+                       TextColor="#9FA0A1"
+                       HorizontalTextAlignment="Start" />
+                    <Button Text="Upload a package"
+                        Command="{Binding NavigateToPackageUploadCommand}"
+                        HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
     </VerticalStackLayout>
 
 </ContentPage>

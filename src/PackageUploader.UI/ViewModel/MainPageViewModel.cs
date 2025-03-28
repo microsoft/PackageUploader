@@ -12,10 +12,13 @@ namespace PackageUploader.UI.ViewModel;
 public partial class MainPageViewModel : BaseViewModel
 {
     private readonly PathConfigurationProvider _pathConfigurationService;
-    
+    private readonly UserLoggedInProvider _userLoggedInProvider;
+
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
     public ICommand NavigateToLoginPage { get; }
+
+    public ICommand PackagingLearnMoreURL { get; }
 
     private bool _isMakePkgEnabled = true;
     public bool IsMakePkgEnabled 
@@ -31,10 +34,24 @@ public partial class MainPageViewModel : BaseViewModel
         set => SetProperty(ref _makePkgUnavailableErrorMessage, value);
     }
 
-    public MainPageViewModel(PathConfigurationProvider pathConfigurationService)
+    public bool NotLoggedIn
+    {
+        get => _userLoggedInProvider.UserLoggedIn;
+        set
+        {
+            if(_userLoggedInProvider.UserLoggedIn != value)
+            {
+                _userLoggedInProvider.UserLoggedIn = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, UserLoggedInProvider userLoggedInProvider)
     {
         _pathConfigurationService = pathConfigurationService;
-        
+        _userLoggedInProvider = userLoggedInProvider;
+
         NavigateToPackageCreationCommand = new Command(async () => 
         {
             await Shell.Current.GoToAsync("///" + nameof(PackageCreationView));
@@ -48,6 +65,12 @@ public partial class MainPageViewModel : BaseViewModel
         {
             await Shell.Current.GoToAsync("///" + nameof(LoginView));
         });
+        PackagingLearnMoreURL = new Command<string>(async (url) =>
+        {
+            await Launcher.OpenAsync(url);
+        });
+
+        NotLoggedIn = true;
 
         string makePkgPath = ResolveExecutablePath("MakePkg.exe");
 

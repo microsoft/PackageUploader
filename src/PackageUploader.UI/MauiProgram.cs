@@ -32,6 +32,7 @@ public static class MauiProgram
         // Register Providers
         builder.Services.AddSingleton<PackageModelProvider>();
         builder.Services.AddSingleton<PathConfigurationProvider>();
+        builder.Services.AddSingleton<UserLoggedInProvider>();
         builder.Services.AddPackageUploaderService(AuthenticationMethod.CacheableBrowser);
 
         // Register ViewModels
