@@ -36,12 +36,12 @@ public partial class MainPageViewModel : BaseViewModel
 
     public bool NotLoggedIn
     {
-        get => _userLoggedInProvider.UserLoggedIn;
+        get => !_userLoggedInProvider.UserLoggedIn;
         set
         {
-            if(_userLoggedInProvider.UserLoggedIn != value)
+            if(_userLoggedInProvider.UserLoggedIn != !value)
             {
-                _userLoggedInProvider.UserLoggedIn = value;
+                _userLoggedInProvider.UserLoggedIn = !value;
                 OnPropertyChanged();
             }
         }
@@ -84,6 +84,11 @@ public partial class MainPageViewModel : BaseViewModel
             IsMakePkgEnabled = false;
             MakePkgUnavailableErrorMessage = "MakePkg.exe was not found. Please install the GDK in order to package game contents.";
         }
+    }
+
+    public void OnAppearing()
+    {
+        OnPropertyChanged(nameof(NotLoggedIn));
     }
 
     private static string ResolveExecutablePath(string exeName)

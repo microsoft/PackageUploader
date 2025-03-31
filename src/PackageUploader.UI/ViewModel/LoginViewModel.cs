@@ -15,6 +15,7 @@ namespace PackageUploader.UI.ViewModel
 {
     public partial class LoginViewModel : BaseViewModel
     {
+        private readonly UserLoggedInProvider _userLoggedInProvider;
         private readonly IAccessTokenProvider _service;
         private CancellationTokenSource _cancellationTokenSource = new();
         public ICommand LoginCommand { get; }
@@ -27,11 +28,18 @@ namespace PackageUploader.UI.ViewModel
             set => SetProperty(ref _loginCommandText, value); 
         }
 
-        private bool _isSignedIn;
+        //private bool _isSignedIn;
         public bool IsSignedIn
         {
-            get => _isSignedIn;
-            set => SetProperty(ref _isSignedIn, value);
+            get => _userLoggedInProvider.UserLoggedIn;
+            set
+            {
+                if (_userLoggedInProvider.UserLoggedIn != value)
+                {
+                    _userLoggedInProvider.UserLoggedIn = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         private string _userName = string.Empty;
@@ -55,8 +63,9 @@ namespace PackageUploader.UI.ViewModel
             set => SetProperty(ref _isSigningIn, value);
         }
 
-        public LoginViewModel(IAccessTokenProvider service) 
+        public LoginViewModel(IAccessTokenProvider service, UserLoggedInProvider userLoggedInProvider) 
         {
+            _userLoggedInProvider = userLoggedInProvider;
             _service = service;
             LoginCommand = new Command(LoginAsync);
             CancelCommand = new Command(CancelLogin);
