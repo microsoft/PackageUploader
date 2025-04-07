@@ -707,29 +707,35 @@ public class PackageUploaderService : IPackageUploaderService
     private async Task<GamePackage> WaitForPackageProcessingAsync(GameProduct product, GamePackage processingPackage, int minutesToWait, int checkIntervalMinutes, CancellationToken ct)
     {
         await Task.Delay(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
-        processingPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
+        GamePackage internalPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
             
         var checkIntervalTimeSpan = TimeSpan.FromMinutes(checkIntervalMinutes);
         _logger.LogInformation("Will wait {minutesToWait} minute(s) for package processing, checking every {checkIntervalMinutes} minute(s).", minutesToWait, checkIntervalMinutes);
 
-        while (processingPackage.State is GamePackageState.InProcessing or GamePackageState.Uploaded or GamePackageState.Unknown && minutesToWait > 0)
+        while (internalPackage.State is GamePackageState.InProcessing or GamePackageState.Uploaded or GamePackageState.Unknown && minutesToWait > 0)
         {
             _logger.LogInformation("Package still in processing, waiting another {checkIntervalMinutes} minute(s). Will wait a further {minutesToWait} minute(s) after this.", checkIntervalMinutes, minutesToWait);
 
             await Task.Delay(checkIntervalTimeSpan, ct).ConfigureAwait(false);
 
-            processingPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, processingPackage.Id, ct).ConfigureAwait(false);
+            internalPackage = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, internalPackage.Id, ct).ConfigureAwait(false);
 
             minutesToWait -= checkIntervalMinutes;
         }
 
-        _logger.LogInformation("Package state: {packageState}", processingPackage.State switch
+        _logger.LogInformation("Package state: {packageState}", internalPackage.State switch
         {
             GamePackageState.InProcessing => "In processing",
             GamePackageState.ProcessFailed => "Process failed",
             GamePackageState.PendingUpload => "Pending upload",
-            _ => processingPackage.State,
+            _ => internalPackage.State,
         });
+
+        if(processingPackage.Id != internalPackage.Id)
+        {
+            // Needed because 301 status returns what to query but not what we're currently uploading
+            processingPackage.State = internalPackage.State;
+        }
 
         return processingPackage;
     }

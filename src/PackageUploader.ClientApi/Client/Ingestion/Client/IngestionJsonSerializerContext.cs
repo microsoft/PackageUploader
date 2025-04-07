@@ -21,5 +21,6 @@ namespace PackageUploader.ClientApi.Client.Ingestion.Client;
 [JsonSerializable(typeof(IngestionSubmissionCreationRequest))]
 [JsonSerializable(typeof(IngestionPackageCreationRequest))]
 [JsonSerializable(typeof(IngestionGamePackageAsset))]
+[JsonSerializable(typeof(IngestionRedirectPackage))]
 internal partial class IngestionJsonSerializerContext : JsonSerializerContext
 { }
