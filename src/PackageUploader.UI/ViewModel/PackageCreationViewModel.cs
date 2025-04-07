@@ -11,6 +11,7 @@ using PackageUploader.UI.Providers;
 using CommunityToolkit.Maui.Storage;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Xml;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -82,19 +83,58 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isProgressVisible, value);
     }
 
+    private ImageSource _packagePreviewImage = null;
+    public ImageSource PackagePreviewImage
+    {
+        get => _packagePreviewImage;
+        set => SetProperty(ref _packagePreviewImage, value);
+    }
+
     public PackageModel Package => _packageModelService.Package;
 
+    public string _packageFilePath = string.Empty;
     public string PackageFilePath 
     { 
-        get => Package.PackageFilePath; 
-        set 
-        { 
-            if (Package.PackageFilePath != value)
+        get => _packageFilePath; 
+        set => SetProperty(ref _packageFilePath, value);
+    }
+    private string _gameConfigPath = string.Empty;
+    public string GameConfigPath
+    {
+        get => _gameConfigPath;
+        set => SetProperty(ref _gameConfigPath, value);
+    }
+
+    private string _subValPath = string.Empty;
+    public string SubValPath
+    {
+        get => _subValPath;
+        set => SetProperty(ref _subValPath, value);
+    }
+
+    public string PackageSize
+    {
+        get => Package.PackageSize;
+        set
+        {
+            if (Package.PackageSize != value)
             {
-                Package.PackageFilePath = value;
+                Package.PackageSize = value;
                 OnPropertyChanged();
             }
-        } 
+        }
+    }
+
+    private string _bigId = string.Empty;
+    public string BigId
+    {
+        get => _bigId;
+        set => SetProperty(ref _bigId, value);
+    }
+
+    public string PackageName
+    {
+        get => Path.GetFileName(Package.PackageFilePath);
     }
 
     private bool _isMakePkgEnabled = true;
@@ -125,11 +165,24 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _dragDropMessage, value);
     }
 
+    private bool _encryptEkb = false;
+    public bool EncryptEkb
+    {
+        get => _encryptEkb;
+        set => SetProperty(ref _encryptEkb, value);
+    }
+
     public ICommand MakePackageCommand { get; }
     public ICommand GameDataPathDroppedCommand { get; }
     public ICommand BrowseGameDataPathCommand { get; }
     public ICommand ResetGameDataPathCommand { get; }
     public ICommand CancelCreationCommand { get; }
+    public ICommand BrowseMappingDataXmlPathCommand { get; }
+    public ICommand BrowseGameConfigPathCommand { get; }
+    public ICommand EncryptEkbButton { get; }
+    public ICommand BrowsePackageOutputPathCommand { get; }
+    public ICommand BrowseSubValPathCommand { get; }
+    public ICommand CancelButtonCommand { get; }
 
     public PackageCreationViewModel(PackageModelProvider packageModelService, PathConfigurationProvider pathConfigurationService)
     {
@@ -156,6 +209,12 @@ public partial class PackageCreationViewModel : BaseViewModel
         BrowseGameDataPathCommand = new Command(OnBrowseGameDataPath);
         ResetGameDataPathCommand = new Command(ResetGameDataPath);
         CancelCreationCommand = new Command(CancelCreation);
+        BrowseMappingDataXmlPathCommand = new Command(OnBrowseMappingDataXml);
+        BrowseGameConfigPathCommand = new Command(OnGameConfigPath);
+        EncryptEkbButton = new Command(OnEncryptEkbButton);
+        BrowsePackageOutputPathCommand = new Command(OnBrowsePackageOutputPath);
+        BrowseSubValPathCommand = new Command(OnBrowseSubValPath);
+        CancelButtonCommand = new Command(OnCancelButtom);
 
         GameDataPath = GetPropertyFromApplicationPreferences(nameof(GameDataPath));
         if(GameDataPath != string.Empty)
@@ -164,6 +223,8 @@ public partial class PackageCreationViewModel : BaseViewModel
             HasGameDataPath = true;
         }
         MappingDataXmlPath = GetPropertyFromApplicationPreferences(nameof(MappingDataXmlPath));
+        GameConfigPath = GetPropertyFromApplicationPreferences(nameof(GameConfigPath));
+        LoadGameLogo(GameConfigPath);
 
     }
 
@@ -207,14 +268,14 @@ public partial class PackageCreationViewModel : BaseViewModel
 #endif
 
     private async void StartMakePackageProcess()
-    {
+    { 
         if (IsCreationInProgress)
         {
             return;
         }
 
         // Reset package data
-        _packageModelService.Package = new PackageModel();
+        _packageModelService.Package = new PackageModel(); //we'll want to capture previous data first
         ErrorMessage = string.Empty;
 
         if (string.IsNullOrEmpty(GameDataPath))
@@ -226,16 +287,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         ArrayList processOutput = [];
         ArrayList processErrorOutput = [];
         string tempBuildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempBuildPath);
+        string buildPath = String.IsNullOrEmpty(PackageFilePath) ? tempBuildPath : PackageFilePath;
+        if(!Directory.Exists(buildPath))
+        {
+            Directory.CreateDirectory(buildPath);
+        }
 
-        if (string.IsNullOrEmpty(MappingDataXmlPath))
+        if (string.IsNullOrEmpty(MappingDataXmlPath) || !File.Exists(MappingDataXmlPath))
         {
             // Need to generate our own mapping file
-            await GenerateMappingFile(tempBuildPath);
+            await GenerateMappingFile(buildPath);
         }
 
         // Return if we still don't have a mapping file.
-        if (string.IsNullOrEmpty(MappingDataXmlPath))
+        if (string.IsNullOrEmpty(MappingDataXmlPath) || !File.Exists(MappingDataXmlPath))
         {
             return;
         }
@@ -248,7 +313,7 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         _makePackageProcess = new Process();
         _makePackageProcess.StartInfo.FileName = _pathConfigurationService.MakePkgPath;
-        _makePackageProcess.StartInfo.Arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, tempBuildPath);
+        _makePackageProcess.StartInfo.Arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, buildPath);
         _makePackageProcess.StartInfo.RedirectStandardOutput = true;
         _makePackageProcess.StartInfo.RedirectStandardError = true;
         _makePackageProcess.EnableRaisingEvents = true;
@@ -413,8 +478,72 @@ public partial class PackageCreationViewModel : BaseViewModel
         {
             GameDataPath = result.Folder.Path;
             HasGameDataPath = true;
+
+            string configPath = Path.Combine(GameDataPath, "MicrosoftGame.config");
+            if(!File.Exists(configPath))
+            {
+                IsMakePkgEnabled = false;
+                return;
+            }
+            IsMakePkgEnabled = true;
+
+            GameConfigPath = configPath;
+            LoadGameLogo(configPath);
+
             OnPropertyChanged(nameof(IsDragDropVisible));
         }
+    }
+
+    private async void OnBrowseMappingDataXml()
+    {
+        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
+        if (result.IsSuccessful)
+        {
+            MappingDataXmlPath = result.Folder.Path;
+            //OnPropertyChanged(nameof(IsDragDropVisible));
+        }
+    }
+    
+    private async void OnGameConfigPath()
+    {
+        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
+        if (result.IsSuccessful)
+        {
+            GameConfigPath = result.Folder.Path;
+            LoadGameLogo(GameConfigPath);
+            IsMakePkgEnabled = true;
+            //OnPropertyChanged(nameof(IsDragDropVisible));
+        }
+    }
+
+    private async void OnBrowsePackageOutputPath()
+    {
+        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
+        if (result.IsSuccessful)
+        {
+            PackageFilePath = result.Folder.Path;
+        }
+    }
+
+    private async void OnBrowseSubValPath()
+    {
+        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
+        if (result.IsSuccessful)
+        {
+            SubValPath = result.Folder.Path;
+        }
+    }
+
+    private async void OnCancelButtom()
+    {
+        // TODO: Data Cleanup
+        await Shell.Current.GoToAsync("///" + nameof(MainPageView));
+    }
+
+    private void OnEncryptEkbButton() // may need async
+    {
+        EncryptEkb = !EncryptEkb;
+        //ToDo: Do something to make the EkbFile?
     }
 
     private void ResetGameDataPath()
@@ -443,7 +572,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             string packagePathValue = packagePathMatchCollection[i].Groups["PackagePath"].Value;
             if (packagePathValue != null)
             {
-                PackageFilePath = packagePathValue;
+                Package.PackageFilePath = packagePathValue;
                 break;
             }
         }
@@ -456,8 +585,53 @@ public partial class PackageCreationViewModel : BaseViewModel
             string packagePathValue = msixvcPackagePathMatchCollection[i].Groups["PackagePath"].Value;
             if (packagePathValue != null)
             {
-                PackageFilePath = packagePathValue;
+                Package.PackageFilePath = packagePathValue;
                 break;
+            }
+        }
+        Package.SubValFilePath = SubValPath;
+        Package.GameConfigFilePath = GameConfigPath;
+    }
+
+    private void LoadGameLogo(string configFilePath)
+    {
+        if(String.IsNullOrEmpty(configFilePath) || !File.Exists(configFilePath))
+        {
+            return;
+        }
+        // https://learn.microsoft.com/en-us/dotnet/api/system.xml.xmlreader?view=net-9.0
+        // https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-xml-xmlreader
+
+        XmlReaderSettings settings = new XmlReaderSettings();
+
+        using(var reader = XmlReader.Create(configFilePath, settings)) 
+        {
+            while(reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.Element:
+                        if(reader.Name=="ShellVisuals" && reader.HasAttributes) // HasAttributes should be true
+                        {
+                            while(reader.MoveToNextAttribute())
+                            {
+                                if (reader.Name == "StoreLogo")
+                                {
+                                    string path = Path.Combine(Directory.GetParent(configFilePath).FullName, reader.Value);
+                                    if (File.Exists(path))
+                                    {
+                                        PackagePreviewImage =  ImageSource.FromFile(path);
+                                    }
+                                }
+                            }
+                            reader.MoveToElement();
+                        }
+                        if(reader.Name=="StoreId")
+                        {
+                            BigId = reader.ReadElementContentAsString();
+                        }
+                        break;
+                }
             }
         }
     }

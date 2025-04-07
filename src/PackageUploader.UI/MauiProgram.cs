@@ -44,7 +44,8 @@ public static class MauiProgram
         // Register Views with their ViewModels
         builder.Services.AddTransient<MainPageView>();
         builder.Services.AddTransient<LoginView>();
-        builder.Services.AddTransient<PackageCreationView>();
+        //builder.Services.AddTransient<PackageCreationView>();
+        builder.Services.AddTransient<PackageCreationView2>();
         builder.Services.AddTransient<PackageUploadView>();
 
 #if DEBUG

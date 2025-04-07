@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
+             x:Class="PackageUploader.UI.View.PackageCreationView2"
+             x:DataType="viewmodel:PackageCreationViewModel"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             BackgroundColor="#25282C">
+    
+    <VerticalStackLayout>
+        <Label Text="Make a game package"
+               Style="{StaticResource Headline}"
+               TextColor="White"
+               SemanticProperties.HeadingLevel="Level1" 
+               HorizontalOptions="Start"/>
+        <Label Text="Locate your game's build to create a package. The Package Tool will remember these paths based on the contentID for easier access in the future."
+               HorizontalOptions="Start"
+               TextColor="White"
+               LineBreakMode="WordWrap"/>
+        
+        <!-- Grid: 4 coluns, 2 rows?-->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="667"/>
+                <ColumnDefinition Width="64" />
+                <ColumnDefinition Width="408" />
+            </Grid.ColumnDefinitions>
+
+            <HorizontalStackLayout Grid.Row="0" Grid.Column="0">
+                <!--TODO: Image for the number 1-->
+                <Label Text="1" TextColor="White"/>
+            </HorizontalStackLayout>
+            <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                <Grid>
+                    <!--Grid: 2 Columns, 5 Rows-->
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="476"/>
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="96"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" 
+                           Text="Build location" 
+                           Style="{StaticResource Headline}"
+                           TextColor="White"
+                           SemanticProperties.HeadingLevel="Level3" 
+                           HorizontalOptions="Start"/>
+                    <Label Grid.Row="1" Grid.ColumnSpan="2"
+                           Text="Locate your game files to build. Add layout files and encryption keys under Additional Details. See docs for more information."
+                           HorizontalOptions="Start"
+                           TextColor="White"
+                           LineBreakMode="WordWrap"/>
+                    <Label Grid.Row="2" Grid.Column="0"
+                           Text="Game path"
+                           TextColor="White"
+                           HorizontalOptions="Start" />
+                    <Entry Grid.Row="3" Grid.Column="0" 
+                           Text="{Binding GameDataPath,Mode=TwoWay}"
+                           TextColor="#D2D2D3"
+                           BackgroundColor="#323538"
+                           Placeholder="Select or enter the game's location" 
+                           IsSpellCheckEnabled="False"/>
+                    <Button Grid.Row="3" Grid.Column="2"
+                            Text="Browse"
+                            Command="{Binding BrowseGameDataPathCommand}"
+                            IsEnabled="True"/>
+                </Grid>
+                <toolkit:Expander>
+                    <toolkit:Expander.Header>
+                        <HorizontalStackLayout>
+                            <!--TODO: Animation for the arrow-->
+                            <Label Text="Additional details" 
+                                   TextColor="White"/>
+                        </HorizontalStackLayout>
+                    </toolkit:Expander.Header>
+                    <Grid>
+                        <!-- Grid: 2 column, 5 rows-->
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="96"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="Layout file/content map"
+                               TextColor="White"
+                               HorizontalOptions="Start"/>
+                        <Entry Grid.Row="1" Grid.Column="0"
+                               Text="{Binding MappingDataXmlPath,Mode=TwoWay}"
+                               TextColor="#D2D2D3"
+                               BackgroundColor="#323538"
+                               Placeholder="Select or enter the content map location"
+                               IsSpellCheckEnabled="False"/>
+                        <Button Grid.Row="1" Grid.Column="2"
+                                Text="Browse"
+                                Command="{Binding BrowseMappingDataXmlPathCommand}"
+                                IsEnabled="True"/>
+                        <Label Grid.Row="2" Grid.Column="0"
+                               Text="Xbox configuration file"
+                               TextColor="White"
+                               HorizontalOptions="Start"/>
+                        <Entry Grid.Row="3" Grid.Column="0"
+                               Text="{Binding GameConfigPath,Mode=TwoWay}"
+                               TextColor="#D2D2D3"
+                               BackgroundColor="#323538"
+                               Placeholder="Select or enter the game config location"
+                               IsSpellCheckEnabled="False"/>
+                        <Button Grid.Row="3" Grid.Column="2"
+                                Text="Browse"
+                                Command="{Binding BrowseGameConfigPathCommand}"
+                                IsEnabled="True"/>
+                        <RadioButton Grid.Row="4" Grid.Column="0"
+                                     IsChecked="{Binding EncryptEkbButton, Mode=TwoWay}">
+                            <RadioButton.Content>
+                                <VerticalStackLayout>
+                                    <Label Text="Encrypt with a new Encryption Key Blob (EKB)"
+                                           TextColor="White" 
+                                           HorizontalOptions="Start"/>
+                                    <Label Text="Initial package creation must be encrypted"
+                                           TextColor="White"
+                                           HorizontalOptions="Start" />
+                                </VerticalStackLayout>
+                            </RadioButton.Content>
+                        </RadioButton>
+                    </Grid>
+                </toolkit:Expander>
+            </VerticalStackLayout>
+            <HorizontalStackLayout Grid.Row="1" Grid.Column="0">
+                <!--TODO: Image for the number 1-->
+                <Label Text="2" TextColor="White"/>
+            </HorizontalStackLayout>
+            <VerticalStackLayout Grid.Row="1" Grid.Column="1">
+                <Grid>
+                    <!-- 4 rows, 2 columns -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="476"/>
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="96"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0"
+                           Text="Package output location"
+                           Style="{StaticResource Headline}"
+                           TextColor="White"
+                           SemanticProperties.HeadingLevel="Level3" 
+                           HorizontalOptions="Start"/>
+                    <Label Grid.Row="1" Grid.ColumnSpan="2"
+                           Text="Select the package output location."
+                           HorizontalOptions="Start"
+                           TextColor="White"
+                           LineBreakMode="WordWrap"/>
+                    <Label Grid.Row="2" Grid.Column="0"
+                            Text="Package path"
+                            TextColor="White"
+                            HorizontalOptions="Start"/>
+                    <Entry Grid.Row="3" Grid.Column="0"
+                            Text="{Binding PackageFilePath,Mode=TwoWay}"
+                            TextColor="#D2D2D3"
+                            BackgroundColor="#323538"
+                            Placeholder="Select or enter the package output location"
+                            IsSpellCheckEnabled="False"/>
+                    <Button Grid.Row="3" Grid.Column="2"
+                            Text="Browse"
+                            Command="{Binding BrowsePackageOutputPathCommand}"/>
+                </Grid>
+                <toolkit:Expander>
+                    <toolkit:Expander.Header>
+                        <HorizontalStackLayout>
+                            <!--TODO: Animation for the arrow-->
+                            <Label Text="Additional details" TextColor="White"/>
+                        </HorizontalStackLayout>
+                    </toolkit:Expander.Header>
+                    <Grid>
+                        <!-- 2 Columns, 2 Rows -->
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="0.2*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0"
+                               Text="SubVal path"
+                               TextColor="White"
+                               HorizontalOptions="Start"/>
+                        <Entry Grid.Row="1" Grid.Column="0"
+                               Text="{Binding SubValPath,Mode=TwoWay}"
+                               TextColor="#D2D2D3"
+                               BackgroundColor="#323538"
+                               Placeholder="Select or enter the content map location"
+                               IsSpellCheckEnabled="False"/>
+                        <Button Grid.Row="1" Grid.Column="1"
+                                Text="Change"
+                                Command="{Binding BrowseSubValPathCommand}"/>
+                    </Grid>
+                </toolkit:Expander>
+            </VerticalStackLayout>
+            <Line Grid.Column="2" Stroke="#6B7584" />
+            <VerticalStackLayout Grid.Column="4" Grid.Row="0">
+                <Label Text="Package Preview"
+                       Style="{StaticResource Headline}"
+                       TextColor="White"
+                       SemanticProperties.HeadingLevel="Level3" 
+                       HorizontalOptions="Start"/>
+                <Border Stroke="#6B7584"
+                        StrokeShape="RoundRectangle 6"
+                        StrokeThickness="1"
+                        HeightRequest="89"
+                        Padding="6">
+                    <Grid>
+                        <!-- 2 columns, 4 rows-->
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.2*"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <!-- Image, sure, OK Copilot -->
+                        <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="4"
+                               Source="{Binding PackagePreviewImage}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               HeightRequest="65"
+                               WidthRequest="65"/>
+                        <Label Grid.Row="0" Grid.Column="1"
+                               HorizontalOptions="Start"
+                               Text="{Binding PackageName}" 
+                               TextColor="White"/>
+                        <Label Grid.Row="1" Grid.Column="1" HorizontalOptions="Start">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="ID: "
+                                          TextColor="White"/>
+                                    <Span Text="{Binding BigId}"
+                                          TextColor="White"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Label Grid.Row="3" Grid.Column="1" HorizontalOptions="Start">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Size est: " 
+                                          TextColor="White"/>
+                                    <Span Text="{Binding PackageSize}" 
+                                          TextColor="White"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </Grid>
+        <HorizontalStackLayout HorizontalOptions="End">
+            <Button Text="Cancel"
+                    Command="{Binding CancelButtonCommand}" />
+            <Button Text="Create package"
+                    Command="{Binding MakePackageCommand}"
+                    IsEnabled="{Binding IsMakePkgEnabled}" />
+        </HorizontalStackLayout>
+    </VerticalStackLayout>
+</ContentPage>

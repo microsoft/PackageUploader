@@ -17,8 +17,8 @@
         Route="LoginView" />
     <ShellContent
         Title="Create a New Package"
-        ContentTemplate="{DataTemplate view:PackageCreationView}"
-        Route="PackageCreationView" />
+        ContentTemplate="{DataTemplate view:PackageCreationView2}"
+        Route="PackageCreationView2" />
     <ShellContent
         Title="Upload an Existing Package"
         ContentTemplate="{DataTemplate view:PackageUploadView}"

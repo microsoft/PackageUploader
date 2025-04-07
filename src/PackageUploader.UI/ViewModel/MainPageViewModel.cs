@@ -54,7 +54,7 @@ public partial class MainPageViewModel : BaseViewModel
 
         NavigateToPackageCreationCommand = new Command(async () => 
         {
-            await Shell.Current.GoToAsync("///" + nameof(PackageCreationView));
+            await Shell.Current.GoToAsync("///" + nameof(PackageCreationView2));
         }, () => IsMakePkgEnabled);
         
         NavigateToPackageUploadCommand = new Command(async () =>
