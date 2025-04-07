@@ -1,18 +1,23 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Azure;
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
 using PackageUploader.ClientApi.Client.Ingestion.Sanitizers;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,6 +52,41 @@ internal abstract class HttpRestClient : IHttpRestClient
 
             var result = await response.Content.ReadFromJsonAsync(jsonTypeInfo, ct).ConfigureAwait(false);
             return result;
+        }
+        catch (Exception ex)
+        {
+            LogException(ex);
+            throw;
+        }
+    }
+
+    public async Task<T> GetAsyncWithErrors<T>(string subUrl, JsonTypeInfo<T> jsonTypeInfo, IReadOnlySet<HttpStatusCode> allowableErrors, CancellationToken ct)
+    {
+        try
+        {
+            var request = CreateJsonRequestMessage(HttpMethod.Get, subUrl);
+
+            await LogRequestVerboseAsync(request, ct).ConfigureAwait(false);
+            using var response = await _httpClient.SendAsync(request, ct).ConfigureAwait(false);
+            await LogResponseVerboseAsync(response, ct).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+            {
+                throw new HttpIOException(HttpRequestError.InvalidResponse, "Unexpected Successful Response");
+            }
+            else if (allowableErrors.Contains(response.StatusCode))
+            {
+                var responseBody = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+                responseBody = responseBody.Substring(responseBody.IndexOf("{"));
+                responseBody = Regex.Unescape(responseBody);
+                responseBody = responseBody.Substring(0, responseBody.LastIndexOf("}") + 1);
+                var result = JsonSerializer.Deserialize(responseBody, jsonTypeInfo);
+                return result;
+            }
+            else
+            {
+                response.EnsureSuccessStatusCode();
+                return default(T); // should not be reached
+            }
         }
         catch (Exception ex)
         {
