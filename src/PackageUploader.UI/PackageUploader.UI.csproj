@@ -27,6 +27,12 @@
 		<WindowsPackageType>None</WindowsPackageType>
 		<AssemblyName>XboxPackageTool</AssemblyName>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+
+    <!-- Self contained -->
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishSingleFile>true</PublishSingleFile>
 	</PropertyGroup>
 
 	<ItemGroup>
