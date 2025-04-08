@@ -219,7 +219,7 @@
                     </Grid>
                 </toolkit:Expander>
             </VerticalStackLayout>
-            <Line Grid.Column="2" Stroke="#6B7584" />
+            <Frame Grid.Column="2" Grid.RowSpan="2" WidthRequest="1" BackgroundColor="#6B7584" />
             <VerticalStackLayout Grid.Column="4" Grid.Row="0">
                 <Label Text="Package Preview"
                        Style="{StaticResource Headline}"
