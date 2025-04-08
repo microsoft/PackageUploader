@@ -7,35 +7,54 @@
              x:DataType="viewmodel:PackageCreationViewModel"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              BackgroundColor="#25282C">
-    
-    <VerticalStackLayout>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32"/>
+            <RowDefinition />
+            <RowDefinition Height="32"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="32"/>
+            <ColumnDefinition />
+            <ColumnDefinition Width="32"/>
+        </Grid.ColumnDefinitions>
+        <VerticalStackLayout Grid.Row="1" Grid.Column="1">
         <Label Text="Make a game package"
                Style="{StaticResource Headline}"
                TextColor="White"
                SemanticProperties.HeadingLevel="Level1" 
                HorizontalOptions="Start"/>
+        <Label HeightRequest="8" />
         <Label Text="Locate your game's build to create a package. The Package Tool will remember these paths based on the contentID for easier access in the future."
                HorizontalOptions="Start"
                TextColor="White"
                LineBreakMode="WordWrap"/>
-        
+        <Label HeightRequest="32" />
+
         <!-- Grid: 4 coluns, 2 rows?-->
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition />
+                <RowDefinition Height="32" />
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="42" />
                 <ColumnDefinition Width="667"/>
                 <ColumnDefinition Width="64" />
                 <ColumnDefinition Width="408" />
             </Grid.ColumnDefinitions>
 
-            <HorizontalStackLayout Grid.Row="0" Grid.Column="0">
                 <!--TODO: Image for the number 1-->
+            <Border Grid.Row="0" Grid.Column="0"
+                    WidthRequest="24"
+                    HeightRequest="24"
+                    StrokeShape="RoundRectangle 24"
+                    VerticalOptions="Start"
+                    Padding="2"
+                    Stroke="#B8B4FF">
                 <Label Text="1" TextColor="White"/>
-            </HorizontalStackLayout>
+            </Border>
             <VerticalStackLayout Grid.Row="0" Grid.Column="1">
                 <Grid>
                     <!--Grid: 2 Columns, 5 Rows-->
@@ -75,6 +94,8 @@
                     <Button Grid.Row="3" Grid.Column="2"
                             Text="Browse"
                             Command="{Binding BrowseGameDataPathCommand}"
+                            WidthRequest="90"
+                            HeightRequest="32"
                             IsEnabled="True"/>
                 </Grid>
                 <toolkit:Expander>
@@ -112,6 +133,8 @@
                         <Button Grid.Row="1" Grid.Column="2"
                                 Text="Browse"
                                 Command="{Binding BrowseMappingDataXmlPathCommand}"
+                                WidthRequest="90"
+                                HeightRequest="32"
                                 IsEnabled="True"/>
                         <Label Grid.Row="2" Grid.Column="0"
                                Text="Xbox configuration file"
@@ -126,6 +149,8 @@
                         <Button Grid.Row="3" Grid.Column="2"
                                 Text="Browse"
                                 Command="{Binding BrowseGameConfigPathCommand}"
+                                WidthRequest="90"
+                                HeightRequest="32"
                                 IsEnabled="True"/>
                         <RadioButton Grid.Row="4" Grid.Column="0"
                                      IsChecked="{Binding EncryptEkbButton, Mode=TwoWay}">
@@ -143,11 +168,16 @@
                     </Grid>
                 </toolkit:Expander>
             </VerticalStackLayout>
-            <HorizontalStackLayout Grid.Row="1" Grid.Column="0">
-                <!--TODO: Image for the number 1-->
+            <Border Grid.Row="2" Grid.Column="0"
+                    WidthRequest="24"
+                    HeightRequest="24"
+                    StrokeShape="RoundRectangle 24"
+                    VerticalOptions="Start"
+                    Padding="3"
+                    Stroke="#B8B4FF">
                 <Label Text="2" TextColor="White"/>
-            </HorizontalStackLayout>
-            <VerticalStackLayout Grid.Row="1" Grid.Column="1">
+            </Border>
+            <VerticalStackLayout Grid.Row="2" Grid.Column="1">
                 <Grid>
                     <!-- 4 rows, 2 columns -->
                     <Grid.RowDefinitions>
@@ -157,7 +187,7 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="476"/>
+                        <ColumnDefinition Width="481"/>
                         <ColumnDefinition Width="12" />
                         <ColumnDefinition Width="96"/>
                     </Grid.ColumnDefinitions>
@@ -181,9 +211,12 @@
                             TextColor="#D2D2D3"
                             BackgroundColor="#323538"
                             Placeholder="Select or enter the package output location"
-                            IsSpellCheckEnabled="False"/>
+                            IsSpellCheckEnabled="False"
+                            WidthRequest="481"/>
                     <Button Grid.Row="3" Grid.Column="2"
                             Text="Browse"
+                            WidthRequest="90"
+                            HeightRequest="32"
                             Command="{Binding BrowsePackageOutputPathCommand}"/>
                 </Grid>
                 <toolkit:Expander>
@@ -200,9 +233,10 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition Width="0.2*"/>
-                        </Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="481"/>
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="96"/>
+                            </Grid.ColumnDefinitions>
                         <Label Grid.Row="0" Grid.Column="0"
                                Text="SubVal path"
                                TextColor="White"
@@ -212,21 +246,22 @@
                                TextColor="#D2D2D3"
                                BackgroundColor="#323538"
                                Placeholder="Select or enter the content map location"
-                               IsSpellCheckEnabled="False"/>
-                        <Button Grid.Row="1" Grid.Column="1"
+                               IsSpellCheckEnabled="False" />
+                        <Button Grid.Row="1" Grid.Column="2"
                                 Text="Change"
                                 Command="{Binding BrowseSubValPathCommand}"/>
                     </Grid>
                 </toolkit:Expander>
             </VerticalStackLayout>
-            <Frame Grid.Column="2" Grid.RowSpan="2" WidthRequest="1" BackgroundColor="#6B7584" />
+            <Frame Grid.Column="2" Grid.RowSpan="3" WidthRequest="1" BackgroundColor="#6B7584" />
             <VerticalStackLayout Grid.Column="4" Grid.Row="0">
                 <Label Text="Package Preview"
                        Style="{StaticResource Headline}"
                        TextColor="White"
                        SemanticProperties.HeadingLevel="Level3" 
                        HorizontalOptions="Start"/>
-                <Border Stroke="#6B7584"
+                    <Label HeightRequest="12 "/>
+                    <Border Stroke="#6B7584"
                         StrokeShape="RoundRectangle 6"
                         StrokeThickness="1"
                         HeightRequest="89"
@@ -240,21 +275,24 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.2*"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="65"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="280"/>
+                                <ColumnDefinition Width="34"/>
+                            </Grid.ColumnDefinitions>
                         <!-- Image, sure, OK Copilot -->
-                        <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="4"
+                        <Image Grid.Row="0" Grid.Column="1" Grid.RowSpan="4"
                                Source="{Binding PackagePreviewImage}"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
                                HeightRequest="65"
                                WidthRequest="65"/>
-                        <Label Grid.Row="0" Grid.Column="1"
+                        <Label Grid.Row="0" Grid.Column="2"
                                HorizontalOptions="Start"
                                Text="{Binding PackageName}" 
                                TextColor="White"/>
-                        <Label Grid.Row="1" Grid.Column="1" HorizontalOptions="Start">
+                        <Label Grid.Row="1" Grid.Column="3" HorizontalOptions="Start">
                             <Label.FormattedText>
                                 <FormattedString>
                                     <Span Text="ID: "
@@ -264,7 +302,7 @@
                                 </FormattedString>
                             </Label.FormattedText>
                         </Label>
-                        <Label Grid.Row="3" Grid.Column="1" HorizontalOptions="Start">
+                        <Label Grid.Row="3" Grid.Column="3" HorizontalOptions="Start">
                             <Label.FormattedText>
                                 <FormattedString>
                                     <Span Text="Size est: " 
@@ -280,10 +318,16 @@
         </Grid>
         <HorizontalStackLayout HorizontalOptions="End">
             <Button Text="Cancel"
-                    Command="{Binding CancelButtonCommand}" />
+                    Command="{Binding CancelButtonCommand}" 
+                    WidthRequest="90"
+                    HeightRequest="32" />
+            <Label WidthRequest="16" />
             <Button Text="Create package"
                     Command="{Binding MakePackageCommand}"
-                    IsEnabled="{Binding IsMakePkgEnabled}" />
+                    IsEnabled="{Binding IsMakePkgEnabled}" 
+                    WidthRequest="128"
+                    HeightRequest="34"/>
         </HorizontalStackLayout>
     </VerticalStackLayout>
+    </Grid>
 </ContentPage>
