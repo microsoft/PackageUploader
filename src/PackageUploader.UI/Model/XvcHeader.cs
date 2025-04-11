@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using PackageUploader.UI.Utility;
+using System;
+using System.IO;
 using System.Text;
 
 namespace PackageUploader.UI.Model;

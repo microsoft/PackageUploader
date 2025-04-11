@@ -2,25 +2,21 @@
 // Licensed under the MIT License.
 
 using PackageUploader.UI.ViewModel;
+using System.Windows.Controls;
 
 namespace PackageUploader.UI.View;
 
-public partial class PackageUploadView : ContentPage
+public partial class PackageUploadView : System.Windows.Controls.UserControl
 {
+    private readonly PackageUploadViewModel _viewModel;
+
     public PackageUploadView(PackageUploadViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = viewModel;
-    }
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-
-        // Call the view model's OnAppearing method to refresh UI
-        if (BindingContext is PackageUploadViewModel viewModel)
-        {
-            viewModel.OnAppearing();
-        }
+        DataContext = viewModel;
+        _viewModel = viewModel;
+        
+        // Subscribe to the Loaded event to refresh UI when the control is loaded
+        this.Loaded += (s, e) => _viewModel.OnAppearing();
     }
 }

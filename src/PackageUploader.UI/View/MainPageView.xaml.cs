@@ -2,25 +2,21 @@
 // Licensed under the MIT License.
 
 using PackageUploader.UI.ViewModel;
+using System.Windows.Controls;
 
 namespace PackageUploader.UI.View;
 
-public partial class MainPageView : ContentPage
+public partial class MainPageView : System.Windows.Controls.UserControl
 {
-    public MainPageView(ViewModel.MainPageViewModel viewModel)
+    private readonly MainPageViewModel _viewModel;
+
+    public MainPageView(MainPageViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = viewModel;
-    }
-
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-
-        // Call the view model's OnAppearing method to refresh UI
-        if (BindingContext is ViewModel.MainPageViewModel viewModel)
-        {
-            viewModel.OnAppearing();
-        }
+        DataContext = viewModel;
+        _viewModel = viewModel;
+        
+        // Subscribe to the Loaded event to refresh UI when the control is loaded
+        this.Loaded += (s, e) => _viewModel.OnAppearing();
     }
 }

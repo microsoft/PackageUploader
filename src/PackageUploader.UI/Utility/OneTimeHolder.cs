@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Chat;
 
 namespace PackageUploader.UI.Utility
 {
@@ -14,7 +13,6 @@ namespace PackageUploader.UI.Utility
         {
             get
             {
-                // copilot figured this out, scary
                 var value = _value; 
                 _value = null;
                 return value;
@@ -24,6 +22,5 @@ namespace PackageUploader.UI.Utility
         {
             _value = value;
         }
-
     }
 }

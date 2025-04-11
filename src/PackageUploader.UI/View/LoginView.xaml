@@ -1,43 +1,50 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
              x:Class="PackageUploader.UI.View.LoginView"
-             x:DataType="viewmodel:LoginViewModel">
-    <VerticalStackLayout Spacing="20" Padding="30">
-        <Label
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewmodel:LoginViewModel}">
+    <StackPanel Orientation="Vertical" Margin="30">
+        <TextBlock
             Text="Login Status"
             FontSize="24"
-            HorizontalOptions="Center"
+            HorizontalAlignment="Center"
             Margin="0,0,0,10" />
 
-        <VerticalStackLayout Spacing="10">
-            <Label
+        <StackPanel Orientation="Vertical" Margin="0,10,0,0">
+            <TextBlock
                 Text="{Binding SignInStatus}"
                 FontSize="18"
-                FontAttributes="Bold"
-                HorizontalOptions="Center" 
-                TextColor="{Binding IsSignedIn, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2E7D32,#C62828'}" />
+                FontWeight="Bold"
+                HorizontalAlignment="Center" 
+                Foreground="{Binding IsSignedIn, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2E7D32,#C62828'}" />
 
-            <Label
-                IsVisible="{Binding IsSignedIn}"
+            <TextBlock
+                Visibility="{Binding IsSignedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
                 Text="{Binding UserName}"
-                HorizontalOptions="Center" />
+                HorizontalAlignment="Center" />
 
-            <HorizontalStackLayout HorizontalOptions="Center">
-            <Button
-                Text="{Binding LoginCommandText}"
-                Command="{Binding LoginCommand}"
-                Margin="0,10,0,0" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button
+                    Content="{Binding LoginCommandText}"
+                    Command="{Binding LoginCommand}"
+                    Margin="0,10,0,0" 
+                    Padding="10,5" />
 
-            <Button
-                Text="Cancel"
-                Command="{Binding CancelCommand}"
-                IsEnabled="{Binding IsSigningIn}"
-                Margin="10, 10, 0, 0"/>
-            </HorizontalStackLayout>
-            <ActivityIndicator IsRunning="{Binding IsSigningIn}" IsVisible="{Binding IsSigningIn}" />
-        </VerticalStackLayout>
-    </VerticalStackLayout>
-</ContentPage>
+                <Button
+                    Content="Cancel"
+                    Command="{Binding CancelCommand}"
+                    IsEnabled="{Binding IsSigningIn}"
+                    Margin="10,10,0,0"
+                    Padding="10,5" />
+            </StackPanel>
+            
+            <ProgressBar Height="20" Width="200" IsIndeterminate="{Binding IsSigningIn}" 
+                       Visibility="{Binding IsSigningIn, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,10,0,0" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>
