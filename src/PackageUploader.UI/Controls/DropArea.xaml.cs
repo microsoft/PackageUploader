@@ -1,23 +1,30 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.IO;
+using System;
+using System.Linq;
 
 namespace PackageUploader.UI.Controls;
 
-public partial class DropArea : ContentView
+public partial class DropArea : System.Windows.Controls.UserControl
 {
-    public static readonly BindableProperty MessageProperty =
-        BindableProperty.Create(nameof(Message), typeof(string), typeof(DropArea), "Drag and drop files here or click to browse");
+    public static readonly DependencyProperty MessageProperty =
+        DependencyProperty.Register(nameof(Message), typeof(string), typeof(DropArea), 
+            new PropertyMetadata("Drag and drop files here or click to browse"));
     
-    public static readonly BindableProperty FileDroppedCommandProperty =
-        BindableProperty.Create(nameof(FileDroppedCommand), typeof(ICommand), typeof(DropArea));
+    public static readonly DependencyProperty FileDroppedCommandProperty =
+        DependencyProperty.Register(nameof(FileDroppedCommand), typeof(ICommand), typeof(DropArea));
     
-    public static readonly BindableProperty BrowseCommandProperty =
-        BindableProperty.Create(nameof(BrowseCommand), typeof(ICommand), typeof(DropArea));
+    public static readonly DependencyProperty BrowseCommandProperty =
+        DependencyProperty.Register(nameof(BrowseCommand), typeof(ICommand), typeof(DropArea));
     
-    public static readonly BindableProperty AcceptedExtensionsProperty =
-        BindableProperty.Create(nameof(AcceptedExtensions), typeof(string), typeof(DropArea), ".*");
+    public static readonly DependencyProperty AcceptedExtensionsProperty =
+        DependencyProperty.Register(nameof(AcceptedExtensions), typeof(string), typeof(DropArea), 
+            new PropertyMetadata(".*"));
     
     public string Message
     {
@@ -43,160 +50,136 @@ public partial class DropArea : ContentView
         set => SetValue(AcceptedExtensionsProperty, value);
     }
 
+    private const string FolderExtension = ":folder:";
+
     public DropArea()
     {
         InitializeComponent();
-
-        // Set up platform-specific implementation for file dropping
-#if WINDOWS
-        this.Loaded += OnLoaded!;
-#endif
+        
+        // Enable drag and drop
+        this.AllowDrop = true;
+        this.DragEnter += DropArea_DragEnter;
+        this.DragOver += DropArea_DragOver;
+        this.Drop += DropArea_Drop;
     }
 
-#if WINDOWS
-
-    private const string FolderExtension = ":folder:";
-
-    private void OnLoaded(object? sender, EventArgs e)
+    private void DropArea_DragEnter(object sender, System.Windows.DragEventArgs e)
     {
-        var nativeView = this.Handler?.PlatformView as Microsoft.UI.Xaml.FrameworkElement;
-        if (nativeView == null) return;
-
-        // Set up drag-drop handlers
-        nativeView.AllowDrop = true;
-
-        // Handle DragOver - this determines if the drop is allowed
-        nativeView.DragOver += (s, args) =>
+        if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
         {
-            bool acceptsFolders = false;
-            bool acceptsFiles = false;
-            bool isAccepted = false;
-
-            // Check if any of the files have an accepted extension
-            if (args.DataView.Contains(Windows.ApplicationModel.DataTransfer.StandardDataFormats.StorageItems))
+            string[]? files = e.Data.GetData(System.Windows.DataFormats.FileDrop) as string[];
+            
+            if (files != null && files.Length > 0)
             {
                 var acceptedExts = AcceptedExtensions.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(e => e.ToLowerInvariant())
+                    .Select(ext => ext.ToLowerInvariant())
                     .ToArray();
-
-                if (acceptedExts.Contains(FolderExtension))
+                
+                bool acceptsFolders = acceptedExts.Contains(FolderExtension);
+                bool acceptsFiles = acceptedExts.Length == 0 || acceptedExts.Contains(".*") || 
+                    acceptedExts.Any(ext => ext != FolderExtension);
+                
+                bool isAccepted = false;
+                
+                foreach (string filePath in files)
                 {
-                    acceptsFolders = true;
+                    if (Directory.Exists(filePath))
+                    {
+                        if (acceptsFolders)
+                        {
+                            isAccepted = true;
+                            break;
+                        }
+                    }
+                    else if (File.Exists(filePath))
+                    {
+                        if (acceptsFiles)
+                        {
+                            if (acceptedExts.Length == 0 || acceptedExts.Contains(".*"))
+                            {
+                                isAccepted = true;
+                                break;
+                            }
+                            
+                            string extension = Path.GetExtension(filePath).ToLowerInvariant();
+                            if (acceptedExts.Any(ext => ext == extension))
+                            {
+                                isAccepted = true;
+                                break;
+                            }
+                        }
+                    }
                 }
                 
-                if (acceptedExts.Length > 1 || !acceptedExts.Contains(FolderExtension))
-                {
-                    acceptsFiles = true;
-                }
-
-                // Accept all if extensions list is empty or contains ".*"
-                if (acceptedExts.Length == 0 || acceptedExts.Contains(".*"))
-                {
-                    isAccepted = true;
-                }
-                else
-                {
-                    // Get the deferral to access the files asynchronously
-                    var deferral = args.GetDeferral();
-                    try
-                    {
-                        var items = args.DataView.GetStorageItemsAsync().AsTask().GetAwaiter().GetResult();
-
-                        // Check if any file has an accepted extension
-                        foreach (var item in items)
-                        {
-                            if (item is Windows.Storage.StorageFile file)
-                            {
-                                string extension = Path.GetExtension(file.Path).ToLowerInvariant();
-                                if (acceptedExts.Any(ext => extension == ext))
-                                {
-                                    isAccepted = true;
-                                    break;
-                                }
-                            }
-                            else if (item is Windows.Storage.StorageFolder)
-                            {
-                                if (acceptsFolders)
-                                {
-                                    isAccepted = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        deferral.Complete();
-                    }
-                }
-
-                if (isAccepted)
-                {
-                    args.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy;
-                }
+                e.Effects = isAccepted ? System.Windows.DragDropEffects.Copy : System.Windows.DragDropEffects.None;
             }
-
-            if (acceptsFiles)
+            else
             {
-                args.DragUIOverride.Caption = "Drop to select this file";
+                e.Effects = System.Windows.DragDropEffects.None;
             }
-            else if (acceptsFolders)
-            {
-                args.DragUIOverride.Caption = "Drop to select this folder";
-            }
-
-            if (!isAccepted)
-            {
-                args.DragUIOverride.Caption = "This file type is not supported";
-            }
-
-            args.DragUIOverride.IsCaptionVisible = true;
-            args.DragUIOverride.IsContentVisible = true;
-
-            args.Handled = true;
-        };
-
-        // Handle Drop - this processes the dropped files
-        nativeView.Drop += async (s, args) =>
+        }
+        else
         {
-            if (args.DataView.Contains(Windows.ApplicationModel.DataTransfer.StandardDataFormats.StorageItems))
+            e.Effects = System.Windows.DragDropEffects.None;
+        }
+        
+        e.Handled = true;
+    }
+
+    private void DropArea_DragOver(object sender, System.Windows.DragEventArgs e)
+    {
+        e.Effects = e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop) ? System.Windows.DragDropEffects.Copy : System.Windows.DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void DropArea_Drop(object sender, System.Windows.DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+        {
+            string[]? files = e.Data.GetData(System.Windows.DataFormats.FileDrop) as string[];
+            
+            if (files == null || files.Length == 0)
+                return;
+            
+            var acceptedExts = AcceptedExtensions.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(ext => ext.ToLowerInvariant())
+                .ToArray();
+            
+            bool acceptsFolders = acceptedExts.Contains(FolderExtension);
+            bool acceptsFiles = acceptedExts.Length == 0 || acceptedExts.Contains(".*") || 
+                acceptedExts.Any(ext => ext != FolderExtension);
+            
+            foreach (string filePath in files)
             {
-                var items = await args.DataView.GetStorageItemsAsync();
-
-                foreach (var item in items)
+                if (Directory.Exists(filePath))
                 {
-                    if (item is Windows.Storage.StorageFile file)
+                    if (acceptsFolders)
                     {
-                        string extension = Path.GetExtension(file.Path).ToLowerInvariant();
-                        string[] acceptedExtensions = [.. AcceptedExtensions
-                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(e => e.ToLowerInvariant())];
-
-                        if (acceptedExtensions.Length == 0 || acceptedExtensions[0] == ".*" ||
-                            acceptedExtensions.Any(ext => extension == ext || ext == ".*"))
-                        {
-                            // Execute the command with the file path
-                            FileDroppedCommand?.Execute(file.Path);
-                            break; // Only take the first valid file
-                        }
+                        FileDroppedCommand?.Execute(filePath);
+                        break;
                     }
-                    else if (item is Windows.Storage.StorageFolder folder)
+                }
+                else if (File.Exists(filePath))
+                {
+                    if (acceptsFiles)
                     {
-                        string[] acceptedExtensions = [.. AcceptedExtensions
-                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(e => e.ToLowerInvariant())];
-                        if (acceptedExtensions.Contains(FolderExtension))
+                        if (acceptedExts.Length == 0 || acceptedExts.Contains(".*"))
                         {
-                            // Execute the command with the folder path
-                            FileDroppedCommand?.Execute(folder.Path);
-                            break; // Only take the first valid folder
+                            FileDroppedCommand?.Execute(filePath);
+                            break;
+                        }
+                        
+                        string extension = Path.GetExtension(filePath).ToLowerInvariant();
+                        if (acceptedExts.Any(ext => ext == extension))
+                        {
+                            FileDroppedCommand?.Execute(filePath);
+                            break;
                         }
                     }
                 }
-
-                args.Handled = true;
             }
-        };
+        }
+        
+        e.Handled = true;
     }
-#endif
 }

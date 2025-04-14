@@ -1,5 +1,4 @@
-﻿using Microsoft.Maui.Controls.PlatformConfiguration;
-using PackageUploader.ClientApi;
+﻿using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 using PackageUploader.UI.Providers;
 using System;
@@ -67,8 +66,8 @@ namespace PackageUploader.UI.ViewModel
         {
             _userLoggedInProvider = userLoggedInProvider;
             _service = service;
-            LoginCommand = new Command(LoginAsync);
-            CancelCommand = new Command(CancelLogin);
+            LoginCommand = new RelayCommand(LoginAsync);
+            CancelCommand = new RelayCommand(CancelLogin);
         }
 
         public async void LoginAsync()

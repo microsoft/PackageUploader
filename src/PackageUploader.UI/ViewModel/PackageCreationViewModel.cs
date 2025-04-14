@@ -5,13 +5,17 @@ using System.Collections;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
+using Microsoft.Win32;
 using PackageUploader.UI.Model;
 using PackageUploader.UI.View;
 using PackageUploader.UI.Providers;
-using CommunityToolkit.Maui.Storage;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Xml;
+using System.IO;
+using System.Windows.Forms;
+using System.Windows;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -20,6 +24,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     private const uint CtrlCTerminationCode = 0xc000013a;
     private readonly PackageModelProvider _packageModelService;
     private readonly PathConfigurationProvider _pathConfigurationService;
+    private readonly PackageUploader.UI.Utility.IWindowService _windowService;
 
     private Process? _makePackageProcess;
 
@@ -83,8 +88,8 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isProgressVisible, value);
     }
 
-    private ImageSource _packagePreviewImage = null;
-    public ImageSource PackagePreviewImage
+    private BitmapImage? _packagePreviewImage = null;
+    public BitmapImage? PackagePreviewImage
     {
         get => _packagePreviewImage;
         set => SetProperty(ref _packagePreviewImage, value);
@@ -179,15 +184,15 @@ public partial class PackageCreationViewModel : BaseViewModel
     public ICommand CancelCreationCommand { get; }
     public ICommand BrowseMappingDataXmlPathCommand { get; }
     public ICommand BrowseGameConfigPathCommand { get; }
-    public ICommand EncryptEkbButton { get; }
     public ICommand BrowsePackageOutputPathCommand { get; }
     public ICommand BrowseSubValPathCommand { get; }
     public ICommand CancelButtonCommand { get; }
 
-    public PackageCreationViewModel(PackageModelProvider packageModelService, PathConfigurationProvider pathConfigurationService)
+    public PackageCreationViewModel(PackageModelProvider packageModelService, PathConfigurationProvider pathConfigurationService, PackageUploader.UI.Utility.IWindowService windowService)
     {
         _packageModelService = packageModelService;
         _pathConfigurationService = pathConfigurationService;
+        _windowService = windowService;
 
 #if WINDOWS
         if (File.Exists(_pathConfigurationService.MakePkgPath))
@@ -204,17 +209,16 @@ public partial class PackageCreationViewModel : BaseViewModel
         ErrorMessage = "MakePkg is not supported on this platform.";
 #endif
 
-        MakePackageCommand = new Command(StartMakePackageProcess);
-        GameDataPathDroppedCommand = new Command<string>(OnGameDataPathDropped);
-        BrowseGameDataPathCommand = new Command(OnBrowseGameDataPath);
-        ResetGameDataPathCommand = new Command(ResetGameDataPath);
-        CancelCreationCommand = new Command(CancelCreation);
-        BrowseMappingDataXmlPathCommand = new Command(OnBrowseMappingDataXml);
-        BrowseGameConfigPathCommand = new Command(OnGameConfigPath);
-        EncryptEkbButton = new Command(OnEncryptEkbButton);
-        BrowsePackageOutputPathCommand = new Command(OnBrowsePackageOutputPath);
-        BrowseSubValPathCommand = new Command(OnBrowseSubValPath);
-        CancelButtonCommand = new Command(OnCancelButtom);
+        MakePackageCommand = new RelayCommand(StartMakePackageProcess);
+        GameDataPathDroppedCommand = new RelayCommand<string>(OnGameDataPathDropped);
+        BrowseGameDataPathCommand = new RelayCommand(OnBrowseGameDataPath);
+        ResetGameDataPathCommand = new RelayCommand(ResetGameDataPath);
+        CancelCreationCommand = new RelayCommand(CancelCreation);
+        BrowseMappingDataXmlPathCommand = new RelayCommand(OnBrowseMappingDataXml);
+        BrowseGameConfigPathCommand = new RelayCommand(OnGameConfigPath);
+        BrowsePackageOutputPathCommand = new RelayCommand(OnBrowsePackageOutputPath);
+        BrowseSubValPathCommand = new RelayCommand(OnBrowseSubValPath);
+        CancelButtonCommand = new RelayCommand(OnCancelButtom);
 
         GameDataPath = GetPropertyFromApplicationPreferences(nameof(GameDataPath));
         if(GameDataPath != string.Empty)
@@ -225,7 +229,6 @@ public partial class PackageCreationViewModel : BaseViewModel
         MappingDataXmlPath = GetPropertyFromApplicationPreferences(nameof(MappingDataXmlPath));
         GameConfigPath = GetPropertyFromApplicationPreferences(nameof(GameConfigPath));
         LoadGameLogo(GameConfigPath);
-
     }
 
 #if WINDOWS
@@ -241,21 +244,21 @@ public partial class PackageCreationViewModel : BaseViewModel
     // Delegate type to be used as the Handler Routine for SCCH
     delegate Boolean ConsoleCtrlDelegate(uint CtrlType);
 
-    private void CancelCreation(object obj)
+    private void CancelCreation()
     {
         uint processId = (uint)(_makePackageProcess?.Id ?? 0);
 
         if (processId != 0)
         {
-            // Getting this to work was a little bit difficult. C# MAUI applications
+            // Getting this to work was a little bit difficult. C# applications
             // don't have a console window so can't use the normal Console.CancelKeyPress
             // event. We can work around this by attaching to the MakePkg console, however
-            // that causes the Ctrl+C event to also terminate our MAUI application so we
+            // that causes the Ctrl+C event to also terminate our application so we
             // need to set the Ctrl Handler to null before sending the event. In order to
             // support subsequent cancellation though, we need to re-enable the Ctrl Handler
             // before creating a new process, or it will inherit the null handler and not
             // be able to cancel. If we do that immediately after sending the Ctrl+C event
-            // though, the Ctrl+C event will terminate our MAUI application still. So we late
+            // though, the Ctrl+C event will terminate our application still. So we late
             // bind that and do it right before creating our MakePkg process.
             if (AttachConsole(processId))
             {
@@ -264,6 +267,11 @@ public partial class PackageCreationViewModel : BaseViewModel
                 FreeConsole();
             }
         }
+    }
+#else
+    private void CancelCreation()
+    {
+        // Non-Windows implementation
     }
 #endif
 
@@ -389,10 +397,10 @@ public partial class PackageCreationViewModel : BaseViewModel
             }
             ProgressValue = 1;
 
-            // Navigate on the main thread (This is temporary, probably will add another page here showing the package status and see if they want to upload).
-            MainThread.BeginInvokeOnMainThread(async () =>
+            // Navigate using the window service (WPF-specific navigation)
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                await Shell.Current.GoToAsync("///" + nameof(PackageUploadView));
+                _windowService.NavigateTo(typeof(PackageUploadView));
             });
         };
 
@@ -471,12 +479,12 @@ public partial class PackageCreationViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsDragDropVisible));
     }
 
-    private async void OnBrowseGameDataPath()
+    private void OnBrowseGameDataPath()
     {
-        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
-        if (result.IsSuccessful)
+        var folderDialog = new FolderBrowserDialog();
+        if (folderDialog.ShowDialog() == DialogResult.OK)
         {
-            GameDataPath = result.Folder.Path;
+            GameDataPath = folderDialog.SelectedPath;
             HasGameDataPath = true;
 
             string configPath = Path.Combine(GameDataPath, "MicrosoftGame.config");
@@ -494,56 +502,58 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
-    private async void OnBrowseMappingDataXml()
+    private void OnBrowseMappingDataXml()
     {
-        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
-        if (result.IsSuccessful)
+        var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            MappingDataXmlPath = result.Folder.Path;
-            //OnPropertyChanged(nameof(IsDragDropVisible));
+            Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*",
+            Title = "Select Mapping Data XML File"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            MappingDataXmlPath = dialog.FileName;
         }
     }
     
-    private async void OnGameConfigPath()
+    private void OnGameConfigPath()
     {
-        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
-        if (result.IsSuccessful)
+        var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            GameConfigPath = result.Folder.Path;
+            Filter = "Config files (*.config)|*.config|All files (*.*)|*.*",
+            Title = "Select Game Config File"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            GameConfigPath = dialog.FileName;
             LoadGameLogo(GameConfigPath);
             IsMakePkgEnabled = true;
-            //OnPropertyChanged(nameof(IsDragDropVisible));
         }
     }
 
-    private async void OnBrowsePackageOutputPath()
+    private void OnBrowsePackageOutputPath()
     {
-        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
-        if (result.IsSuccessful)
+        var folderDialog = new FolderBrowserDialog();
+        if (folderDialog.ShowDialog() == DialogResult.OK)
         {
-            PackageFilePath = result.Folder.Path;
+            PackageFilePath = folderDialog.SelectedPath;
         }
     }
 
-    private async void OnBrowseSubValPath()
+    private void OnBrowseSubValPath()
     {
-        var result = await FolderPicker.Default.PickAsync(CancellationToken.None);
-        if (result.IsSuccessful)
+        var folderDialog = new FolderBrowserDialog();
+        if (folderDialog.ShowDialog() == DialogResult.OK)
         {
-            SubValPath = result.Folder.Path;
+            SubValPath = folderDialog.SelectedPath;
         }
     }
 
-    private async void OnCancelButtom()
+    private void OnCancelButtom()
     {
-        // TODO: Data Cleanup?
-        await Shell.Current.GoToAsync("///" + nameof(MainPageView));
-    }
-
-    private void OnEncryptEkbButton() // may need async
-    {
-        EncryptEkb = !EncryptEkb;
-        //ToDo: Do something to make the EkbFile?
+        // Navigate to the main page view
+        _windowService.NavigateTo(typeof(MainPageView));
     }
 
     private void ResetGameDataPath()
@@ -599,8 +609,6 @@ public partial class PackageCreationViewModel : BaseViewModel
         {
             return;
         }
-        // https://learn.microsoft.com/en-us/dotnet/api/system.xml.xmlreader?view=net-9.0
-        // https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-xml-xmlreader
 
         XmlReaderSettings settings = new XmlReaderSettings();
 
@@ -617,10 +625,15 @@ public partial class PackageCreationViewModel : BaseViewModel
                             {
                                 if (reader.Name == "StoreLogo")
                                 {
-                                    string path = Path.Combine(Directory.GetParent(configFilePath).FullName, reader.Value);
-                                    if (File.Exists(path))
+                                    var parentDirectory = Directory.GetParent(configFilePath);
+
+                                    if (parentDirectory != null)
                                     {
-                                        PackagePreviewImage =  ImageSource.FromFile(path);
+                                        string path = Path.Combine(parentDirectory.FullName, reader.Value);
+                                        if (File.Exists(path))
+                                        {
+                                            PackagePreviewImage = LoadBitmapImage(path);
+                                        }
                                     }
                                 }
                             }
@@ -634,5 +647,15 @@ public partial class PackageCreationViewModel : BaseViewModel
                 }
             }
         }
+    }
+
+    private BitmapImage LoadBitmapImage(string imagePath)
+    {
+        var image = new BitmapImage();
+        image.BeginInit();
+        image.CacheOption = BitmapCacheOption.OnLoad;
+        image.UriSource = new Uri(imagePath);
+        image.EndInit();
+        return image;
     }
 }

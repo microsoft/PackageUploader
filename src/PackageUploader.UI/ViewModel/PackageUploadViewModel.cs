@@ -4,12 +4,16 @@
 using System.Diagnostics;
 using System.Windows.Input;
 using System.Xml;
+using Microsoft.Win32;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
+using PackageUploader.UI.View;
+using System.Windows;
+using System.IO;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -17,6 +21,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 {
     private readonly PackageModelProvider _packageModelService;
     private readonly IPackageUploaderService _uploaderService;
+    private readonly PackageUploader.UI.Utility.IWindowService _windowService;
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
@@ -155,7 +160,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                     MarketGroupName = MarketGroupNames.FirstOrDefault(string.Empty);
                 }
 
-                (UploadPackageCommand as Command)?.ChangeCanExecute();
+                CheckCanExecuteUploadCommand();
             }
             else
             {
@@ -177,7 +182,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             ErrorMessage = $"Error getting market groups: {ex.Message}";
         }
 
-        (UploadPackageCommand as Command)?.ChangeCanExecute();
+        CheckCanExecuteUploadCommand();
         IsSpinnerRunning = false;
     }
 
@@ -208,7 +213,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                 Package.BigId = value;
                 OnPropertyChanged();
                 UpdatePackageState();
-                SetPropertyInApplicationPreferences(value);
+                SetPropertyInApplicationPreferences(nameof(BigId), value);
 
                 GetProductInfoAsync();
             }
@@ -223,7 +228,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.PackageFilePath != value)
             {
                 Package.PackageFilePath = value;
-                SetPropertyInApplicationPreferences(value);
+                SetPropertyInApplicationPreferences(nameof(PackageFilePath), value);
                 OnPropertyChanged();
             }
         }
@@ -237,7 +242,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.EkbFilePath != value)
             {
                 Package.EkbFilePath = value;
-                SetPropertyInApplicationPreferences(value);
+                SetPropertyInApplicationPreferences(nameof(EkbFilePath), value);
                 OnPropertyChanged();
             }
         }
@@ -251,7 +256,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.SubValFilePath != value)
             {
                 Package.SubValFilePath = value;
-                SetPropertyInApplicationPreferences(value);
+                SetPropertyInApplicationPreferences(nameof(SubValFilePath), value);
                 OnPropertyChanged();
             }
         }
@@ -265,7 +270,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.SymbolBundleFilePath != value)
             {
                 Package.SymbolBundleFilePath = value;
-                SetPropertyInApplicationPreferences(value);
+                SetPropertyInApplicationPreferences(nameof(SymbolBundleFilePath), value);
                 OnPropertyChanged();
             }
         }
@@ -279,7 +284,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         { 
             if (SetProperty(ref _isPackageUploadEnabled, value))
             {
-                (UploadPackageCommand as Command)?.ChangeCanExecute();
+                CheckCanExecuteUploadCommand();
             }
         }
     }
@@ -321,7 +326,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         { 
             if (SetProperty(ref _hasPackage, value))
             {
-                (UploadPackageCommand as Command)?.ChangeCanExecute();
+                CheckCanExecuteUploadCommand();
             }
         }
     }
@@ -363,19 +368,21 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private CancellationTokenSource? _uploadCancellationTokenSource;
 
-    public PackageUploadViewModel(PackageModelProvider packageModelService, IPackageUploaderService uploaderService)
+    public PackageUploadViewModel(
+        PackageModelProvider packageModelService, 
+        IPackageUploaderService uploaderService,
+        PackageUploader.UI.Utility.IWindowService windowService)
     {
         _packageModelService = packageModelService;
         _uploaderService = uploaderService;
+        _windowService = windowService;
 
-        // Initialize commands
-        UploadPackageCommand = new Command(
-            UploadPackageProcessAsync,
-            () => IsUploadReady());
-        BrowseForPackageCommand = new Command(async () => await BrowseForPackage());
-        FileDroppedCommand = new Command<string>(ProcessDroppedFile);
-        ResetPackageCommand = new Command(ResetPackage);
-        CancelUploadCommand = new Command(CancelUpload);
+        // Initialize commands with RelayCommand
+        UploadPackageCommand = new RelayCommand(UploadPackageProcessAsync, () => IsUploadReady());
+        BrowseForPackageCommand = new RelayCommand(BrowseForPackage);
+        FileDroppedCommand = new RelayCommand<string>(ProcessDroppedFile);
+        ResetPackageCommand = new RelayCommand(ResetPackage);
+        CancelUploadCommand = new RelayCommand(CancelUpload);
 
         SelectedMode = GetPropertyFromApplicationPreferences(nameof(SelectedMode));
         MarketGroupName = GetPropertyFromApplicationPreferences(nameof(MarketGroupName));
@@ -385,7 +392,6 @@ public partial class PackageUploadViewModel : BaseViewModel
         _savedBranchMemory = new OneTimeHolder<String>(BranchFriendlyName);
         if (string.IsNullOrEmpty(PackageFilePath))
         {
-
             PackageFilePath = GetPropertyFromApplicationPreferences(nameof(PackageFilePath));
             if (!string.IsNullOrEmpty(PackageFilePath))
             {
@@ -394,7 +400,6 @@ public partial class PackageUploadViewModel : BaseViewModel
                 UpdateMarketGroups();
             }
         }
-
     }
 
     private bool IsUploadReady()
@@ -402,12 +407,21 @@ public partial class PackageUploadViewModel : BaseViewModel
         return HasPackage && _gameProduct != null && !string.IsNullOrEmpty(MarketGroupName);
     }
 
+    private void CheckCanExecuteUploadCommand()
+    {
+        // Force re-evaluation of the command's CanExecute status
+        if (UploadPackageCommand is RelayCommand command)
+        {
+            command.RaiseCanExecuteChanged();
+        }
+    }
+
     private void UpdatePackageState()
     {
         // Notify of changes to HasPackage and IsDragDropVisible when BigId changes
         OnPropertyChanged(nameof(HasPackage));
         OnPropertyChanged(nameof(IsDragDropVisible));
-        (UploadPackageCommand as Command)?.ChangeCanExecute();
+        CheckCanExecuteUploadCommand();
     }
 
     public void OnAppearing()
@@ -437,28 +451,19 @@ public partial class PackageUploadViewModel : BaseViewModel
         SuccessMessage = string.Empty;
     }
 
-    private async Task BrowseForPackage()
+    private void BrowseForPackage()
     {
         try
         {
-            var fileTypes = new FilePickerFileType(
-                new Dictionary<DevicePlatform, IEnumerable<string>>
-                {
-                    { DevicePlatform.WinUI, packageExtensions },
-                    { DevicePlatform.MacCatalyst, packageExtensions },
-                });
-
-            var options = new PickOptions
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                PickerTitle = "Select a Package File",
-                FileTypes = fileTypes,
+                Filter = "Package Files (*.xvc;*.msixvc)|*.xvc;*.msixvc|All Files (*.*)|*.*",
+                Title = "Select a Package File"
             };
 
-            var result = await FilePicker.Default.PickAsync(options);
-            
-            if (result != null)
+            if (openFileDialog.ShowDialog() == true)
             {
-                ProcessSelectedPackage(result.FullPath);
+                ProcessSelectedPackage(openFileDialog.FileName);
             }
         }
         catch (Exception ex)
@@ -623,7 +628,6 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         node = xmlDoc.SelectSingleNode("//GameConfig/Game/TitleId");
         titleId = node?.InnerText ?? string.Empty;
-
     }
 
     private async void GetProductInfoAsync()
@@ -664,16 +668,14 @@ public partial class PackageUploadViewModel : BaseViewModel
             {
                 BranchFriendlyName = BranchFriendlyNames.FirstOrDefault(string.Empty);
             }
-            //BranchFriendlyName = BranchFriendlyNames.FirstOrDefault(string.Empty);
             if(string.IsNullOrEmpty(FlightName) || !flightNames.Contains(FlightName))
             {
                 FlightName = FlightNames.FirstOrDefault(string.Empty);
             }
-            //FlightName = FlightNames.FirstOrDefault(string.Empty);
             OnPropertyChanged(nameof(BranchFriendlyName));
             OnPropertyChanged(nameof(FlightName));
 
-            (UploadPackageCommand as Command)?.ChangeCanExecute();
+            CheckCanExecuteUploadCommand();
             ErrorMessage = string.Empty;
         }
         catch (ProductNotFoundException)
@@ -770,6 +772,12 @@ public partial class PackageUploadViewModel : BaseViewModel
             ProgressValue = 1;
             timer.Stop();
             SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
+            
+            // After successful upload, navigate back to main page
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                _windowService.NavigateTo(typeof(MainPageView));
+            });
         }
         catch (OperationCanceledException)
         {

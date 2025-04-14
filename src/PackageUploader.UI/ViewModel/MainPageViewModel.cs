@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.IO;
 using System.Reflection;
 using System.Windows.Input;
 using Microsoft.Win32;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.View;
+using PackageUploader.UI.Utility;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -47,27 +50,31 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
-    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, UserLoggedInProvider userLoggedInProvider)
+    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, UserLoggedInProvider userLoggedInProvider, PackageUploader.UI.Utility.IWindowService windowService)
     {
         _pathConfigurationService = pathConfigurationService;
         _userLoggedInProvider = userLoggedInProvider;
 
-        NavigateToPackageCreationCommand = new Command(async () => 
+        NavigateToPackageCreationCommand = new RelayCommand(() => 
         {
-            await Shell.Current.GoToAsync("///" + nameof(PackageCreationView2));
+            windowService.NavigateTo(typeof(PackageCreationView2));
         }, () => IsMakePkgEnabled);
         
-        NavigateToPackageUploadCommand = new Command(async () =>
+        NavigateToPackageUploadCommand = new RelayCommand(() =>
         {
-            await Shell.Current.GoToAsync("///" + nameof(PackageUploadView));
+            windowService.NavigateTo(typeof(PackageUploadView));
         });
-        NavigateToLoginPage = new Command(async () =>
+        NavigateToLoginPage = new RelayCommand(() =>
         {
-            await Shell.Current.GoToAsync("///" + nameof(LoginView));
+            windowService.NavigateTo(typeof(LoginView));
         });
-        PackagingLearnMoreURL = new Command<string>(async (url) =>
+        PackagingLearnMoreURL = new RelayCommand<string>((url) =>
         {
-            await Launcher.OpenAsync(url);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
         });
 
         NotLoggedIn = true;
@@ -99,8 +106,8 @@ public partial class MainPageViewModel : BaseViewModel
         // 3. In the GDK if it's installed
         // 4. In the directories specified by the PATH environment variable
 
-        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+        // Use AppContext.BaseDirectory instead of Assembly.Location for single-file compatibility
+        var assemblyDirectory = AppContext.BaseDirectory;
 
         if (Directory.Exists(assemblyDirectory))
         {
