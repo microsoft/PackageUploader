@@ -2,11 +2,11 @@ using PackageUploader.UI.ViewModel;
 
 namespace PackageUploader.UI.View;
 
-public partial class PackagingProgressView : ContentPage
+public partial class PackagingProgressView : System.Windows.Controls.UserControl
 {
 	public PackagingProgressView(PackageCreationViewModel viewModel)
 	{
 		InitializeComponent();
-        BindingContext = viewModel;
+        DataContext = viewModel;
     }
 }
