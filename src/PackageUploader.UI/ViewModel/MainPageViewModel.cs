@@ -19,7 +19,7 @@ public partial class MainPageViewModel : BaseViewModel
 
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
-    public ICommand NavigateToLoginPage { get; }
+    public ICommand SignInCommand { get; }
 
     public ICommand PackagingLearnMoreURL { get; }
 
@@ -64,7 +64,7 @@ public partial class MainPageViewModel : BaseViewModel
         {
             windowService.NavigateTo(typeof(PackageUploadView));
         });
-        NavigateToLoginPage = new RelayCommand(() =>
+        SignInCommand = new RelayCommand(() =>
         {
             windowService.NavigateTo(typeof(LoginView));
         });
