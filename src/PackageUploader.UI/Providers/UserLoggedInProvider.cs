@@ -21,6 +21,17 @@ namespace PackageUploader.UI.Providers
             }
         }
 
+        private string _accessToken = string.Empty;
+        public string AccessToken
+        {
+            get => _accessToken;
+            set
+            {
+                _accessToken = value;
+                OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

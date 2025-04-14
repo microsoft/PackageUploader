@@ -53,14 +53,5 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
 
             return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
         }
-
-        public static void DeleteCache()
-        {
-            string recordPath = Path.Combine(TokenCacheDir, TokenCacheName);
-            if (File.Exists(recordPath))
-            {
-                File.Delete(recordPath);
-            }
-        }
     }
 }

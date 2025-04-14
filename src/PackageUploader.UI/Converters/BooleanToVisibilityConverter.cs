@@ -29,16 +29,12 @@ namespace PackageUploader.UI.Converters
         /// </returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool invert = IsInverted(parameter);
-            bool boolValue = value is bool b && b;
-
-            // If inverted, invert the boolean value
-            if (invert)
+            if (value is bool boolValue)
             {
-                boolValue = !boolValue;
+                bool invert = parameter is string param && bool.TryParse(param, out var result) && result;
+                return (boolValue ^ invert) ? Visibility.Visible : Visibility.Collapsed;
             }
-
-            return boolValue ? Visibility.Visible : Visibility.Collapsed;
+            return Visibility.Collapsed;
         }
 
         /// <summary>
