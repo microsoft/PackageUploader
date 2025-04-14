@@ -20,6 +20,10 @@
         ContentTemplate="{DataTemplate view:PackageCreationView2}"
         Route="PackageCreationView2" />
     <ShellContent
+        Title="Packaging"
+        ContentTemplate="{DataTemplate view:PackagingProgressView}"
+        Route="PackagingPpogressView" />
+    <ShellContent
         Title="Upload an Existing Package"
         ContentTemplate="{DataTemplate view:PackageUploadView}"
         Route="PackageUploadView" />

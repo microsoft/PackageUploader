@@ -46,6 +46,7 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginView>();
         //builder.Services.AddTransient<PackageCreationView>();
         builder.Services.AddTransient<PackageCreationView2>();
+        builder.Services.AddTransient<PackagingProgressView>();
         builder.Services.AddTransient<PackageUploadView>();
 
 #if DEBUG

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PackageUploader.UI.View.PackagingProgressView"
+              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
+             x:DataType="viewmodel:PackageCreationViewModel"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             BackgroundColor="#25282C">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="19" />
+            <RowDefinition />
+            <RowDefinition Height="19" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="29" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="29"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition Height="23"/>
+                <RowDefinition Height="28"/>
+                <RowDefinition Height="23"/>
+                <RowDefinition />
+                <RowDefinition Height="23"/>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="364" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="364" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="4" Grid.Column="1"
+                   Style="{StaticResource Headline}"
+                   SemanticProperties.HeadingLevel="Level1" 
+                   Text="Getting your package ready..."
+                   TextColor="White" />
+            <!-- Loading Bar -->
+            <Grid Grid.Row="6" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="19" />
+                    <RowDefinition Height="38" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="358" />
+                    <ColumnDefinition Width="358" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0"
+                       Text="Packaging..."
+                       TextColor="White" 
+                       HorizontalOptions="Start"/>
+                <Label Grid.Row="0" Grid.Column="1" HorizontalOptions="End">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding ProgressValue}"
+                                  TextColor="White"/>
+                            <Span Text="% complete"
+                                  TextColor="White" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <ProgressBar
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    Progress="{Binding ProgressValue, Mode=OneWay}"
+                    IsVisible="True"
+                    ProgressColor="LightBlue"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Fill"
+                    MinimumHeightRequest="25"/>
+            </Grid>
+        </Grid>
+    </Grid>
+
+</ContentPage>
