@@ -9,6 +9,10 @@ using Microsoft.Win32;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.View;
 using PackageUploader.UI.Utility;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
+using System.Threading;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -16,6 +20,8 @@ public partial class MainPageViewModel : BaseViewModel
 {
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly UserLoggedInProvider _userLoggedInProvider;
+    private readonly IAccessTokenProvider _accessTokenProvider;
+    private CancellationTokenSource _cancellationTokenSource = new();
 
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
@@ -50,9 +56,31 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
-    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, UserLoggedInProvider userLoggedInProvider, PackageUploader.UI.Utility.IWindowService windowService)
+    private string? _userName = string.Empty;
+    public string? UserName
+    {
+        get => _userName;
+        set => SetProperty(ref _userName, value);
+    }
+
+    private bool _signinStarted = false;
+    public bool SigninStarted
+    {
+        get => _signinStarted;
+        set
+        {
+            if (_signinStarted != value)
+            {
+                _signinStarted = value;
+                OnPropertyChanged(nameof(SigninStarted));
+            }
+        }
+    }
+
+    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, IAccessTokenProvider accessTokenProvider, UserLoggedInProvider userLoggedInProvider, IWindowService windowService)
     {
         _pathConfigurationService = pathConfigurationService;
+        _accessTokenProvider = accessTokenProvider;
         _userLoggedInProvider = userLoggedInProvider;
 
         NavigateToPackageCreationCommand = new RelayCommand(() => 
@@ -66,7 +94,8 @@ public partial class MainPageViewModel : BaseViewModel
         });
         SignInCommand = new RelayCommand(() =>
         {
-            windowService.NavigateTo(typeof(LoginView));
+            SigninStarted = true;
+            SigninAsync();
         });
         PackagingLearnMoreURL = new RelayCommand<string>((url) =>
         {
@@ -169,5 +198,57 @@ public partial class MainPageViewModel : BaseViewModel
             }
         }
         return null;
+    }
+
+    public async void SigninAsync()
+    {
+        try
+        {
+            // Cancel any previous login attempt
+            _cancellationTokenSource.Cancel();
+
+            _cancellationTokenSource = new CancellationTokenSource();
+
+            var loginTask = Task.Run(async () =>
+            {
+                return await _accessTokenProvider.GetTokenAsync(_cancellationTokenSource.Token).ConfigureAwait(false);
+            });
+
+            while (!loginTask.IsCompleted)
+            {
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+                await Task.Delay(500); // Check every 500ms
+            }
+
+            var login = await loginTask;
+
+            if (login != null)
+            {
+                UpdateSignInStatus(login.AccessToken);
+            }
+        }
+        catch (Exception)
+        {
+            // Ignore failures
+        }
+    }
+
+    private void UpdateSignInStatus(string accessToken)
+    {
+        _userLoggedInProvider.AccessToken = accessToken;
+        _userLoggedInProvider.UserLoggedIn = true;
+
+        OnPropertyChanged(nameof(NotLoggedIn));
+
+        // Try to extract user name from the token
+        var handler = new JwtSecurityTokenHandler();
+
+        if (handler.ReadToken(accessToken) is JwtSecurityToken jsonToken)
+        {
+            var claims = jsonToken.Claims;
+
+            UserName = claims.FirstOrDefault(c => c.Type == "name")?.Value;
+        }
     }
 }

@@ -52,11 +52,20 @@
                        HorizontalAlignment="Left"
                        Foreground="White" />
 
-                    <TextBlock Margin="0, 10, 0, 0" Text="For seamless acess to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files."
-                       HorizontalAlignment="Left" 
-                       Foreground="#9FA0A1"
-                       TextWrapping="Wrap"/>
-                       
+                    <TextBlock Margin="0, 10, 0, 0"
+                               Text="For seamless access to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files."
+                               HorizontalAlignment="Left" 
+                               Foreground="#9FA0A1"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=True}"/>
+
+                    <TextBlock Margin="0, 10, 0, 0" 
+                               Text="We are attempting to retrieve your sign-in information. If a browser page does not open within a few seconds, please click the sign-in button again to retry."
+                               HorizontalAlignment="Left"
+                               Foreground="#9FA0A1"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
                     <Button Content="Sign In"
                         Command="{Binding SignInCommand}"
                         HorizontalAlignment="Left"

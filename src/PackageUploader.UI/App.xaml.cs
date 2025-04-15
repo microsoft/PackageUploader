@@ -33,13 +33,11 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<UserLoggedInProvider>();
                 
                 // Register ViewModels
-                services.AddTransient<LoginViewModel>();
                 services.AddTransient<MainPageViewModel>();
                 services.AddTransient<PackageCreationViewModel>();
                 services.AddTransient<PackageUploadViewModel>();
                 
                 // Register Views
-                services.AddTransient<LoginView>();
                 services.AddTransient<MainPageView>();
                 services.AddTransient<PackageCreationView>();
                 services.AddTransient<PackageUploadView>();
