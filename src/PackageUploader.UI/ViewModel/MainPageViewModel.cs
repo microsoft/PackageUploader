@@ -56,13 +56,6 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
-    private string? _userName = string.Empty;
-    public string? UserName
-    {
-        get => _userName;
-        set => SetProperty(ref _userName, value);
-    }
-
     private bool _signinStarted = false;
     public bool SigninStarted
     {
@@ -236,10 +229,9 @@ public partial class MainPageViewModel : BaseViewModel
 
     private void UpdateSignInStatus(string accessToken)
     {
+        _userLoggedInProvider.UserName = string.Empty;
         _userLoggedInProvider.AccessToken = accessToken;
         _userLoggedInProvider.UserLoggedIn = true;
-
-        OnPropertyChanged(nameof(NotLoggedIn));
 
         // Try to extract user name from the token
         var handler = new JwtSecurityTokenHandler();
@@ -248,7 +240,12 @@ public partial class MainPageViewModel : BaseViewModel
         {
             var claims = jsonToken.Claims;
 
-            UserName = claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            if (claims != null)
+            {
+                _userLoggedInProvider.UserName = claims.FirstOrDefault(c => c.Type == "name")?.Value ?? string.Empty;
+            }
         }
+
+        OnPropertyChanged(nameof(NotLoggedIn));
     }
 }

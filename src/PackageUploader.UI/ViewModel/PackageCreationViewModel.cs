@@ -678,7 +678,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
-    private BitmapImage LoadBitmapImage(string imagePath)
+    private static BitmapImage LoadBitmapImage(string imagePath)
     {
         var image = new BitmapImage();
         image.BeginInit();

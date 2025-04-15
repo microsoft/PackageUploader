@@ -47,6 +47,16 @@
                        VerticalAlignment="Center"/>
             </StackPanel>
             
+            <!-- User Info -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
+                <TextBlock x:Name="UserDisplayText" 
+                           Foreground="White" 
+                           FontSize="12" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"
+                           Visibility="Collapsed"/>
+            </StackPanel>
+            
             <!-- Window Controls -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="MinimizeButton" 

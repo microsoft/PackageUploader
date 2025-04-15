@@ -32,6 +32,17 @@ namespace PackageUploader.UI.Providers
             }
         }
 
+        private string _userName = string.Empty;
+        public string UserName
+        {
+            get => _userName;
+            set
+            {
+                _userName = value;
+                OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
