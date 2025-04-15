@@ -44,7 +44,8 @@ public partial class App : System.Windows.Application
                 services.AddTransient<PackageCreationView>();
                 services.AddTransient<PackageUploadView>();
                 services.AddTransient<PackageCreationView2>();
-                
+                services.AddTransient<PackagingProgressView>();
+
                 // Register the main window
                 services.AddSingleton<MainWindow>();
                 

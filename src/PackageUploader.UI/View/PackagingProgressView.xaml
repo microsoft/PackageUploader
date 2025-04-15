@@ -22,22 +22,22 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Row="1" Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition Height="23"/>
-                <RowDefinition Height="28"/>
-                <RowDefinition Height="23"/>
-                <RowDefinition />
-                <RowDefinition Height="23"/>
-                <RowDefinition />
-                <RowDefinition />
+                <RowDefinition /> <!-- space -->
+                <RowDefinition /><!-- picture -->
+                <RowDefinition Height="23"/><!-- space -->
+                <RowDefinition Height="28"/> <!-- heading -->
+                <RowDefinition Height="23"/><!-- space -->
+                <RowDefinition /> <!-- progress bars bundle-->
+                <RowDefinition Height="23"/><!-- space -->
+                <RowDefinition /> <!-- updating labels -->
+                <RowDefinition /> <!-- cancel button? -->
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="364" />
+                <ColumnDefinition Width="350" />
                 <ColumnDefinition />
-                <ColumnDefinition Width="364" />
+                <ColumnDefinition Width="350" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="4" Grid.Column="1"
+            <TextBlock Grid.Row="5" Grid.Column="1"
                    Style="{StaticResource Headline}"
                    Text="Getting your package ready..."
                    Foreground="White" />
@@ -71,6 +71,58 @@
                     VerticalAlignment="Stretch"
                     Height="25"/>
             </Grid>
+            <!-- updating labels -->
+            <Grid Grid.Row="7" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Image Grid.Row="0" Grid.Column="0"
+                       Source="{Binding ValidatingFilesImage}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Height="28"
+                       Width="28" />
+                <TextBlock Grid.Row="0" Grid.Column="1"
+                           Text="Validating files..."
+                           Foreground="White"
+                           HorizontalAlignment="Left" />
+                <Image Grid.Row="1" Grid.Column="0"
+                       Source="{Binding CopyingAndEncryptingDataImage}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Height="28"
+                       Width="28" />
+                <TextBlock Grid.Row="1" Grid.Column="1"
+                           Text="Copying and encrypting data..."
+                           Foreground="White"
+                           HorizontalAlignment="Left" />
+                <Image Grid.Row="2" Grid.Column="0"
+                       Source="{Binding VerifyingPackageContentsImage}"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Height="28"
+                       Width="28" />
+                <TextBlock Grid.Row="2" Grid.Column="1"
+                           Text="Verifying package contents..."
+                           Foreground="White"
+                           HorizontalAlignment="Left" />
+            </Grid>
+            <StackPanel Grid.Row="8" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancel"
+                        Command="{Binding CancelCreationCommand}"
+                        IsEnabled="True"
+                        Margin="0, 0, 0, 0"
+                        Width="100"
+                        Height="30"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"/>
+            </StackPanel>
         </Grid>
     </Grid>
 

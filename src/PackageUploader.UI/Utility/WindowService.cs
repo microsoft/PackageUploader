@@ -61,7 +61,7 @@ namespace PackageUploader.UI.Utility
             {
                 throw new InvalidOperationException($"Could not create an instance of {viewType.Name}");
             }
-            
+             
             _contentControl.Content = view;
         }
 

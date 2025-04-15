@@ -95,6 +95,25 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _packagePreviewImage, value);
     }
 
+    private BitmapImage? _validatingFilesImage = null;
+    public BitmapImage? ValidatingFilesImage
+    {
+        get => _validatingFilesImage;
+        set => SetProperty(ref _validatingFilesImage, value);
+    }
+    private BitmapImage? _copyingAndEncryptingDataImage = null;
+    public BitmapImage? CopyingAndEncryptingDataImage
+    {
+        get => _copyingAndEncryptingDataImage;
+        set => SetProperty(ref _copyingAndEncryptingDataImage, value);
+    }
+    private BitmapImage? _verifyingPackageContentsImage = null;
+    public BitmapImage? VerifyingPackageContentsImage
+    {
+        get => _verifyingPackageContentsImage;
+        set => SetProperty(ref _verifyingPackageContentsImage, value);
+    }
+
     public PackageModel Package => _packageModelService.Package;
 
     public string _packageFilePath = string.Empty;
@@ -267,6 +286,10 @@ public partial class PackageCreationViewModel : BaseViewModel
                 FreeConsole();
             }
         }
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            _windowService.NavigateTo(typeof(PackageCreationView2));
+        });
     }
 #else
     private void CancelCreation()
@@ -412,6 +435,12 @@ public partial class PackageCreationViewModel : BaseViewModel
         _makePackageProcess.Start();
         _makePackageProcess.BeginOutputReadLine();
         _makePackageProcess.BeginErrorReadLine();
+
+        // Navigate using the window service (WPF-specific navigation)
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            _windowService.NavigateTo(typeof(PackagingProgressView));
+        });
     }
 
     private async Task GenerateMappingFile(string tempBuildPath)
