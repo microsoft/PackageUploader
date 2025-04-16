@@ -13,6 +13,7 @@ using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 using System.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.Logging;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -21,6 +22,7 @@ public partial class MainPageViewModel : BaseViewModel
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly UserLoggedInProvider _userLoggedInProvider;
     private readonly IAccessTokenProvider _accessTokenProvider;
+    private readonly ILogger<MainPageViewModel> _logger;
     private CancellationTokenSource _cancellationTokenSource = new();
 
     public ICommand NavigateToPackageCreationCommand { get; }
@@ -70,11 +72,12 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
-    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, IAccessTokenProvider accessTokenProvider, UserLoggedInProvider userLoggedInProvider, IWindowService windowService)
+    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, IAccessTokenProvider accessTokenProvider, UserLoggedInProvider userLoggedInProvider, IWindowService windowService, ILogger<MainPageViewModel> logger)
     {
         _pathConfigurationService = pathConfigurationService;
         _accessTokenProvider = accessTokenProvider;
         _userLoggedInProvider = userLoggedInProvider;
+        _logger = logger;
 
         NavigateToPackageCreationCommand = new RelayCommand(() => 
         {
@@ -112,6 +115,19 @@ public partial class MainPageViewModel : BaseViewModel
         {
             IsMakePkgEnabled = false;
             MakePkgUnavailableErrorMessage = "MakePkg.exe was not found. Please install the GDK in order to package game contents.";
+        }
+
+        // Log version of the tool
+        string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
+        _logger.LogInformation("PackageUploader.UI version {version} is starting from location {location}.", version, AppContext.BaseDirectory);
+
+        string makePkgVersion = string.Empty;
+        if (File.Exists(makePkgPath))
+        {
+            var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(makePkgPath);
+            makePkgVersion = fileVersionInfo.FileVersion ?? string.Empty;
+
+            _logger.LogInformation("Using MakePkg.exe version: {makePkgVersion} from location {makePkgLocation}.", makePkgVersion, makePkgPath);
         }
     }
 
