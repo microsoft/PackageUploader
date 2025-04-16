@@ -44,7 +44,8 @@
                 <TextBlock Text="Xbox Package Tool" 
                        Foreground="White" 
                        FontSize="12"
-                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center"
+                       Margin="5, 0, 0, 0"/>
             </StackPanel>
             
             <!-- User Info -->
