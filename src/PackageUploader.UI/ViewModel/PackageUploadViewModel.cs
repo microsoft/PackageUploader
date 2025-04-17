@@ -4,7 +4,6 @@
 using System.Diagnostics;
 using System.Windows.Input;
 using System.Xml;
-using Microsoft.Win32;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
@@ -12,7 +11,6 @@ using PackageUploader.ClientApi.Models;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
-using System.Windows;
 using System.IO;
 
 namespace PackageUploader.UI.ViewModel;

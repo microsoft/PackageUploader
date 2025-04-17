@@ -87,7 +87,7 @@ namespace PackageUploader.UI.ViewModel
 
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                _windowService.NavigateTo(typeof(PackageCreationView2));
+                _windowService.NavigateTo(typeof(PackageCreationView));
             });
         }
     }

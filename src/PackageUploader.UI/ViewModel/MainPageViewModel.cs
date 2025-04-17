@@ -81,7 +81,7 @@ public partial class MainPageViewModel : BaseViewModel
 
         NavigateToPackageCreationCommand = new RelayCommand(() => 
         {
-            windowService.NavigateTo(typeof(PackageCreationView2));
+            windowService.NavigateTo(typeof(PackageCreationView));
         }, () => IsMakePkgEnabled);
         
         NavigateToPackageUploadCommand = new RelayCommand(() =>
