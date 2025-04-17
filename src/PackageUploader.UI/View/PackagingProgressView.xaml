@@ -37,6 +37,12 @@
                 <ColumnDefinition />
                 <ColumnDefinition Width="350" />
             </Grid.ColumnDefinitions>
+            <Image Grid.Row="1" Grid.Column="1"
+                   Source="pack://application:,,,/Resources/Images/InProgress.png"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="100"
+                   Width="100" />
             <TextBlock Grid.Row="5" Grid.Column="1"
                    Style="{StaticResource Headline}"
                    Text="Getting your package ready..."

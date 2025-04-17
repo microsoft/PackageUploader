@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace PackageUploader.UI.ViewModel
 {
@@ -28,6 +29,25 @@ namespace PackageUploader.UI.ViewModel
             }
         }
 
+        private ImageSource _validatingFilesImage = null;
+        public ImageSource ValidatingFilesImage
+        {
+            get => _validatingFilesImage;
+            set => SetProperty(ref _validatingFilesImage, value);
+        }
+        private ImageSource _copyingAndEncryptingDataImage = null;
+        public ImageSource CopyingAndEncryptingDataImage
+        {
+            get => _copyingAndEncryptingDataImage;
+            set => SetProperty(ref _copyingAndEncryptingDataImage, value);
+        }
+        public ImageSource _verifyingPackageContentsImage = null;
+        public ImageSource VerifyingPackageContentsImage
+        {
+            get => _verifyingPackageContentsImage;
+            set => SetProperty(ref _verifyingPackageContentsImage, value);
+        }
+
         public ICommand CancelCreationCommand { get; }
 
 
@@ -38,6 +58,8 @@ namespace PackageUploader.UI.ViewModel
             _windowService = windowService;
 
             CancelCreationCommand = new RelayCommand(CancelCreation);
+
+            ValidatingFilesImage = new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/AppIcon/Settings.png") as ImageSource; // thanks copilot
         }
 
         public void PackagingProgressUpdate(object sender, PropertyChangedEventArgs e)
@@ -45,6 +67,17 @@ namespace PackageUploader.UI.ViewModel
             if (e.PropertyName == nameof(PackingProgressPercentageProvider.PackingProgressPercentage))
             {
                 OnPropertyChanged(nameof(PackingProgressPercentage));
+
+                if(PackingProgressPercentage > 0)
+                {
+                    ValidatingFilesImage = new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/AppIcon/Accept.png") as ImageSource;
+                    CopyingAndEncryptingDataImage = new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/AppIcon/Settings.png") as ImageSource;
+                }
+                else if(PackingProgressPercentage >= 95)
+                {
+                    CopyingAndEncryptingDataImage = new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/AppIcon/Accept.png") as ImageSource;
+                    VerifyingPackageContentsImage = new ImageSourceConverter().ConvertFromString("pack://application:,,,/Resources/AppIcon/Settings.png") as ImageSource;
+                }
             }
         }
 
