@@ -44,7 +44,18 @@
                 <TextBlock Text="Xbox Package Tool" 
                        Foreground="White" 
                        FontSize="12"
-                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center"
+                       Margin="5, 0, 0, 0"/>
+            </StackPanel>
+            
+            <!-- User Info -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
+                <TextBlock x:Name="UserDisplayText" 
+                           Foreground="White" 
+                           FontSize="12" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"
+                           Visibility="Collapsed"/>
             </StackPanel>
             
             <!-- Window Controls -->

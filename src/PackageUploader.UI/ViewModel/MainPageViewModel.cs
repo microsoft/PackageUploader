@@ -13,6 +13,7 @@ using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 using System.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.Logging;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -21,6 +22,7 @@ public partial class MainPageViewModel : BaseViewModel
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly UserLoggedInProvider _userLoggedInProvider;
     private readonly IAccessTokenProvider _accessTokenProvider;
+    private readonly ILogger<MainPageViewModel> _logger;
     private CancellationTokenSource _cancellationTokenSource = new();
 
     public ICommand NavigateToPackageCreationCommand { get; }
@@ -56,13 +58,6 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
-    private string? _userName = string.Empty;
-    public string? UserName
-    {
-        get => _userName;
-        set => SetProperty(ref _userName, value);
-    }
-
     private bool _signinStarted = false;
     public bool SigninStarted
     {
@@ -77,11 +72,12 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
-    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, IAccessTokenProvider accessTokenProvider, UserLoggedInProvider userLoggedInProvider, IWindowService windowService)
+    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, IAccessTokenProvider accessTokenProvider, UserLoggedInProvider userLoggedInProvider, IWindowService windowService, ILogger<MainPageViewModel> logger)
     {
         _pathConfigurationService = pathConfigurationService;
         _accessTokenProvider = accessTokenProvider;
         _userLoggedInProvider = userLoggedInProvider;
+        _logger = logger;
 
         NavigateToPackageCreationCommand = new RelayCommand(() => 
         {
@@ -120,6 +116,30 @@ public partial class MainPageViewModel : BaseViewModel
             IsMakePkgEnabled = false;
             MakePkgUnavailableErrorMessage = "MakePkg.exe was not found. Please install the GDK in order to package game contents.";
         }
+
+        // Log version of the tool
+        _logger.LogInformation("PackageUploader.UI version {version} is starting from location {location}.", GetVersion(), AppContext.BaseDirectory);
+
+        string makePkgVersion = string.Empty;
+        if (File.Exists(makePkgPath))
+        {
+            var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(makePkgPath);
+            makePkgVersion = fileVersionInfo.FileVersion ?? string.Empty;
+
+            _logger.LogInformation("Using MakePkg.exe version: {makePkgVersion} from location {makePkgLocation}.", makePkgVersion, makePkgPath);
+        }
+    }
+
+    private static string GetVersion()
+    {
+        var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+        var assemblyVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+
+        if (assemblyVersionAttribute is not null)
+        {
+            return assemblyVersionAttribute.InformationalVersion;
+        }
+        return assembly.GetName().Version?.ToString() ?? string.Empty;
     }
 
     public void OnAppearing()
@@ -236,10 +256,9 @@ public partial class MainPageViewModel : BaseViewModel
 
     private void UpdateSignInStatus(string accessToken)
     {
+        _userLoggedInProvider.UserName = string.Empty;
         _userLoggedInProvider.AccessToken = accessToken;
         _userLoggedInProvider.UserLoggedIn = true;
-
-        OnPropertyChanged(nameof(NotLoggedIn));
 
         // Try to extract user name from the token
         var handler = new JwtSecurityTokenHandler();
@@ -248,7 +267,12 @@ public partial class MainPageViewModel : BaseViewModel
         {
             var claims = jsonToken.Claims;
 
-            UserName = claims.FirstOrDefault(c => c.Type == "name")?.Value;
+            if (claims != null)
+            {
+                _userLoggedInProvider.UserName = claims.FirstOrDefault(c => c.Type == "name")?.Value ?? string.Empty;
+            }
         }
+
+        OnPropertyChanged(nameof(NotLoggedIn));
     }
 }
