@@ -118,8 +118,7 @@ public partial class MainPageViewModel : BaseViewModel
         }
 
         // Log version of the tool
-        string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
-        _logger.LogInformation("PackageUploader.UI version {version} is starting from location {location}.", version, AppContext.BaseDirectory);
+        _logger.LogInformation("PackageUploader.UI version {version} is starting from location {location}.", GetVersion(), AppContext.BaseDirectory);
 
         string makePkgVersion = string.Empty;
         if (File.Exists(makePkgPath))
@@ -129,6 +128,18 @@ public partial class MainPageViewModel : BaseViewModel
 
             _logger.LogInformation("Using MakePkg.exe version: {makePkgVersion} from location {makePkgLocation}.", makePkgVersion, makePkgPath);
         }
+    }
+
+    private static string GetVersion()
+    {
+        var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+        var assemblyVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+
+        if (assemblyVersionAttribute is not null)
+        {
+            return assemblyVersionAttribute.InformationalVersion;
+        }
+        return assembly.GetName().Version?.ToString() ?? string.Empty;
     }
 
     public void OnAppearing()
