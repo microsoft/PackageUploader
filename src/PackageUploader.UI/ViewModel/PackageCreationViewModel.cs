@@ -25,6 +25,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     private readonly PackageModelProvider _packageModelService;
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly PackageUploader.UI.Utility.IWindowService _windowService;
+    private readonly PackingProgressPercentageProvider _packingProgressPercentageProvider;
 
     private Process? _makePackageProcess;
 
@@ -74,11 +75,17 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isSpinnerRunning, value);
     }
     
-    private double _progressValue = 0;
     public double ProgressValue
     {
-        get => _progressValue;
-        set => SetProperty(ref _progressValue, value);
+        get => _packingProgressPercentageProvider.PackingProgressPercentage;
+        set
+        {
+            if (_packingProgressPercentageProvider.PackingProgressPercentage != value)
+            {
+                _packingProgressPercentageProvider.PackingProgressPercentage = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     private bool _isProgressVisible = false;
@@ -207,11 +214,15 @@ public partial class PackageCreationViewModel : BaseViewModel
     public ICommand BrowseSubValPathCommand { get; }
     public ICommand CancelButtonCommand { get; }
 
-    public PackageCreationViewModel(PackageModelProvider packageModelService, PathConfigurationProvider pathConfigurationService, PackageUploader.UI.Utility.IWindowService windowService)
+    public PackageCreationViewModel(PackageModelProvider packageModelService, 
+                                    PathConfigurationProvider pathConfigurationService, 
+                                    PackageUploader.UI.Utility.IWindowService windowService, 
+                                    PackingProgressPercentageProvider packingProgressPercentageProvider)
     {
         _packageModelService = packageModelService;
         _pathConfigurationService = pathConfigurationService;
         _windowService = windowService;
+        _packingProgressPercentageProvider = packingProgressPercentageProvider;
 
 #if WINDOWS
         if (File.Exists(_pathConfigurationService.MakePkgPath))
@@ -286,10 +297,10 @@ public partial class PackageCreationViewModel : BaseViewModel
                 FreeConsole();
             }
         }
-        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+/*        System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             _windowService.NavigateTo(typeof(PackageCreationView2));
-        });
+        });*/
     }
 #else
     private void CancelCreation()
@@ -349,19 +360,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         _makePackageProcess.StartInfo.RedirectStandardError = true;
         _makePackageProcess.EnableRaisingEvents = true;
         _makePackageProcess.StartInfo.CreateNoWindow = true;
+        ProgressValue = 0;
 
         _makePackageProcess.OutputDataReceived += (sender, args) =>
         {
             if (!String.IsNullOrEmpty(args.Data))
             {
                 processOutput.Add(args.Data);
-                
+
                 // Check for encryption progress messages
                 var match = EncryptionProgressRegex().Match(args.Data);
                 if (match.Success && int.TryParse(match.Groups[1].Value, out int percentComplete))
                 {
                     // Map the 0-100 range to .05 - .95 range
-                    ProgressValue = percentComplete / 100.0 * 0.9 + 0.05;
+                    ProgressValue = percentComplete; //percentComplete / 100.0 * 0.9 + 0.05;
                 }
             }
         };
@@ -630,6 +642,15 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
         Package.SubValFilePath = SubValPath;
         Package.GameConfigFilePath = GameConfigPath;
+    }
+
+    public void OnAppearing()
+    {
+        if(_packingProgressPercentageProvider.PackingCancelled)
+        {
+            _packingProgressPercentageProvider.PackingCancelled = false;
+            CancelCreation();
+        }
     }
 
     private void LoadGameLogo(string configFilePath)

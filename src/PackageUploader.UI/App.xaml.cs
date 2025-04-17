@@ -31,12 +31,14 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<PackageModelProvider>();
                 services.AddSingleton<PathConfigurationProvider>();
                 services.AddSingleton<UserLoggedInProvider>();
-                
+                services.AddSingleton<PackingProgressPercentageProvider>();
+
                 // Register ViewModels
                 services.AddTransient<MainPageViewModel>();
                 services.AddTransient<PackageCreationViewModel>();
                 services.AddTransient<PackageUploadViewModel>();
-                
+                services.AddTransient<PackagingProgressViewModel>();
+
                 // Register Views
                 services.AddTransient<MainPageView>();
                 services.AddTransient<PackageCreationView>();

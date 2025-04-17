@@ -9,5 +9,7 @@ public partial class PackageCreationView2 : System.Windows.Controls.UserControl
 	{
 		InitializeComponent();
 		DataContext = viewModel;
-	}
+
+        this.Loaded += (s, e) => viewModel.OnAppearing();
+    }
 }

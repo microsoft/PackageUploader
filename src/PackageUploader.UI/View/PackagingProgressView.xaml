@@ -7,7 +7,7 @@
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=viewmodel:PackageCreationViewModel}"
+             d:DataContext="{d:DesignInstance Type=viewmodel:PackagingProgressViewModel}"
              Background="#25282C">
     <Grid>
         <Grid.RowDefinitions>
@@ -44,19 +44,19 @@
             <!-- Loading Bar -->
             <Grid Grid.Row="6" Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="19" />
-                    <RowDefinition Height="38" />
+                    <RowDefinition  /> <!-- 19-->
+                    <RowDefinition  /> <!-- 38-->
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="358" />
-                    <ColumnDefinition Width="358" />
+                    <ColumnDefinition  />
+                    <ColumnDefinition  />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0"
                        Text="Packaging..."
                        Foreground="White" 
                        HorizontalAlignment="Left"/>
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding ProgressValue}"
+                    <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                Foreground="White"/>
                     <TextBlock Text="% complete"
                                Foreground="White" />
@@ -64,12 +64,15 @@
                 <ProgressBar
                     Grid.Row="1"
                     Grid.ColumnSpan="2"
-                    Value="{Binding ProgressValue, Mode=OneWay}"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="{Binding PackingProgressPercentage}"
                     Visibility="Visible"
                     Foreground="LightBlue"
+                    Background="Black"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Height="25"/>
+                    />
             </Grid>
             <!-- updating labels -->
             <Grid Grid.Row="7" Grid.Column="1">
