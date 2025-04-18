@@ -6,133 +6,204 @@
              x:Class="PackageUploader.UI.View.PackagingProgressView"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
+             xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackagingProgressViewModel}"
              Background="#25282C">
+    <UserControl.Resources>
+        <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
+        <Storyboard x:Key="RotateAnimation">
+            <DoubleAnimation
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                From="0"
+                To="360"
+                Duration="0:0:5"
+                RepeatBehavior="Forever" />
+        </Storyboard>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="19" />
-            <RowDefinition />
-            <RowDefinition Height="19" />
+            <!-- picture -->
+            <RowDefinition Height="Auto"/>
+            <!-- heading -->
+            <RowDefinition Height="Auto"/>
+            <!-- progress bars bundle-->
+            <RowDefinition Height="Auto"/>
+            <!-- updating labels -->
+            <RowDefinition Height="Auto"/>
+            <!-- cancel button? -->
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="29" />
-            <ColumnDefinition />
-            <ColumnDefinition Width="29"/>
-        </Grid.ColumnDefinitions>
-        <Grid Grid.Row="1" Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition /> <!-- space -->
-                <RowDefinition /><!-- picture -->
-                <RowDefinition Height="23"/><!-- space -->
-                <RowDefinition Height="28"/> <!-- heading -->
-                <RowDefinition Height="23"/><!-- space -->
-                <RowDefinition /> <!-- progress bars bundle-->
-                <RowDefinition Height="23"/><!-- space -->
-                <RowDefinition /> <!-- updating labels -->
-                <RowDefinition /> <!-- cancel button? -->
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350" />
-                <ColumnDefinition />
-                <ColumnDefinition Width="350" />
-            </Grid.ColumnDefinitions>
-            <Image Grid.Row="1" Grid.Column="1"
-                   Source="pack://application:,,,/Resources/Images/InProgress.png"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Height="100"
-                   Width="100" />
-            <TextBlock Grid.Row="5" Grid.Column="1"
-                   Style="{StaticResource Headline}"
+        <Image Grid.Row="0"
+               Margin="0, 100, 0, 23"
+               Source="/Resources/Images/InProgress.png"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               Height="130"
+               Width="130" />
+        <TextBlock Grid.Row="1"
+                   Margin="0, 0, 0, 23"
+                   Style="{StaticResource SubHeadline}"
                    Text="Getting your package ready..."
                    Foreground="White" />
-            <!-- Loading Bar -->
-            <Grid Grid.Row="6" Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition  /> <!-- 19-->
-                    <RowDefinition  /> <!-- 38-->
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition  />
-                    <ColumnDefinition  />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0"
+        <!-- Loading Bar -->
+        <Grid Grid.Row="2"
+              Margin="300, 0, 300, 23">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="0, 0, 0, 10"
                        Text="Packaging..."
                        Foreground="White" 
                        HorizontalAlignment="Left"/>
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                               Foreground="White"/>
-                    <TextBlock Text="% complete"
-                               Foreground="White" />
-                </StackPanel>
-                <ProgressBar
-                    Grid.Row="1"
-                    Grid.ColumnSpan="2"
-                    Minimum="0"
-                    Maximum="100"
-                    Value="{Binding PackingProgressPercentage}"
-                    Visibility="Visible"
-                    Foreground="LightBlue"
-                    Background="Black"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    />
-            </Grid>
-            <!-- updating labels -->
-            <Grid Grid.Row="7" Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="28" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Image Grid.Row="0" Grid.Column="0"
-                       Source="{Binding ValidatingFilesImage}"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Height="28"
-                       Width="28" />
-                <TextBlock Grid.Row="0" Grid.Column="1"
-                           Text="Validating files..."
-                           Foreground="White"
-                           HorizontalAlignment="Left" />
-                <Image Grid.Row="1" Grid.Column="0"
-                       Source="{Binding CopyingAndEncryptingDataImage}"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Height="28"
-                       Width="28" />
-                <TextBlock Grid.Row="1" Grid.Column="1"
-                           Text="Copying and encrypting data..."
-                           Foreground="White"
-                           HorizontalAlignment="Left" />
-                <Image Grid.Row="2" Grid.Column="0"
-                       Source="{Binding VerifyingPackageContentsImage}"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Height="28"
-                       Width="28" />
-                <TextBlock Grid.Row="2" Grid.Column="1"
-                           Text="Verifying package contents..."
-                           Foreground="White"
-                           HorizontalAlignment="Left" />
-            </Grid>
-            <StackPanel Grid.Row="8" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Cancel"
-                        Command="{Binding CancelCreationCommand}"
-                        IsEnabled="True"
-                        Margin="0, 0, 0, 0"
-                        Width="100"
-                        Height="30"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"/>
+            <StackPanel Grid.Row="0"
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                           Foreground="White"/>
+                <TextBlock Text="% complete"
+                           Foreground="White" />
             </StackPanel>
+            <ProgressBar Grid.Row="1"
+                         Grid.ColumnSpan="2"
+                         Margin="0, 0, 0, 23"
+                         Minimum="0"
+                         Maximum="100"
+                         Value="{Binding PackingProgressPercentage}"
+                         Visibility="Visible"
+                         Foreground="{StaticResource LightPurplishBlueBrush}"
+                         Background="{StaticResource Gray500Brush}"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Stretch"
+                         Height="3"/>
         </Grid>
+        <!-- updating labels -->
+        <Grid Grid.Row="3" Margin="500, 0, 0, 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="28" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <!-- Row 1 -->
+            <Image Grid.Row="0"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Settings.png"
+                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-5}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16">
+                <Image.RenderTransform>
+                    <RotateTransform CenterX="8" CenterY="8" />
+                </Image.RenderTransform>
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+            <Image Grid.Row="0"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Accept.png"
+                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-100}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16" />
+            <TextBlock Grid.Row="0"
+                       Grid.Column="1"
+                       Text="Validating files..."
+                       Foreground="White"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"/>
+            <!-- Row 2 -->
+            <Image Grid.Row="1"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Settings.png"
+                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-93}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16">
+                <Image.RenderTransform>
+                    <RotateTransform CenterX="8" CenterY="8" />
+                </Image.RenderTransform>
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+            <Image Grid.Row="1"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Accept.png"
+                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=94-100}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16" />
+            <TextBlock Grid.Row="1" Grid.Column="1"
+                       Text="Copying and encrypting data..."
+                       Foreground="White"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"/>
+            <!-- Row 3 -->
+            <Image Grid.Row="2"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Settings.png"
+                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=95-99}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16">
+                <Image.RenderTransform>
+                    <RotateTransform CenterX="8" CenterY="8" />
+                </Image.RenderTransform>
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+            <Image Grid.Row="2"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Accept.png"
+                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=100-100}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16" />
+            <TextBlock Grid.Row="2"
+                       Grid.Column="1"
+                       Text="Verifying package contents..."
+                       Foreground="White"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center" />
+        </Grid>
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Content="Cancel packaging"
+                    Command="{Binding CancelCreationCommand}"
+                    IsEnabled="True"
+                    Margin="0, 0, 50, 50"
+                    Width="150"
+                    Height="30"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"/>
+        </StackPanel>
     </Grid>
 
 </UserControl>

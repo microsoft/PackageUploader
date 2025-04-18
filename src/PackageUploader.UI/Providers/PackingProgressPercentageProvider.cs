@@ -10,8 +10,8 @@ namespace PackageUploader.UI.Providers
 {
     public partial class PackingProgressPercentageProvider : INotifyPropertyChanged
     {
-        private double _packingProgressPercentage;
-        public double PackingProgressPercentage
+        private int _packingProgressPercentage;
+        public int PackingProgressPercentage
         {
             get => _packingProgressPercentage;
             set

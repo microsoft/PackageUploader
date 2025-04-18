@@ -57,6 +57,7 @@ public partial class PackageCreationViewModel : BaseViewModel
                 _gameDataPath = value;
                 OnPropertyChanged(nameof(GameDataPath));
                 LoadGameConfigValues();
+                EstimatePackageSize();
             }
         }
     }
@@ -65,7 +66,15 @@ public partial class PackageCreationViewModel : BaseViewModel
     public string MappingDataXmlPath
     {
         get => _mappingDataXmlPath;
-        set => SetProperty(ref _mappingDataXmlPath, value);
+        set
+        {
+            if (_mappingDataXmlPath != value)
+            {
+                _mappingDataXmlPath = value;
+                OnPropertyChanged(nameof(MappingDataXmlPath));
+                EstimatePackageSize();
+            }
+        }
     }
 
     private bool _isCreationInProgress = false;
@@ -82,7 +91,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isSpinnerRunning, value);
     }
     
-    public double ProgressValue
+    public int ProgressValue
     {
         get => _packingProgressPercentageProvider.PackingProgressPercentage;
         set
@@ -437,8 +446,8 @@ public partial class PackageCreationViewModel : BaseViewModel
                 var match = EncryptionProgressRegex().Match(args.Data);
                 if (match.Success && int.TryParse(match.Groups[1].Value, out int percentComplete))
                 {
-                    // Map the 0-100 range to .05 - .95 range
-                    ProgressValue = percentComplete; //percentComplete / 100.0 * 0.9 + 0.05;
+                    // Map the 0-100 range to 5-95 to allow for setup and validation
+                    ProgressValue = (int)(percentComplete * 0.9 + 5);
                 }
             }
         };
@@ -495,7 +504,7 @@ public partial class PackageCreationViewModel : BaseViewModel
                 }
                 return;
             }
-            ProgressValue = 1;
+            ProgressValue = 100;
 
             // Navigate using the window service (WPF-specific navigation)
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
