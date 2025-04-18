@@ -224,7 +224,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isDragDropVisible, value);
     }
 
-    private string _dragDropMessage = "Drag and drop the Game Data folder here or click to browse";
+    private string _dragDropMessage = "Drag and drop the Identity Data folder here or click to browse";
     public string DragDropMessage
     {
         get => _dragDropMessage;
@@ -509,7 +509,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             // Navigate using the window service (WPF-specific navigation)
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                _windowService.NavigateTo(typeof(PackageUploadView));
+                _windowService.NavigateTo(typeof(PackagingFinishedView));
             });
         };
 
@@ -706,55 +706,20 @@ public partial class PackageCreationViewModel : BaseViewModel
             HasValidGameConfig = false;
             return;
         }
-
-        XmlReaderSettings settings = new XmlReaderSettings();
-
-        using(var reader = XmlReader.Create(gameConfigPath, settings)) 
+        GameConfigModel gameConfig;
+        try
         {
-            while(reader.Read())
-            {
-                switch (reader.NodeType)
-                {
-                    case XmlNodeType.Element:
-                        if(reader.Name=="ShellVisuals" && reader.HasAttributes) // HasAttributes should be true
-                        {
-                            while(reader.MoveToNextAttribute())
-                            {
-                                if (reader.Name == "StoreLogo")
-                                {
-                                    var parentDirectory = Directory.GetParent(gameConfigPath);
-
-                                    if (parentDirectory != null)
-                                    {
-                                        string path = Path.Combine(parentDirectory.FullName, reader.Value);
-                                        if (File.Exists(path))
-                                        {
-                                            PackagePreviewImage = LoadBitmapImage(path);
-                                        }
-                                    }
-                                }
-                            }
-                            reader.MoveToElement();
-                        }
-                        if(reader.Name=="Identity" && reader.HasAttributes)
-                        {
-                            while (reader.MoveToNextAttribute())
-                            {
-                                if (reader.Name == "Name")
-                                {
-                                    PackageId = reader.Value;
-                                }
-                            }
-                            reader.MoveToElement();
-                        }
-                        if (reader.Name == "StoreId")
-                        {
-                            BigId = reader.ReadElementContentAsString();
-                        }
-                        break;
-                }
-            }
+            gameConfig = new GameConfigModel(gameConfigPath);
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading game config."); // thanks copilot
+            HasValidGameConfig = false;
+            return;
+        }
+        PackageId = gameConfig.Identity.Name;
+        BigId = gameConfig.StoreId;
+        PackagePreviewImage = LoadBitmapImage(gameConfig.ShellVisuals.StoreLogo);
 
         HasValidGameConfig = true;
     }

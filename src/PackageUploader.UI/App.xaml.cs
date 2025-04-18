@@ -38,12 +38,14 @@ public partial class App : System.Windows.Application
                 services.AddTransient<PackageCreationViewModel>();
                 services.AddTransient<PackageUploadViewModel>();
                 services.AddTransient<PackagingProgressViewModel>();
+                services.AddTransient<PackagingFinishedViewModel>();
 
                 // Register Views
                 services.AddTransient<MainPageView>();
                 services.AddTransient<PackageCreationView>();
                 services.AddTransient<PackageUploadView>();
                 services.AddTransient<PackagingProgressView>();
+                services.AddTransient<PackagingFinishedView>();
 
                 // Register the main window
                 services.AddSingleton<MainWindow>();
