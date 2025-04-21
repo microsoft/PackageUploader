@@ -16,7 +16,7 @@ namespace PackageUploader.UI.ViewModel
         private readonly GameConfigModel _gameConfigModel;
         private readonly PathConfigurationProvider _pathConfigurationService;
 
-        private string _wdAppPath = string.Empty;
+        private readonly string _wdAppPath = string.Empty;
 
         private BitmapImage? _packagePreviewImage = null;
         public BitmapImage? PackagePreviewImage
@@ -100,8 +100,9 @@ namespace PackageUploader.UI.ViewModel
                 // Create a temporary batch file to run the command and pause
                 string batchFilePath = Path.Combine(Path.GetTempPath(), "InstallGame.bat");
 
-                File.WriteAllText(batchFilePath, 
+                File.WriteAllText(batchFilePath,
                                   @"@echo off
+                                  echo """ + _wdAppPath + @""" install """ + _packageModelProvider.Package.PackageFilePath + @"""
                                   """ + _wdAppPath + @""" install """ + _packageModelProvider.Package.PackageFilePath + @"""
                                   pause");
 

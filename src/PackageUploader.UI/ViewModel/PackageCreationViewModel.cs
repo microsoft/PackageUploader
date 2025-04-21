@@ -231,6 +231,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _dragDropMessage, value);
     }
 
+    private bool _supportsCustomSubValPath = false;
+    public bool SupportsCustomSubValPath
+    {
+        get => _supportsCustomSubValPath;
+        set
+        {
+            if (_supportsCustomSubValPath != value)
+            {
+                _supportsCustomSubValPath = value;
+                OnPropertyChanged(nameof(SupportsCustomSubValPath));
+            }
+        }
+    }
+
     public ICommand MakePackageCommand { get; }
     public ICommand GameDataPathDroppedCommand { get; }
     public ICommand BrowseGameDataPathCommand { get; }
@@ -252,6 +266,19 @@ public partial class PackageCreationViewModel : BaseViewModel
         _windowService = windowService;
         _packingProgressPercentageProvider = packingProgressPercentageProvider;
         _logger = logger;
+
+        // Ensure our version of MakePkg supports custom SubVal paths before allowing that option.
+        var mkgPkgpath = _pathConfigurationService.MakePkgPath;
+        var mkgPkgVersionString = FileVersionInfo.GetVersionInfo(mkgPkgpath);
+
+        if (!string.IsNullOrEmpty(mkgPkgVersionString.ProductVersion))
+        {
+            Version makePkgVersion = new(mkgPkgVersionString.ProductVersion);
+            Version firstSupportedVersion = new("10.0.22621.4272"); // June 2023 GDK
+            _supportsCustomSubValPath = makePkgVersion >= firstSupportedVersion;
+
+            // Future options can also be checked here to enable new features.
+        }
 
         MakePackageCommand = new RelayCommand(StartMakePackageProcess, CanCreatePackage);
         GameDataPathDroppedCommand = new RelayCommand<string>(OnGameDataPathDropped);
@@ -281,39 +308,144 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     private void EstimatePackageSize()
     {
+        string sizeInBytes = "Unknown";
         if (string.IsNullOrEmpty(GameDataPath) || !Directory.Exists(GameDataPath))
         {
             PackageSize = "Unknown";
             return;
         }
 
-        if (string.IsNullOrEmpty(MappingDataXmlPath) || !File.Exists(MappingDataXmlPath))
+        try
         {
-            try
+            if (string.IsNullOrEmpty(MappingDataXmlPath) || !File.Exists(MappingDataXmlPath))
             {
-                var sizeInBytes = GetDirectorySizeInBytes(GameDataPath).ToString();
-                double sizeInGB = double.Parse(sizeInBytes) / (1024 * 1024 * 1024); // Convert bytes to GB
+                sizeInBytes = GetDirectorySizeInBytes(GameDataPath).ToString();
+            }
+            else
+            {
+                sizeInBytes = ParseLayoutFileForFileSize(MappingDataXmlPath);
+            }
+    
+            double sizeInGB = double.Parse(sizeInBytes) / (1024 * 1024 * 1024); // Convert bytes to GB
 
-                if (sizeInGB < 1)
-                {
-                    PackageSize = "< 1 GB";
-                }
-                else
-                {
-                    PackageSize = $"{sizeInGB:F2} GB";
-                }
-            }
-            catch (Exception ex)
+            if (sizeInGB < 1)
             {
-                // Handle any exceptions that may occur during size calculation
-                PackageSize = "Unknown";
-                _logger.LogError(ex, "Error calculating package size.");
+                PackageSize = "< 1 GB";
             }
-            return;
+            else
+            {
+                PackageSize = $"{sizeInGB:F2} GB";
+            }
         }
+        catch (Exception ex)
+        {
+            // Handle any exceptions that may occur during size calculation
+            PackageSize = "Unknown";
+            _logger.LogError(ex, "Error calculating package size.");
+        }
+    }
 
-        // TODO: Parse the Layout file to estimate the size based on the files in that layout.
+    private string ParseLayoutFileForFileSize(string mappingDataXmlPath)
+    {
+        try
+        {
+            _logger.LogInformation("Parsing layout file for size calculation: {Path}", mappingDataXmlPath);
 
+            // Load the XML document
+            XmlDocument xmlDoc = new();
+            xmlDoc.Load(mappingDataXmlPath);
+
+            // Get all FileGroup nodes
+            XmlNodeList? fileGroups = xmlDoc.SelectNodes("//FileGroup");
+            if (fileGroups == null || fileGroups.Count == 0)
+            {
+                _logger.LogWarning("No FileGroup elements found in layout file");
+                return "0"; // Return 0 bytes if no file groups found
+            }
+
+            long totalSize = 0;
+            HashSet<string> processedFiles = new(StringComparer.OrdinalIgnoreCase);
+
+            // Process each FileGroup
+            foreach (XmlNode fileGroup in fileGroups)
+            {
+                string? sourcePath = fileGroup.Attributes?["SourcePath"]?.Value;
+                string? include = fileGroup.Attributes?["Include"]?.Value;
+
+                if (string.IsNullOrEmpty(sourcePath) || string.IsNullOrEmpty(include))
+                {
+                    continue; // Skip if attributes are missing
+                }
+
+                // Resolve path - if relative to game data, use GameDataPath as base
+                string fullSourcePath = sourcePath;
+                if (!Path.IsPathRooted(sourcePath))
+                {
+                    fullSourcePath = Path.Combine(GameDataPath, sourcePath);
+                }
+
+                // Check if directory exists
+                if (!Directory.Exists(fullSourcePath))
+                {
+                    _logger.LogWarning("Source directory does not exist: {Path}", fullSourcePath);
+                    continue;
+                }
+
+                // Calculate size based on include pattern
+                try
+                {
+                    SearchOption searchOption = SearchOption.TopDirectoryOnly;
+
+                    // Handle specific file patterns
+                    if (include.Contains('*'))
+                    {
+                        var directory = new DirectoryInfo(fullSourcePath);
+                        FileInfo[] files = directory.GetFiles(include, searchOption);
+
+                        foreach (FileInfo file in files)
+                        {
+                            string normalizedPath = file.FullName.ToLowerInvariant(); // Normalize for comparison
+                            if (!processedFiles.Contains(normalizedPath))
+                            {
+                                totalSize += file.Length;
+                                processedFiles.Add(normalizedPath);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Handle specific file
+                        string filePath = Path.Combine(fullSourcePath, include);
+                        string normalizedPath = filePath.ToLowerInvariant(); // Normalize for comparison
+
+                        if (File.Exists(filePath) && !processedFiles.Contains(normalizedPath))
+                        {
+                            totalSize += new FileInfo(filePath).Length;
+                            processedFiles.Add(normalizedPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error calculating size for path: {Path}", fullSourcePath);
+                }
+            }
+
+            _logger.LogInformation("Finished parsing layout file. Total size: {Size} bytes, Unique files: {FileCount}",
+                totalSize, processedFiles.Count);
+
+            return totalSize.ToString();
+        }
+        catch (XmlException xmlEx)
+        {
+            _logger.LogError(xmlEx, "XML parsing error in layout file");
+            return GetDirectorySizeInBytes(GameDataPath).ToString();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error parsing layout file for size calculation");
+            return GetDirectorySizeInBytes(GameDataPath).ToString();
+        }
     }
 
     private static long GetDirectorySizeInBytes(string gameDataPath)
@@ -464,6 +596,9 @@ public partial class PackageCreationViewModel : BaseViewModel
         {
             IsSpinnerRunning = false;
             string outputString = string.Join("\n", processOutput.ToArray());
+
+            // Log error output as well
+            outputString += "\n" + string.Join("\n", processErrorOutput.ToArray());
 
             // Parse Make Package Output
             ProcessMakePackageOutput(outputString);

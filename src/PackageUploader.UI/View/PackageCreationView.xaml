@@ -201,12 +201,10 @@
                                 <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
-                                <RowDefinition />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="476"/>
-                                <ColumnDefinition Width="12" />
-                                <ColumnDefinition Width="96"/>
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="Layout file/content map"
@@ -217,7 +215,7 @@
                                  Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  Foreground="#D2D2D3"
                                  Background="#323538"
-                                 Margin="0,0,0,10">
+                                 Margin="0,0,10,10">
                                 <TextBox.Style>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                         <Setter Property="Template">
@@ -248,6 +246,50 @@
                                 Command="{Binding BrowseMappingDataXmlPathCommand}"
                                 IsEnabled="True"
                                 Margin="0,0,0,10"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0"
+                                       Text="Folder path for SubmissionValidator.dll"
+                                       Foreground="White"
+                                       HorizontalAlignment="Left"
+                                       Margin="0,0,0,5"
+                                       Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <TextBox Grid.Row="3"
+                                     Grid.Column="0"
+                                     Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Foreground="#D2D2D3"
+                                     Background="#323538"
+                                     Margin="0,0,10,0"
+                                     Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Border Background="{TemplateBinding Background}" 
+                                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                                        <Grid>
+                                                            <TextBlock Text="Select or enter the folder path for SubmissionValidator.dll" 
+                                                                       Foreground="Gray"
+                                                                       VerticalAlignment="Center"
+                                                                       Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                                       Margin="15,2"/>
+                                                            <ScrollViewer x:Name="PART_ContentHost" 
+                                                                          Margin="5,2" 
+                                                                          VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                            <Button Grid.Row="3" 
+                                    Grid.Column="1"
+                                    Content="Browse"
+                                    Command="{Binding BrowseSubValPathCommand}"
+                                    Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </Grid>
                     </Expander>
                 </StackPanel>
@@ -331,60 +373,6 @@
                                 Content="Browse"
                                 Command="{Binding BrowsePackageOutputPathCommand}"/>
                     </Grid>
-                    <Expander Style="{StaticResource CustomExpanderStyle}" Margin="0,20,0,20">
-                        <Expander.Header>
-                            <TextBlock Text="Additional details" Foreground="White"/>
-                        </Expander.Header>
-                        <Grid Margin="0,10,0,0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Folder path for SubmissionValidator.dll"
-                                   Foreground="White"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,0,0,5"/>
-                            <TextBox Grid.Row="1" Grid.Column="0"
-                                 Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="#D2D2D3"
-                                 Background="#323538"
-                                 Margin="0,0,10,0">
-                                <TextBox.Style>
-                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="TextBox">
-                                                    <Border Background="{TemplateBinding Background}" 
-                                                        BorderBrush="{TemplateBinding BorderBrush}" 
-                                                        BorderThickness="{TemplateBinding BorderThickness}">
-                                                        <Grid>
-                                                            <TextBlock Text="Select or enter the folder path for SubmissionValidator.dll" 
-                                                                   Foreground="Gray"
-                                                                   VerticalAlignment="Center"
-                                                                   Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                   Margin="15,2"/>
-                                                            <ScrollViewer x:Name="PART_ContentHost" 
-                                                                       Margin="5,2" 
-                                                                       VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </TextBox.Style>
-                            </TextBox>
-                            <Button Grid.Row="1" 
-                                    Grid.Column="1"
-                                    Content="Browse"
-                                    Command="{Binding BrowseSubValPathCommand}"/>
-                        </Grid>
-                    </Expander>
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="#6B7584" Margin="10,0" />
                 <StackPanel Grid.Column="3" Grid.Row="0" Margin="10,0,0,0">
