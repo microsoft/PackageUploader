@@ -17,403 +17,271 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <ScrollViewer>
-        <Grid Margin="30,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <TextBlock Grid.Row="0"
-                   x:Name="SubHeadLine"
-                   Text="Upload your package to Partner Center"
-                   Style="{StaticResource SubHeadline}" />
-
-            <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center">
-                <TextBlock Text="{Binding SuccessMessage}" 
-                       Foreground="{StaticResource PrimaryBrush}"
-                       Style="{StaticResource SubHeadline}"
-                       HorizontalAlignment="Center"
-                       Visibility="{Binding SuccessMessage, Converter={StaticResource StringNotEmptyConverter}, ConverterParameter=Visibility}" />
-                
-                <TextBlock Text="{Binding ErrorMessage}" 
-                       Foreground="Red"
-                       Style="{StaticResource SubHeadline}"
-                       HorizontalAlignment="Center"
-                       Visibility="{Binding ErrorMessage, Converter={StaticResource StringNotEmptyConverter}, ConverterParameter=Visibility}" />
+    <Grid Background="#25282C">
+        <StackPanel Margin="20">
+            <!-- Add Back Arrow Icon -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
+                <Button Width="16" Height="16" Command="{Binding CancelButtonCommand}" Style="{StaticResource WindowControlButtonStyle}">
+                    <Path Data="M16,8 L4,8 M4,8 L8,4 M4,8 L8,12" 
+                          Stroke="White" 
+                          StrokeThickness="1.5" 
+                          Stretch="None" 
+                          VerticalAlignment="Center" 
+                          HorizontalAlignment="Center"/>
+                </Button>
             </StackPanel>
 
-            <Grid Grid.Row="2">
+            <TextBlock Text="Upload a package"
+                   Style="{StaticResource Headline}"
+                   Foreground="White"
+                   HorizontalAlignment="Left"/>
+            <TextBlock Text="Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future."
+                       HorizontalAlignment="Left"
+                       Foreground="White"
+                       TextWrapping="Wrap"
+                       Margin="0,5,0,20"/>
+
+            <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
-
-                <ProgressBar
-                    Grid.Row="0"
-                    x:Name="WorkingIndicator"
-                    IsIndeterminate="{Binding IsSpinnerRunning, Mode=OneWay}"
-                    Height="20"
-                    Width="200"
-                    HorizontalAlignment="Center" />
-
-                <ProgressBar
-                    Grid.Row="1"
-                    Value="{Binding ProgressValue, Mode=OneWay}"
-                    Visibility="{Binding IsProgressVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Foreground="Green"
-                    HorizontalAlignment="Stretch"
-                    Margin="200,20,200,0"
-                    Height="25"/>
-            </Grid>
-
-            <!-- Package Drop Area  -->
-            <Grid Grid.Row="3" Visibility="{Binding IsDragDropVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <controls:DropArea 
-                    Message="{Binding DragDropMessage}"
-                    FileDroppedCommand="{Binding FileDroppedCommand}"
-                    BrowseCommand="{Binding BrowseForPackageCommand}"
-                    AcceptedExtensions=".xvc,.msixvc"
-                    Height="100"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Center" />
-            </Grid>
-
-            <!-- Package Selected Info -->
-            <Grid Grid.Row="3" Visibility="{Binding HasPackage, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                
-                <TextBlock Grid.Row="0" 
-                       Text="Selected Package" 
-                       Style="{StaticResource SubHeadline}" 
-                       HorizontalAlignment="Left" />
-                       
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Grid.Column="0" 
-                           Text="{Binding PackageFilePath}" 
-                           TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center" />
-                           
-                    <Button Grid.Column="1" 
-                            Content="Reset" 
-                            Command="{Binding ResetPackageCommand}"
-                            Width="100" 
-                            HorizontalAlignment="Right" />
-                </Grid>
-            </Grid>
-
-            <Grid Grid.Row="4" Visibility="{Binding HasPackage, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0"
-                       Text="Package Uploader Parameters"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"
-                       Style="{StaticResource SubHeadline}" />
-
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <!-- First Column - First 4 parameters -->
-                    <Grid Grid.Column="0" Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="StoreId / BigID"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <TextBox Grid.Column="1"
-                               x:Name="bigId"
-                               Text="{Binding BigId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" 
-                                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                                    BorderThickness="{TemplateBinding BorderThickness}">
-                                                    <Grid>
-                                                        <TextBlock Text="Enter bigId" 
-                                                                   Foreground="Gray" 
-                                                                   Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                   Margin="5,2"/>
-                                                        <ScrollViewer x:Name="PART_ContentHost" 
-                                                                     Margin="5,2" 
-                                                                     VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                    </Grid>
-
-                    <Grid Grid.Column="0" Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="Select Mode"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <ComboBox Grid.Column="1"
-                                x:Name="modePicker"
-                                ItemsSource="{Binding Modes, Mode=OneWay}"
-                                SelectedItem="{Binding SelectedMode, Mode=TwoWay}" />
-                    </Grid>
-
-                    <Grid Grid.Column="0" Grid.Row="2" Visibility="{Binding IsBranchSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="Branch"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <ComboBox Grid.Column="1"
-                                x:Name="branchFriendlyName"
-                                ItemsSource="{Binding BranchFriendlyNames, Mode=OneWay}"
-                                SelectedItem="{Binding BranchFriendlyName, Mode=TwoWay}" />
-                    </Grid>
-
-                    <Grid Grid.Column="0" Grid.Row="2" Visibility="{Binding IsFlightSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="Flight"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <ComboBox Grid.Column="1"
-                                x:Name="flightName"
-                                ItemsSource="{Binding FlightNames, Mode=OneWay}"
-                                SelectedItem="{Binding FlightName, Mode=TwoWay}" />
-                    </Grid>
-
-                    <Grid Grid.Column="0" Grid.Row="3">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="Market Group"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <ComboBox Grid.Column="1"
-                                x:Name="marketGroupName"
-                                ItemsSource="{Binding MarketGroupNames, Mode=OneWay}"
-                                SelectedItem="{Binding MarketGroupName, Mode=TwoWay}" />
-                    </Grid>
-
-                    <!-- Second Column - Other 4 parameters -->
-                    <Grid Grid.Column="1" Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="Package Path"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <TextBox Grid.Column="1"
-                               x:Name="packageFilePath"
-                               Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" 
-                                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                                    BorderThickness="{TemplateBinding BorderThickness}">
-                                                    <Grid>
-                                                        <TextBlock Text="Enter packageFilePath" 
-                                                                   Foreground="Gray" 
-                                                                   Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                   Margin="5,2"/>
-                                                        <ScrollViewer x:Name="PART_ContentHost" 
-                                                                     Margin="5,2" 
-                                                                     VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                    </Grid>
-
-                    <Grid Grid.Column="1" Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="EKB File"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <TextBox Grid.Column="1"
-                               x:Name="ekbFilePath"
-                               Text="{Binding EkbFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" 
-                                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                                    BorderThickness="{TemplateBinding BorderThickness}">
-                                                    <Grid>
-                                                        <TextBlock Text="Enter ekbFilePath" 
-                                                                   Foreground="Gray" 
-                                                                   Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                   Margin="5,2"/>
-                                                        <ScrollViewer x:Name="PART_ContentHost" 
-                                                                     Margin="5,2" 
-                                                                     VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                    </Grid>
-
-                    <Grid Grid.Column="1" Grid.Row="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="Validator Log"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <TextBox Grid.Column="1"
-                               x:Name="subValFilePath"
-                               Text="{Binding SubValFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" 
-                                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                                    BorderThickness="{TemplateBinding BorderThickness}">
-                                                    <Grid>
-                                                        <TextBlock Text="Enter subValFilePath" 
-                                                                   Foreground="Gray" 
-                                                                   Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                   Margin="5,2"/>
-                                                        <ScrollViewer x:Name="PART_ContentHost" 
-                                                                     Margin="5,2" 
-                                                                     VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                    </Grid>
-                    <Grid Grid.Column="1" Grid.Row="3">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width=".3*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                               Text="Symbol Bundle"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left" />
-                        <TextBox Grid.Column="1"
-                               x:Name="symbolBundleFilePath"
-                               Text="{Binding SymbolBundleFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" 
-                                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                                    BorderThickness="{TemplateBinding BorderThickness}">
-                                                    <Grid>
-                                                        <TextBlock Text="Enter symbolBundleFilePath" 
-                                                                   Foreground="Gray" 
-                                                                   Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                   Margin="5,2"/>
-                                                        <ScrollViewer x:Name="PART_ContentHost" 
-                                                                     Margin="5,2" 
-                                                                     VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-                    </Grid>
-                </Grid>
-            </Grid>
-
-            <Grid Grid.Row="5">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="607"/>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="468" />
                 </Grid.ColumnDefinitions>
 
+                <StackPanel Grid.Row="0"
+                            Grid.Column="0"
+                            Orientation="Horizontal"
+                            Margin="0, 5, 0, 0">
+                    <Border Width="24"
+                            Height="24"
+                            CornerRadius="12"
+                            VerticalAlignment="Top"
+                            Padding="2"
+                            BorderBrush="#B8B4FF"
+                            BorderThickness="1">
+                        <TextBlock Text="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Row="0"
+                            Grid.Column="1"
+                            Orientation="Vertical">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="96"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0" 
+                                   Text="Package location" 
+                                   Style="{StaticResource SubHeadline}"
+                                   Foreground="White"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,5"/>
+                        <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
+                                   Text="Confirm the location of the package"
+                                   HorizontalAlignment="Left"
+                                   Foreground="White"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                   Text="Package path"
+                                   Foreground="White"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Grid.Row="3" Grid.Column="0" 
+                                 x:Name="PackagePathTextBox"
+                                 Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Foreground="#D2D2D3"
+                                 Background="#323538"
+                                 Margin="0,0,0,10">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TextBox">
+                                                <Border Background="{TemplateBinding Background}" 
+                                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <Grid>
+                                                        <TextBlock Text="Select or enter the package path" 
+                                                                   Foreground="Gray" 
+                                                                   VerticalAlignment="Center"
+                                                                   Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                                   Margin="15,2"/>
+                                                        <ScrollViewer x:Name="PART_ContentHost" 
+                                                       Margin="5,2" 
+                                                       VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                        <Button Grid.Row="3" Grid.Column="2"
+                                Content="Browse"
+                                Command="{Binding BrowseForPackageCommand}"
+                                IsEnabled="True"
+                                Margin="0,0,0,10"/>
+                    </Grid>
+                </StackPanel>
+                <StackPanel Grid.Row="1"
+                Grid.Column="0"
+                Orientation="Horizontal"
+                Margin="0, 5, 0, 0">
+                    <Border Width="24"
+                            Height="24"
+                            CornerRadius="12"
+                            VerticalAlignment="Top"
+                            Padding="2"
+                            BorderBrush="#B8B4FF"
+                            BorderThickness="1">
+                        <TextBlock Text="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Row="1"
+                            Grid.Column="1"
+                            Orientation="Vertical">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="96"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="Destination"
+                                   Style="{StaticResource SubHeadline}"
+                                   Foreground="White"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,5"/>
+                        <TextBlock Grid.Row="1"
+                                   Grid.ColumnSpan="2"
+                                   Text="Select a destination and market for the package upload."
+                                   HorizontalAlignment="Left"
+                                   Foreground="White"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,10"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="Destination"
+                                   Foreground="White"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,5"/>
+                        <ComboBox Grid.Row="3"
+                                  Grid.Column="0"
+                                  x:Name="flightName"
+                                  ItemsSource="{Binding BranchAndFlightNames, Mode=OneWay}"
+                                  SelectedItem="{Binding BranchOrFlightDisplayName, Mode=TwoWay}"
+                                  Style="{StaticResource CustomComboBoxStyle}" />
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Text="Market"
+                                   Foreground="White"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,5"/>
+                        <ComboBox Grid.Row="5"
+                                  Grid.Column="0"
+                                  x:Name="marketName"
+                                  ItemsSource="{Binding MarketGroupNames, Mode=OneWay}"
+                                  SelectedItem="{Binding MarketGroupName, Mode=TwoWay}"
+                                  IsEnabled="{Binding HasMarketGroups}"
+                                  Style="{StaticResource CustomComboBoxStyle}" />
+                    </Grid>
+                </StackPanel>
+                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="#6B7584" Margin="10,0" />
+                <StackPanel Grid.Column="3" Grid.Row="0" Margin="10,0,0,0">
+                    <TextBlock Text="Upload Preview"
+                               Style="{StaticResource SubHeadline}"
+                               Foreground="White"
+                               HorizontalAlignment="Left"
+                               Margin="0,0,0,10"/>
+                    <Border BorderBrush="#6B7584"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Height="89"
+                            Padding="6"
+                            Visibility="{Binding HasPackage, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition Height="10"/>
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <!-- Image placeholder -->
+                            <Image Grid.Row="0"
+                                   Grid.Column="0"
+                                   Grid.RowSpan="4"
+                                   Source="{Binding PackagePreviewImage}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Height="65"
+                                   Width="65"
+                                   Margin="0,0,10,0"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1"
+                                       HorizontalAlignment="Left"
+                                       Text="{Binding PackageName}" 
+                                       Foreground="White"/>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+                                <TextBlock Text="ID: "
+                                           Foreground="White"/>
+                                <TextBlock Text="{Binding BigId}"
+                                           Foreground="White"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+                                <TextBlock Text="Size: " 
+                                           Foreground="White"/>
+                                <TextBlock Text="{Binding PackageSize}" 
+                                           Foreground="White"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Button panel -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                 <Button Grid.Column="0"
-                        Margin="5"
-                        x:Name="UploadPackage"
+                        Content="Cancel" 
+                        Command="{Binding CancelButtonCommand}"
+                        Width="90"
+                        Height="32"
+                        Margin="0,0,10,0" />
+
+                <Button Grid.Column="1"
                         Content="Upload Package" 
                         Command="{Binding UploadPackageCommand}"
                         IsEnabled="{Binding HasPackage}"
-                        HorizontalAlignment="Stretch" />
-
-                <Button Grid.Column="1"
-                        Margin="5"
-                        x:Name="CancelUpload"
-                        Content="Cancel Upload" 
-                        Command="{Binding CancelUploadCommand}"
-                        IsEnabled="{Binding IsUploadInProgress}"
-                        HorizontalAlignment="Stretch" />
-            </Grid>
-        </Grid>
-    </ScrollViewer>
-
+                        Width="128"
+                        Height="34" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
 </UserControl>

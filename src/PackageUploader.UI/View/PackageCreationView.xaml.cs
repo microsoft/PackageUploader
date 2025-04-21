@@ -7,7 +7,7 @@ namespace PackageUploader.UI.View;
 
 public partial class PackageCreationView : System.Windows.Controls.UserControl
 {
-    private PackageCreationViewModel _viewModel;
+    private readonly PackageCreationViewModel _viewModel;
 
     public PackageCreationView(PackageCreationViewModel viewModel)
     {

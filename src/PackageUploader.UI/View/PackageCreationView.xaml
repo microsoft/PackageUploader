@@ -87,7 +87,7 @@
                    Style="{StaticResource Headline}"
                    Foreground="White"
                    HorizontalAlignment="Left"/>
-            <TextBlock Text="Locate your game's build to create a package. The Package Tool will remember these paths for easier access in the future."
+            <TextBlock Text="Locate your game's build to create a package. The Xbox Package Tool will remember these paths for easier access in the future."
                    HorizontalAlignment="Left"
                    Foreground="White"
                    TextWrapping="Wrap"
@@ -205,7 +205,7 @@
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="476"/>
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="96" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="Layout file/content map"
@@ -243,7 +243,7 @@
                                     </Style>
                                 </TextBox.Style>
                             </TextBox>
-                            <Button Grid.Row="1" Grid.Column="2"
+                            <Button Grid.Row="1" Grid.Column="1"
                                 Content="Browse"
                                 Command="{Binding BrowseMappingDataXmlPathCommand}"
                                 IsEnabled="True"

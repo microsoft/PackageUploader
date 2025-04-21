@@ -248,8 +248,6 @@ public partial class PackageCreationViewModel : BaseViewModel
     public ICommand MakePackageCommand { get; }
     public ICommand GameDataPathDroppedCommand { get; }
     public ICommand BrowseGameDataPathCommand { get; }
-    public ICommand ResetGameDataPathCommand { get; }
-    public ICommand CancelCreationCommand { get; }
     public ICommand BrowseMappingDataXmlPathCommand { get; }
     public ICommand BrowsePackageOutputPathCommand { get; }
     public ICommand BrowseSubValPathCommand { get; }
@@ -283,12 +281,10 @@ public partial class PackageCreationViewModel : BaseViewModel
         MakePackageCommand = new RelayCommand(StartMakePackageProcess, CanCreatePackage);
         GameDataPathDroppedCommand = new RelayCommand<string>(OnGameDataPathDropped);
         BrowseGameDataPathCommand = new RelayCommand(OnBrowseGameDataPath);
-        ResetGameDataPathCommand = new RelayCommand(ResetGameDataPath);
-        CancelCreationCommand = new RelayCommand(CancelCreation);
         BrowseMappingDataXmlPathCommand = new RelayCommand(OnBrowseMappingDataXml);
         BrowsePackageOutputPathCommand = new RelayCommand(OnBrowsePackageOutputPath);
         BrowseSubValPathCommand = new RelayCommand(OnBrowseSubValPath);
-        CancelButtonCommand = new RelayCommand(OnCancelButtom);
+        CancelButtonCommand = new RelayCommand(OnCancelButton);
 
         GameDataPath = GetPropertyFromApplicationPreferences(nameof(GameDataPath));
         if(GameDataPath != string.Empty)
@@ -461,8 +457,6 @@ public partial class PackageCreationViewModel : BaseViewModel
         return size;
     }
 
-#if WINDOWS
-
     [DllImport("kernel32.dll")]
     internal static extern bool GenerateConsoleCtrlEvent(uint dwCtrlEvent, uint dwProcessGroupId);
     [DllImport("kernel32.dll", SetLastError = true)]
@@ -497,17 +491,7 @@ public partial class PackageCreationViewModel : BaseViewModel
                 FreeConsole();
             }
         }
-/*        System.Windows.Application.Current.Dispatcher.Invoke(() =>
-        {
-            _windowService.NavigateTo(typeof(PackageCreationView2));
-        });*/
     }
-#else
-    private void CancelCreation()
-    {
-        // Non-Windows implementation
-    }
-#endif
 
     private async void StartMakePackageProcess()
     { 
@@ -773,17 +757,10 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
-    private void OnCancelButtom()
+    private void OnCancelButton()
     {
         // Navigate to the main page view
         _windowService.NavigateTo(typeof(MainPageView));
-    }
-
-    private void ResetGameDataPath()
-    {
-        GameDataPath = string.Empty;
-        HasGameDataPath = false;
-        OnPropertyChanged(nameof(IsDragDropVisible));
     }
 
     [GeneratedRegex(@"Successfully created package '(?<PackagePath>.*?\.xvc)'")]
