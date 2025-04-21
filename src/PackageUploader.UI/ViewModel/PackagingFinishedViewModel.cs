@@ -2,13 +2,8 @@
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
@@ -94,7 +89,9 @@ namespace PackageUploader.UI.ViewModel
         public void InstallGame()
         {
             if (_isInstallingGame)
+            {
                 return;
+            }
 
             _isInstallingGame = true;
 
@@ -102,8 +99,7 @@ namespace PackageUploader.UI.ViewModel
             {
                 // Create a temporary batch file to run the command and pause
                 string batchFilePath = Path.Combine(Path.GetTempPath(), "InstallGame.bat");
-                
-                // Fix: Use single quotes in the batch file to avoid escaping issues
+
                 File.WriteAllText(batchFilePath, 
                                   @"@echo off
                                   """ + _wdAppPath + @""" install """ + _packageModelProvider.Package.PackageFilePath + @"""
