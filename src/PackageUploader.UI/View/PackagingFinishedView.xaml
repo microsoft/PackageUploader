@@ -12,37 +12,29 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition /> <!-- space -->
-            <RowDefinition /> <!-- check -->
-            <RowDefinition /> <!-- space -->
-            <RowDefinition /> <!-- title -->
-            <RowDefinition /> <!-- space -->
-            <RowDefinition /> <!-- Main Box -->
-            <RowDefinition /> <!-- space -->
+            <RowDefinition Height="auto"/> <!-- check -->
+            <RowDefinition Height="auto"/> <!-- title -->
+            <RowDefinition Height="auto"/> <!-- Main Box -->
             <RowDefinition /> <!-- buttons row -->
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/> <!-- space -->
             <ColumnDefinition />
-            <ColumnDefinition Width="200"/> <!-- space -->
         </Grid.ColumnDefinitions>
 
-        <Image Grid.Row="1"
-               Grid.Column="1"
-               Margin="0, 100, 0, 23"
+        <Image Grid.Row="0"
+               Margin="0, 175, 0, 30"
                Source="/Resources/Images/Complete.png"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
                Height="130"
                Width="130" />
-        <TextBlock Grid.Row="3"
-                   Grid.Column="1"
+        <TextBlock Grid.Row="1"
            Margin="0, 0, 0, 23"
            Style="{StaticResource SubHeadline}"
            Text="Packaging completed"
            Foreground="White" />
-        <Border Grid.Row="5"
-                Grid.Column="1"
+        <Border Grid.Row="2"
+                Margin="100, 0, 100, 0"
                 BorderBrush="#6B7584"
                 BorderThickness="1"
                 CornerRadius="6"
@@ -56,19 +48,18 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition /> <!-- image -->
+                    <ColumnDefinition Width="auto"/> <!-- image -->
                     <ColumnDefinition /> <!-- text -->
-                    <ColumnDefinition /> <!-- space -->
-                    <ColumnDefinition /> <!-- button -->
-                    <ColumnDefinition /> <!-- button -->
+                    <ColumnDefinition Width="auto"/> <!-- button -->
+                    <ColumnDefinition Width="auto"/> <!-- button -->
                 </Grid.ColumnDefinitions>
                 <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="4"
                                Source="{Binding PackagePreviewImage}"
-                               HorizontalAlignment="Center"
+                               HorizontalAlignment="Left"
                                VerticalAlignment="Center"
                                Height="65"
                                Width="65"
-                               Margin="0,0,10,0"/>
+                               Margin="10,0,15,0"/>
                 <TextBlock Grid.Row="0" Grid.Column="1"
                            HorizontalAlignment="Left"
                            Text="{Binding PackageFileName}" 
@@ -87,36 +78,36 @@
                     <TextBlock Text="{Binding PackageSize}" 
                                Foreground="White"/>
                 </StackPanel>
-                <Button Grid.RowSpan="4" Grid.Column="3"
+                <Button Grid.RowSpan="4" Grid.Column="2"
                         Content="Install game"
                         Command="{Binding InstallGameCommand}"
-                                            IsEnabled="True"
-                    Margin="0, 0, 50, 50"
-                    Width="150"
-                    Height="30"/>
-                <Button Grid.RowSpan="4" Grid.Column="4"
+                        IsEnabled="True"
+                        Width="150"
+                        Height="30"
+                        Margin="10, 0, 10, 0"/>
+                <Button Grid.RowSpan="4" Grid.Column="3"
                         Content="View package"
                         Command="{Binding ViewPackageCommand}"
-                                            IsEnabled="True"
-                    Margin="0, 0, 50, 50"
-                    Width="150"
-                    Height="30"/>
+                        IsEnabled="True"
+                        Width="150"
+                        Height="30"
+                        Margin="0, 0, 10, 0"/>
             </Grid>
         </Border>
-        <StackPanel Grid.Row="7"
-                    Grid.ColumnSpan="3"
+        <StackPanel Grid.Row="3"
                     Orientation="Horizontal"
-                    HorizontalAlignment="Right">
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom">
             <Button Content="Close"
                     Command="{Binding CloseCommand}"
                                         IsEnabled="True"
-                    Margin="0, 0, 50, 50"
+                    Margin="0, 0, 10, 20"
                     Width="150"
                     Height="30"/>
             <Button Content="Configure upload"
                     Command="{Binding ConfigureUploadCommand}"
                                         IsEnabled="True"
-                    Margin="0, 0, 50, 50"
+                    Margin="0, 0, 25, 20"
                     Width="150"
                     Height="30"/>
         </StackPanel>
