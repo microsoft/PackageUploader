@@ -34,11 +34,11 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<PackingProgressPercentageProvider>();
 
                 // Register ViewModels
-                services.AddTransient<MainPageViewModel>();
-                services.AddTransient<PackageCreationViewModel>();
-                services.AddTransient<PackageUploadViewModel>();
-                services.AddTransient<PackagingProgressViewModel>();
-                services.AddTransient<PackagingFinishedViewModel>();
+                services.AddSingleton<MainPageViewModel>();
+                services.AddSingleton<PackageCreationViewModel>();
+                services.AddSingleton<PackageUploadViewModel>();
+                services.AddSingleton<PackagingProgressViewModel>();
+                services.AddSingleton<PackagingFinishedViewModel>();
 
                 // Register Views
                 services.AddTransient<MainPageView>();

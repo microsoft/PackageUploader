@@ -841,10 +841,10 @@ public partial class PackageCreationViewModel : BaseViewModel
             HasValidGameConfig = false;
             return;
         }
-        GameConfigModel gameConfig;
+        PartialGameConfigModel gameConfig;
         try
         {
-            gameConfig = new GameConfigModel(gameConfigPath);
+            gameConfig = new PartialGameConfigModel(gameConfigPath);
         }
         catch (Exception ex)
         {

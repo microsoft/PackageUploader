@@ -65,7 +65,7 @@
                            Text="{Binding PackageFileName}" 
                            Foreground="White"/>
                 <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                    <TextBlock Text="{Binding AppId}"
+                    <TextBlock Text="{Binding StoreId}"
                                Foreground="White"/>
                     <TextBlock Text=" | v"
                                Foreground="White"/>

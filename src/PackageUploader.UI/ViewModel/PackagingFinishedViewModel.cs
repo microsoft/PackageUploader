@@ -13,7 +13,7 @@ namespace PackageUploader.UI.ViewModel
     {
         private readonly IWindowService _windowService;
         private readonly PackageModelProvider _packageModelProvider;
-        private readonly GameConfigModel _gameConfigModel;
+        private readonly PartialGameConfigModel _gameConfigModel;
         private readonly PathConfigurationProvider _pathConfigurationService;
 
         private readonly string _wdAppPath = string.Empty;
@@ -42,11 +42,11 @@ namespace PackageUploader.UI.ViewModel
             get => _versionNum;
             set => SetProperty(ref _versionNum, value);
         }
-        private string _appId = string.Empty;
-        public string AppId
+        private string _storeId = string.Empty;
+        public string StoreId
         {
-            get => _appId;
-            set => SetProperty(ref _appId, value);
+            get => _storeId;
+            set => SetProperty(ref _storeId, value);
         }
 
         private Process? _installGameProcess = null;
@@ -63,10 +63,10 @@ namespace PackageUploader.UI.ViewModel
             _packageModelProvider = packageModelProvider;
             _pathConfigurationService = pathConfigurationService;
 
-            _gameConfigModel = new GameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
+            _gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
             PackagePreviewImage = LoadBitmapImage(_gameConfigModel.ShellVisuals.StoreLogo);
             VersionNum = _gameConfigModel.Identity.Version;
-            AppId = _gameConfigModel.MSAAppId;
+            StoreId = _gameConfigModel.StoreId;
 
             _wdAppPath = Path.GetDirectoryName(_pathConfigurationService.MakePkgPath) ?? string.Empty;
             _wdAppPath = Path.Combine(_wdAppPath, "WdApp.exe");
