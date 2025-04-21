@@ -100,13 +100,13 @@
                     VerticalAlignment="Bottom">
             <Button Content="Close"
                     Command="{Binding CloseCommand}"
-                                        IsEnabled="True"
+                    IsEnabled="True"
                     Margin="0, 0, 10, 20"
                     Width="150"
                     Height="30"/>
             <Button Content="Configure upload"
                     Command="{Binding ConfigureUploadCommand}"
-                                        IsEnabled="True"
+                    IsEnabled="True"
                     Margin="0, 0, 25, 20"
                     Width="150"
                     Height="30"/>

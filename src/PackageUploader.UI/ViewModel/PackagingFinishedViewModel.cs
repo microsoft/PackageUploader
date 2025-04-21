@@ -4,6 +4,7 @@ using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,9 @@ namespace PackageUploader.UI.ViewModel
         private readonly IWindowService _windowService;
         private readonly PackageModelProvider _packageModelProvider;
         private readonly GameConfigModel _gameConfigModel;
+        private readonly PathConfigurationProvider _pathConfigurationService;
+
+        private string _wdAppPath = string.Empty;
 
         private BitmapImage? _packagePreviewImage = null;
         public BitmapImage? PackagePreviewImage
@@ -50,46 +54,108 @@ namespace PackageUploader.UI.ViewModel
             set => SetProperty(ref _appId, value);
         }
 
-        public ICommand InstallGameCommand;
-        public ICommand ViewPackageCommand;
-        public ICommand CloseCommand;
-        public ICommand ConfigureUploadCommand;
+        private Process? _installGameProcess = null;
+        private bool _isInstallingGame = false;
 
-        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider)
+        public ICommand InstallGameCommand { get; }
+        public ICommand ViewPackageCommand { get; }
+        public ICommand CloseCommand { get; }
+        public ICommand ConfigureUploadCommand { get; }
+
+        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService)
         {
             _windowService = windowService;
             _packageModelProvider = packageModelProvider;
+            _pathConfigurationService = pathConfigurationService;
+
             _gameConfigModel = new GameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
             PackagePreviewImage = LoadBitmapImage(_gameConfigModel.ShellVisuals.StoreLogo);
             VersionNum = _gameConfigModel.Identity.Version;
             AppId = _gameConfigModel.MSAAppId;
 
+            _wdAppPath = Path.GetDirectoryName(_pathConfigurationService.MakePkgPath) ?? string.Empty;
+            _wdAppPath = Path.Combine(_wdAppPath, "WdApp.exe");
 
-            InstallGameCommand = new RelayCommand(InstallGame);
+            InstallGameCommand = new RelayCommand(InstallGame, CanInstallGame);
             ViewPackageCommand = new RelayCommand(ViewPackage);
             CloseCommand = new RelayCommand(Close);
             ConfigureUploadCommand = new RelayCommand(ConfigureUpload);
 
-            FileInfo packageInfo = new FileInfo(_packageModelProvider.Package.PackageFilePath);
-            PackageFileName = packageInfo.Name; //Path.GetFileName(_packageModelProvider.Package.PackageFilePath);
+            FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
+            PackageFileName = packageInfo.Name;
             PackageSize = TranslateFileSize(packageInfo.Length);
+        }
+
+        private bool CanInstallGame()
+        {
+            return File.Exists(_wdAppPath) && !_isInstallingGame;
         }
 
         public void InstallGame()
         {
-            //_windowService.ShowDialog<InstallGameView>();
+            if (_isInstallingGame)
+                return;
+
+            _isInstallingGame = true;
+
+            try
+            {
+                // Create a temporary batch file to run the command and pause
+                string batchFilePath = Path.Combine(Path.GetTempPath(), "InstallGame.bat");
+                
+                // Fix: Use single quotes in the batch file to avoid escaping issues
+                File.WriteAllText(batchFilePath, 
+                                  @"@echo off
+                                  """ + _wdAppPath + @""" install """ + _packageModelProvider.Package.PackageFilePath + @"""
+                                  pause");
+
+                _installGameProcess = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c \"{batchFilePath}\"",
+                    UseShellExecute = true
+                });
+
+                if (_installGameProcess != null)
+                {
+                    _installGameProcess.EnableRaisingEvents = true;
+                    _installGameProcess.Exited += (sender, args) =>
+                    {
+                        _isInstallingGame = false;
+                        _installGameProcess = null;
+                        OnPropertyChanged(nameof(CanInstallGame)); // Notify UI to re-evaluate button state
+
+                        // Clean up the temporary batch file
+                        if (File.Exists(batchFilePath))
+                        {
+                            File.Delete(batchFilePath);
+                        }
+                    };
+                }
+                else
+                {
+                    _isInstallingGame = false; // Reset flag if process fails to start
+                }
+            }
+            catch
+            {
+                _isInstallingGame = false; // Reset flag in case of an exception
+                throw;
+            }
+
+            OnPropertyChanged(nameof(CanInstallGame)); // Notify UI to re-evaluate button state
         }
 
         public void ViewPackage()
         {
-            // Dunno if this would work at all, Copilot wrote this
-            System.Diagnostics.Process.Start("explorer.exe", $"/select, \"{_packageModelProvider.Package.PackageFilePath}\"");
+            Process.Start("explorer.exe", $"/select, \"{_packageModelProvider.Package.PackageFilePath}\"");
         }
 
-        public void Close()
+        public static void Close()
         {
-            // TODO: Close
+            System.Windows.Application.Current.Shutdown();
         }
+
         public void ConfigureUpload()
         {
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -98,17 +164,15 @@ namespace PackageUploader.UI.ViewModel
             });
         }
 
-
         private static string TranslateFileSize(long size)
         {
-            // thanks copilot
             if (size > 1024 * 1024 * 1024)
             {
-                return $"{size / 1024 / 1024 / 1024} GB";
+                return $"{(size / 1024d / 1024d / 1024d):F2} GB"; // Format to 2 decimal places
             }
             else if (size > 1024 * 1024)
             {
-                return $"{size / 1024 / 1024} MB";
+                return $"{size / 1024 / 1024} MB"; // No need to include decimal places if the package is less than 1 GB.
             }
             else if (size > 1024)
             {
