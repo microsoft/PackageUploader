@@ -21,6 +21,8 @@ public partial class PackageModelProvider : INotifyPropertyChanged
         }
     }
 
+    public string PackagingLogFilepath { get; internal set; }
+
     public PackageModelProvider()
     {
         _package = new PackageModel();

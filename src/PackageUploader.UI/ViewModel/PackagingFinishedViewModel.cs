@@ -1,4 +1,5 @@
-﻿using PackageUploader.UI.Model;
+﻿using Microsoft.Extensions.Logging;
+using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -15,6 +16,7 @@ namespace PackageUploader.UI.ViewModel
         private readonly PackageModelProvider _packageModelProvider;
         private readonly PartialGameConfigModel _gameConfigModel;
         private readonly PathConfigurationProvider _pathConfigurationService;
+        private readonly ILogger<PackagingFinishedViewModel> _logger;
 
         private readonly string _wdAppPath = string.Empty;
 
@@ -56,15 +58,17 @@ namespace PackageUploader.UI.ViewModel
         public ICommand ViewPackageCommand { get; }
         public ICommand CloseCommand { get; }
         public ICommand ConfigureUploadCommand { get; }
+        public ICommand ViewLogsCommand { get; }
 
-        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService)
+        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService, ILogger<PackagingFinishedViewModel> logger)
         {
             _windowService = windowService;
             _packageModelProvider = packageModelProvider;
             _pathConfigurationService = pathConfigurationService;
+            _logger = logger;
 
             _gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
-            PackagePreviewImage = LoadBitmapImage(_gameConfigModel.ShellVisuals.StoreLogo);
+            PackagePreviewImage = LoadBitmapImage(_gameConfigModel.ShellVisuals.Square150x150Logo);
             VersionNum = _gameConfigModel.Identity.Version;
             StoreId = _gameConfigModel.StoreId;
 
@@ -75,6 +79,7 @@ namespace PackageUploader.UI.ViewModel
             ViewPackageCommand = new RelayCommand(ViewPackage);
             CloseCommand = new RelayCommand(Close);
             ConfigureUploadCommand = new RelayCommand(ConfigureUpload);
+            ViewLogsCommand = new RelayCommand(ViewLogs);
 
             FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
             PackageFileName = packageInfo.Name;
@@ -146,6 +151,12 @@ namespace PackageUploader.UI.ViewModel
         public void ViewPackage()
         {
             Process.Start("explorer.exe", $"/select, \"{_packageModelProvider.Package.PackageFilePath}\"");
+        }
+
+        private void ViewLogs()
+        {
+            string logPath = _packageModelProvider.PackagingLogFilepath;
+            Process.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
 
         public static void Close()

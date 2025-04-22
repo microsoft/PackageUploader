@@ -37,14 +37,12 @@
                 BorderBrush="#6B7584"
                 BorderThickness="1"
                 CornerRadius="6"
-                Height="89"
+                Height="100"
                 Padding="6">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/> <!-- image -->
@@ -52,31 +50,45 @@
                     <ColumnDefinition Width="auto"/> <!-- button -->
                     <ColumnDefinition Width="auto"/> <!-- button -->
                 </Grid.ColumnDefinitions>
-                <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="4"
-                               Source="{Binding PackagePreviewImage}"
-                               HorizontalAlignment="Left"
-                               VerticalAlignment="Center"
-                               Height="65"
-                               Width="65"
-                               Margin="10,0,15,0"/>
-                <TextBlock Grid.Row="0" Grid.Column="1"
-                           HorizontalAlignment="Left"
-                           Text="{Binding PackageFileName}" 
-                           Foreground="White"/>
-                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                    <TextBlock Text="{Binding StoreId}"
-                               Foreground="White"/>
-                    <TextBlock Text=" | v"
-                               Foreground="White"/>
-                    <TextBlock Text="{Binding VersionNum}"
+                <Image Grid.Row="0"
+                       Grid.Column="0"
+                       Grid.RowSpan="4"
+                       Source="{Binding PackagePreviewImage}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Height="80"
+                       Width="80"
+                       Margin="10,0,15,0"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                    <TextBlock HorizontalAlignment="Left"
+                               Text="File name" 
+                               Foreground="{StaticResource Gray300Brush}"/>
+                    <TextBlock HorizontalAlignment="Left"
+                               Text="{Binding PackageFileName}" 
                                Foreground="White"/>
                 </StackPanel>
-                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                    <TextBlock Text="Size: " 
-                               Foreground="White"/>
-                    <TextBlock Text="{Binding PackageSize}" 
-                               Foreground="White"/>
-                </StackPanel>
+                <Grid Margin="0, 10, 0, 0" Grid.Row="1" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0"
+                                Orientation="Vertical"
+                                HorizontalAlignment="Left"
+                                Margin="0, 0, 50, 0">
+                        <TextBlock HorizontalAlignment="Left"
+                                   Text="Store ID" 
+                                   Foreground="{StaticResource Gray300Brush}"/>
+                        <TextBlock Text="{Binding StoreId}"
+                                   Foreground="White"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
+                        <TextBlock Text="Size" 
+                                   Foreground="{StaticResource Gray300Brush}"/>
+                        <TextBlock Text="{Binding PackageSize}" 
+                                   Foreground="White"/>
+                    </StackPanel>
+                </Grid>
                 <Button Grid.RowSpan="4" Grid.Column="2"
                         Content="Install game"
                         Command="{Binding InstallGameCommand}"
@@ -97,6 +109,10 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom">
+            <Button Content="View logs"
+                    Command="{Binding ViewLogsCommand}"
+                    Style="{StaticResource HyperlinkButtonStyle}"
+                    Margin="0, 0, 20, 20" />
             <Button Content="Close"
                     Command="{Binding CloseCommand}"
                     IsEnabled="True"
