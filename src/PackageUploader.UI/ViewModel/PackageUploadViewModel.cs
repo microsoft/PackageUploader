@@ -218,6 +218,14 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
     }
 
+    public string ProductName
+    {
+        get
+        {
+            return _gameProduct == null ? string.Empty : _gameProduct.ProductName;
+        }
+    }
+
     public string PackageFilePath 
     { 
         get => Package.PackageFilePath;
@@ -273,13 +281,6 @@ public partial class PackageUploadViewModel : BaseViewModel
                 OnPropertyChanged();
             }
         }
-    }
-
-    private BitmapImage? _packagePreviewImage = null;
-    public BitmapImage? PackagePreviewImage
-    {
-        get => _packagePreviewImage;
-        set => SetProperty(ref _packagePreviewImage, value);
     }
 
     private string _packageId = string.Empty;
@@ -590,7 +591,17 @@ public partial class PackageUploadViewModel : BaseViewModel
             // Update package preview information
             PackageId = fileName;
             FileInfo fileInfo = new(packagePath);
-            PackageSize = string.Format("{0:0.##} MB", fileInfo.Length / (1024.0 * 1024.0));
+
+            double bytesInMB = 1024.0 * 1024.0;
+            double bytesInGB = bytesInMB * 1024.0;
+            if (fileInfo.Length > bytesInGB)
+            {
+                PackageSize = string.Format("{0:0.##} GB", fileInfo.Length / bytesInGB);
+            }
+            else
+            {
+                PackageSize = string.Format("{0:0.##} MB", fileInfo.Length / bytesInMB);
+            }
         }
         catch (Exception ex)
         {
@@ -646,6 +657,9 @@ public partial class PackageUploadViewModel : BaseViewModel
         try
         {
             _gameProduct = await _uploaderService.GetProductByBigIdAsync(BigId, CancellationToken.None);
+
+            OnPropertyChanged(nameof(ProductName));
+
             _branchesAndFlights = await _uploaderService.GetPackageBranchesAsync(_gameProduct, CancellationToken.None);
 
             List<string> displayNames = [];

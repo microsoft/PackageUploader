@@ -211,7 +211,7 @@
                     </Grid>
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="#6B7584" Margin="10,0" />
-                <StackPanel Grid.Column="3" Grid.Row="0" Margin="10,0,0,0">
+                <StackPanel Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="10,0,0,0">
                     <TextBlock Text="Upload Preview"
                                Style="{StaticResource SubHeadline}"
                                Foreground="White"
@@ -226,40 +226,80 @@
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition />
-                                <RowDefinition />
                                 <RowDefinition Height="10"/>
-                                <RowDefinition />
+                                <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
-                            <!-- Image placeholder -->
-                            <Image Grid.Row="0"
-                                   Grid.Column="0"
-                                   Grid.RowSpan="4"
-                                   Source="{Binding PackagePreviewImage}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   Height="65"
-                                   Width="65"
-                                   Margin="0,0,10,0"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1"
-                                       HorizontalAlignment="Left"
-                                       Text="{Binding PackageName}" 
-                                       Foreground="White"/>
-                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock Text="ID: "
-                                           Foreground="White"/>
-                                <TextBlock Text="{Binding BigId}"
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
+                                <TextBlock Text="Product name"
+                                           Foreground="{StaticResource Gray200Brush}"/>
+                                <TextBlock Text="{Binding ProductName}"
                                            Foreground="White"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock Text="Size: " 
-                                           Foreground="White"/>
-                                <TextBlock Text="{Binding PackageSize}" 
+                            <Grid Grid.Row="2" Grid.Column="1" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50*" />
+                                    <ColumnDefinition Width="50*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
+                                    <TextBlock Text="Destination"
+                                               Foreground="{StaticResource Gray200Brush}"/>
+                                    <TextBlock Text="{Binding BranchOrFlightDisplayName}" 
+                                               Foreground="White"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
+                                    <TextBlock Text="Market"
+                                               Foreground="{StaticResource Gray200Brush}"/>
+                                    <TextBlock Text="{Binding MarketGroupName}" 
+                                               Foreground="White"/>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                    <Border BorderBrush="#6B7584"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Height="89"
+                            Padding="6"
+                            Margin="0, 20, 0, 0"
+                            Visibility="{Binding HasValidPackage, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
+                                <TextBlock Text="File name"
+                                           Foreground="{StaticResource Gray200Brush}"/>
+                                <TextBlock Text="{Binding PackageName}"
                                            Foreground="White"/>
                             </StackPanel>
+                            <Grid Grid.Row="2" Grid.Column="1" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50*" />
+                                    <ColumnDefinition Width="50*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
+                                    <TextBlock Text="Store ID"
+                                               Foreground="{StaticResource Gray200Brush}"/>
+                                    <TextBlock Text="{Binding BigId}" 
+                                               Foreground="White"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
+                                    <TextBlock Text="Size"
+                                               Foreground="{StaticResource Gray200Brush}"/>
+                                    <TextBlock Text="{Binding PackageSize}" 
+                                               Foreground="White"/>
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </Border>
                 </StackPanel>
