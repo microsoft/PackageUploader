@@ -28,7 +28,8 @@ public partial class PackageUploadViewModel : BaseViewModel
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
     private GamePackageConfiguration? _gamePackageConfiguration = null;
 
-    private OneTimeHolder<String>? _savedBranchOrFlightMemory = null;
+    private readonly OneTimeHolder<String>? _savedBranchOrFlightMemory = null;
+    private readonly OneTimeHolder<String>? _savedMarketGroupMemory = null;
 
     private bool _isUploadInProgress = false;
     public bool IsUploadInProgress
@@ -98,6 +99,11 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             if (SetProperty(ref _marketGroupNames, value))
             {
+                string? marketGroupName = _savedMarketGroupMemory?.Value;
+                if (!String.IsNullOrEmpty(marketGroupName) && String.IsNullOrEmpty(MarketGroupName))
+                {
+                    MarketGroupName = marketGroupName;
+                }
                 OnPropertyChanged(nameof(MarketGroupName));
             }
         }
@@ -333,13 +339,13 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private readonly string ConfileFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GeneratedConfig_{DateTime.Now:yyyyMMddHHmmss}.log");
 
-    private bool _hasPackage = false;
-    public bool HasPackage
+    private bool _hasValidPackage = false;
+    public bool HasValidPackage
     {
-        get => _hasPackage || !string.IsNullOrEmpty(BigId);
+        get => _hasValidPackage;
         private set 
         { 
-            if (SetProperty(ref _hasPackage, value))
+            if (SetProperty(ref _hasValidPackage, value))
             {
                 CheckCanExecuteUploadCommand();
             }
@@ -349,7 +355,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     private bool _isDragDropVisible = true;
     public bool IsDragDropVisible
     {
-        get => _isDragDropVisible && !HasPackage;
+        get => _isDragDropVisible && !HasValidPackage;
         set => SetProperty(ref _isDragDropVisible, value);
     }
 
@@ -379,9 +385,11 @@ public partial class PackageUploadViewModel : BaseViewModel
         CancelUploadCommand = new RelayCommand(CancelUpload);
         CancelButtonCommand = new RelayCommand(OnCancelButton);
 
-        MarketGroupName = GetPropertyFromApplicationPreferences(nameof(MarketGroupName));
-        BranchOrFlightDisplayName = GetPropertyFromApplicationPreferences(nameof(BranchOrFlightDisplayName));
-        _savedBranchOrFlightMemory = new OneTimeHolder<String>(BranchOrFlightDisplayName);
+        string priorMarketGroup = GetPropertyFromApplicationPreferences(nameof(MarketGroupName));
+        string priorBranchOrFlight = GetPropertyFromApplicationPreferences(nameof(BranchOrFlightDisplayName));
+        _savedMarketGroupMemory = new OneTimeHolder<string>(priorMarketGroup); 
+        _savedBranchOrFlightMemory = new OneTimeHolder<String>(priorBranchOrFlight);
+
         if (string.IsNullOrEmpty(PackageFilePath))
         {
             PackageFilePath = GetPropertyFromApplicationPreferences(nameof(PackageFilePath));
@@ -396,7 +404,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private bool IsUploadReady()
     {
-        return HasPackage && _gameProduct != null && !string.IsNullOrEmpty(MarketGroupName);
+        return HasValidPackage && _gameProduct != null && !string.IsNullOrEmpty(MarketGroupName);
     }
 
     private void CheckCanExecuteUploadCommand()
@@ -410,8 +418,8 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private void UpdatePackageState()
     {
-        // Notify of changes to HasPackage and IsDragDropVisible when BigId changes
-        OnPropertyChanged(nameof(HasPackage));
+        // Notify of changes to HasValidPackage and IsDragDropVisible when BigId changes
+        OnPropertyChanged(nameof(HasValidPackage));
         OnPropertyChanged(nameof(IsDragDropVisible));
         CheckCanExecuteUploadCommand();
     }
@@ -425,7 +433,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
             if (!string.IsNullOrEmpty(BigId))
             {
-                HasPackage = true;
+                HasValidPackage = true;
             }
 
             // Refresh all bound properties from the shared model
@@ -479,6 +487,8 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private void ProcessSelectedPackage(string filePath)
     {
+        HasValidPackage = false;
+
         if (!File.Exists(filePath))
         {
             return;
@@ -499,7 +509,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             // Update UI state
             if (!string.IsNullOrEmpty(BigId))
             {
-                HasPackage = true;
+                HasValidPackage = true;
             }
 
             OnPropertyChanged(nameof(IsDragDropVisible));
@@ -521,7 +531,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         SubValFilePath = string.Empty;
         SymbolBundleFilePath = string.Empty;
 
-        HasPackage = false;
+        HasValidPackage = false;
         OnPropertyChanged(nameof(IsDragDropVisible));
         
         ErrorMessage = string.Empty;

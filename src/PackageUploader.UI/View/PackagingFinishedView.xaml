@@ -4,7 +4,6 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
-      xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
       xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
       mc:Ignorable="d"
       d:DataContext="{d:DesignInstance Type=viewmodel:PackagingFinishedViewModel}"

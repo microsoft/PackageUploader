@@ -5,7 +5,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:Class="PackageUploader.UI.View.PackagingProgressView"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
-             xmlns:controls="clr-namespace:PackageUploader.UI.Controls"
              xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackagingProgressViewModel}"
