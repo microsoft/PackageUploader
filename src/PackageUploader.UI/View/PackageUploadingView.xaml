@@ -43,7 +43,7 @@
         <TextBlock Grid.Row="1"
                    Margin="0, 0, 0, 23"
                    Style="{StaticResource SubHeadline}"
-                   Text="Getting your package ready..."
+                   Text="Uploading package to partner center"
                    Foreground="White" />
         <!-- Loading Bar -->
         <Grid Grid.Row="2"
@@ -59,7 +59,7 @@
             <TextBlock Grid.Row="0"
                        Grid.Column="0"
                        Margin="0, 0, 0, 10"
-                       Text="Packaging..."
+                       Text="Uploading"
                        Foreground="White" 
                        HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="0"
@@ -99,7 +99,7 @@
             <Image Grid.Row="0"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Settings.png"
-                   Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-5}"
+                   Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-90}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Height="16"
@@ -116,14 +116,14 @@
             <Image Grid.Row="0"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Accept.png"
-                   Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-100}"
+                   Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=91-100}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Height="16"
                    Width="16" />
             <TextBlock Grid.Row="0"
                        Grid.Column="1"
-                       Text="Validating files..."
+                       Text="Uploading files..."
                        Foreground="White"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"/>
@@ -131,7 +131,7 @@
             <Image Grid.Row="1"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Settings.png"
-                   Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-93}"
+                   Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=91-99}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Height="16"
@@ -148,18 +148,18 @@
             <Image Grid.Row="1"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Accept.png"
-                   Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=94-100}"
+                   Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=99-100}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Height="16"
                    Width="16" />
             <TextBlock Grid.Row="1" Grid.Column="1"
-                       Text="Copying and encrypting data..."
+                       Text="Processing the package..."
                        Foreground="White"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"/>
             <!-- Row 3 -->
-            <Image Grid.Row="2"
+            <!--<Image Grid.Row="2"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Settings.png"
                    Visibility="{Binding PackageUploadPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=95-99}"
@@ -189,12 +189,12 @@
                        Text="Verifying package contents..."
                        Foreground="White"
                        HorizontalAlignment="Left"
-                       VerticalAlignment="Center" />
+                       VerticalAlignment="Center" />-->
         </Grid>
         <StackPanel Grid.Row="4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button Content="Cancel packaging"
+            <Button Content="Cancel upload"
                     Command="{Binding CancelUploadCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 50, 50"

@@ -763,7 +763,9 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             var marketGroupPackage = _gamePackageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(MarketGroupName));
 
-            IProgress<double> progress = new Progress<double>(value => ProgressValue = (int)value*100);
+            IProgress<double> progress = new Progress<double>(value => { 
+                ProgressValue = (int)(value * 100); 
+            });
 
             GamePackage gamePackage = await _uploaderService.UploadGamePackageAsync(
                 _gameProduct,
