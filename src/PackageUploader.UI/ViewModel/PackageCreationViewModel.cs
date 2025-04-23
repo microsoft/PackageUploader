@@ -501,7 +501,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
 
         // Reset package data
-        _packageModelService.Package = new PackageModel(); //we'll want to capture previous data first
+        _packageModelService.Package = new PackageModel();
         ErrorMessage = string.Empty;
 
         if (string.IsNullOrEmpty(GameDataPath))
@@ -597,6 +597,8 @@ public partial class PackageCreationViewModel : BaseViewModel
 
             // Log the output to a file for debugging
             string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_MakePkg_{DateTime.Now:yyyyMMddHHmmss}.log");
+            _packageModelService.PackagingLogFilepath = logFilePath;
+
             File.WriteAllText(logFilePath, outputString);
 
             if (exitCode != 0)
@@ -625,7 +627,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             }
             ProgressValue = 100;
 
-            // Navigate using the window service (WPF-specific navigation)
+            // Navigate using the window service
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 _windowService.NavigateTo(typeof(PackagingFinishedView));
@@ -641,7 +643,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         _makePackageProcess.BeginOutputReadLine();
         _makePackageProcess.BeginErrorReadLine();
 
-        // Navigate using the window service (WPF-specific navigation)
+        // Navigate using the window service
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             _windowService.NavigateTo(typeof(PackagingProgressView));
@@ -825,13 +827,13 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading game config."); // thanks copilot
+            _logger.LogError(ex, "Error loading game config.");
             HasValidGameConfig = false;
             return;
         }
         PackageId = gameConfig.Identity.Name;
         BigId = gameConfig.StoreId;
-        PackagePreviewImage = LoadBitmapImage(gameConfig.ShellVisuals.StoreLogo);
+        PackagePreviewImage = LoadBitmapImage(gameConfig.ShellVisuals.Square150x150Logo);
 
         HasValidGameConfig = true;
     }
