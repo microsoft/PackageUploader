@@ -12,6 +12,8 @@ using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using System.IO;
+using PackageUploader.UI.Model;
+using System.Windows.Media.Imaging;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -339,6 +341,13 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _marketGroupErrorMessage, value);
     }
 
+    private BitmapImage? _packagePreviewImage = null;
+    public BitmapImage? PackagePreviewImage
+    {
+        get => _packagePreviewImage;
+        set => SetProperty(ref _packagePreviewImage, value);
+    }
+
     public ICommand UploadPackageCommand { get; }
     public ICommand BrowseForPackageCommand { get; }
     public ICommand FileDroppedCommand { get; }
@@ -529,7 +538,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     {
         try
         {
-            Model.XvcFile.GetBuildAndKeyId(packagePath, out Guid buildId, out Guid keyId);
+            XvcFile.GetBuildAndKeyId(packagePath, out Guid buildId, out Guid keyId);
 
             // Get just the filename without extension to build up other file paths
             string? baseFolder = Path.GetDirectoryName(packagePath);
@@ -544,7 +553,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             SubValFilePath = Path.Combine(baseFolder, $"Validator_{fileName}.xml");
 
             // Parse the SubVal file for any remaining needed fields. Use the buildId to verify it's the right Validator log.
-            ExtractIdInformationFromValidatorLog(buildId, out string? titleId, out string storeId);
+            ExtractIdInformationFromValidatorLog(buildId, out string? titleId, out string storeId, out string logoFilename);
 
             var symbolBundleFilePath = string.Empty;
             if (!string.IsNullOrEmpty(titleId))
@@ -588,6 +597,12 @@ public partial class PackageUploadViewModel : BaseViewModel
             {
                 PackageSize = string.Format("{0:0.##} MB", fileInfo.Length / bytesInMB);
             }
+
+            if (!string.IsNullOrEmpty(logoFilename))
+            {
+                XvcFile.ExtractFile(packagePath, logoFilename, out byte[]? fileContents);
+                PackagePreviewImage = fileContents != null ? LoadBitmapImage(fileContents) : null;
+            }
         }
         catch (Exception ex)
         {
@@ -595,7 +610,21 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
     }
 
-    private void ExtractIdInformationFromValidatorLog(Guid expectedBuildId, out string? titleId, out string storeId)
+    private static BitmapImage? LoadBitmapImage(byte[] fileContents)
+    {
+        BitmapImage bitmapImage = new();
+        using (MemoryStream stream = new(fileContents))
+        {
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = stream;
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.EndInit();
+            bitmapImage.Freeze();
+        }
+        return bitmapImage;
+    }
+
+    private void ExtractIdInformationFromValidatorLog(Guid expectedBuildId, out string? titleId, out string storeId, out string logoFilename)
     {
         // Read the XML file and extract the TitleId and StoreId
         if (!File.Exists(SubValFilePath))
@@ -625,6 +654,9 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         node = xmlDoc.SelectSingleNode("//GameConfig/Game/TitleId");
         titleId = node?.InnerText ?? string.Empty;
+
+        node = xmlDoc.SelectSingleNode("//GameConfig/Game/ShellVisuals");
+        logoFilename = node?.Attributes?.GetNamedItem("Square150x150Logo")?.InnerText ?? string.Empty;
     }
 
     private async void GetProductInfoAsync()
@@ -726,7 +758,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                 branchOrFlight,
                 marketGroupPackage,
                 PackageFilePath,
-                new GameAssets { EkbFilePath = EkbFilePath, SubValFilePath = SubValFilePath, SymbolsFilePath = SymbolBundleFilePath },
+                new ClientApi.Models.GameAssets { EkbFilePath = EkbFilePath, SubValFilePath = SubValFilePath, SymbolsFilePath = SymbolBundleFilePath },
                 minutesToWaitForProcessing: 60,
                 deltaUpload: true,
                 isXvc: true,
