@@ -183,7 +183,8 @@
                 <Button Content="View logs for full details"
                         Foreground="Red"
                         Command="{Binding ViewLogsCommand}"
-                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"/>
+                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
+                        Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
             </StackPanel>
             <!-- Row 2 (leaves empty row for error message) -->
             <Grid Grid.Row="2"
@@ -235,7 +236,8 @@
                 <Button Content="View logs for full details"
                         Foreground="Red"
                         Command="{Binding ViewLogsCommand}"
-                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"/>
+                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
+                        Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
             </StackPanel>
             <!-- Row 3 (now two empty rows for error messages) -->
             <Grid Grid.Row="4"
@@ -288,7 +290,8 @@
                 <Button Content="View logs for full details"
                         Foreground="Red"
                         Command="{Binding ViewLogsCommand}"
-                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"/>
+                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
+                        Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="6"
