@@ -32,6 +32,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<PathConfigurationProvider>();
                 services.AddSingleton<UserLoggedInProvider>();
                 services.AddSingleton<PackingProgressPercentageProvider>();
+                services.AddSingleton<UploadingProgressPercentageProvider>();
 
                 // Register ViewModels
                 services.AddSingleton<MainPageViewModel>();
@@ -39,6 +40,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<PackageUploadViewModel>();
                 services.AddSingleton<PackagingProgressViewModel>();
                 services.AddSingleton<PackagingFinishedViewModel>();
+                services.AddSingleton<PackageUploadingViewModel>();
 
                 // Register Views
                 services.AddTransient<MainPageView>();
@@ -46,6 +48,7 @@ public partial class App : System.Windows.Application
                 services.AddTransient<PackageUploadView>();
                 services.AddTransient<PackagingProgressView>();
                 services.AddTransient<PackagingFinishedView>();
+                services.AddTransient<PackageUploadingView>();
 
                 // Register the main window
                 services.AddSingleton<MainWindow>();

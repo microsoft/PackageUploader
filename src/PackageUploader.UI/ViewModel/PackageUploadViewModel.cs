@@ -23,6 +23,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     private readonly PackageModelProvider _packageModelService;
     private readonly IPackageUploaderService _uploaderService;
     private readonly IWindowService _windowService;
+    public readonly UploadingProgressPercentageProvider _uploadingProgressPercentageProvider;
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
@@ -176,11 +177,18 @@ public partial class PackageUploadViewModel : BaseViewModel
         });
     }
 
-    private double _progressValue = 0;
+    //private double _progressValue = 0;
     public double ProgressValue
     {
-        get => _progressValue;
-        set => SetProperty(ref _progressValue, value);
+        get => _uploadingProgressPercentageProvider.UploadingProgressPercentage;
+        set
+        {
+            if (_uploadingProgressPercentageProvider.UploadingProgressPercentage != (int)value)
+            {
+                _uploadingProgressPercentageProvider.UploadingProgressPercentage = (int)value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     private bool _isProgressVisible = false;
@@ -372,11 +380,13 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     public PackageUploadViewModel(PackageModelProvider packageModelService, 
                                   IPackageUploaderService uploaderService,
-                                  IWindowService windowService)
+                                  IWindowService windowService,
+                                  UploadingProgressPercentageProvider uploadingProgressPercentageProvider)
     {
         _packageModelService = packageModelService;
         _uploaderService = uploaderService;
         _windowService = windowService;
+        _uploadingProgressPercentageProvider = uploadingProgressPercentageProvider;
 
         // Initialize commands with RelayCommand
         UploadPackageCommand = new RelayCommand(UploadPackageProcessAsync, () => IsUploadReady());
@@ -450,6 +460,14 @@ public partial class PackageUploadViewModel : BaseViewModel
         IsProgressVisible = false;
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
+
+        if(_uploadingProgressPercentageProvider.UploadingCancelled)
+        {
+            _uploadingProgressPercentageProvider.UploadingCancelled = false;
+            IsUploadInProgress = false;
+            IsProgressVisible = false;
+            CancelUpload();
+        }
     }
 
     private void BrowseForPackage()
@@ -700,6 +718,11 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private async void UploadPackageProcessAsync()
     {
+        //Go to next page...
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            _windowService.NavigateTo(typeof(PackageUploadingView));
+        });
         // Clear any previous status messages when starting a new upload
         SuccessMessage = string.Empty;
         ErrorMessage = string.Empty;
@@ -740,7 +763,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             var marketGroupPackage = _gamePackageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(MarketGroupName));
 
-            IProgress<double> progress = new Progress<double>(value => ProgressValue = value);
+            IProgress<double> progress = new Progress<double>(value => ProgressValue = (int)value*100);
 
             GamePackage gamePackage = await _uploaderService.UploadGamePackageAsync(
                 _gameProduct,
