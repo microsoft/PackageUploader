@@ -7,7 +7,16 @@
              x:Class="PackageUploader.UI.View.PackageUploadView"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageUploadViewModel}">
-
+    <UserControl.Resources>
+        <Storyboard x:Key="RotateAnimation">
+            <DoubleAnimation
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+            From="0"
+            To="360"
+            Duration="0:0:5"
+            RepeatBehavior="Forever" />
+        </Storyboard>
+    </UserControl.Resources>
     <Grid Background="#25282C">
         <StackPanel Margin="20">
             <!-- Add Back Arrow Icon -->
@@ -186,7 +195,25 @@
                                   x:Name="flightName"
                                   ItemsSource="{Binding BranchAndFlightNames, Mode=OneWay}"
                                   SelectedItem="{Binding BranchOrFlightDisplayName, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsLoadingBranchesAndFlights, Converter={StaticResource InverseBooleanConverter}}"
                                   Style="{StaticResource CustomComboBoxStyle}" />
+                        <StackPanel Grid.Row="3"
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Left"
+                                    Width="16"
+                                    Height="16">
+                            <Image Source="/Resources/AppIcon/Settings.png"
+                                   Visibility="{Binding IsLoadingBranchesAndFlights, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Image.RenderTransform>
+                                    <RotateTransform CenterX="8" CenterY="8" />
+                                </Image.RenderTransform>
+                                <Image.Triggers>
+                                    <EventTrigger RoutedEvent="Image.Loaded">
+                                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                                    </EventTrigger>
+                                </Image.Triggers>
+                            </Image>
+                        </StackPanel>
                         <TextBlock Grid.Row="4"
                                    Grid.Column="0"
                                    Text="Market"
@@ -198,8 +225,31 @@
                                   x:Name="marketName"
                                   ItemsSource="{Binding MarketGroupNames, Mode=OneWay}"
                                   SelectedItem="{Binding MarketGroupName, Mode=TwoWay}"
-                                  IsEnabled="{Binding HasMarketGroups}"
-                                  Style="{StaticResource CustomComboBoxStyle}" />
+                                  Style="{StaticResource CustomComboBoxStyle}">
+                            <ComboBox.IsEnabled>
+                                <MultiBinding Converter="{StaticResource BooleanAndConverter}">
+                                    <Binding Path="IsLoadingMarkets" Converter="{StaticResource InverseBooleanConverter}"/>
+                                    <Binding Path="IsLoadingBranchesAndFlights" Converter="{StaticResource InverseBooleanConverter}"/>
+                                </MultiBinding>
+                            </ComboBox.IsEnabled>
+                        </ComboBox>
+                        <StackPanel Grid.Row="5"
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Left"
+                                    Width="16"
+                                    Height="16">
+                            <Image Source="/Resources/AppIcon/Settings.png"
+                                   Visibility="{Binding IsLoadingMarkets, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Image.RenderTransform>
+                                    <RotateTransform CenterX="8" CenterY="8" />
+                                </Image.RenderTransform>
+                                <Image.Triggers>
+                                    <EventTrigger RoutedEvent="Image.Loaded">
+                                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                                    </EventTrigger>
+                                </Image.Triggers>
+                            </Image>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="#6B7584" Margin="10,0" />

@@ -281,7 +281,7 @@
             <StackPanel Grid.Row="5"
                         Grid.Column="1"
                         Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=95-99}">
-            <TextBlock Text="{Binding PackagingErrorMessage}"
+                <TextBlock Text="{Binding PackagingErrorMessage}"
                        Foreground="Red"
                        HorizontalAlignment="Left"
                        MaxWidth="400"

@@ -71,12 +71,6 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isCreationInProgress, value);
     }
 
-    private bool _isSpinnerRunning = false;
-    public bool IsSpinnerRunning
-    {
-        get => _isSpinnerRunning;
-        set => SetProperty(ref _isSpinnerRunning, value);
-    }
     
     public int ProgressValue
     {
@@ -89,13 +83,6 @@ public partial class PackageCreationViewModel : BaseViewModel
                 OnPropertyChanged(nameof(ProgressValue));
             }
         }
-    }
-
-    private bool _isProgressVisible = false;
-    public bool IsProgressVisible
-    {
-        get => _isProgressVisible;
-        set => SetProperty(ref _isProgressVisible, value);
     }
 
     private BitmapImage? _packagePreviewImage = null;
@@ -629,7 +616,6 @@ public partial class PackageCreationViewModel : BaseViewModel
         
         _makePackageProcess.Exited += (sender, args) =>
         {
-            IsSpinnerRunning = false;
             string outputString = string.Join("\n", processOutput.ToArray());
 
             // Log error output as well
@@ -687,8 +673,6 @@ public partial class PackageCreationViewModel : BaseViewModel
         };
 
         ProgressValue = 0;
-        IsSpinnerRunning = true;
-        IsProgressVisible = true;
         IsCreationInProgress = true;
 
         _makePackageProcess.Start();

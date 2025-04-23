@@ -19,6 +19,7 @@
             <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
             <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
+            <converters:BooleanAndConverter x:Key="BooleanAndConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
