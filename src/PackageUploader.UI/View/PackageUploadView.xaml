@@ -4,17 +4,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
-             xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
              x:Class="PackageUploader.UI.View.PackageUploadView"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageUploadViewModel}">
-
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
-            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
-        </ResourceDictionary>
-    </UserControl.Resources>
 
     <Grid Background="#25282C">
         <StackPanel Margin="20">

@@ -50,7 +50,7 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Add this new style for a chromeless hyperlink-like button -->
+    <!-- Style for a chromeless hyperlink-like button -->
     <Style x:Key="HyperlinkButtonStyle" TargetType="Button">
         <Setter Property="Foreground" Value="{StaticResource WhiteBrush}" />
         <Setter Property="Background" Value="Transparent" />
@@ -64,6 +64,32 @@
                 <ControlTemplate TargetType="Button">
                     <TextBlock Text="{TemplateBinding Content}" 
                                Foreground="{TemplateBinding Foreground}" 
+                               Cursor="Hand" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource TertiaryBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Style for a chromeless hyperlink-like button that is underlined -->
+    <Style x:Key="HyperlinkUnderlinedButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource WhiteBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <TextBlock Text="{TemplateBinding Content}" 
+                               Foreground="{TemplateBinding Foreground}" 
+                               TextDecorations="Underline"
                                Cursor="Hand" />
                 </ControlTemplate>
             </Setter.Value>

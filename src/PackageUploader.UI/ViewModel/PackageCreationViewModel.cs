@@ -28,24 +28,6 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     private Process? _makePackageProcess;
 
-    private string _errorMessage = string.Empty;
-    public string ErrorMessage
-    {
-        get => _errorMessage;
-        set
-        {
-            SetProperty(ref _errorMessage, value);
-            IsErrorVisible = !string.IsNullOrEmpty(value);
-        }
-    }
-
-    private bool _isErrorVisible;
-    public bool IsErrorVisible
-    {
-        get => _isErrorVisible;
-        private set => SetProperty(ref _isErrorVisible, value);
-    }
-
     private string _gameDataPath = string.Empty;
     public string GameDataPath
     {
@@ -73,6 +55,11 @@ public partial class PackageCreationViewModel : BaseViewModel
                 _mappingDataXmlPath = value;
                 OnPropertyChanged(nameof(MappingDataXmlPath));
                 EstimatePackageSize();
+
+                if (MakePackageCommand is RelayCommand relayCommand)
+                {
+                    relayCommand.RaiseCanExecuteChanged();
+                }
             }
         }
     }
@@ -171,6 +158,44 @@ public partial class PackageCreationViewModel : BaseViewModel
                 OnPropertyChanged(nameof(PackageSize));
             }
         }
+    }
+
+    private string _gameConfigLoadError = string.Empty;
+    public string GameConfigLoadError
+    {
+        get => _gameConfigLoadError;
+        set => SetProperty(ref _gameConfigLoadError, value);
+    }
+
+    private string _layoutParseError = string.Empty;
+    public string LayoutParseError
+    {
+        get => _layoutParseError;
+        set
+        {
+            if (_layoutParseError != value)
+            {
+                SetProperty(ref _layoutParseError, value);
+                if (MakePackageCommand is RelayCommand relayCommand)
+                {
+                    relayCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+    }
+
+    private string _subValDllError = string.Empty;
+    public string SubValDllError
+    {
+        get => _subValDllError;
+        set => SetProperty(ref _subValDllError, value);
+    }
+
+    private string _outputDirectoryError = string.Empty;
+    public string OutputDirectoryError
+    {
+        get => _outputDirectoryError;
+        set => SetProperty(ref _outputDirectoryError, value);
     }
 
     private bool _hasValidGameConfig = false;
@@ -299,11 +324,12 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     private bool CanCreatePackage()
     {
-        return HasValidGameConfig;
+        return HasValidGameConfig && string.IsNullOrEmpty(LayoutParseError) && (string.IsNullOrEmpty(MappingDataXmlPath) || File.Exists(MappingDataXmlPath));
     }
 
     private void EstimatePackageSize()
     {
+        LayoutParseError = string.Empty;
         string sizeInBytes = "Unknown";
         if (string.IsNullOrEmpty(GameDataPath) || !Directory.Exists(GameDataPath))
         {
@@ -343,6 +369,7 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     private string ParseLayoutFileForFileSize(string mappingDataXmlPath)
     {
+        LayoutParseError = string.Empty;
         try
         {
             _logger.LogInformation("Parsing layout file for size calculation: {Path}", mappingDataXmlPath);
@@ -356,6 +383,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             if (fileGroups == null || fileGroups.Count == 0)
             {
                 _logger.LogWarning("No FileGroup elements found in layout file");
+                LayoutParseError = "There were no files found in the layout file";
                 return "0"; // Return 0 bytes if no file groups found
             }
 
@@ -424,6 +452,7 @@ public partial class PackageCreationViewModel : BaseViewModel
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error calculating size for path: {Path}", fullSourcePath);
+                    LayoutParseError = "There was an error parsing the layout file";
                 }
             }
 
@@ -435,11 +464,13 @@ public partial class PackageCreationViewModel : BaseViewModel
         catch (XmlException xmlEx)
         {
             _logger.LogError(xmlEx, "XML parsing error in layout file");
+            LayoutParseError = "There was an error parsing the layout file";
             return GetDirectorySizeInBytes(GameDataPath).ToString();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error parsing layout file for size calculation");
+            LayoutParseError = "There was an error parsing the layout file";
             return GetDirectorySizeInBytes(GameDataPath).ToString();
         }
     }
@@ -502,13 +533,17 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         // Reset package data
         _packageModelService.Package = new PackageModel();
-        ErrorMessage = string.Empty;
+        _packingProgressPercentageProvider.PackagingErrorMessage = string.Empty;
 
         if (string.IsNullOrEmpty(GameDataPath))
         {
-            ErrorMessage = "Please provide the game data path";
+            GameConfigLoadError = "Please provide the game data path";
             return;
         }
+
+        OutputDirectoryError = string.Empty;
+        LayoutParseError = string.Empty;
+        SubValDllError = string.Empty;
 
         ArrayList processOutput = [];
         ArrayList processErrorOutput = [];
@@ -516,7 +551,15 @@ public partial class PackageCreationViewModel : BaseViewModel
         string buildPath = String.IsNullOrEmpty(PackageFilePath) ? tempBuildPath : PackageFilePath;
         if(!Directory.Exists(buildPath))
         {
-            Directory.CreateDirectory(buildPath);
+            try
+            {
+                Directory.CreateDirectory(buildPath);
+            }
+            catch(Exception)
+            {
+                OutputDirectoryError = "Failed to create output directory";
+                return;
+            }
         }
 
         if (string.IsNullOrEmpty(MappingDataXmlPath) || !File.Exists(MappingDataXmlPath))
@@ -528,20 +571,28 @@ public partial class PackageCreationViewModel : BaseViewModel
         // Return if we still don't have a mapping file.
         if (string.IsNullOrEmpty(MappingDataXmlPath) || !File.Exists(MappingDataXmlPath))
         {
+            LayoutParseError = "Failed to generate a layout file";
             return;
         }
 
         string cmdFormat = "pack /v /f {0} /d {1} /pd {2}";
         string arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, buildPath);
 
-        if (!string.IsNullOrEmpty(SubValPath) && File.Exists(Path.Combine(SubValPath, "SubmissionValidator.dll")))
+        SubValDllError = string.Empty;
+        if (!string.IsNullOrEmpty(SubValPath))
         {
-            arguments += $" /validationpath {SubValPath}";
+            if (File.Exists(Path.Combine(SubValPath, "SubmissionValidator.dll")))
+            {
+                arguments += $" /validationpath {SubValPath}";
+            }
+            else
+            {
+                SubValDllError = "SubmissionValidator.dll not found in the specified path.";
+                return;
+            }
         }
 
-#if WINDOWS
         SetConsoleCtrlHandler(null, false);
-#endif
 
         _makePackageProcess = new Process();
         _makePackageProcess.StartInfo.FileName = _pathConfigurationService.MakePkgPath;
@@ -605,22 +656,23 @@ public partial class PackageCreationViewModel : BaseViewModel
             {
                 if ((uint)exitCode == CtrlCTerminationCode)
                 {
-                    // User cancelled the process
-                    ErrorMessage = "Package creation was cancelled.";
+                    // User cancelled the process, progress screen
+                    // will already navigate back to this screen so
+                    // no work is needed.
                 }
                 else
                 {
-                    // Get the final line from the error message
-                    string? errorString = processErrorOutput.Count > 0 ? processErrorOutput[^1]?.ToString() : string.Empty;
+                    // Get the stderr output for our error message
+                    string? errorString = string.Join("\n", processErrorOutput.ToArray());
 
-                    // Show error message
+                    // Add error message so progress screen can display it.
                     if (!string.IsNullOrEmpty(errorString))
                     {
-                        ErrorMessage = $"Error creating package: {errorString}";
+                        _packingProgressPercentageProvider.PackagingErrorMessage = errorString;
                     }
                     else
                     {
-                        ErrorMessage = "Error creating package.";
+                        _packingProgressPercentageProvider.PackagingErrorMessage = "Error creating package.";
                     }
                 }
                 return;
@@ -694,7 +746,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             if (makePackageProcess.ExitCode != 0)
             {
                 // Show error message
-                ErrorMessage = "Error generating layout file.";
+                LayoutParseError = "Error generating layout file.";
                 return;
             }
             MappingDataXmlPath = layoutFile;
@@ -814,10 +866,18 @@ public partial class PackageCreationViewModel : BaseViewModel
     }
     private void LoadGameConfigValues()
     {
+        GameConfigLoadError = string.Empty;
+        HasValidGameConfig = false;
+
+        if (string.IsNullOrEmpty(GameDataPath) || !Directory.Exists(GameDataPath))
+        {           
+            return;
+        }
+
         string gameConfigPath = Path.Combine(GameDataPath, "MicrosoftGame.config");
         if (String.IsNullOrEmpty(gameConfigPath) || !File.Exists(gameConfigPath))
         {
-            HasValidGameConfig = false;
+            GameConfigLoadError = "Provided folder does not contain a MicrosoftGame.config file";
             return;
         }
         PartialGameConfigModel gameConfig;
@@ -828,7 +888,28 @@ public partial class PackageCreationViewModel : BaseViewModel
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading game config.");
-            HasValidGameConfig = false;
+            GameConfigLoadError = "The MicrosoftGame.config in the provided folder is invalid";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(gameConfig.Identity.Name))
+        {
+            GameConfigLoadError = "The MicrosoftGame.config lacks a valid Identity node";
+            return;
+        }
+        if (string.IsNullOrEmpty(gameConfig.StoreId))
+        {
+            GameConfigLoadError = "The MicrosoftGame.config has no StoreId";
+            return;
+        }
+        if (string.IsNullOrEmpty(gameConfig.ShellVisuals.Square150x150Logo))
+        {
+            GameConfigLoadError = "The MicrosoftGame.config does not have the required Logo files in the ShellVisuals";
+            return;
+        }
+        if (!File.Exists(gameConfig.ShellVisuals.Square150x150Logo))
+        {
+            GameConfigLoadError = "The logo file specified by the MicrosoftGame.config does not exist";
             return;
         }
         PackageId = gameConfig.Identity.Name;

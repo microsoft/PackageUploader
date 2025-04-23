@@ -130,6 +130,7 @@
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
+                            <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="476"/>
@@ -189,6 +190,20 @@
                             Command="{Binding BrowseGameDataPathCommand}"
                             IsEnabled="True"
                             Margin="0,0,0,10"/>
+                        <StackPanel Grid.Row="4"
+                                    Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    Visibility="{Binding GameConfigLoadError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                            <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                   Width="16" 
+                                   Height="16" 
+                                   Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding GameConfigLoadError}"
+                                       Foreground="White"
+                                       HorizontalAlignment="Left"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
                     </Grid>
                     <Expander Style="{StaticResource CustomExpanderStyle}" Margin="0,10,0,20">
                         <Expander.Header>
@@ -197,6 +212,8 @@
                         </Expander.Header>
                         <Grid Margin="0,10,0,0">
                             <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
@@ -248,13 +265,29 @@
                                 IsEnabled="True"
                                 Margin="0,0,0,10"/>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0"
+                            <StackPanel Grid.Row="2"
+                                        Grid.Column="0"
+                                        Margin="0, 0, 0, 5"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Left"
+                                        Visibility="{Binding LayoutParseError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                                <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                       Width="16" 
+                                       Height="16" 
+                                       Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding LayoutParseError}"
+                                           Foreground="White"
+                                           HorizontalAlignment="Left"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0"
                                        Text="Folder path for SubmissionValidator.dll"
                                        Foreground="White"
                                        HorizontalAlignment="Left"
                                        Margin="0,0,0,5"
                                        Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                            <TextBox Grid.Row="3"
+                            <TextBox Grid.Row="4"
                                      Grid.Column="0"
                                      x:Name="SubValPathTextBox"
                                      Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -287,11 +320,27 @@
                                     </Style>
                                 </TextBox.Style>
                             </TextBox>
-                            <Button Grid.Row="3" 
+                            <Button Grid.Row="4" 
                                     Grid.Column="1"
                                     Content="Browse"
                                     Command="{Binding BrowseSubValPathCommand}"
                                     Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                            <StackPanel Grid.Row="5"
+                                        Grid.Column="0"
+                                        Margin="0, 5, 0, 0"
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Left"
+                                        Visibility="{Binding SubValDllError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                                <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                       Width="16" 
+                                       Height="16" 
+                                       Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding SubValDllError}"
+                                           Foreground="White"
+                                           HorizontalAlignment="Left"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
                         </Grid>
                     </Expander>
                 </StackPanel>
@@ -315,6 +364,7 @@
                             Orientation="Vertical">
                     <Grid>
                         <Grid.RowDefinitions>
+                            <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
@@ -375,6 +425,22 @@
                         <Button Grid.Row="3" Grid.Column="2"
                                 Content="Browse"
                                 Command="{Binding BrowsePackageOutputPathCommand}"/>
+
+                        <StackPanel Grid.Row="4"
+                                    Grid.Column="0"
+                                    Margin="0, 5, 0, 0"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    Visibility="{Binding OutputDirectoryError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                            <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                   Width="16" 
+                                   Height="16" 
+                                   Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding OutputDirectoryError}"
+                                       Foreground="White"
+                                       HorizontalAlignment="Left"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="#6B7584" Margin="10,0" />

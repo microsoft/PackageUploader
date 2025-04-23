@@ -16,6 +16,9 @@
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
+            <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+            <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
