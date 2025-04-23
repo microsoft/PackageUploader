@@ -58,7 +58,7 @@
    - **percentage**: optional - rollout to start with
    - **isSeekEnabled**: optional - enable/disable always provide the newest packages when customers manually check for updates
 - **uploadConfig**: optional - httpClient configuration to be used to upload the files
-   - **httpTimeoutMs**: (default and recommended: 5000)
+   - **httpTimeoutMs**: (default and recommended: 300000)
    - **httpUploadTimeoutMs**: (default and recommended: 300000)
    - **maxParallelism**: (default and recommended: 24)
    - **defaultConnectionLimit**: (default and recommended: -1)
@@ -96,7 +96,7 @@
    - **isEnabled**: optional (default false) - it will enable/disable custom pre-download date
    - **effectiveDate**: optional - if informed it will set the package pre-download date (date format example: "2021-10-24T21:00:00.000Z")
 - **uploadConfig**: optional - httpClient configuration to be used to upload the files
-   - **httpTimeoutMs**: (default and recommended: 5000)
+   - **httpTimeoutMs**: (default and recommended: 300000)
    - **httpUploadTimeoutMs**: (default and recommended: 300000)
    - **maxParallelism**: (default and recommended: 24)
    - **defaultConnectionLimit**: (default and recommended: -1)

@@ -41,7 +41,7 @@
   },
 
   "uploadConfig": {
-    "httpTimeoutMs": 10000,
+    "httpTimeoutMs": 300000,
     "httpUploadTimeoutMs": 300000,
     "maxParallelism": 24,
     "defaultConnectionLimit": -1,
