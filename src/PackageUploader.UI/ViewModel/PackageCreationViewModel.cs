@@ -848,6 +848,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             CancelCreation();
         }
     }
+
     private void LoadGameConfigValues()
     {
         GameConfigLoadError = string.Empty;

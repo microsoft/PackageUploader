@@ -16,6 +16,8 @@ public partial class PackageUploadView : System.Windows.Controls.UserControl
         DataContext = viewModel;
         _viewModel = viewModel;
 
+        this.Loaded += (s, e) => viewModel.OnAppearing();
+
         // Register drag drop event handlers after control is initialized
         this.Loaded += (s, e) => RegisterDragDropHandlers();
     }

@@ -534,6 +534,11 @@ public partial class PackageUploadViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsDragDropVisible));
     }
 
+    public void OnAppearing()
+    {
+        ProcessSelectedPackage();
+    }
+
     private void ExtractPackageInformation(string packagePath)
     {
         try

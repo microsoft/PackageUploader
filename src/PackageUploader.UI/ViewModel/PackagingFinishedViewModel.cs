@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PackageUploader.UI.ViewModel
 {
@@ -81,6 +82,13 @@ namespace PackageUploader.UI.ViewModel
             ConfigureUploadCommand = new RelayCommand(ConfigureUpload);
             ViewLogsCommand = new RelayCommand(ViewLogs);
 
+            FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
+            PackageFileName = packageInfo.Name;
+            PackageSize = TranslateFileSize(packageInfo.Length);
+        }
+
+        public void OnAppearing()
+        {
             FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
             PackageFileName = packageInfo.Name;
             PackageSize = TranslateFileSize(packageInfo.Length);
