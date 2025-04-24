@@ -17,7 +17,7 @@ namespace PackageUploader.UI.Providers
             set
             {
                 _packingProgressPercentage = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(PackingProgressPercentage));
             }
         }
 
@@ -28,7 +28,18 @@ namespace PackageUploader.UI.Providers
             set
             {
                 _packingCancelled = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(PackingCancelled));
+            }
+        }
+
+        private string _packagingErrorMessage = string.Empty;
+        public string PackagingErrorMessage
+        {
+            get => _packagingErrorMessage;
+            set
+            {
+                _packagingErrorMessage = value;
+                OnPropertyChanged(nameof(PackagingErrorMessage));
             }
         }
 

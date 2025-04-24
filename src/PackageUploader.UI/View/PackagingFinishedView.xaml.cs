@@ -12,5 +12,7 @@ public partial class PackagingFinishedView : System.Windows.Controls.UserControl
     {
         InitializeComponent();
         DataContext = viewModel;
+
+        this.Loaded += (s, e) => viewModel.OnAppearing();
     }
 }

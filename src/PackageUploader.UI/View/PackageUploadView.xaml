@@ -4,18 +4,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
-             xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
              x:Class="PackageUploader.UI.View.PackageUploadView"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageUploadViewModel}">
-
     <UserControl.Resources>
-        <ResourceDictionary>
-            <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
-            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
-        </ResourceDictionary>
+        <Storyboard x:Key="RotateAnimation">
+            <DoubleAnimation
+            Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+            From="0"
+            To="360"
+            Duration="0:0:5"
+            RepeatBehavior="Forever" />
+        </Storyboard>
     </UserControl.Resources>
-
     <Grid Background="#25282C">
         <StackPanel Margin="20">
             <!-- Add Back Arrow Icon -->
@@ -136,6 +137,22 @@
                                 Command="{Binding BrowseForPackageCommand}"
                                 IsEnabled="True"
                                 Margin="0,0,0,10"/>
+
+                        <StackPanel Grid.Row="4"
+                                    Grid.Column="0"
+                                    Margin="0, 5, 0, 0"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    Visibility="{Binding PackageErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                            <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                   Width="16" 
+                                   Height="16" 
+                                   Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding PackageErrorMessage}"
+                                       Foreground="White"
+                                       HorizontalAlignment="Left"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
                 <StackPanel Grid.Row="1"
@@ -157,6 +174,8 @@
                             Orientation="Vertical">
                     <Grid>
                         <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
@@ -194,20 +213,91 @@
                                   x:Name="flightName"
                                   ItemsSource="{Binding BranchAndFlightNames, Mode=OneWay}"
                                   SelectedItem="{Binding BranchOrFlightDisplayName, Mode=TwoWay}"
+                                  IsEnabled="{Binding IsLoadingBranchesAndFlights, Converter={StaticResource InverseBooleanConverter}}"
                                   Style="{StaticResource CustomComboBoxStyle}" />
-                        <TextBlock Grid.Row="4"
+                        <StackPanel Grid.Row="3"
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Left"
+                                    Width="16"
+                                    Height="16">
+                            <Image Source="/Resources/AppIcon/Settings.png"
+                                   Visibility="{Binding IsLoadingBranchesAndFlights, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Image.RenderTransform>
+                                    <RotateTransform CenterX="8" CenterY="8" />
+                                </Image.RenderTransform>
+                                <Image.Triggers>
+                                    <EventTrigger RoutedEvent="Image.Loaded">
+                                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                                    </EventTrigger>
+                                </Image.Triggers>
+                            </Image>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4"
+                                    Grid.Column="0"
+                                    Margin="0, 5, 0, 0"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    Visibility="{Binding BranchOrFlightErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                            <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                   Width="16" 
+                                   Height="16" 
+                                   Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding BranchOrFlightErrorMessage}"
+                                       Foreground="White"
+                                       HorizontalAlignment="Left"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <TextBlock Grid.Row="5"
                                    Grid.Column="0"
                                    Text="Market"
                                    Foreground="White"
                                    HorizontalAlignment="Left"
                                    Margin="0,10,0,5"/>
-                        <ComboBox Grid.Row="5"
+                        <ComboBox Grid.Row="6"
                                   Grid.Column="0"
                                   x:Name="marketName"
                                   ItemsSource="{Binding MarketGroupNames, Mode=OneWay}"
                                   SelectedItem="{Binding MarketGroupName, Mode=TwoWay}"
-                                  IsEnabled="{Binding HasMarketGroups}"
-                                  Style="{StaticResource CustomComboBoxStyle}" />
+                                  Style="{StaticResource CustomComboBoxStyle}">
+                            <ComboBox.IsEnabled>
+                                <MultiBinding Converter="{StaticResource BooleanAndConverter}">
+                                    <Binding Path="IsLoadingMarkets" Converter="{StaticResource InverseBooleanConverter}"/>
+                                    <Binding Path="IsLoadingBranchesAndFlights" Converter="{StaticResource InverseBooleanConverter}"/>
+                                </MultiBinding>
+                            </ComboBox.IsEnabled>
+                        </ComboBox>
+                        <StackPanel Grid.Row="6"
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Left"
+                                    Width="16"
+                                    Height="16">
+                            <Image Source="/Resources/AppIcon/Settings.png"
+                                   Visibility="{Binding IsLoadingMarkets, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Image.RenderTransform>
+                                    <RotateTransform CenterX="8" CenterY="8" />
+                                </Image.RenderTransform>
+                                <Image.Triggers>
+                                    <EventTrigger RoutedEvent="Image.Loaded">
+                                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                                    </EventTrigger>
+                                </Image.Triggers>
+                            </Image>
+                        </StackPanel>
+                        <StackPanel Grid.Row="7"
+                                    Grid.Column="0"
+                                    Margin="0, 5, 0, 0"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    Visibility="{Binding MarketGroupErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                            <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                   Width="16" 
+                                   Height="16" 
+                                   Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding MarketGroupErrorMessage}"
+                                       Foreground="White"
+                                       HorizontalAlignment="Left"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="#6B7584" Margin="10,0" />
@@ -276,11 +366,21 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
+                            <Image Grid.Row="0"
+                                   Grid.Column="0"
+                                   Grid.RowSpan="3"
+                                   Source="{Binding PackagePreviewImage}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Height="65"
+                                   Width="65"
+                                   Margin="0,0,10,0"/>
                             <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
                                 <TextBlock Text="File name"
                                            Foreground="{StaticResource Gray200Brush}"/>
                                 <TextBlock Text="{Binding PackageName}"
-                                           Foreground="White"/>
+                                           Foreground="White"
+                                           TextWrapping="Wrap"/>
                             </StackPanel>
                             <Grid Grid.Row="2" Grid.Column="1" >
                                 <Grid.ColumnDefinitions>

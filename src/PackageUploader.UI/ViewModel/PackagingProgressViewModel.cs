@@ -2,12 +2,14 @@
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace PackageUploader.UI.ViewModel
 {
     public partial class PackagingProgressViewModel : BaseViewModel
     {
+        public readonly PackageModelProvider _packageModelProvider;
         public readonly PackingProgressPercentageProvider _packingProgressPercentageProvider;
         private readonly IWindowService _windowService;
 
@@ -24,15 +26,31 @@ namespace PackageUploader.UI.ViewModel
             }
         }
 
+        public string PackagingErrorMessage
+        {
+            get => _packingProgressPercentageProvider.PackagingErrorMessage;
+            set
+            {
+                if (_packingProgressPercentageProvider.PackagingErrorMessage != value)
+                {
+                    _packingProgressPercentageProvider.PackagingErrorMessage = value;
+                    OnPropertyChanged(nameof(PackingProgressPercentage));
+                }
+            }
+        }
+
+        public ICommand ViewLogsCommand { get; }
         public ICommand CancelCreationCommand { get; }
 
 
-        public PackagingProgressViewModel(PackingProgressPercentageProvider packingProgressPercentageProvider, IWindowService windowService)
+        public PackagingProgressViewModel(PackingProgressPercentageProvider packingProgressPercentageProvider, PackageModelProvider packageModelProvider, IWindowService windowService)
         {
             _packingProgressPercentageProvider = packingProgressPercentageProvider;
             _packingProgressPercentageProvider.PropertyChanged += PackagingProgressUpdate;
+            _packageModelProvider = packageModelProvider;
             _windowService = windowService;
 
+            ViewLogsCommand = new RelayCommand(ViewLogs);
             CancelCreationCommand = new RelayCommand(CancelCreation);
         }
 
@@ -41,6 +59,10 @@ namespace PackageUploader.UI.ViewModel
             if (e.PropertyName == nameof(PackingProgressPercentageProvider.PackingProgressPercentage))
             {
                 OnPropertyChanged(nameof(PackingProgressPercentage));
+            }
+            else if (e.PropertyName == nameof(PackingProgressPercentageProvider.PackagingErrorMessage))
+            {
+                OnPropertyChanged(nameof(PackagingErrorMessage));
             }
         }
 
@@ -52,6 +74,12 @@ namespace PackageUploader.UI.ViewModel
             {
                 _windowService.NavigateTo(typeof(PackageCreationView));
             });
+        }
+
+        private void ViewLogs()
+        {
+            string logPath = _packageModelProvider.PackagingLogFilepath;
+            Process.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
     }
 }

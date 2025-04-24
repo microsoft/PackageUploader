@@ -4,7 +4,6 @@
 using System.Diagnostics;
 using System.Windows.Input;
 using System.Xml;
-using Microsoft.Win32;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
@@ -12,8 +11,8 @@ using PackageUploader.ClientApi.Models;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
-using System.Windows;
 using System.IO;
+using PackageUploader.UI.Model;
 using System.Windows.Media.Imaging;
 
 namespace PackageUploader.UI.ViewModel;
@@ -37,13 +36,6 @@ public partial class PackageUploadViewModel : BaseViewModel
     {
         get => _isUploadInProgress;
         set => SetProperty(ref _isUploadInProgress, value);
-    }
-
-    private bool _isSpinnerRunning = false;
-    public bool IsSpinnerRunning
-    {
-        get => _isSpinnerRunning;
-        set => SetProperty(ref _isSpinnerRunning, value);
     }
 
     private string _branchOrFlightDisplayName = string.Empty;
@@ -117,10 +109,11 @@ public partial class PackageUploadViewModel : BaseViewModel
             return;
         }
 
-        IsSpinnerRunning = true;
+        IsLoadingMarkets = true;
+
         try
         {
-            ErrorMessage = string.Empty;
+            MarketGroupErrorMessage = string.Empty;
 
             IGamePackageBranch? branchOrFlight = GetBranchOrFlightFromUISelection();
 
@@ -149,21 +142,24 @@ public partial class PackageUploadViewModel : BaseViewModel
                 MarketGroupNames = [];
                 MarketGroupName = string.Empty;
 
-                ErrorMessage = "No Branches found for this product";
+                MarketGroupErrorMessage = "No Branches found for this product";
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error getting market groups: {ex.Message}";
+            MarketGroupErrorMessage = $"Error getting market groups: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingMarkets = false;
         }
 
         CheckCanExecuteUploadCommand();
-        IsSpinnerRunning = false;
     }
 
     private IGamePackageBranch? GetBranchOrFlightFromUISelection()
     {
-        if (_branchesAndFlights == null)
+        if (_branchesAndFlights == null || string.IsNullOrEmpty(BranchOrFlightDisplayName))
         {
             return null;
         }
@@ -189,13 +185,6 @@ public partial class PackageUploadViewModel : BaseViewModel
                 OnPropertyChanged();
             }
         }
-    }
-
-    private bool _isProgressVisible = false;
-    public bool IsProgressVisible
-    {
-        get => _isProgressVisible;
-        set => SetProperty(ref _isProgressVisible, value);
     }
 
     public Model.PackageModel Package => _packageModelService.Package;
@@ -242,7 +231,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (Package.PackageFilePath != value)
             {
                 Package.PackageFilePath = value;
-                ProcessSelectedPackage(Package.PackageFilePath);
+                ProcessSelectedPackage();
                 SetPropertyInApplicationPreferences(nameof(PackageFilePath), value);
                 OnPropertyChanged(nameof(PackageFilePath));
             }
@@ -325,24 +314,51 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _packageUploadTooltip, value);
     }
 
-    private string _successMessage = string.Empty;
-    public string SuccessMessage
+    private bool _isLoadingBranchesAndFlights = false;
+    public bool IsLoadingBranchesAndFlights
     {
-        get => _successMessage;
-        set => SetProperty(ref _successMessage, value);
+        get => _isLoadingBranchesAndFlights;
+        set => SetProperty(ref _isLoadingBranchesAndFlights, value);
     }
 
-    private string _errorMessage = string.Empty;
-    public string ErrorMessage
+    private bool _isLoadingMarkets = false;
+    public bool IsLoadingMarkets
     {
-        get => _errorMessage;
-        set => SetProperty(ref _errorMessage, value);
+        get => _isLoadingMarkets;
+        set => SetProperty(ref _isLoadingMarkets, value);
+    }
+
+    private string _packageErrorMessage = string.Empty;
+    public string PackageErrorMessage
+    {
+        get => _packageErrorMessage;
+        set => SetProperty(ref _packageErrorMessage, value);
+    }
+
+    private string _branchOrFlightErrorMessage = string.Empty;
+    public string BranchOrFlightErrorMessage
+    {
+        get => _branchOrFlightErrorMessage;
+        set => SetProperty(ref _branchOrFlightErrorMessage, value);
+    }
+
+    private string _marketGroupErrorMessage = string.Empty;
+    public string MarketGroupErrorMessage
+    {
+        get => _marketGroupErrorMessage;
+        set => SetProperty(ref _marketGroupErrorMessage, value);
+    }
+
+    private BitmapImage? _packagePreviewImage = null;
+    public BitmapImage? PackagePreviewImage
+    {
+        get => _packagePreviewImage;
+        set => SetProperty(ref _packagePreviewImage, value);
     }
 
     public ICommand UploadPackageCommand { get; }
     public ICommand BrowseForPackageCommand { get; }
     public ICommand FileDroppedCommand { get; }
-    public ICommand ResetPackageCommand { get; }
     public ICommand CancelUploadCommand { get; }
     public ICommand CancelButtonCommand { get; }
 
@@ -392,7 +408,6 @@ public partial class PackageUploadViewModel : BaseViewModel
         UploadPackageCommand = new RelayCommand(UploadPackageProcessAsync, () => IsUploadReady());
         BrowseForPackageCommand = new RelayCommand(BrowseForPackage);
         FileDroppedCommand = new RelayCommand<string>(ProcessDroppedFile);
-        ResetPackageCommand = new RelayCommand(ResetPackage);
         CancelUploadCommand = new RelayCommand(CancelUpload);
         CancelButtonCommand = new RelayCommand(OnCancelButton);
 
@@ -404,18 +419,20 @@ public partial class PackageUploadViewModel : BaseViewModel
         if (string.IsNullOrEmpty(PackageFilePath))
         {
             PackageFilePath = GetPropertyFromApplicationPreferences(nameof(PackageFilePath));
-            if (!string.IsNullOrEmpty(PackageFilePath))
-            {
-                IsDragDropVisible = false;
-                ExtractPackageInformation(PackageFilePath);
-                UpdateMarketGroups();
-            }
+        }
+        else
+        {
+            ProcessSelectedPackage();
         }
     }
 
     private bool IsUploadReady()
     {
-        return HasValidPackage && _gameProduct != null && !string.IsNullOrEmpty(MarketGroupName);
+        return HasValidPackage &&
+            _gameProduct != null &&
+            !string.IsNullOrEmpty(MarketGroupName) &&
+            !IsLoadingBranchesAndFlights &&
+            !IsLoadingMarkets;
     }
 
     private void CheckCanExecuteUploadCommand()
@@ -460,14 +477,6 @@ public partial class PackageUploadViewModel : BaseViewModel
         IsProgressVisible = false;
         ErrorMessage = string.Empty;
         SuccessMessage = string.Empty;
-
-        if(_uploadingProgressPercentageProvider.UploadingCancelled)
-        {
-            _uploadingProgressPercentageProvider.UploadingCancelled = false;
-            IsUploadInProgress = false;
-            IsProgressVisible = false;
-            CancelUpload();
-        }
     }
 
     private void BrowseForPackage()
@@ -488,7 +497,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error selecting file: {ex.Message}";
+            PackageErrorMessage = $"Error selecting file: {ex.Message}";
         }
     }
 
@@ -496,7 +505,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     {
         if (string.IsNullOrEmpty(filePath))
         {
-            ErrorMessage = "Invalid file path.";
+            PackageErrorMessage = "Invalid file path.";
             return;
         }
 
@@ -504,17 +513,18 @@ public partial class PackageUploadViewModel : BaseViewModel
         PackageFilePath = filePath;
     }
 
-    private void ProcessSelectedPackage(string filePath)
+    private void ProcessSelectedPackage()
     {
-        HasValidPackage = false;
+        // Reset package state
+        ResetPackage();
 
-        if (!File.Exists(filePath))
+        if (!File.Exists(PackageFilePath))
         {
             return;
         }
         
         // Check file extension
-        string extension = Path.GetExtension(filePath).ToLowerInvariant();
+        string extension = Path.GetExtension(PackageFilePath).ToLowerInvariant();
         if (!(extension == ".xvc" || extension == ".msixvc"))
         {
             return;
@@ -523,7 +533,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         try
         {            
             // Extract package information
-            ExtractPackageInformation(filePath);
+            ExtractPackageInformation(PackageFilePath);
 
             // Update UI state
             if (!string.IsNullOrEmpty(BigId))
@@ -535,33 +545,42 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error processing package: {ex.Message}";
+            PackageErrorMessage = $"Error processing package: {ex.Message}";
         }
     }
 
     private void ResetPackage()
     {
-        IsSpinnerRunning = false;
         IsUploadInProgress = false;
-        IsProgressVisible = false;
         BigId = string.Empty;
-        PackageFilePath = string.Empty;
         EkbFilePath = string.Empty;
         SubValFilePath = string.Empty;
         SymbolBundleFilePath = string.Empty;
 
         HasValidPackage = false;
+
+        BranchAndFlightNames = [];
+        MarketGroupNames = [];
+
+        PackageErrorMessage = string.Empty;
+        BranchOrFlightErrorMessage = string.Empty;
+        MarketGroupErrorMessage = string.Empty;
+
+        IsLoadingBranchesAndFlights = false;
+        IsLoadingMarkets = false;
         OnPropertyChanged(nameof(IsDragDropVisible));
-        
-        ErrorMessage = string.Empty;
-        SuccessMessage = string.Empty;
+    }
+
+    public void OnAppearing()
+    {
+        ProcessSelectedPackage();
     }
 
     private void ExtractPackageInformation(string packagePath)
     {
         try
         {
-            Model.XvcFile.GetBuildAndKeyId(packagePath, out Guid buildId, out Guid keyId);
+            XvcFile.GetBuildAndKeyId(packagePath, out Guid buildId, out Guid keyId);
 
             // Get just the filename without extension to build up other file paths
             string? baseFolder = Path.GetDirectoryName(packagePath);
@@ -576,7 +595,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             SubValFilePath = Path.Combine(baseFolder, $"Validator_{fileName}.xml");
 
             // Parse the SubVal file for any remaining needed fields. Use the buildId to verify it's the right Validator log.
-            ExtractIdInformationFromValidatorLog(buildId, out string? titleId, out string storeId);
+            ExtractIdInformationFromValidatorLog(buildId, out string? titleId, out string storeId, out string logoFilename);
 
             var symbolBundleFilePath = string.Empty;
             if (!string.IsNullOrEmpty(titleId))
@@ -603,7 +622,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             }
             else
             {
-                ErrorMessage = $"Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package.";
+                PackageErrorMessage = $"Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package.";
             }
 
             // Update package preview information
@@ -620,14 +639,34 @@ public partial class PackageUploadViewModel : BaseViewModel
             {
                 PackageSize = string.Format("{0:0.##} MB", fileInfo.Length / bytesInMB);
             }
+
+            if (!string.IsNullOrEmpty(logoFilename))
+            {
+                XvcFile.ExtractFile(packagePath, logoFilename, out byte[]? fileContents);
+                PackagePreviewImage = fileContents != null ? LoadBitmapImage(fileContents) : null;
+            }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error extracting package information: {ex.Message}";
+            PackageErrorMessage = $"Error extracting package information: {ex.Message}";
         }
     }
 
-    private void ExtractIdInformationFromValidatorLog(Guid expectedBuildId, out string? titleId, out string storeId)
+    private static BitmapImage? LoadBitmapImage(byte[] fileContents)
+    {
+        BitmapImage bitmapImage = new();
+        using (MemoryStream stream = new(fileContents))
+        {
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = stream;
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.EndInit();
+            bitmapImage.Freeze();
+        }
+        return bitmapImage;
+    }
+
+    private void ExtractIdInformationFromValidatorLog(Guid expectedBuildId, out string? titleId, out string storeId, out string logoFilename)
     {
         // Read the XML file and extract the TitleId and StoreId
         if (!File.Exists(SubValFilePath))
@@ -657,6 +696,9 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         node = xmlDoc.SelectSingleNode("//GameConfig/Game/TitleId");
         titleId = node?.InnerText ?? string.Empty;
+
+        node = xmlDoc.SelectSingleNode("//GameConfig/Game/ShellVisuals");
+        logoFilename = node?.Attributes?.GetNamedItem("Square150x150Logo")?.InnerText ?? string.Empty;
     }
 
     private async void GetProductInfoAsync()
@@ -671,7 +713,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             return;
         }
 
-        IsSpinnerRunning = true;
+        IsLoadingBranchesAndFlights = true;
         try
         {
             _gameProduct = await _uploaderService.GetProductByBigIdAsync(BigId, CancellationToken.None);
@@ -702,41 +744,35 @@ public partial class PackageUploadViewModel : BaseViewModel
             OnPropertyChanged(nameof(BranchOrFlightDisplayName));
 
             CheckCanExecuteUploadCommand();
-            ErrorMessage = string.Empty;
         }
         catch (ProductNotFoundException)
         {
-            ErrorMessage = $"Product with BigId '{BigId}' not found. Configure your product at https://partner.microsoft.com/";
+            BranchOrFlightErrorMessage = $"Product with BigId '{BigId}' not found. Configure your product at https://partner.microsoft.com/";
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error getting product information: {ex.Message}";
+            BranchOrFlightErrorMessage = $"Error getting product information: {ex.Message}";
         }
-
-        IsSpinnerRunning = false;
+        finally
+        {
+            IsLoadingBranchesAndFlights = false;
+        }
     }
 
     private async void UploadPackageProcessAsync()
     {
-        //Go to next page...
-        System.Windows.Application.Current.Dispatcher.Invoke(() =>
-        {
-            _windowService.NavigateTo(typeof(PackageUploadingView));
-        });
         // Clear any previous status messages when starting a new upload
         SuccessMessage = string.Empty;
         ErrorMessage = string.Empty;
 
         if (_gameProduct == null || _branchesAndFlights == null || _gamePackageConfiguration == null)
         {
-            ErrorMessage = "Product information not available. Please enter a valid BigId and try again.";
+            PackageErrorMessage = "Product information not available. Please enter a valid BigId and try again.";
             return;
         }
 
         ProgressValue = 0;
-        IsSpinnerRunning = true;
         IsUploadInProgress = true;
-        IsProgressVisible = true;
 
         // We generate an uploader config for debugging or CLI use
         GenerateUploaderConfig();
@@ -746,9 +782,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         if (branchOrFlight == null)
         {
-            ErrorMessage = $"Branch '{BranchOrFlightDisplayName}' not found.";
-            IsSpinnerRunning = false;
-            IsProgressVisible = false;
+            PackageErrorMessage = $"Branch '{BranchOrFlightDisplayName}' not found.";
             IsUploadInProgress = false;
             return;
         }
@@ -772,7 +806,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                 branchOrFlight,
                 marketGroupPackage,
                 PackageFilePath,
-                new GameAssets { EkbFilePath = EkbFilePath, SubValFilePath = SubValFilePath, SymbolsFilePath = SymbolBundleFilePath },
+                new ClientApi.Models.GameAssets { EkbFilePath = EkbFilePath, SubValFilePath = SubValFilePath, SymbolsFilePath = SymbolBundleFilePath },
                 minutesToWaitForProcessing: 60,
                 deltaUpload: true,
                 isXvc: true,
@@ -781,7 +815,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
             ProgressValue = 100;
             timer.Stop();
-            SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
+            // SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
             
             // After successful upload, navigate back to main page
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -791,17 +825,15 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (OperationCanceledException)
         {
-            ErrorMessage = "Upload cancelled.";
+            PackageErrorMessage = "Upload cancelled.";
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error uploading package: {ex.Message}";
+            PackageErrorMessage = $"Error uploading package: {ex.Message}";
         }
         finally
         {
-            IsSpinnerRunning = false;
             IsUploadInProgress = false;
-            IsProgressVisible = false;
             _uploadCancellationTokenSource = null;
         }
     }
