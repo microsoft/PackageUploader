@@ -25,7 +25,7 @@ public partial class App : System.Windows.Application
             .ConfigureServices((context, services) =>
             {
                 // Register services
-                services.AddPackageUploaderService();
+                services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.CacheableBrowser);
                 
                 // Register providers
                 services.AddSingleton<PackageModelProvider>();
