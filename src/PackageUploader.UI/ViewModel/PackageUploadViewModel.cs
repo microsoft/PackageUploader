@@ -452,33 +452,6 @@ public partial class PackageUploadViewModel : BaseViewModel
         CheckCanExecuteUploadCommand();
     }
 
-    public void OnAppearing()
-    {
-        // Update UI based on any changed package data
-        if (!string.IsNullOrEmpty(PackageFilePath) && File.Exists(PackageFilePath))
-        {
-            ExtractPackageInformation(PackageFilePath);
-
-            if (!string.IsNullOrEmpty(BigId))
-            {
-                HasValidPackage = true;
-            }
-
-            // Refresh all bound properties from the shared model
-            OnPropertyChanged(nameof(BigId));
-            OnPropertyChanged(nameof(PackageFilePath));
-            OnPropertyChanged(nameof(EkbFilePath));
-            OnPropertyChanged(nameof(SubValFilePath));
-            OnPropertyChanged(nameof(SymbolBundleFilePath));
-            OnPropertyChanged(nameof(IsDragDropVisible));
-        }
-
-        // Clear any previous messages
-        IsProgressVisible = false;
-        ErrorMessage = string.Empty;
-        SuccessMessage = string.Empty;
-    }
-
     private void BrowseForPackage()
     {
         try
@@ -761,9 +734,10 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private async void UploadPackageProcessAsync()
     {
-        // Clear any previous status messages when starting a new upload
-        SuccessMessage = string.Empty;
-        ErrorMessage = string.Empty;
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            _windowService.NavigateTo(typeof(PackageUploadingView));
+        });
 
         if (_gameProduct == null || _branchesAndFlights == null || _gamePackageConfiguration == null)
         {
