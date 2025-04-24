@@ -102,6 +102,8 @@ internal class XfusApiController
 
     internal async Task<UploadProgress> InitializeAssetAsync(Guid assetId, FileInfo uploadFile, bool deltaUpload, CancellationToken ct)
     {
+        _logger.LogInformation("Calling XFUS with AssetId: {assetId}", assetId);
+
         var properties = new UploadProperties
         {
             FileProperties = new FileProperties
@@ -115,12 +117,12 @@ internal class XfusApiController
         using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
 
         var response = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
+        
         if (!response.IsSuccessStatusCode)
         {
             throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
         }
 
-        _logger.LogInformation("XFUS AssetId: {assetId}", assetId);
         var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
         return uploadProgress;
     }
