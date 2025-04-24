@@ -779,14 +779,14 @@ public partial class PackageUploadViewModel : BaseViewModel
                 progress,
                 ct);
 
-            ProgressValue = 1;
+            ProgressValue = 100;
             timer.Stop();
             SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
             
             // After successful upload, navigate back to main page
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                _windowService.NavigateTo(typeof(MainPageView));
+                _windowService.NavigateTo(typeof(UploadingFinishedView));
             });
         }
         catch (OperationCanceledException)

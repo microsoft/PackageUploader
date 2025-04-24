@@ -41,6 +41,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<PackagingProgressViewModel>();
                 services.AddSingleton<PackagingFinishedViewModel>();
                 services.AddSingleton<PackageUploadingViewModel>();
+                services.AddSingleton<UploadingFinishedViewModel>();
 
                 // Register Views
                 services.AddTransient<MainPageView>();
@@ -49,6 +50,7 @@ public partial class App : System.Windows.Application
                 services.AddTransient<PackagingProgressView>();
                 services.AddTransient<PackagingFinishedView>();
                 services.AddTransient<PackageUploadingView>();
+                services.AddTransient<UploadingFinishedView>();
 
                 // Register the main window
                 services.AddSingleton<MainWindow>();
