@@ -94,7 +94,7 @@ namespace PackageUploader.UI.ViewModel
 
         public void OnViewLogs()
         {
-            string logPath = _packageModelProvider.PackagingLogFilepath;
+            string logPath = App.LogFilePath;
             Process.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
 

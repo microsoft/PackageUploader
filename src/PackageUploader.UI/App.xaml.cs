@@ -19,6 +19,10 @@ public partial class App : System.Windows.Application
 {
     private readonly IHost _host;
 
+    public static string LogFilePath = System.IO.Path.Combine(
+                        System.IO.Path.GetTempPath(),
+                        $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");
+
     public App()
     {
         _host = Host.CreateDefaultBuilder()
@@ -75,9 +79,10 @@ public partial class App : System.Windows.Application
                     // Configure formatter options if needed
                 }, fileOptions => {
                     // Set custom log file path
-                    fileOptions.Path = System.IO.Path.Combine(
+                    /*fileOptions.Path = System.IO.Path.Combine(
                         System.IO.Path.GetTempPath(), 
-                        $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");
+                        $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");*/
+                    fileOptions.Path = LogFilePath;
                 });
             })
             .Build();
@@ -93,6 +98,7 @@ public partial class App : System.Windows.Application
         // Navigate to the initial view
         var windowService = _host.Services.GetRequiredService<Utility.IWindowService>();
         windowService.NavigateTo(typeof(MainPageView));
+
     }
 
     protected override void OnExit(ExitEventArgs e)
