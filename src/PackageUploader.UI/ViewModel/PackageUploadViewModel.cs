@@ -234,6 +234,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                 ProcessSelectedPackage();
                 SetPropertyInApplicationPreferences(nameof(PackageFilePath), value);
                 OnPropertyChanged(nameof(PackageFilePath));
+                OnPropertyChanged(nameof(PackageName));
             }
         }
     }
@@ -287,11 +288,18 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _packageId, value);
     }
 
-    private string _packageSize = "Unknown";
+    //private string _packageSize = "Unknown";
     public string PackageSize
     {
-        get => _packageSize;
-        set => SetProperty(ref _packageSize, value);
+        get => Package.PackageSize;//_packageSize;
+        set
+        { //=> SetProperty(ref _packageSize, value);
+            if (Package.PackageSize != value)
+            {
+                Package.PackageSize = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     private bool _isPackageUploadEnabled = true;
@@ -349,11 +357,18 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _marketGroupErrorMessage, value);
     }
 
-    private BitmapImage? _packagePreviewImage = null;
+    //private BitmapImage? _packagePreviewImage = null;
     public BitmapImage? PackagePreviewImage
     {
-        get => _packagePreviewImage;
-        set => SetProperty(ref _packagePreviewImage, value);
+        get => Package.PackagePreviewImage;//_packagePreviewImage;
+        set
+        { //=> SetProperty(ref _packagePreviewImage, value);
+            if (Package.PackagePreviewImage != value)
+            {
+                Package.PackagePreviewImage = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     public ICommand UploadPackageCommand { get; }
@@ -415,6 +430,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         string priorBranchOrFlight = GetPropertyFromApplicationPreferences(nameof(BranchOrFlightDisplayName));
         _savedMarketGroupMemory = new OneTimeHolder<string>(priorMarketGroup); 
         _savedBranchOrFlightMemory = new OneTimeHolder<String>(priorBranchOrFlight);
+        PackageSize = "Unknown"; // default
 
         if (string.IsNullOrEmpty(PackageFilePath))
         {

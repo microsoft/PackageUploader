@@ -84,7 +84,7 @@ namespace PackageUploader.UI.ViewModel
 
             FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
             PackageFileName = packageInfo.Name;
-            PackageSize = TranslateFileSize(packageInfo.Length);
+            PackageSize = TranslateFileSize(packageInfo.Length); // Need someone to get the ACTUAL size.
         }
 
         public void OnAppearing()

@@ -19,7 +19,6 @@ namespace PackageUploader.UI.ViewModel
     {
         private readonly IWindowService _windowService;
         private readonly PackageModelProvider _packageModelProvider;
-        private readonly PartialGameConfigModel _gameConfigModel;
         private readonly PathConfigurationProvider _pathConfigurationService;
         private readonly ILogger<PackagingFinishedViewModel> _logger;
 
@@ -74,12 +73,12 @@ namespace PackageUploader.UI.ViewModel
             ViewInPartnerCenterCommand = new RelayCommand(OnViewInPartnerCenter);
 
             // Golden Path: Packaging->Uploading, Need to figure it out for XVC->Uploading
-            _gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
-            PackagePreviewImage = LoadBitmapImage(_gameConfigModel.ShellVisuals.Square150x150Logo);
-            VersionNum = _gameConfigModel.Identity.Version;
-            StoreId = _gameConfigModel.StoreId;
+            //_gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
+            PackagePreviewImage = _packageModelProvider.Package.PackagePreviewImage; //LoadBitmapImage(_gameConfigModel.ShellVisuals.Square150x150Logo);
+            VersionNum = _packageModelProvider.Package.Version; //_gameConfigModel.Identity.Version;
+            StoreId = _packageModelProvider.Package.BigId; //_gameConfigModel.StoreId;
 
-            FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
+            FileInfo packageInfo = new FileInfo(_packageModelProvider.Package.PackageFilePath);
             PackageFileName = packageInfo.Name;
             PackageSize = TranslateFileSize(packageInfo.Length);
         }
