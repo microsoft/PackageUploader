@@ -152,33 +152,46 @@ public class PackageUploaderService : IPackageUploaderService
             throw new FileNotFoundException("Package file not found.", packageFile.FullName);
         }
 
-        var xvcTargetPlatform = isXvc ? ReadXvcTargetPlatformFromMetaData(packageFile) : XvcTargetPlatform.NotSpecified;
-
-        _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
-        var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, isXvc, xvcTargetPlatform, ct).ConfigureAwait(false);
-
-        if (gameAssets is not null)
+        try
         {
-            await UploadAssetAsync(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
+            var xvcTargetPlatform = isXvc ? ReadXvcTargetPlatformFromMetaData(packageFile) : XvcTargetPlatform.NotSpecified;
+
+            _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
+            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, isXvc, xvcTargetPlatform, ct).ConfigureAwait(false);
+
+            if (gameAssets is not null)
+            {
+                await UploadAssetAsync(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
+            }
+
+            _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
+            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, deltaUpload, ct).ConfigureAwait(false);
+            _logger.LogDebug("Package file '{fileName}' uploaded.", packageFile.Name);
+
+            package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
+            _logger.LogInformation("Package is uploaded and is in processing.");
+
+            package = await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
+
+            if (gameAssets is not null)
+            {
+                var uploadTasks = new List<Task>
+                { 
+                    UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct),
+                    UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct),
+                    UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct),
+                };
+
+                await Task.WhenAll(uploadTasks).ConfigureAwait(false);
+            }
+
+            return package;
         }
-
-        _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
-        await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, deltaUpload, ct).ConfigureAwait(false);
-        _logger.LogDebug("Package file '{fileName}' uploaded.", packageFile.Name);
-
-        package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
-        _logger.LogInformation("Package is uploaded and is in processing.");
-
-        package = await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
-
-        if (gameAssets is not null)
+        catch (Exception ex)
         {
-            await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct).ConfigureAwait(false);
-            await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct).ConfigureAwait(false);
-            await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct).ConfigureAwait(false);
+            _logger.LogError(ex, "An error occurred while uploading the package '{fileName}' to branch '{branchName}' in product '{productId}'.", packageFile.Name, packageBranch.Name, product.ProductId);
+            throw;
         }
-
-        return package;
     }
 
     public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, string packageFileName, CancellationToken ct)
