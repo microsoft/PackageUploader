@@ -3,13 +3,8 @@ using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
@@ -28,24 +23,28 @@ namespace PackageUploader.UI.ViewModel
             get => _packagePreviewImage;
             set => SetProperty(ref _packagePreviewImage, value);
         }
+
         private string _packageFileName = string.Empty;
         public string PackageFileName
         {
             get => _packageFileName;
             set => SetProperty(ref _packageFileName, value);
         }
+
         private string _packageSize = string.Empty;
         public string PackageSize
         {
             get => _packageSize;
             set => SetProperty(ref _packageSize, value);
         }
+
         private string _versionNum = string.Empty;
         public string VersionNum
         {
             get => _versionNum;
             set => SetProperty(ref _versionNum, value);
         }
+
         private string _storeId = string.Empty;
         public string StoreId
         {
@@ -53,6 +52,14 @@ namespace PackageUploader.UI.ViewModel
             set => SetProperty(ref _storeId, value);
         }
 
+        private string _packageType = string.Empty;
+        public string PackageType
+        {
+            get => _packageType;
+            set => SetProperty(ref _packageType, value);
+        }
+
+        public ICommand HomeCommand { get; }
         public ICommand CloseCommand { get; }
         public ICommand ViewLogsCommand { get; }
         public ICommand ViewInPartnerCenterCommand { get; }
@@ -69,30 +76,37 @@ namespace PackageUploader.UI.ViewModel
             _logger = logger;
             
             CloseCommand = new RelayCommand(OnClose);
+            HomeCommand = new RelayCommand(OnHome);
             ViewLogsCommand = new RelayCommand(OnViewLogs);
             ViewInPartnerCenterCommand = new RelayCommand(OnViewInPartnerCenter);
+        }
 
-            // Golden Path: Packaging->Uploading, Need to figure it out for XVC->Uploading
-            //_gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
-            PackagePreviewImage = _packageModelProvider.Package.PackagePreviewImage; //LoadBitmapImage(_gameConfigModel.ShellVisuals.Square150x150Logo);
-            VersionNum = _packageModelProvider.Package.Version; //_gameConfigModel.Identity.Version;
-            StoreId = _packageModelProvider.Package.BigId; //_gameConfigModel.StoreId;
+        public void OnAppearing()
+        {
+            PackagePreviewImage = _packageModelProvider.Package.PackagePreviewImage;
+            VersionNum = _packageModelProvider.Package.Version;
+            StoreId = _packageModelProvider.Package.BigId;
 
             FileInfo packageInfo = new FileInfo(_packageModelProvider.Package.PackageFilePath);
             PackageFileName = packageInfo.Name;
             PackageSize = TranslateFileSize(packageInfo.Length);
+            PackageType = _packageModelProvider.Package.PackageType;
         }
 
-        public void OnClose()
+        public static void OnClose()
         {
             System.Windows.Application.Current.Shutdown();
-            /*System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
-                _windowService.NavigateTo(typeof(MainPageView));
-            });*/
         }
 
-        public void OnViewLogs()
+        public void OnHome()
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+           {
+               _windowService.NavigateTo(typeof(MainPageView));
+           });
+        }
+
+        public static void OnViewLogs()
         {
             string logPath = App.LogFilePath;
             Process.Start("explorer.exe", $"/select, \"{logPath}\"");
@@ -100,6 +114,9 @@ namespace PackageUploader.UI.ViewModel
 
         public void OnViewInPartnerCenter()
         {
+            string branchId = _packageModelProvider.Package.BranchId;
+            string partnerCenterUrl = $"https://partner.microsoft.com/en-us/dashboard/products/{StoreId}/packages/{branchId}";
+            Process.Start(new ProcessStartInfo(partnerCenterUrl) { UseShellExecute = true });
         }
 
         private static string TranslateFileSize(long size)
@@ -120,16 +137,6 @@ namespace PackageUploader.UI.ViewModel
             {
                 return $"{size} B";
             }
-        }
-
-        private static BitmapImage LoadBitmapImage(string imagePath)
-        {
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.CacheOption = BitmapCacheOption.OnLoad;
-            image.UriSource = new Uri(imagePath);
-            image.EndInit();
-            return image;
         }
     }
 }

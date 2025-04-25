@@ -187,7 +187,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
     }
 
-    public Model.PackageModel Package => _packageModelService.Package;
+    public PackageModel Package => _packageModelService.Package;
     
     // Package properties accessed from the shared service
     public string BigId 
@@ -288,15 +288,27 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _packageId, value);
     }
 
-    //private string _packageSize = "Unknown";
     public string PackageSize
     {
-        get => Package.PackageSize;//_packageSize;
+        get => Package.PackageSize;
         set
-        { //=> SetProperty(ref _packageSize, value);
+        {
             if (Package.PackageSize != value)
             {
                 Package.PackageSize = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string PackageType
+    {
+        get => Package.PackageType;
+        set
+        {
+            if (Package.PackageType != value)
+            {
+                Package.PackageType = value;
                 OnPropertyChanged();
             }
         }
@@ -357,12 +369,11 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _marketGroupErrorMessage, value);
     }
 
-    //private BitmapImage? _packagePreviewImage = null;
     public BitmapImage? PackagePreviewImage
     {
-        get => Package.PackagePreviewImage;//_packagePreviewImage;
+        get => Package.PackagePreviewImage;
         set
-        { //=> SetProperty(ref _packagePreviewImage, value);
+        {
             if (Package.PackagePreviewImage != value)
             {
                 Package.PackagePreviewImage = value;
@@ -584,7 +595,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             SubValFilePath = Path.Combine(baseFolder, $"Validator_{fileName}.xml");
 
             // Parse the SubVal file for any remaining needed fields. Use the buildId to verify it's the right Validator log.
-            ExtractIdInformationFromValidatorLog(buildId, out string? titleId, out string storeId, out string logoFilename);
+            ExtractIdInformationFromValidatorLog(buildId, out string? type, out string? titleId, out string storeId, out string logoFilename);
 
             var symbolBundleFilePath = string.Empty;
             if (!string.IsNullOrEmpty(titleId))
@@ -629,6 +640,8 @@ public partial class PackageUploadViewModel : BaseViewModel
                 PackageSize = string.Format("{0:0.##} MB", fileInfo.Length / bytesInMB);
             }
 
+            PackageType = type == "MSIXVC" ? "PC" : "Console";
+
             if (!string.IsNullOrEmpty(logoFilename))
             {
                 XvcFile.ExtractFile(packagePath, logoFilename, out byte[]? fileContents);
@@ -655,7 +668,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         return bitmapImage;
     }
 
-    private void ExtractIdInformationFromValidatorLog(Guid expectedBuildId, out string? titleId, out string storeId, out string logoFilename)
+    private void ExtractIdInformationFromValidatorLog(Guid expectedBuildId, out string? type, out string? titleId, out string storeId, out string logoFilename)
     {
         // Read the XML file and extract the TitleId and StoreId
         if (!File.Exists(SubValFilePath))
@@ -679,6 +692,9 @@ public partial class PackageUploadViewModel : BaseViewModel
                 throw new Exception($"BuildId mismatch in the Submission Validator log file. Expected: {expectedBuildId}, Found: {buildId}");
             }
         }
+
+        node = xmlDoc.SelectSingleNode("//project/Type");
+        type = node?.InnerText ?? string.Empty;
 
         node = xmlDoc.SelectSingleNode("//GameConfig/Game/StoreId");
         storeId = node?.InnerText ?? string.Empty;
@@ -776,6 +792,8 @@ public partial class PackageUploadViewModel : BaseViewModel
             IsUploadInProgress = false;
             return;
         }
+
+        Package.BranchId = branchOrFlight.CurrentDraftInstanceId;
 
         var timer = new Stopwatch();
         timer.Start();

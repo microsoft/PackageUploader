@@ -149,17 +149,25 @@
                                Foreground="White"
                                TextWrapping="Wrap"
                                Margin="0,0,0,10"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0"
-                               Text="Game path"
-                               Foreground="White"
-                               HorizontalAlignment="Left"
-                               Margin="0,0,0,5"/>
-                        <TextBox Grid.Row="3" Grid.Column="0" 
-                             x:Name="GamePathTextBox"
-                             Text="{Binding GameDataPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             Foreground="#D2D2D3"
-                             Background="#323538"
-                             Margin="0,0,0,10">
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="Game path"
+                                   Foreground="White"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,5"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="Required"
+                                   Foreground="{StaticResource Gray300Brush}"
+                                   HorizontalAlignment="Right"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Grid.Row="3"
+                                 Grid.Column="0" 
+                                 x:Name="GamePathTextBox"
+                                 Text="{Binding GameDataPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Foreground="#D2D2D3"
+                                 Background="#323538"
+                                 Margin="0,0,0,10">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Template">
@@ -228,6 +236,12 @@
                                    Foreground="White"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
+                            <TextBlock Grid.Row="0"
+                                       Grid.Column="0"
+                                       Text="Optional"
+                                       Foreground="{StaticResource Gray300Brush}"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,0,10,5"/>
                             <TextBox Grid.Row="1" Grid.Column="0"
                                  x:Name="MappingDataTextBox"
                                  Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -287,6 +301,12 @@
                                        HorizontalAlignment="Left"
                                        Margin="0,0,0,5"
                                        Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="0"
+                                       Text="Optional"
+                                       Foreground="{StaticResource Gray300Brush}"
+                                       HorizontalAlignment="Right"
+                                       Margin="0,0,10,5"/>
                             <TextBox Grid.Row="4"
                                      Grid.Column="0"
                                      x:Name="SubValPathTextBox"
@@ -392,6 +412,12 @@
                                 Foreground="White"
                                 HorizontalAlignment="Left"
                                 Margin="0,0,0,5"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Text="Optional"
+                                   Foreground="{StaticResource Gray300Brush}"
+                                   HorizontalAlignment="Right"
+                                   Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3" Grid.Column="0"
                                 x:Name="PackagePathTextBox"
                                 Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -453,14 +479,11 @@
                     <Border BorderBrush="#6B7584"
                             BorderThickness="1"
                             CornerRadius="6"
-                            Height="89"
                             Padding="6"
                             Visibility="{Binding HasValidGameConfig, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition Height="10"/>
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
@@ -470,31 +493,65 @@
                             <!-- Image placeholder -->
                             <Image Grid.Row="0"
                                    Grid.Column="0"
-                                   Grid.RowSpan="4"
+                                   Grid.RowSpan="3"
                                    Source="{Binding PackagePreviewImage}"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    Height="65"
                                    Width="65"
                                    Margin="0,0,10,0"/>
-                            <TextBlock Grid.Row="0"
-                                       Grid.Column="1"
-                                       HorizontalAlignment="Left"
-                                       Text="{Binding PackageId}" 
-                                       Foreground="White"
-                                       TextWrapping="Wrap"/>
-                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock Text="ID: "
-                                       Foreground="White"/>
-                                <TextBlock Text="{Binding BigId}"
-                                       Foreground="White"/>
-                            </StackPanel>
-                            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock Text="Size est: " 
-                                       Foreground="White"/>
-                                <TextBlock Text="{Binding PackageSize}" 
-                                       Foreground="White"/>
-                            </StackPanel>
+                            <Grid Grid.Row="0"
+                                  Grid.Column="1"
+                                  Margin="0,0,0,10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0"
+                                           HorizontalAlignment="Left"
+                                           Text="Package ID" 
+                                           Foreground="{StaticResource Gray300Brush}"/>
+                                <TextBlock Grid.Row="1"
+                                           HorizontalAlignment="Left"
+                                           Text="{Binding PackageId}" 
+                                           Foreground="White"
+                                           TextWrapping="Wrap"/>
+                            </Grid>
+                            <Grid Grid.Row="1" Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="33*" />
+                                    <ColumnDefinition Width="33*" />
+                                    <ColumnDefinition Width="33*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="0"
+                                           Text="StoreId: "
+                                           Foreground="{StaticResource Gray300Brush}"/>
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           Text="{Binding BigId}"
+                                           Foreground="White"/>
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="1"
+                                           Text="Size estimate" 
+                                           Foreground="{StaticResource Gray300Brush}"/>
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="1"
+                                           Text="{Binding PackageSize}" 
+                                           Foreground="White"/>
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="2"
+                                           Text="Family" 
+                                           Foreground="{StaticResource Gray300Brush}"/>
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="2"
+                                           Text="{Binding PackageType}" 
+                                           Foreground="White"/>
+                            </Grid>
                         </Grid>
                     </Border>
                 </StackPanel>
