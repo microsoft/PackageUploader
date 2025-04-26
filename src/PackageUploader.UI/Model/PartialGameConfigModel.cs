@@ -122,6 +122,29 @@ namespace PackageUploader.UI.Model
                 }
             }
         }
+
+        public string GetDeviceFamily()
+        {
+            string targetDeviceFamily = string.Empty;
+            foreach (var exe in Executables)
+            {
+                if (string.IsNullOrEmpty(targetDeviceFamily))
+                {
+                    targetDeviceFamily = exe.TargetDeviceFamily;
+                }
+                else if (!string.IsNullOrEmpty(exe.TargetDeviceFamily) && targetDeviceFamily != exe.TargetDeviceFamily)
+                {
+                    throw new Exception("The MicrosoftGame.config has multiple target device families");
+                }
+            }
+
+            if (string.IsNullOrEmpty(targetDeviceFamily))
+            {
+                throw new Exception("The MicrosoftGame.config does not have a target device family");
+            }
+
+            return targetDeviceFamily == "PC" ? "PC" : "Console";
+        }
     }
 
     public class Identity

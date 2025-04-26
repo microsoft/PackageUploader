@@ -13,5 +13,7 @@ public partial class UploadingFinishedView : System.Windows.Controls.UserControl
     {
         InitializeComponent();
         DataContext = uploadingFinishedViewModel;
+
+        this.Loaded += (s, e) => uploadingFinishedViewModel.OnAppearing();
     }
 }

@@ -16,5 +16,7 @@ public class PackageModel
     public string SymbolBundleFilePath { get; internal set; } = string.Empty;
     public string GameConfigFilePath { get; set; } = string.Empty;
     public string PackageSize { get; set; } = string.Empty;
+    public string PackageType { get; set; } = string.Empty;
     public BitmapImage? PackagePreviewImage { get; set; } = null;
+    public string BranchId { get; internal set; }
 }

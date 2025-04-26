@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PackageUploader.UI.ViewModel
 {
@@ -15,11 +14,12 @@ namespace PackageUploader.UI.ViewModel
     {
         private readonly IWindowService _windowService;
         private readonly PackageModelProvider _packageModelProvider;
-        private readonly PartialGameConfigModel _gameConfigModel;
         private readonly PathConfigurationProvider _pathConfigurationService;
         private readonly ILogger<PackagingFinishedViewModel> _logger;
 
         private readonly string _wdAppPath = string.Empty;
+
+        private PartialGameConfigModel _gameConfigModel;
 
         private BitmapImage? _packagePreviewImage = null;
         public BitmapImage? PackagePreviewImage
@@ -52,6 +52,13 @@ namespace PackageUploader.UI.ViewModel
             set => SetProperty(ref _storeId, value);
         }
 
+        private string _packageType = string.Empty;
+        public string PackageType
+        {
+            get => _packageType;
+            set => SetProperty(ref _packageType, value);
+        }
+
         private Process? _installGameProcess = null;
         private bool _isInstallingGame = false;
 
@@ -68,11 +75,6 @@ namespace PackageUploader.UI.ViewModel
             _pathConfigurationService = pathConfigurationService;
             _logger = logger;
 
-            _gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
-            PackagePreviewImage = LoadBitmapImage(_gameConfigModel.ShellVisuals.Square150x150Logo);
-            VersionNum = _gameConfigModel.Identity.Version;
-            StoreId = _gameConfigModel.StoreId;
-
             _wdAppPath = Path.GetDirectoryName(_pathConfigurationService.MakePkgPath) ?? string.Empty;
             _wdAppPath = Path.Combine(_wdAppPath, "WdApp.exe");
 
@@ -82,13 +84,17 @@ namespace PackageUploader.UI.ViewModel
             ConfigureUploadCommand = new RelayCommand(ConfigureUpload);
             ViewLogsCommand = new RelayCommand(ViewLogs);
 
-            FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
-            PackageFileName = packageInfo.Name;
-            PackageSize = TranslateFileSize(packageInfo.Length); // Need someone to get the ACTUAL size.
+            _gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
         }
 
         public void OnAppearing()
         {
+            _gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
+            PackagePreviewImage = LoadBitmapImage(_gameConfigModel.ShellVisuals.Square150x150Logo);
+            PackageType = _gameConfigModel.GetDeviceFamily();
+            VersionNum = _gameConfigModel.Identity.Version;
+            StoreId = _gameConfigModel.StoreId;
+
             FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
             PackageFileName = packageInfo.Name;
             PackageSize = TranslateFileSize(packageInfo.Length);

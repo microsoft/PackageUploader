@@ -75,8 +75,9 @@
                 </StackPanel>
                 <Grid Margin="0, 10, 0, 0" Grid.Row="1" Grid.Column="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition />
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0"
                                 Orientation="Vertical"
@@ -92,6 +93,12 @@
                         <TextBlock Text="Size" 
                                    Foreground="{StaticResource Gray300Brush}"/>
                         <TextBlock Text="{Binding PackageSize}" 
+                                   Foreground="White"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
+                        <TextBlock Text="Family" 
+                                   Foreground="{StaticResource Gray300Brush}"/>
+                        <TextBlock Text="{Binding PackageType}" 
                                    Foreground="White"/>
                     </StackPanel>
                 </Grid>
@@ -116,6 +123,12 @@
                     Command="{Binding CloseCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 10, 20"
+                    Width="150"
+                    Height="30"/>
+            <Button Content="Back to Home"
+                    Command="{Binding HomeCommand}"
+                    IsEnabled="True"
+                    Margin="0, 0, 20, 20"
                     Width="150"
                     Height="30"/>
         </StackPanel>

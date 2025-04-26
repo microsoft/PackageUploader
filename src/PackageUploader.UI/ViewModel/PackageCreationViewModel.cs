@@ -134,6 +134,19 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _subValPath, value);
     }
 
+    public string PackageType
+    {
+        get => Package.PackageType;
+        set
+        {
+            if (Package.PackageType != value)
+            {
+                Package.PackageType = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public string PackageSize
     {
         get => Package.PackageSize;
@@ -900,6 +913,17 @@ public partial class PackageCreationViewModel : BaseViewModel
         PackageId = gameConfig.Identity.Name;
         BigId = gameConfig.StoreId;
         PackagePreviewImage = LoadBitmapImage(gameConfig.ShellVisuals.Square150x150Logo);
+
+        try
+        {
+            PackageType = gameConfig.GetDeviceFamily();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting device family from game config.");
+            GameConfigLoadError = ex.Message;
+            return;
+        }
 
         HasValidGameConfig = true;
     }
