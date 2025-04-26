@@ -67,6 +67,7 @@ namespace PackageUploader.UI.ViewModel
         public ICommand CloseCommand { get; }
         public ICommand ConfigureUploadCommand { get; }
         public ICommand ViewLogsCommand { get; }
+        public ICommand GoHomeCommand { get; }
 
         public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService, ILogger<PackagingFinishedViewModel> logger)
         {
@@ -83,6 +84,7 @@ namespace PackageUploader.UI.ViewModel
             CloseCommand = new RelayCommand(Close);
             ConfigureUploadCommand = new RelayCommand(ConfigureUpload);
             ViewLogsCommand = new RelayCommand(ViewLogs);
+            GoHomeCommand = new RelayCommand(GoHome);
 
             _gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
         }
@@ -183,6 +185,14 @@ namespace PackageUploader.UI.ViewModel
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 _windowService.NavigateTo(typeof(PackageUploadView));
+            });
+        }
+
+        public void GoHome()
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                _windowService.NavigateTo(typeof(MainPageView));
             });
         }
 
