@@ -17,6 +17,7 @@
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
+            <converters:PackageUploadingProgressStageToVisibilityConverter x:Key="PackageUploadingProgressStageToVisibilityConverter" />
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
             <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
             <converters:BooleanAndConverter x:Key="BooleanAndConverter"/>

@@ -1,4 +1,5 @@
-﻿using PackageUploader.UI.Providers;
+﻿using PackageUploader.ClientApi.Models;
+using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using System;
@@ -28,6 +29,17 @@ namespace PackageUploader.UI.ViewModel
                 }
             }
         }
+        public PackageUploadingProgressStages UploadStage {
+            get => _uploadingProgressPercentageProvider.UploadStage;
+            set
+            {
+                if(_uploadingProgressPercentageProvider.UploadStage != value)
+                {
+                    _uploadingProgressPercentageProvider.UploadStage = value;
+                    OnPropertyChanged(nameof(UploadStage));
+                }
+            }
+        }
 
         public ICommand CancelUploadCommand { get; }
 
@@ -46,6 +58,14 @@ namespace PackageUploader.UI.ViewModel
             if (e.PropertyName == nameof(UploadingProgressPercentageProvider.UploadingProgressPercentage))
             {
                 OnPropertyChanged(nameof(PackageUploadPercentage));
+            }
+            else if (e.PropertyName == nameof(UploadingProgressPercentageProvider.UploadStage))
+            {
+                OnPropertyChanged(nameof(UploadStage));
+            }
+            else if (e.PropertyName == nameof(UploadingProgressPercentageProvider.UploadingCancelled))
+            {
+                OnPropertyChanged(nameof(CancelUploadCommand));
             }
         }
 

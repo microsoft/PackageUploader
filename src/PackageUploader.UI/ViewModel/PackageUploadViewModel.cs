@@ -174,14 +174,14 @@ public partial class PackageUploadViewModel : BaseViewModel
     }
 
     //private double _progressValue = 0;
-    public double ProgressValue
+    public PackageUploadingProgressStages ProgressValue
     {
-        get => _uploadingProgressPercentageProvider.UploadingProgressPercentage;
+        get => _uploadingProgressPercentageProvider.UploadStage;
         set
         {
-            if (_uploadingProgressPercentageProvider.UploadingProgressPercentage != (int)value)
+            if (_uploadingProgressPercentageProvider.UploadStage != value)
             {
-                _uploadingProgressPercentageProvider.UploadingProgressPercentage = (int)value;
+                _uploadingProgressPercentageProvider.UploadStage = value;
                 OnPropertyChanged();
             }
         }
@@ -787,8 +787,8 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             var marketGroupPackage = _gamePackageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(MarketGroupName));
 
-            IProgress<double> progress = new Progress<double>(value => { 
-                ProgressValue = (int)(value * 100); 
+            IProgress<PackageUploadingProgressStages> progress = new Progress<PackageUploadingProgressStages>(value => { 
+                ProgressValue = value; 
             });
 
             GamePackage gamePackage = await _uploaderService.UploadGamePackageAsync(
@@ -803,7 +803,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                 progress,
                 ct);
 
-            ProgressValue = 100;
+            ProgressValue = PackageUploadingProgressStages.Done;
             timer.Stop();
             // SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
             
