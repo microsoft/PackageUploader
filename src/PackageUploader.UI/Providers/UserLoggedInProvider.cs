@@ -16,8 +16,11 @@ namespace PackageUploader.UI.Providers
             get => _isLoggedIn;
             set
             {
-                _isLoggedIn = value;
-                OnPropertyChanged();
+                if (_isLoggedIn != value)
+                {
+                    _isLoggedIn = value;
+                    OnPropertyChanged(nameof(UserLoggedIn));
+                }
             }
         }
 
@@ -27,8 +30,11 @@ namespace PackageUploader.UI.Providers
             get => _accessToken;
             set
             {
-                _accessToken = value;
-                OnPropertyChanged();
+                if (_accessToken != value)
+                {
+                    _accessToken = value;
+                    OnPropertyChanged(nameof(AccessToken));
+                }
             }
         }
 
@@ -38,8 +44,11 @@ namespace PackageUploader.UI.Providers
             get => _userName;
             set
             {
-                _userName = value;
-                OnPropertyChanged();
+                if (_userName != value)
+                {
+                    _userName = value;
+                    OnPropertyChanged(nameof(UserName));
+                }
             }
         }
 

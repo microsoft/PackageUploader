@@ -14,6 +14,8 @@ using PackageUploader.UI.View;
 using System.IO;
 using PackageUploader.UI.Model;
 using System.Windows.Media.Imaging;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
+using System.Threading;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -447,10 +449,6 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             PackageFilePath = GetPropertyFromApplicationPreferences(nameof(PackageFilePath));
         }
-        else
-        {
-            ProcessSelectedPackage();
-        }
     }
 
     private bool IsUploadReady()
@@ -573,6 +571,11 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     public void OnAppearing()
     {
+        if (_uploadingProgressPercentageProvider.UploadingCancelled)
+        {
+            _uploadingProgressPercentageProvider.UploadingCancelled = false;
+            CancelUpload();
+        }
         ProcessSelectedPackage();
     }
 

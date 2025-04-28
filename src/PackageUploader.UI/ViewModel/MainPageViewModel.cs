@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.IO;
 using System.Reflection;
 using System.Windows.Input;
@@ -9,11 +8,8 @@ using Microsoft.Win32;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.View;
 using PackageUploader.UI.Utility;
-using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
-using System.Threading;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -21,14 +17,12 @@ public partial class MainPageViewModel : BaseViewModel
 {
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly UserLoggedInProvider _userLoggedInProvider;
-    private readonly IAccessTokenProvider _accessTokenProvider;
+    private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<MainPageViewModel> _logger;
-    private CancellationTokenSource _cancellationTokenSource = new();
 
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
     public ICommand SignInCommand { get; }
-
     public ICommand PackagingLearnMoreURL { get; }
 
     private bool _isMakePkgEnabled = true;
@@ -45,15 +39,15 @@ public partial class MainPageViewModel : BaseViewModel
         set => SetProperty(ref _makePkgUnavailableErrorMessage, value);
     }
 
-    public bool NotLoggedIn
+    public bool IsUserLoggedIn
     {
-        get => !_userLoggedInProvider.UserLoggedIn;
+        get => _userLoggedInProvider.UserLoggedIn;
         set
         {
-            if(_userLoggedInProvider.UserLoggedIn != !value)
+            if (_userLoggedInProvider.UserLoggedIn != value)
             {
-                _userLoggedInProvider.UserLoggedIn = !value;
-                OnPropertyChanged();
+                _userLoggedInProvider.UserLoggedIn = value;
+                OnPropertyChanged(nameof(IsUserLoggedIn));
             }
         }
     }
@@ -72,27 +66,49 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
-    public MainPageViewModel(PathConfigurationProvider pathConfigurationService, IAccessTokenProvider accessTokenProvider, UserLoggedInProvider userLoggedInProvider, IWindowService windowService, ILogger<MainPageViewModel> logger)
+    public MainPageViewModel(
+        PathConfigurationProvider pathConfigurationService, 
+        UserLoggedInProvider userLoggedInProvider, 
+        IAuthenticationService authenticationService,
+        IWindowService windowService, 
+        ILogger<MainPageViewModel> logger)
     {
         _pathConfigurationService = pathConfigurationService;
-        _accessTokenProvider = accessTokenProvider;
         _userLoggedInProvider = userLoggedInProvider;
+        _authenticationService = authenticationService;
         _logger = logger;
+
+        // Subscribe to UserLoggedInProvider changes
+        _userLoggedInProvider.PropertyChanged += UserLoggedInProvider_PropertyChanged;
 
         NavigateToPackageCreationCommand = new RelayCommand(() => 
         {
             windowService.NavigateTo(typeof(PackageCreationView));
         }, () => IsMakePkgEnabled);
         
-        NavigateToPackageUploadCommand = new RelayCommand(() =>
-        {
-            windowService.NavigateTo(typeof(PackageUploadView));
-        });
-        SignInCommand = new RelayCommand(() =>
+        SignInCommand = new RelayCommand(async () =>
         {
             SigninStarted = true;
-            SigninAsync();
+            await _authenticationService.SignInAsync();
+            SigninStarted = false;
+            OnPropertyChanged(nameof(IsUserLoggedIn));
         });
+
+        NavigateToPackageUploadCommand = new RelayCommand(async () =>
+        {
+            if (!IsUserLoggedIn)
+            {
+                SigninStarted = true;
+                await _authenticationService.SignInAsync();
+                SigninStarted = false;
+            }
+
+            if (IsUserLoggedIn)
+            {
+                windowService.NavigateTo(typeof(PackageUploadView));
+            }
+        });
+
         PackagingLearnMoreURL = new RelayCommand<string>((url) =>
         {
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -102,7 +118,7 @@ public partial class MainPageViewModel : BaseViewModel
             });
         });
 
-        NotLoggedIn = true;
+        IsUserLoggedIn = false;
 
         string makePkgPath = ResolveExecutablePath("MakePkg.exe");
 
@@ -130,6 +146,14 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
+    private void UserLoggedInProvider_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(UserLoggedInProvider.UserLoggedIn))
+        {
+            OnPropertyChanged(nameof(IsUserLoggedIn));
+        }
+    }
+
     private static string GetVersion()
     {
         var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
@@ -144,7 +168,7 @@ public partial class MainPageViewModel : BaseViewModel
 
     public void OnAppearing()
     {
-        OnPropertyChanged(nameof(NotLoggedIn));
+        OnPropertyChanged(nameof(IsUserLoggedIn));
     }
 
     private static string ResolveExecutablePath(string exeName)
@@ -218,61 +242,5 @@ public partial class MainPageViewModel : BaseViewModel
             }
         }
         return null;
-    }
-
-    public async void SigninAsync()
-    {
-        try
-        {
-            // Cancel any previous login attempt
-            _cancellationTokenSource.Cancel();
-
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            var loginTask = Task.Run(async () =>
-            {
-                return await _accessTokenProvider.GetTokenAsync(_cancellationTokenSource.Token).ConfigureAwait(false);
-            });
-
-            while (!loginTask.IsCompleted)
-            {
-                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
-
-                await Task.Delay(500); // Check every 500ms
-            }
-
-            var login = await loginTask;
-
-            if (login != null)
-            {
-                UpdateSignInStatus(login.AccessToken);
-            }
-        }
-        catch (Exception)
-        {
-            // Ignore failures
-        }
-    }
-
-    private void UpdateSignInStatus(string accessToken)
-    {
-        _userLoggedInProvider.UserName = string.Empty;
-        _userLoggedInProvider.AccessToken = accessToken;
-        _userLoggedInProvider.UserLoggedIn = true;
-
-        // Try to extract user name from the token
-        var handler = new JwtSecurityTokenHandler();
-
-        if (handler.ReadToken(accessToken) is JwtSecurityToken jsonToken)
-        {
-            var claims = jsonToken.Claims;
-
-            if (claims != null)
-            {
-                _userLoggedInProvider.UserName = claims.FirstOrDefault(c => c.Type == "name")?.Value ?? string.Empty;
-            }
-        }
-
-        OnPropertyChanged(nameof(NotLoggedIn));
     }
 }

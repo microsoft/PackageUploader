@@ -49,13 +49,30 @@
             </StackPanel>
             
             <!-- User Info -->
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
-                <TextBlock x:Name="UserDisplayText" 
-                           Foreground="White" 
-                           FontSize="12" 
-                           VerticalAlignment="Center"
-                           Margin="0,0,10,0"
-                           Visibility="Collapsed"/>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,0,10,0">
+                <Button x:Name="UserSignoutButton" 
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        Click="UserSignoutButton_Click"
+                        Style="{StaticResource UserSignoutButtonStyle}"
+                        Visibility="Collapsed"
+                        Height="32"
+                        ToolTip="Sign Out User">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" 
+                              Fill="{StaticResource Gray200Brush}" 
+                              Width="18" 
+                              Height="18"
+                              Stretch="Uniform"
+                              Margin="0,0,8,0"/>
+                        <TextBlock x:Name="UserDisplayText" 
+                                   Foreground="{StaticResource Gray200Brush}" 
+                                   FontSize="12" 
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
             
             <!-- Window Controls -->

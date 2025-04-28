@@ -31,7 +31,7 @@ namespace PackageUploader.UI.Converters
         {
             if (value is bool boolValue)
             {
-                bool invert = parameter is string param && bool.TryParse(param, out var result) && result;
+                bool invert = IsInverted(parameter);
                 return (boolValue ^ invert) ? Visibility.Visible : Visibility.Collapsed;
             }
             return Visibility.Collapsed;
