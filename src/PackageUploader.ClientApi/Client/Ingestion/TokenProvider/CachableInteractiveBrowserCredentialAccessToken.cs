@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client.Extensions.Msal;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,17 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
 
         public CachableInteractiveBrowserCredentialAccessToken(IOptions<AccessTokenProviderConfig> config, ILogger<CachableInteractiveBrowserCredentialAccessToken> logger) : base(config, logger)
         { }
+
+        public static void ClearCache()
+        {
+            string recordPath = Path.Combine(TokenCacheDir, TokenCacheName);
+
+            // Delete existing record if it exists
+            if (File.Exists(recordPath))
+            {
+                File.Delete(recordPath);
+            }
+        }
 
         public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
         {

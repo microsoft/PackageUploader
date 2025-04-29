@@ -30,6 +30,7 @@ public partial class App : System.Windows.Application
             {
                 // Register services
                 services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.CacheableBrowser);
+                services.AddSingleton<IAuthenticationService, AuthenticationService>();
                 
                 // Register providers
                 services.AddSingleton<PackageModelProvider>();

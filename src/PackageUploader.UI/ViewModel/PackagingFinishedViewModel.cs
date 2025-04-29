@@ -15,6 +15,7 @@ namespace PackageUploader.UI.ViewModel
         private readonly IWindowService _windowService;
         private readonly PackageModelProvider _packageModelProvider;
         private readonly PathConfigurationProvider _pathConfigurationService;
+        private readonly IAuthenticationService _authenticationService;
         private readonly ILogger<PackagingFinishedViewModel> _logger;
 
         private readonly string _wdAppPath = string.Empty;
@@ -59,6 +60,13 @@ namespace PackageUploader.UI.ViewModel
             set => SetProperty(ref _packageType, value);
         }
 
+        private bool _isSigningIn = false;
+        public bool IsSigningIn
+        {
+            get => _isSigningIn;
+            set => SetProperty(ref _isSigningIn, value);
+        }
+
         private Process? _installGameProcess = null;
         private bool _isInstallingGame = false;
 
@@ -69,11 +77,12 @@ namespace PackageUploader.UI.ViewModel
         public ICommand ViewLogsCommand { get; }
         public ICommand GoHomeCommand { get; }
 
-        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService, ILogger<PackagingFinishedViewModel> logger)
+        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService, IAuthenticationService authenticationService, ILogger<PackagingFinishedViewModel> logger)
         {
             _windowService = windowService;
             _packageModelProvider = packageModelProvider;
             _pathConfigurationService = pathConfigurationService;
+            _authenticationService = authenticationService;
             _logger = logger;
 
             _wdAppPath = Path.GetDirectoryName(_pathConfigurationService.MakePkgPath) ?? string.Empty;
@@ -180,8 +189,21 @@ namespace PackageUploader.UI.ViewModel
             System.Windows.Application.Current.Shutdown();
         }
 
-        public void ConfigureUpload()
+        public async void ConfigureUpload()
         {
+            // Ensure signin first
+            if (!_authenticationService.IsUserLoggedIn)
+            {
+                IsSigningIn = true;
+                var success = await _authenticationService.SignInAsync();
+                IsSigningIn = false;
+
+                if (!success)
+                {
+                    return; // Don't continue if sign-in failed
+                }
+            }
+
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 _windowService.NavigateTo(typeof(PackageUploadView));
