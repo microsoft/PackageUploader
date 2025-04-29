@@ -23,6 +23,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     private readonly PackageModelProvider _packageModelService;
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly PackingProgressPercentageProvider _packingProgressPercentageProvider;
+    private readonly ErrorModelProvider _errorModelProvider;
     private readonly IWindowService _windowService;
     private readonly ILogger<PackageCreationViewModel> _logger;
 
@@ -282,13 +283,15 @@ public partial class PackageCreationViewModel : BaseViewModel
                                     PathConfigurationProvider pathConfigurationService,
                                     IWindowService windowService,
                                     PackingProgressPercentageProvider packingProgressPercentageProvider,
-                                    ILogger<PackageCreationViewModel> logger)
+                                    ILogger<PackageCreationViewModel> logger,
+                                    ErrorModelProvider errorModelProvider)
     {
         _packageModelService = packageModelService;
         _pathConfigurationService = pathConfigurationService;
         _windowService = windowService;
         _packingProgressPercentageProvider = packingProgressPercentageProvider;
         _logger = logger;
+        _errorModelProvider = errorModelProvider;
 
         // Ensure our version of MakePkg supports custom SubVal paths before allowing that option.
         var mkgPkgpath = _pathConfigurationService.MakePkgPath;
@@ -312,7 +315,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         CancelButtonCommand = new RelayCommand(OnCancelButton);
 
         GameDataPath = GetPropertyFromApplicationPreferences(nameof(GameDataPath));
-        if(GameDataPath != string.Empty)
+        if (GameDataPath != string.Empty)
         {
             IsDragDropVisible = false;
             HasGameDataPath = true;
@@ -320,6 +323,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         MappingDataXmlPath = GetPropertyFromApplicationPreferences(nameof(MappingDataXmlPath));
 
         EstimatePackageSize();
+        _errorModelProvider = errorModelProvider;
     }
 
     private bool CanCreatePackage()
@@ -667,13 +671,22 @@ public partial class PackageCreationViewModel : BaseViewModel
                     // Add error message so progress screen can display it.
                     if (!string.IsNullOrEmpty(errorString))
                     {
-                        _packingProgressPercentageProvider.PackagingErrorMessage = errorString;
+                        //_packingProgressPercentageProvider.PackagingErrorMessage = errorString;
+                        _errorModelProvider.Error.MainMessage = "Error creating package.";
+                        _errorModelProvider.Error.DetailMessage = errorString;
+                        _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
                     }
                     else
                     {
-                        _packingProgressPercentageProvider.PackagingErrorMessage = "Error creating package.";
+                        //_packingProgressPercentageProvider.PackagingErrorMessage = "Error creating package.";
+                        _errorModelProvider.Error.MainMessage = "Error creating package.";
+                        _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
                     }
                 }
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _windowService.NavigateTo(typeof(ErrorPageView));
+                });
                 return;
             }
             ProgressValue = 100;

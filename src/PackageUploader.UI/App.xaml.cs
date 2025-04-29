@@ -37,6 +37,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<UserLoggedInProvider>();
                 services.AddSingleton<PackingProgressPercentageProvider>();
                 services.AddSingleton<UploadingProgressPercentageProvider>();
+                services.AddSingleton<ErrorModelProvider>();
 
                 // Register ViewModels
                 services.AddSingleton<MainPageViewModel>();
@@ -46,6 +47,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<PackagingFinishedViewModel>();
                 services.AddSingleton<PackageUploadingViewModel>();
                 services.AddSingleton<UploadingFinishedViewModel>();
+                services.AddSingleton<ErrorScreenViewModel>();
 
                 // Register Views
                 services.AddTransient<MainPageView>();
@@ -55,6 +57,7 @@ public partial class App : System.Windows.Application
                 services.AddTransient<PackagingFinishedView>();
                 services.AddTransient<PackageUploadingView>();
                 services.AddTransient<UploadingFinishedView>();
+                services.AddTransient<ErrorPageView>();
 
                 // Register the main window
                 services.AddSingleton<MainWindow>();
