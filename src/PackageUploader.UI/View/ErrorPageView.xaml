@@ -37,7 +37,7 @@
                            Foreground="White"
                            HorizontalAlignment="Center"
                            Margin="0, 0, 0, 23" />
-                <Border Background="#FF889B">
+                <Border Background="#FF889B" Opacity="1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
@@ -54,7 +54,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="1"
                                    Style="{StaticResource SubHeadline}"
                                    Text="{Binding ErrorTitle, Mode=OneWay}"
-                                   Foreground="#FF889B"
+                                   Foreground="White"
                                    Margin="10, 10, 0, 0" />
                         <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
                                    Text="{Binding ErrorDescription, Mode=OneWay}"

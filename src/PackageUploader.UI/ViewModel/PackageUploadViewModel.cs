@@ -25,6 +25,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     private readonly IPackageUploaderService _uploaderService;
     private readonly IWindowService _windowService;
     public readonly UploadingProgressPercentageProvider _uploadingProgressPercentageProvider;
+    private readonly ErrorModelProvider _errorModelProvider;
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
@@ -425,12 +426,14 @@ public partial class PackageUploadViewModel : BaseViewModel
     public PackageUploadViewModel(PackageModelProvider packageModelService, 
                                   IPackageUploaderService uploaderService,
                                   IWindowService windowService,
-                                  UploadingProgressPercentageProvider uploadingProgressPercentageProvider)
+                                  UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
+                                  ErrorModelProvider errorModelProvider)
     {
         _packageModelService = packageModelService;
         _uploaderService = uploaderService;
         _windowService = windowService;
         _uploadingProgressPercentageProvider = uploadingProgressPercentageProvider;
+        _errorModelProvider = errorModelProvider;
 
         // Initialize commands with RelayCommand
         UploadPackageCommand = new RelayCommand(UploadPackageProcessAsync, () => IsUploadReady());
@@ -777,6 +780,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         if (_gameProduct == null || _branchesAndFlights == null || _gamePackageConfiguration == null)
         {
             PackageErrorMessage = "Product information not available. Please enter a valid BigId and try again.";
+            SetErrorAndGoToErrorPage("No Product Information", PackageErrorMessage);
             return;
         }
 
@@ -793,6 +797,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             PackageErrorMessage = $"Branch '{BranchOrFlightDisplayName}' not found.";
             IsUploadInProgress = false;
+            SetErrorAndGoToErrorPage("Null Branch/Flight", PackageErrorMessage);
             return;
         }
 
@@ -834,12 +839,14 @@ public partial class PackageUploadViewModel : BaseViewModel
                 _windowService.NavigateTo(typeof(UploadingFinishedView));
             });
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException oce)
         {
+            SetErrorAndGoToErrorPage(nameof(OperationCanceledException), oce.ToString());
             PackageErrorMessage = "Upload cancelled.";
         }
         catch (Exception ex)
         {
+            SetErrorAndGoToErrorPage(nameof(Exception), ex.ToString());
             PackageErrorMessage = $"Error uploading package: {ex.Message}";
         }
         finally
@@ -889,5 +896,16 @@ public partial class PackageUploadViewModel : BaseViewModel
     {
         // Navigate to the main page view
         _windowService.NavigateTo(typeof(MainPageView));
+    }
+
+    private void SetErrorAndGoToErrorPage(string errorTitle, string errorDescription)
+    {
+        _errorModelProvider.Error.MainMessage = errorTitle;
+        _errorModelProvider.Error.DetailMessage = errorDescription;
+        _errorModelProvider.Error.OriginPage = typeof(PackageUploadView);
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            _windowService.NavigateTo(typeof(ErrorPageView));
+        });
     }
 }
