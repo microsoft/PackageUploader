@@ -269,8 +269,6 @@ public class PackageUploaderService : IPackageUploaderService
         package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
         _logger.LogInformation("Package is uploaded and is in processing.");
 
-        throw new OperationCanceledException("Some Test Exception");
-
         package = await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
 
         if (gameAssets is not null)
