@@ -14,8 +14,6 @@ using PackageUploader.UI.View;
 using System.IO;
 using PackageUploader.UI.Model;
 using System.Windows.Media.Imaging;
-using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
-using System.Threading;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -176,15 +174,14 @@ public partial class PackageUploadViewModel : BaseViewModel
         });
     }
 
-    //private double _progressValue = 0;
-    public PackageUploadingProgressStages ProgressValue
+    public PackageUploadingProgress ProgressValue
     {
-        get => _uploadingProgressPercentageProvider.UploadStage;
+        get => _uploadingProgressPercentageProvider.UploadProgress;
         set
         {
-            if (_uploadingProgressPercentageProvider.UploadStage != value)
+            if (!_uploadingProgressPercentageProvider.UploadProgress.Equals(value))
             {
-                _uploadingProgressPercentageProvider.UploadStage = value;
+                _uploadingProgressPercentageProvider.UploadProgress = value;
                 OnPropertyChanged();
             }
         }
@@ -785,7 +782,6 @@ public partial class PackageUploadViewModel : BaseViewModel
             return;
         }
 
-        ProgressValue = 0;
         IsUploadInProgress = true;
 
         // We generate an uploader config for debugging or CLI use
@@ -815,7 +811,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             var marketGroupPackage = _gamePackageConfiguration.MarketGroupPackages.SingleOrDefault(x => x.Name.Equals(MarketGroupName));
 
-            IProgress<PackageUploadingProgressStages> progress = new Progress<PackageUploadingProgressStages>(value => { 
+            IProgress<PackageUploadingProgress> progress = new Progress<PackageUploadingProgress>(value => { 
                 ProgressValue = value; 
             });
 
@@ -831,11 +827,10 @@ public partial class PackageUploadViewModel : BaseViewModel
                 progress,
                 ct);
 
-            ProgressValue = PackageUploadingProgressStages.Done;
             timer.Stop();
             // SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
             
-            // After successful upload, navigate back to main page
+            // After successful upload, navigate to upload finished page
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
                 _windowService.NavigateTo(typeof(UploadingFinishedView));

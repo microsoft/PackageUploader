@@ -1,4 +1,7 @@
-﻿using PackageUploader.UI.Providers;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using System.ComponentModel;

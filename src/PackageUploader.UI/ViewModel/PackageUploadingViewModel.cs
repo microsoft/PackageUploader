@@ -1,4 +1,7 @@
-﻿using PackageUploader.ClientApi.Models;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using PackageUploader.ClientApi.Models;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -24,7 +27,7 @@ namespace PackageUploader.UI.ViewModel
                 }
             }
         }
-        public PackageUploadingProgressStages UploadStage {
+        public PackageUploadingProgressStage UploadStage {
             get => _uploadingProgressPercentageProvider.UploadStage;
             set
             {

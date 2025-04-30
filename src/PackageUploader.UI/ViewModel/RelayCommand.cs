@@ -1,4 +1,6 @@
-using System;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System.Windows.Input;
 
 namespace PackageUploader.UI.ViewModel
