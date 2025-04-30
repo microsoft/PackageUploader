@@ -24,7 +24,8 @@
                 VerticalAlignment="Center"
             Background="#25282C"
                 BorderBrush="#25282C"
-                BorderThickness="1">
+                BorderThickness="1"
+                CornerRadius="6">
             <StackPanel Orientation="Vertical">
                 <Image Source="/Resources/Images/ErrorImage.png"
                        HorizontalAlignment="Center"
@@ -37,7 +38,7 @@
                            Foreground="White"
                            HorizontalAlignment="Center"
                            Margin="0, 0, 0, 23" />
-                <Border Background="#FF889B" Opacity="1" Margin="40,10,40,10">
+                <Border Background="#FF889B" Opacity="1" Margin="40,10,40,10" CornerRadius="6">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
@@ -72,7 +73,7 @@
                 </Grid>
                 </Border>
 
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Content="Copy error"
                             Command="{Binding CopyErrorCommand}"
                             HorizontalAlignment="Center"
