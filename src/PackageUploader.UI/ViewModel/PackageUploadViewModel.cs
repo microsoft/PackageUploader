@@ -422,6 +422,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     private static readonly string[] packageExtensions = [".xvc", ".msixvc"];
 
     private CancellationTokenSource? _uploadCancellationTokenSource;
+    private bool _isUserCancelled = false;
 
     public PackageUploadViewModel(PackageModelProvider packageModelService, 
                                   IPackageUploaderService uploaderService,
@@ -806,6 +807,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         var timer = new Stopwatch();
         timer.Start();
 
+        _isUserCancelled = false;
         _uploadCancellationTokenSource = new CancellationTokenSource();
         var ct = _uploadCancellationTokenSource.Token;
 
@@ -841,7 +843,10 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (OperationCanceledException oce)
         {
-            SetErrorAndGoToErrorPage(nameof(OperationCanceledException), oce.ToString());
+            if (!_isUserCancelled)
+            {
+                SetErrorAndGoToErrorPage(nameof(OperationCanceledException), oce.ToString());
+            }
             PackageErrorMessage = "Upload cancelled.";
         }
         catch (Exception ex)
@@ -852,12 +857,14 @@ public partial class PackageUploadViewModel : BaseViewModel
         finally
         {
             IsUploadInProgress = false;
+            _isUserCancelled = false;
             _uploadCancellationTokenSource = null;
         }
     }
 
     private void CancelUpload()
     {
+        _isUserCancelled = true;
         _uploadCancellationTokenSource?.Cancel();
     }
 

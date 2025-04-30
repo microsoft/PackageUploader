@@ -8,83 +8,77 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=viewmodel:ErrorScreenViewModel}"
              Background="Black">
-    <!--<Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-        </Grid.ColumnDefinitions> -->
-        <Border 
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
+    <Border HorizontalAlignment="Center"
+            VerticalAlignment="Center"
             Background="#25282C"
-                BorderBrush="#25282C"
-                BorderThickness="1"
-                CornerRadius="6">
-            <StackPanel Orientation="Vertical" Margin="20">
-                <Image Source="/Resources/Images/ErrorImage.png"
+            BorderBrush="#25282C"
+            BorderThickness="1"
+            CornerRadius="6">
+        <StackPanel Orientation="Vertical" Margin="20">
+            <Image Source="/Resources/Images/ErrorImage.png"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="130"
+                   Width="130" />
+            <TextBlock Style="{StaticResource SubHeadline}" 
+                       Text="We've run into an issue, go back to fix"
+                       Foreground="White"
                        HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Height="130"
-                       Width="130" />
-                <!-- Sure, ok copilot -->
-                <TextBlock Style="{StaticResource SubHeadline}" 
-                           Text="We've run into an issue, go back to fix"
-                           Foreground="White"
-                           HorizontalAlignment="Center"
-                           Margin="0, 0, 0, 23" />
-                <Border Background="#1AFF889B" Margin="40,10,40,10" CornerRadius="6" BorderBrush="#1AFF889B">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
+                       Margin="0, 0, 0, 23" />
+            <Border Background="#1AFF889B"
+                    Margin="40,10,40,10"
+                    CornerRadius="6"
+                    BorderBrush="#1AFF889B">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
 
-                        <Image Grid.Row="0" Grid.Column="0"
-                               Source="/Resources/AppIcon/ErrorIcon.png" 
-                               HorizontalAlignment="Right"
-                               Margin="10,10,0,0"/>
-                        <!-- Margins set by CoPilot, no idea if they're at all good or not -->
-                        <TextBlock Grid.Row="0" Grid.Column="1"
-                                   Style="{StaticResource SubHeadline}"
-                                   Text="{Binding ErrorTitle, Mode=OneWay}"
-                                   Foreground="#FF889B"
-                                   HorizontalAlignment="Left"
-                                   Margin="10, 10, 0, 0" />
-                        <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
-                                   Text="{Binding ErrorDescription, Mode=OneWay}"
-                                   Foreground="White"
-                                   Margin="10, 10, 20, 20" />
-                    <Button Grid.Row="2" Grid.Column="1"
+                    <Image Grid.Row="0"
+                           Grid.Column="0"
+                           Source="/Resources/AppIcon/ErrorIcon.png" 
+                           HorizontalAlignment="Right"
+                           Margin="10,10,0,0"/>
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="1"
+                               Style="{StaticResource SubHeadline}"
+                               Text="{Binding ErrorTitle, Mode=OneWay}"
+                               Foreground="#FF889B"
+                               HorizontalAlignment="Left"
+                               Margin="10, 10, 0, 0" />
+                    <TextBlock Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Text="{Binding ErrorDescription, Mode=OneWay}"
+                               Foreground="White"
+                               Margin="10, 10, 20, 20"
+                               MaxHeight="300"/>
+                    <Button Grid.Row="2"
+                            Grid.Column="1"
                             Content="View logs"
                             HorizontalAlignment="Right"
                             Command="{Binding ViewLogsCommand}"
                             Style="{StaticResource HyperlinkButtonStyle}"
                             Margin="0, 0, 20, 20" />
                 </Grid>
-                </Border>
+            </Border>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Content="Copy error"
-                            Command="{Binding CopyErrorCommand}"
-                            HorizontalAlignment="Center"
-                            Margin="0, 0, 10, 0" />
-                    <Button Content="Go back and fix"
-                            Command="{Binding GoBackAndFixCommand}"
-                            HorizontalAlignment="Center"
-                            Margin="0, 0, 10, 0" />
-                </StackPanel>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                <Button Content="Copy error"
+                        Command="{Binding CopyErrorCommand}"
+                        HorizontalAlignment="Center"
+                        Margin="0, 0, 10, 0" />
+                <Button Content="Go back and fix"
+                        Command="{Binding GoBackAndFixCommand}"
+                        HorizontalAlignment="Center"
+                        Margin="0, 0, 10, 0" />
             </StackPanel>
-        </Border>
-    <!--</Grid>-->
+        </StackPanel>
+    </Border>
 </UserControl>

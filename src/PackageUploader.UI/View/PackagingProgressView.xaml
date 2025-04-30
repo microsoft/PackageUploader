@@ -39,27 +39,11 @@
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
                Height="130"
-               Width="130"
-               Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}, ConverterParameter=Invert}"/>
-        <Image Grid.Row="0"
-               Margin="0, 100, 0, 23"
-               Source="/Resources/Images/ErrorImage.png"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Height="130"
-               Width="130"
-               Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"/>
+               Width="130"/>
         <TextBlock Grid.Row="1"
                    Margin="0, 0, 0, 23"
                    Style="{StaticResource SubHeadline}"
                    Text="Getting your package ready..."
-                   Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}, ConverterParameter=Invert}"
-                   Foreground="White" />
-        <TextBlock Grid.Row="1"
-                   Margin="0, 0, 0, 23"
-                   Style="{StaticResource SubHeadline}"
-                   Text="We've run into an issue, go back to fix"
-                   Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
                    Foreground="White" />
         <!-- Loading Bar -->
         <Grid Grid.Row="2"
@@ -77,15 +61,7 @@
                        Margin="0, 0, 0, 10"
                        Text="Packaging..."
                        Foreground="White" 
-                       HorizontalAlignment="Left"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}, ConverterParameter=Invert}"/>
-            <TextBlock Grid.Row="0"
-                       Grid.Column="0"
-                       Margin="0, 0, 0, 10"
-                       Text="Packaging stopped"
-                       Foreground="White" 
-                       HorizontalAlignment="Left"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"/>
+                       HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="0"
                         Grid.Column="1"
                         Orientation="Horizontal"
@@ -101,20 +77,7 @@
                          Minimum="0"
                          Maximum="100"
                          Value="{Binding PackingProgressPercentage}"
-                         Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}, ConverterParameter=Invert}"
                          Foreground="{StaticResource LightPurplishBlueBrush}"
-                         Background="{StaticResource Gray500Brush}"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Stretch"
-                         Height="3"/>
-            <ProgressBar Grid.Row="1"
-                         Grid.ColumnSpan="2"
-                         Margin="0, 0, 0, 23"
-                         Minimum="0"
-                         Maximum="100"
-                         Value="{Binding PackingProgressPercentage}"
-                         Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
-                         Foreground="Red"
                          Background="{StaticResource Gray500Brush}"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Stretch"
@@ -123,7 +86,6 @@
         <!-- updating labels -->
         <Grid Grid.Row="3" Margin="500, 0, 0, 0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -143,8 +105,7 @@
                   VerticalAlignment="Top"
                   Height="16"
                   Width="16">
-                <Image Source="/Resources/AppIcon/Settings.png"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}, ConverterParameter=Invert}">
+                <Image Source="/Resources/AppIcon/Settings.png">
                     <Image.RenderTransform>
                         <RotateTransform CenterX="8" CenterY="8" />
                     </Image.RenderTransform>
@@ -154,8 +115,6 @@
                         </EventTrigger>
                     </Image.Triggers>
                 </Image>
-                <Image Source="/Resources/AppIcon/ErrorIcon.png"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
             </Grid>
             <Image Grid.Row="0"
                    Grid.Column="0"
@@ -171,23 +130,8 @@
                        VerticalAlignment="Top"
                        Text="Validating files..."
                        Foreground="White"/>
-            <StackPanel Grid.Row="1"
-                        Grid.Column="1"
-                        HorizontalAlignment="Left"
-                        MaxWidth="400"
-                        Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-5}">
-                <TextBlock Text="{Binding PackagingErrorMessage}"
-                           Foreground="Red"
-                           TextWrapping="Wrap"
-                           Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
-                <Button Content="View logs for full details"
-                        Foreground="Red"
-                        Command="{Binding ViewLogsCommand}"
-                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
-                        Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
-            </StackPanel>
-            <!-- Row 2 (leaves empty row for error message) -->
-            <Grid Grid.Row="2"
+            <!-- Row 2 -->
+            <Grid Grid.Row="1"
                   Grid.Column="0"
                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-93}"
                   HorizontalAlignment="Center"
@@ -195,8 +139,7 @@
                   Height="16"
                   Width="16"
                   Margin="0, 30, 0, 0">
-                <Image Source="/Resources/AppIcon/Settings.png"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}, ConverterParameter=Invert}">
+                <Image Source="/Resources/AppIcon/Settings.png">
                     <Image.RenderTransform>
                         <RotateTransform CenterX="8" CenterY="8" />
                     </Image.RenderTransform>
@@ -206,10 +149,8 @@
                         </EventTrigger>
                     </Image.Triggers>
                 </Image>
-                <Image Source="/Resources/AppIcon/ErrorIcon.png"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
             </Grid>
-            <Image Grid.Row="2"
+            <Image Grid.Row="1"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Accept.png"
                    Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=94-100}"
@@ -218,29 +159,14 @@
                    Height="16"
                    Width="16"
                    Margin="0, 30, 0, 0"/>
-            <TextBlock Grid.Row="2" Grid.Column="1"
+            <TextBlock Grid.Row="1" Grid.Column="1"
                        Text="Copying and encrypting data..."
                        Foreground="White"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
                        Margin="0, 30, 0, 0"/>
-            <StackPanel Grid.Row="3"
-                        Grid.Column="1"
-                        HorizontalAlignment="Left"
-                        MaxWidth="400"
-                        Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-93}">
-                <TextBlock Text="{Binding PackagingErrorMessage}"
-                           Foreground="Red"
-                           TextWrapping="Wrap"
-                           Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
-                <Button Content="View logs for full details"
-                        Foreground="Red"
-                        Command="{Binding ViewLogsCommand}"
-                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
-                        Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
-            </StackPanel>
-            <!-- Row 3 (now two empty rows for error messages) -->
-            <Grid Grid.Row="4"
+            <!-- Row 3 -->
+            <Grid Grid.Row="2"
                   Grid.Column="0"
                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=95-99}"
                   HorizontalAlignment="Center"
@@ -248,8 +174,7 @@
                   Height="16"
                   Width="16"
                   Margin="0, 30, 0, 0">
-                <Image Source="/Resources/AppIcon/Settings.png"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}, ConverterParameter=Invert}">
+                <Image Source="/Resources/AppIcon/Settings.png">
                     <Image.RenderTransform>
                         <RotateTransform CenterX="8" CenterY="8" />
                     </Image.RenderTransform>
@@ -259,10 +184,8 @@
                         </EventTrigger>
                     </Image.Triggers>
                 </Image>
-                <Image Source="/Resources/AppIcon/ErrorIcon.png"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
             </Grid>
-            <Image Grid.Row="4"
+            <Image Grid.Row="2"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Accept.png"
                    Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=100-100}"
@@ -271,50 +194,21 @@
                    Height="16"
                    Width="16"
                    Margin="0, 30, 0, 0"/>
-            <TextBlock Grid.Row="4"
+            <TextBlock Grid.Row="2"
                        Grid.Column="1"
                        Text="Verifying package contents..."
                        Foreground="White"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
                        Margin="0, 30, 0, 0"/>
-            <StackPanel Grid.Row="5"
-                        Grid.Column="1"
-                        Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=95-99}">
-                <TextBlock Text="{Binding PackagingErrorMessage}"
-                       Foreground="Red"
-                       HorizontalAlignment="Left"
-                       MaxWidth="400"
-                       TextWrapping="Wrap"
-                       Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
-                <Button Content="View logs for full details"
-                        Foreground="Red"
-                        Command="{Binding ViewLogsCommand}"
-                        Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
-                        Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
-            </StackPanel>
         </Grid>
-        <StackPanel Grid.Row="6"
+        <StackPanel Grid.Row="4"
                     Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}, ConverterParameter=Invert}">
+                    HorizontalAlignment="Right">
             <Button Content="Cancel packaging"
                     Command="{Binding CancelCreationCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 50, 50"
-                    Width="150"
-                    Height="30"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"/>
-        </StackPanel>
-        <StackPanel Grid.Row="6"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Left"
-                    Visibility="{Binding PackagingErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
-            <Button Content="Back"
-                    Command="{Binding CancelCreationCommand}"
-                    IsEnabled="True"
-                    Margin="50, 0, 50, 50"
                     Width="150"
                     Height="30"
                     HorizontalAlignment="Right"

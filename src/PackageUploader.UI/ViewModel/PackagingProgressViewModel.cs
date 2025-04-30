@@ -26,19 +26,6 @@ namespace PackageUploader.UI.ViewModel
             }
         }
 
-        public string PackagingErrorMessage
-        {
-            get => _packingProgressPercentageProvider.PackagingErrorMessage;
-            set
-            {
-                if (_packingProgressPercentageProvider.PackagingErrorMessage != value)
-                {
-                    _packingProgressPercentageProvider.PackagingErrorMessage = value;
-                    OnPropertyChanged(nameof(PackingProgressPercentage));
-                }
-            }
-        }
-
         public ICommand ViewLogsCommand { get; }
         public ICommand CancelCreationCommand { get; }
 
@@ -59,10 +46,6 @@ namespace PackageUploader.UI.ViewModel
             if (e.PropertyName == nameof(PackingProgressPercentageProvider.PackingProgressPercentage))
             {
                 OnPropertyChanged(nameof(PackingProgressPercentage));
-            }
-            else if (e.PropertyName == nameof(PackingProgressPercentageProvider.PackagingErrorMessage))
-            {
-                OnPropertyChanged(nameof(PackagingErrorMessage));
             }
         }
 

@@ -537,7 +537,6 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         // Reset package data
         _packageModelService.Package = new PackageModel();
-        _packingProgressPercentageProvider.PackagingErrorMessage = string.Empty;
 
         if (string.IsNullOrEmpty(GameDataPath))
         {
@@ -671,23 +670,22 @@ public partial class PackageCreationViewModel : BaseViewModel
                     // Add error message so progress screen can display it.
                     if (!string.IsNullOrEmpty(errorString))
                     {
-                        //_packingProgressPercentageProvider.PackagingErrorMessage = errorString;
                         _errorModelProvider.Error.MainMessage = "Error creating package.";
                         _errorModelProvider.Error.DetailMessage = errorString;
                         _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
                     }
                     else
                     {
-                        //_packingProgressPercentageProvider.PackagingErrorMessage = "Error creating package.";
                         _errorModelProvider.Error.MainMessage = "Error creating package.";
                         _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
                     }
+
+                    _errorModelProvider.Error.LogsPath = logFilePath;
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _windowService.NavigateTo(typeof(ErrorPageView));
+                    });
                 }
-                _errorModelProvider.Error.LogsPath = logFilePath;
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    _windowService.NavigateTo(typeof(ErrorPageView));
-                });
                 return;
             }
             ProgressValue = 100;

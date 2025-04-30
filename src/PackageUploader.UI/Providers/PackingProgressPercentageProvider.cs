@@ -32,17 +32,6 @@ namespace PackageUploader.UI.Providers
             }
         }
 
-        private string _packagingErrorMessage = string.Empty;
-        public string PackagingErrorMessage
-        {
-            get => _packagingErrorMessage;
-            set
-            {
-                _packagingErrorMessage = value;
-                OnPropertyChanged(nameof(PackagingErrorMessage));
-            }
-        }
-
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
