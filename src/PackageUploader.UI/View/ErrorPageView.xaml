@@ -26,7 +26,7 @@
                 BorderBrush="#25282C"
                 BorderThickness="1"
                 CornerRadius="6">
-            <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Vertical" Margin="20">
                 <Image Source="/Resources/Images/ErrorImage.png"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
@@ -38,7 +38,7 @@
                            Foreground="White"
                            HorizontalAlignment="Center"
                            Margin="0, 0, 0, 23" />
-                <Border Background="#FF889B" Opacity="1" Margin="40,10,40,10" CornerRadius="6">
+                <Border Background="#1AFF889B" Margin="40,10,40,10" CornerRadius="6" BorderBrush="#1AFF889B">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition />
@@ -58,7 +58,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="1"
                                    Style="{StaticResource SubHeadline}"
                                    Text="{Binding ErrorTitle, Mode=OneWay}"
-                                   Foreground="White"
+                                   Foreground="#FF889B"
                                    HorizontalAlignment="Left"
                                    Margin="10, 10, 0, 0" />
                         <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
