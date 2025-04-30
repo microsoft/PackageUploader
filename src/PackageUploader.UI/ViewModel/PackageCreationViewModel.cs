@@ -683,6 +683,7 @@ public partial class PackageCreationViewModel : BaseViewModel
                         _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
                     }
                 }
+                _errorModelProvider.Error.LogsPath = logFilePath;
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     _windowService.NavigateTo(typeof(ErrorPageView));

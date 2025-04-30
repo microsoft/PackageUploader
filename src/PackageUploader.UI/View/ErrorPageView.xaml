@@ -37,9 +37,10 @@
                            Foreground="White"
                            HorizontalAlignment="Center"
                            Margin="0, 0, 0, 23" />
-                <Border Background="#FF889B" Opacity="1">
+                <Border Background="#FF889B" Opacity="1" Margin="40,10,40,10">
                     <Grid>
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
@@ -49,26 +50,36 @@
                         </Grid.ColumnDefinitions>
 
                         <Image Grid.Row="0" Grid.Column="0"
-                               Source="/Resources/AppIcon/ErrorIcon.png" />
+                               Source="/Resources/AppIcon/ErrorIcon.png" 
+                               HorizontalAlignment="Left"/>
                         <!-- Margins set by CoPilot, no idea if they're at all good or not -->
                         <TextBlock Grid.Row="0" Grid.Column="1"
                                    Style="{StaticResource SubHeadline}"
                                    Text="{Binding ErrorTitle, Mode=OneWay}"
                                    Foreground="White"
+                                   HorizontalAlignment="Left"
                                    Margin="10, 10, 0, 0" />
                         <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
                                    Text="{Binding ErrorDescription, Mode=OneWay}"
                                    Foreground="White"
-                                   Margin="10, 10, 0, 0" />
-                    </Grid>
+                                   Margin="10, 10, 20, 20" />
+                    <Button Grid.Row="2" Grid.Column="1"
+                            Content="View logs"
+                            HorizontalAlignment="Right"
+                            Command="{Binding ViewLogsCommand}"
+                            Style="{StaticResource HyperlinkButtonStyle}"
+                            Margin="0, 0, 20, 20" />
+                </Grid>
                 </Border>
 
                 <StackPanel Orientation="Horizontal">
                     <Button Content="Copy error"
                             Command="{Binding CopyErrorCommand}"
+                            HorizontalAlignment="Center"
                             Margin="0, 0, 10, 0" />
                     <Button Content="Go back and fix"
                             Command="{Binding GoBackAndFixCommand}"
+                            HorizontalAlignment="Center"
                             Margin="0, 0, 10, 0" />
                 </StackPanel>
             </StackPanel>

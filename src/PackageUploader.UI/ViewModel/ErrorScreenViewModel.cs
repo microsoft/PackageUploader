@@ -1,6 +1,6 @@
 ﻿using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
-
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace PackageUploader.UI.ViewModel
@@ -15,6 +15,7 @@ namespace PackageUploader.UI.ViewModel
 
         public ICommand CopyErrorCommand { get; }
         public ICommand GoBackAndFixCommand { get; }
+        public ICommand ViewLogsCommand { get; }
 
         public ErrorScreenViewModel(IWindowService windowService, ErrorModelProvider errorModelProvider)
         {
@@ -23,6 +24,7 @@ namespace PackageUploader.UI.ViewModel
 
             CopyErrorCommand = new RelayCommand(CopyError);
             GoBackAndFixCommand = new RelayCommand(GoBackAndFix);
+            ViewLogsCommand = new RelayCommand(ViewLogs);
         }
 
         public void CopyError()
@@ -35,6 +37,12 @@ namespace PackageUploader.UI.ViewModel
             {
                 _windowService.NavigateTo(_errorModelProvider.Error.OriginPage);
             });
+        }
+
+        public void ViewLogs()
+        {
+            string logPath = _errorModelProvider.Error.LogsPath;
+            Process.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
     }
 }
