@@ -10,7 +10,7 @@
              Background="#25282C">
 
     <StackPanel Orientation="Vertical" Margin="30,0" >
-        <TextBlock Text="Make a package and upload it to partner center" 
+        <TextBlock Text="Make a package and upload it to Microsoft Partner Center" 
                Style="{StaticResource Headline}"
                Foreground="White"
                HorizontalAlignment="Left"
