@@ -10,8 +10,8 @@
              Background="Black">
     <Border HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="#25282C"
-            BorderBrush="#25282C"
+            Background="{StaticResource Gray800Brush}"
+            BorderBrush="{StaticResource Gray800Brush}"
             BorderThickness="1"
             CornerRadius="6">
         <StackPanel Orientation="Vertical" Margin="20">
@@ -25,10 +25,10 @@
                        Foreground="White"
                        HorizontalAlignment="Center"
                        Margin="0, 0, 0, 23" />
-            <Border Background="#1AFF889B"
+            <Border Background="{StaticResource ErrorRedTransluscentBrush}"
                     Margin="40,10,40,10"
                     CornerRadius="6"
-                    BorderBrush="#1AFF889B">
+                    BorderBrush="{StaticResource ErrorRedTransluscentBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition />
@@ -49,7 +49,7 @@
                                Grid.Column="1"
                                Style="{StaticResource SubHeadline}"
                                Text="{Binding ErrorTitle, Mode=OneWay}"
-                               Foreground="#FF889B"
+                               Foreground="{StaticResource ErrorRedBrush}"
                                HorizontalAlignment="Left"
                                Margin="10, 10, 0, 0" />
                     <TextBlock Grid.Row="1"

@@ -62,7 +62,7 @@
                             CornerRadius="12"
                             VerticalAlignment="Top"
                             Padding="2"
-                            BorderBrush="#B8B4FF"
+                            BorderBrush="{StaticResource LightPurplishBlueBrush}"
                             BorderThickness="1">
                         <TextBlock Text="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
@@ -110,8 +110,8 @@
                         <TextBox Grid.Row="3" Grid.Column="0" 
                                  x:Name="PackagePathTextBox"
                                  Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="#D2D2D3"
-                                 Background="#323538"
+                                 Foreground="{StaticResource Gray150Brush}"
+                                 Background="{StaticResource Gray700Brush}"
                                  Margin="0,0,0,10">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -171,7 +171,7 @@
                             CornerRadius="12"
                             VerticalAlignment="Top"
                             Padding="2"
-                            BorderBrush="#B8B4FF"
+                            BorderBrush="{StaticResource LightPurplishBlueBrush}"
                             BorderThickness="1">
                         <TextBlock Text="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
@@ -321,7 +321,7 @@
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="#6B7584" Margin="10,0" />
+                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{StaticResource Gray500Brush}" Margin="10,0" />
                 <StackPanel Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="10,0,0,0">
                     <TextBlock Text="Upload Preview"
                                Style="{StaticResource SubHeadline}"

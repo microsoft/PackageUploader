@@ -7,7 +7,7 @@
       xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
       mc:Ignorable="d"
       d:DataContext="{d:DesignInstance Type=viewmodel:PackagingFinishedViewModel}"
-      Background="#25282C">
+      Background="{StaticResource Gray800Brush}">
 
     <Grid>
         <Grid.RowDefinitions>
