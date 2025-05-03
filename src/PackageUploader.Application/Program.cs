@@ -32,8 +32,12 @@ internal class Program
     private static readonly Option<string> ClientSecretOption = new (["-s", "--ClientSecret"], "The client secret of the AAD app (only for AppSecret)");
     private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(["-c", "--ConfigFile"], "The location of the config file").Required();
     private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(["-a", "--Authentication"], () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
+    public static readonly Option<string> ProductIdOption = new(["-p", "--Product"], "Product ID");
+    public static readonly Option<string> BigIdOption = new(["-b", "--BigId"], "Big ID");
+    public static readonly Option<string> BranchOption = new(["-br", "--Branch"], "Branch Friendly Name");
 
-    private static async Task<int> Main(string[] args)
+
+  private static async Task<int> Main(string[] args)
     {
         return await BuildCommandLine()
             .UseHost(hostBuilder => hostBuilder
@@ -111,7 +115,7 @@ internal class Program
         {
             new Command("GetProduct", "Gets metadata of the product")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, DataOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, DataOption, ProductIdOption, BigIdOption
             }.AddOperationHandler<GetProductOperation>(),
             new Command("UploadUwpPackage", "Uploads Uwp game package")
             {
