@@ -32,12 +32,14 @@ internal class Program
     private static readonly Option<string> ClientSecretOption = new (["-s", "--ClientSecret"], "The client secret of the AAD app (only for AppSecret)");
     private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(["-c", "--ConfigFile"], "The location of the config file").Required();
     private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(["-a", "--Authentication"], () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
-    public static readonly Option<string> ProductIdOption = new(["-p", "--Product"], "Product ID");
-    public static readonly Option<string> BigIdOption = new(["-b", "--BigId"], "Big ID");
-    public static readonly Option<string> BranchOption = new(["-br", "--Branch"], "Branch Friendly Name");
+    public static readonly Option<string> ProductIdOption = new(["-p", "--Product"], "Product ID, replaces config value productId if present");
+    public static readonly Option<string> BigIdOption = new(["-b", "--BigId"], "Big ID, replaces config value bigId if present");
+    public static readonly Option<string> BranchFriendlyNameOption = new(["-br", "--BranchFriendlyName"], "Branch Friendly Name, replaces config value branchFriendlyName if present");
+    public static readonly Option<string> FlightNameOption = new(["-f", "--Flight"], "Flight Name, replaces config value flightName if present");
+    public static readonly Option<string> MarketGroupNameOption = new(["-m", "--MarketGroupName"], "Market Group Name, replaces config value marketGroupName if present");
 
 
-  private static async Task<int> Main(string[] args)
+    private static async Task<int> Main(string[] args)
     {
         return await BuildCommandLine()
             .UseHost(hostBuilder => hostBuilder
@@ -119,27 +121,27 @@ internal class Program
             }.AddOperationHandler<GetProductOperation>(),
             new Command("UploadUwpPackage", "Uploads Uwp game package")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<UploadUwpPackageOperation>(),
             new Command("UploadXvcPackage", "Uploads Xvc game package and assets")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<UploadXvcPackageOperation>(),
             new Command("RemovePackages", "Removes all game packages and assets from a branch")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<RemovePackagesOperation>(),
             new Command("ImportPackages", "Imports all game packages from a branch to a destination branch")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<ImportPackagesOperation>(),
             new Command("PublishPackages", "Publishes all game packages from a branch or flight to a destination sandbox or flight")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption // take a look at conditions
             }.AddOperationHandler<PublishPackagesOperation>(),
             new Command("GetPackages", "Gets the list of packages from a branch or flight")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, DataOption
+                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, DataOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<GetPackagesOperation>(),
         };
         rootCommand.AddGlobalOption(VerboseOption);
