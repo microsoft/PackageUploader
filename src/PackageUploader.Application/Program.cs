@@ -34,7 +34,7 @@ internal class Program
     private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(["-a", "--Authentication"], () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
     public static readonly Option<string> ProductIdOption = new(["-p", "--ProductId"], "Product ID, replaces config value productId if present");
     public static readonly Option<string> BigIdOption = new(["-b", "--BigId"], "Big ID, replaces config value bigId if present");
-    public static readonly Option<string> BranchFriendlyNameOption = new(["-br", "--BranchFriendlyName"], "Branch Friendly Name, replaces config value branchFriendlyName if present");
+    public static readonly Option<string> BranchFriendlyNameOption = new(["-bf", "--BranchFriendlyName"], "Branch Friendly Name, replaces config value branchFriendlyName if present");
     public static readonly Option<string> FlightNameOption = new(["-f", "--FlightName"], "Flight Name, replaces config value flightName if present");
     public static readonly Option<string> MarketGroupNameOption = new(["-m", "--MarketGroupName"], "Market Group Name, replaces config value marketGroupName if present");
     public static readonly Option<string> DestinationSandboxName = new(["-ds", "--DestinationSandboxName"], "Destination Sandbox Name, replaces config value destinationSandboxName if present");
