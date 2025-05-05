@@ -107,7 +107,15 @@ namespace PackageUploader.UI.ViewModel
             PackagePreviewImage = LoadBitmapImage(_gameConfigModel.ShellVisuals.Square150x150Logo);
             PackageType = _gameConfigModel.GetDeviceFamily();
             VersionNum = _gameConfigModel.Identity.Version;
-            StoreId = _gameConfigModel.StoreId;
+
+            if (!string.IsNullOrEmpty(_gameConfigModel.StoreId))
+            {
+                StoreId = _gameConfigModel.StoreId;
+            }
+            else
+            {
+                StoreId = "None";
+            }
 
             FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
             PackageFileName = packageInfo.Name;

@@ -188,7 +188,14 @@ public partial class PackageUploadViewModel : BaseViewModel
     }
 
     public PackageModel Package => _packageModelService.Package;
-    
+
+    private bool _isPackageMissingStoreId = false;
+    public bool IsPackageMissingStoreId
+    {
+        get => _isPackageMissingStoreId;
+        set => SetProperty(ref _isPackageMissingStoreId, value);
+    }
+
     // Package properties accessed from the shared service
     public string BigId 
     { 
@@ -390,34 +397,6 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private readonly string ConfileFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GeneratedConfig_{DateTime.Now:yyyyMMddHHmmss}.log");
 
-    private bool _hasValidPackage = false;
-    public bool HasValidPackage
-    {
-        get => _hasValidPackage;
-        private set 
-        { 
-            if (SetProperty(ref _hasValidPackage, value))
-            {
-                CheckCanExecuteUploadCommand();
-            }
-        }
-    }
-
-    private bool _isDragDropVisible = true;
-    public bool IsDragDropVisible
-    {
-        get => _isDragDropVisible && !HasValidPackage;
-        set => SetProperty(ref _isDragDropVisible, value);
-    }
-
-    private string _dragDropMessage = "Drag and drop a package file here or click to select";
-    public string DragDropMessage
-    {
-        get => _dragDropMessage;
-        set => SetProperty(ref _dragDropMessage, value);
-    }
-    private static readonly string[] packageExtensions = [".xvc", ".msixvc"];
-
     private CancellationTokenSource? _uploadCancellationTokenSource;
     private bool _isUserCancelled = false;
 
@@ -454,8 +433,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private bool IsUploadReady()
     {
-        return HasValidPackage &&
-            _gameProduct != null &&
+        return _gameProduct != null &&
             !string.IsNullOrEmpty(MarketGroupName) &&
             !IsLoadingBranchesAndFlights &&
             !IsLoadingMarkets;
@@ -472,9 +450,6 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private void UpdatePackageState()
     {
-        // Notify of changes to HasValidPackage and IsDragDropVisible when BigId changes
-        OnPropertyChanged(nameof(HasValidPackage));
-        OnPropertyChanged(nameof(IsDragDropVisible));
         CheckCanExecuteUploadCommand();
     }
 
@@ -533,14 +508,6 @@ public partial class PackageUploadViewModel : BaseViewModel
         {            
             // Extract package information
             ExtractPackageInformation(PackageFilePath);
-
-            // Update UI state
-            if (!string.IsNullOrEmpty(BigId))
-            {
-                HasValidPackage = true;
-            }
-
-            OnPropertyChanged(nameof(IsDragDropVisible));
         }
         catch (Exception ex)
         {
@@ -556,18 +523,24 @@ public partial class PackageUploadViewModel : BaseViewModel
         SubValFilePath = string.Empty;
         SymbolBundleFilePath = string.Empty;
 
-        HasValidPackage = false;
+        PackageErrorMessage = string.Empty;
+
+        ResetProductInfo();
+    }
+
+    private void ResetProductInfo()
+    {
+        _gameProduct = null;
+        OnPropertyChanged(nameof(ProductName));
 
         BranchAndFlightNames = [];
         MarketGroupNames = [];
 
-        PackageErrorMessage = string.Empty;
         BranchOrFlightErrorMessage = string.Empty;
         MarketGroupErrorMessage = string.Empty;
 
         IsLoadingBranchesAndFlights = false;
         IsLoadingMarkets = false;
-        OnPropertyChanged(nameof(IsDragDropVisible));
     }
 
     public void OnAppearing()
@@ -623,10 +596,13 @@ public partial class PackageUploadViewModel : BaseViewModel
             if (!string.IsNullOrEmpty(storeId))
             {
                 BigId = storeId;
+                IsPackageMissingStoreId = false;
             }
             else
             {
-                PackageErrorMessage = $"Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package.";
+                BigId = string.Empty;
+                IsPackageMissingStoreId = true;
+                PackageErrorMessage = $"Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in additional details below.";
             }
 
             // Update package preview information
@@ -712,8 +688,9 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private async void GetProductInfoAsync()
     {
-        if (string.IsNullOrEmpty(BigId))
+        if (string.IsNullOrEmpty(BigId) || BigId.Length < 12)
         {
+            ResetProductInfo();
             return;
         }
 
@@ -723,6 +700,8 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
 
         IsLoadingBranchesAndFlights = true;
+        BranchOrFlightErrorMessage = string.Empty;
+
         try
         {
             _gameProduct = await _uploaderService.GetProductByBigIdAsync(BigId, CancellationToken.None);

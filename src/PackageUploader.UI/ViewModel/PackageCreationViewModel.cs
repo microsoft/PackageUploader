@@ -217,6 +217,13 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
+    private bool _storeIdNotAvailable = false;
+    public bool StoreIdNotAvailable
+    {
+        get => _storeIdNotAvailable;
+        set => SetProperty(ref _storeIdNotAvailable, value);
+    }
+
     private string _bigId = string.Empty;
     public string BigId
     {
@@ -907,11 +914,6 @@ public partial class PackageCreationViewModel : BaseViewModel
             GameConfigLoadError = "The MicrosoftGame.config lacks a valid Identity node";
             return;
         }
-        if (string.IsNullOrEmpty(gameConfig.StoreId))
-        {
-            GameConfigLoadError = "The MicrosoftGame.config has no StoreId";
-            return;
-        }
         if (string.IsNullOrEmpty(gameConfig.ShellVisuals.Square150x150Logo))
         {
             GameConfigLoadError = "The MicrosoftGame.config does not have the required Logo files in the ShellVisuals";
@@ -922,8 +924,19 @@ public partial class PackageCreationViewModel : BaseViewModel
             GameConfigLoadError = "The logo file specified by the MicrosoftGame.config does not exist";
             return;
         }
+
+        if (string.IsNullOrEmpty(gameConfig.StoreId))
+        {
+            StoreIdNotAvailable = true;
+            BigId = "None";
+        }
+        else
+        {
+            StoreIdNotAvailable = false;
+            BigId = gameConfig.StoreId;
+        }
+        
         PackageId = gameConfig.Identity.Name;
-        BigId = gameConfig.StoreId;
         PackagePreviewImage = LoadBitmapImage(gameConfig.ShellVisuals.Square150x150Logo);
 
         try

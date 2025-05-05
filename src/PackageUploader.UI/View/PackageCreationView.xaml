@@ -7,67 +7,7 @@
              x:Class="PackageUploader.UI.View.PackageCreationView"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageCreationViewModel}">
-
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <!-- Expander Style -->
-            <Style x:Key="ExpanderHeaderStyle" TargetType="ToggleButton">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="ToggleButton">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Path x:Name="arrow" 
-                                      Fill="White" 
-                                      Data="M 0 0 L 4 4 L 8 0 Z" 
-                                      HorizontalAlignment="Center" 
-                                      VerticalAlignment="Center" 
-                                      Margin="5,0,5,0"/>
-                                <ContentPresenter Grid.Column="1" 
-                                                  VerticalAlignment="Center" 
-                                                  ContentSource="Content"/>
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="arrow" Property="Data" Value="M 0 4 L 4 0 L 8 4 Z"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
-            <!-- Updated Expander Style -->
-            <Style x:Key="CustomExpanderStyle" TargetType="Expander">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Expander">
-                            <DockPanel>
-                                <ToggleButton x:Name="HeaderSite" 
-                                              DockPanel.Dock="Top" 
-                                              Content="{TemplateBinding Header}" 
-                                              Style="{StaticResource ExpanderHeaderStyle}" 
-                                              IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
-                                <ContentPresenter x:Name="ExpandSite" 
-                                                  Visibility="Collapsed" 
-                                                  ContentSource="Content" 
-                                                  Margin="10,0,0,0"/>
-                            </DockPanel>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsExpanded" Value="True">
-                                    <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-        </ResourceDictionary>
-    </UserControl.Resources>
-    
+  
     <Grid Background="#25282C">
         <StackPanel Margin="20">
             <!-- Add Back Arrow Icon -->
@@ -517,7 +457,7 @@
                                            Foreground="White"
                                            TextWrapping="Wrap"/>
                             </Grid>
-                            <Grid Grid.Row="1" Grid.Column="1">
+                            <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition />
                                     <RowDefinition />
@@ -551,6 +491,11 @@
                                            Grid.Column="2"
                                            Text="{Binding PackageType}" 
                                            Foreground="White"/>
+                            </Grid>
+                            <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file."
+                                           Foreground="{StaticResource WarningBrush}"
+                                           TextWrapping="Wrap"/>
                             </Grid>
                         </Grid>
                     </Border>

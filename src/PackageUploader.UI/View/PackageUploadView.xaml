@@ -156,11 +156,62 @@
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding PackageErrorMessage}"
                                        Foreground="Red"
-                                       Width="500"
+                                       Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
+                    <Expander Style="{StaticResource CustomExpanderStyle}" Margin="0,10,0,20">
+                        <Expander.Header>
+                            <TextBlock Text="Additional details" 
+                                       Foreground="White"/>
+                        </Expander.Header>
+                        <Grid Margin="0,10,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0"
+                                       Text="StoreId"
+                                       Foreground="White"
+                                       HorizontalAlignment="Left"
+                                       Margin="0,0,0,5"/>
+                            <TextBox Grid.Row="1"
+                                     x:Name="StoreIdTextBox"
+                                     Text="{Binding BigId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Foreground="#D2D2D3"
+                                     Background="#323538"
+                                     Margin="0,0,10,10"
+                                     HorizontalAlignment="Left"
+                                     Width="530"
+                                     IsEnabled="{Binding IsPackageMissingStoreId}">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Border Background="{TemplateBinding Background}" 
+                                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                                        <Grid>
+                                                            <TextBlock Text="Select a package with a StoreId or enter it manually for packages with no StoreId" 
+                                                                       Foreground="Gray" 
+                                                                       VerticalAlignment="Center"
+                                                                       Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                                       Margin="15,2"/>
+                                                            <ScrollViewer x:Name="PART_ContentHost" 
+                                                                          Margin="5,2" 
+                                                                          VerticalAlignment="Center"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Expander>
                 </StackPanel>
                 <StackPanel Grid.Row="1"
                 Grid.Column="0"
@@ -257,7 +308,7 @@
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding BranchOrFlightErrorMessage}"
                                        Foreground="Red"
-                                       Width="500"
+                                       Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -315,7 +366,7 @@
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding MarketGroupErrorMessage}"
                                        Foreground="Red"
-                                       Width="500"
+                                       Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -333,7 +384,7 @@
                             CornerRadius="6"
                             Padding="6"
                             Margin="0, 20, 0, 0"
-                            Visibility="{Binding HasValidPackage, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            Visibility="{Binding ProductName, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition />

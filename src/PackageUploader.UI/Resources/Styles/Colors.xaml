@@ -27,6 +27,8 @@
     <Color x:Key="Gray900">#212121</Color>
     <Color x:Key="Gray950">#141414</Color>
 
+    <Color x:Key="WarningColor">#FFFF00</Color>
+
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
@@ -44,4 +46,6 @@
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
 
     <SolidColorBrush x:Key="LightPurplishBlueBrush" Color="{StaticResource LightPurplishBlue}"/>
+
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
 </ResourceDictionary>
