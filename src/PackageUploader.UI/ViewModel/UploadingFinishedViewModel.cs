@@ -62,7 +62,6 @@ namespace PackageUploader.UI.ViewModel
         }
 
         public ICommand HomeCommand { get; }
-        public ICommand CloseCommand { get; }
         public ICommand ViewLogsCommand { get; }
         public ICommand ViewInPartnerCenterCommand { get; }
 
@@ -77,7 +76,6 @@ namespace PackageUploader.UI.ViewModel
             _pathConfigurationService = pathConfigurationService;
             _logger = logger;
             
-            CloseCommand = new RelayCommand(OnClose);
             HomeCommand = new RelayCommand(OnHome);
             ViewLogsCommand = new RelayCommand(OnViewLogs);
             ViewInPartnerCenterCommand = new RelayCommand(OnViewInPartnerCenter);
@@ -93,11 +91,6 @@ namespace PackageUploader.UI.ViewModel
             PackageFileName = packageInfo.Name;
             PackageSize = TranslateFileSize(packageInfo.Length);
             PackageType = _packageModelProvider.Package.PackageType;
-        }
-
-        public static void OnClose()
-        {
-            System.Windows.Application.Current.Shutdown();
         }
 
         public void OnHome()

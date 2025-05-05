@@ -75,7 +75,6 @@ namespace PackageUploader.UI.ViewModel
 
         public ICommand InstallGameCommand { get; }
         public ICommand ViewPackageCommand { get; }
-        public ICommand CloseCommand { get; }
         public ICommand ConfigureUploadCommand { get; }
         public ICommand ViewLogsCommand { get; }
         public ICommand GoHomeCommand { get; }
@@ -93,7 +92,6 @@ namespace PackageUploader.UI.ViewModel
 
             InstallGameCommand = new RelayCommand(InstallGame, CanInstallGame);
             ViewPackageCommand = new RelayCommand(ViewPackage);
-            CloseCommand = new RelayCommand(Close);
             ConfigureUploadCommand = new RelayCommand(ConfigureUpload);
             ViewLogsCommand = new RelayCommand(ViewLogs);
             GoHomeCommand = new RelayCommand(GoHome);
@@ -193,11 +191,6 @@ namespace PackageUploader.UI.ViewModel
         {
             string logPath = _packageModelProvider.PackagingLogFilepath;
             Process.Start("explorer.exe", $"/select, \"{logPath}\"");
-        }
-
-        public static void Close()
-        {
-            System.Windows.Application.Current.Shutdown();
         }
 
         public async void ConfigureUpload()
