@@ -53,6 +53,11 @@ internal abstract class HttpRestClient : IHttpRestClient
             var result = await response.Content.ReadFromJsonAsync(jsonTypeInfo, ct).ConfigureAwait(false);
             return result;
         }
+        catch (HttpRequestException e) when (e.StatusCode is HttpStatusCode.NotFound && Regex.Match(subUrl, "products/[\\w]+$").Success) 
+        {
+            // This doesn't need logged, similar to behavior when a product is not found by Big ID
+            throw;
+        }
         catch (Exception ex)
         {
             LogException(ex);
