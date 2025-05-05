@@ -120,13 +120,13 @@ public class PackageUploaderServiceTest
     [TestMethod]
     public async Task GetProductByProductIdNullTest()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _packageUploaderService.GetProductByProductIdAsync(null, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _packageUploaderService.GetProductByProductIdAsync(null, CancellationToken.None));
     }
 
     [TestMethod]
     public async Task GetProductByBigIdNullTest()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _packageUploaderService.GetProductByBigIdAsync(null, CancellationToken.None));
+        await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => _packageUploaderService.GetProductByBigIdAsync(null, CancellationToken.None));
     }
 
     [TestMethod]
