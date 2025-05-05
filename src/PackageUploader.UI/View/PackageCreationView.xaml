@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              x:Class="PackageUploader.UI.View.PackageCreationView"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageCreationViewModel}">
 
@@ -82,11 +83,15 @@
                 </Button>
             </StackPanel>
 
-            <TextBlock Text="Make a game package"
+            <TextBlock 
+                   Text="{x:Static strings:PackageCreation.TitleString}"
+                   d:Text="Make a game package"
                    Style="{StaticResource Headline}"
                    Foreground="White"
                    HorizontalAlignment="Left"/>
-            <TextBlock Text="Locate your game's build to create a package. The Xbox Package Tool will remember these paths for easier access in the future."
+            <TextBlock 
+                   Text="{x:Static strings:PackageCreation.SubTitleText}"
+                   d:Text="Locate your game's build to create a package. The Xbox Package Tool will remember these paths for easier access in the future."
                    HorizontalAlignment="Left"
                    Foreground="White"
                    TextWrapping="Wrap"
@@ -138,26 +143,30 @@
                             <ColumnDefinition Width="96"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0" 
-                               Text="Build location" 
+                               Text="{x:Static strings:PackageCreation.BuildLocationTitle}"
+                               d:Text="Build location" 
                                Style="{StaticResource SubHeadline}"
                                Foreground="White"
                                HorizontalAlignment="Left"
                                Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
-                               Text="Locate your game files to package. Add a layout file under Additional Details. See docs for more information."
+                               Text="{x:Static strings:PackageCreation.BuildLocationText}"
+                               d:Text="Locate your game files to package. Add a layout file under Additional Details. See docs for more information."
                                HorizontalAlignment="Left"
                                Foreground="White"
                                TextWrapping="Wrap"
                                Margin="0,0,0,10"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="Game path"
+                                   Text="{x:Static strings:PackageCreation.GamePathTitleText}"
+                                   d:Text="Game path"
                                    Foreground="White"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="Required"
+                                   Text="{x:Static strings:PackageCreation.RequiredText}"
+                                   d:Text="Required"
                                    Foreground="{StaticResource Gray300Brush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
@@ -177,7 +186,8 @@
                                                     BorderBrush="{TemplateBinding BorderBrush}" 
                                                     BorderThickness="{TemplateBinding BorderThickness}">
                                                     <Grid>
-                                                        <TextBlock Text="Select or enter the game's location" 
+                                                        <TextBlock Text="{x:Static strings:PackageCreation.GamePathBoxDefaultText}"
+                                                                   d:Text="Select or enter the game's location" 
                                                                    Foreground="Gray" 
                                                                    VerticalAlignment="Center"
                                                                    Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
@@ -194,7 +204,8 @@
                             </TextBox.Style>
                         </TextBox>
                         <Button Grid.Row="3" Grid.Column="2"
-                            Content="Browse"
+                            d:Content="Browse"
+                            Content="{x:Static strings:PackageCreation.BrowseText}"
                             Command="{Binding BrowseGameDataPathCommand}"
                             IsEnabled="True"
                             Margin="0,0,0,10"/>
@@ -215,8 +226,9 @@
                     </Grid>
                     <Expander Style="{StaticResource CustomExpanderStyle}" Margin="0,10,0,20">
                         <Expander.Header>
-                            <TextBlock Text="Additional details" 
-                                   Foreground="White"/>
+                            <TextBlock Text="{x:Static strings:PackageCreation.AdditionalDetailsTitle}"
+                                       d:Text="Additional details" 
+                                       Foreground="White"/>
                         </Expander.Header>
                         <Grid Margin="0,10,0,0">
                             <Grid.RowDefinitions>
@@ -232,21 +244,23 @@
                                 <ColumnDefinition Width="96" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Layout file/content map"
+                                   Text="{x:Static strings:PackageCreation.LayoutFileMapTitle}"
+                                   d:Text="Layout file/content map"
                                    Foreground="White"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
-                                       Text="Optional"
+                                       Text="{x:Static strings:PackageCreation.OptionalText}"
+                                       d:Text="Optional"
                                        Foreground="{StaticResource Gray300Brush}"
                                        HorizontalAlignment="Right"
                                        Margin="0,0,10,5"/>
                             <TextBox Grid.Row="1" Grid.Column="0"
                                  x:Name="MappingDataTextBox"
                                  Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="#D2D2D3"
-                                 Background="#323538"
+                                 Foreground="{StaticResource Gray150Brush}"
+                                 Background="{StaticResource Gray700Brush}"
                                  Margin="0,0,10,10">
                                 <TextBox.Style>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -257,7 +271,8 @@
                                                         BorderBrush="{TemplateBinding BorderBrush}" 
                                                         BorderThickness="{TemplateBinding BorderThickness}">
                                                         <Grid>
-                                                            <TextBlock Text="Select or enter the content map location" 
+                                                            <TextBlock Text="{x:Static strings:PackageCreation.ContentMapPathBoxDefaultText}"
+                                                                       d:Text="Select or enter the content map location" 
                                                                        Foreground="Gray" 
                                                                        VerticalAlignment="Center"
                                                                        Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
@@ -274,7 +289,8 @@
                                 </TextBox.Style>
                             </TextBox>
                             <Button Grid.Row="1" Grid.Column="1"
-                                Content="Browse"
+                                d:Content="Browse"
+                                Content="{x:Static strings:PackageCreation.BrowseText}"
                                 Command="{Binding BrowseMappingDataXmlPathCommand}"
                                 IsEnabled="True"
                                 Margin="0,0,0,10"/>
@@ -296,14 +312,16 @@
                             </StackPanel>
 
                             <TextBlock Grid.Row="3" Grid.Column="0"
-                                       Text="Folder path for SubmissionValidator.dll"
+                                       Text="{x:Static strings:PackageCreation.ValidatorPathTitleText}"
+                                       d:Text="Folder path for SubmissionValidator.dll"
                                        Foreground="White"
                                        HorizontalAlignment="Left"
                                        Margin="0,0,0,5"
                                        Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             <TextBlock Grid.Row="3"
                                        Grid.Column="0"
-                                       Text="Optional"
+                                       Text="{x:Static strings:PackageCreation.OptionalText}"
+                                       d:Text="Optional"
                                        Foreground="{StaticResource Gray300Brush}"
                                        HorizontalAlignment="Right"
                                        Margin="0,0,10,5"/>
@@ -324,7 +342,8 @@
                                                             BorderBrush="{TemplateBinding BorderBrush}" 
                                                             BorderThickness="{TemplateBinding BorderThickness}">
                                                         <Grid>
-                                                            <TextBlock Text="Select or enter the folder path for SubmissionValidator.dll" 
+                                                            <TextBlock Text="{x:Static strings:PackageCreation.ValidatorPathBoxDefaultText}"
+                                                                       d:Text="Select or enter the folder path for SubmissionValidator.dll" 
                                                                        Foreground="Gray"
                                                                        VerticalAlignment="Center"
                                                                        Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
@@ -342,7 +361,8 @@
                             </TextBox>
                             <Button Grid.Row="4" 
                                     Grid.Column="1"
-                                    Content="Browse"
+                                    Content="{x:Static strings:PackageCreation.BrowseText}"
+                                    d:Content="Browse"
                                     Command="{Binding BrowseSubValPathCommand}"
                                     Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
@@ -374,7 +394,7 @@
                         CornerRadius="12"
                         VerticalAlignment="Top"
                         Padding="2"
-                        BorderBrush="#B8B4FF"
+                        BorderBrush="{StaticResource LightPurplishBlueBrush}"
                         BorderThickness="1">
                         <TextBlock Text="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
@@ -396,33 +416,37 @@
                             <ColumnDefinition Width="96"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0"
-                               Text="Package output location"
+                               Text="{x:Static strings:PackageCreation.PackageOutputTitleText}"
+                               d:Text="Package output location"
                                Style="{StaticResource SubHeadline}"
                                Foreground="White"
                                HorizontalAlignment="Left"
                                Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
-                               Text="Select the package output location."
+                               Text="{x:Static strings:PackageCreation.PackageOutputBoxText}"
+                               d:Text="Select the package output location."
                                HorizontalAlignment="Left"
                                Foreground="White"
                                TextWrapping="Wrap"
                                Margin="0,0,0,10"/>
                         <TextBlock Grid.Row="2" Grid.Column="0"
-                                Text="Package path"
+                                Text="{x:Static strings:PackageCreation.PackagePathTitleText}"
+                                d:Text="Package path"
                                 Foreground="White"
                                 HorizontalAlignment="Left"
                                 Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="Optional"
+                                   Text="{x:Static strings:PackageCreation.OptionalText}"
+                                   d:Text="Optional"
                                    Foreground="{StaticResource Gray300Brush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3" Grid.Column="0"
                                 x:Name="PackagePathTextBox"
                                 Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                Foreground="#D2D2D3"
-                                Background="#323538">
+                                 Foreground="{StaticResource Gray150Brush}"
+                                 Background="{StaticResource Gray700Brush}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Template">
@@ -432,7 +456,8 @@
                                                     BorderBrush="{TemplateBinding BorderBrush}" 
                                                     BorderThickness="{TemplateBinding BorderThickness}">
                                                     <Grid>
-                                                        <TextBlock Text="Select or enter the package output location" 
+                                                        <TextBlock Text="{x:Static strings:PackageCreation.PackageOutputBoxText}"
+                                                                   d:Text="Select or enter the package output location" 
                                                                    Foreground="Gray"
                                                                    VerticalAlignment="Center"
                                                                    Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
@@ -449,7 +474,8 @@
                             </TextBox.Style>
                         </TextBox>
                         <Button Grid.Row="3" Grid.Column="2"
-                                Content="Browse"
+                                Content="{x:Static strings:PackageCreation.BrowseText}"
+                                d:Content="Browse"
                                 Command="{Binding BrowsePackageOutputPathCommand}"/>
 
                         <StackPanel Grid.Row="4"
@@ -471,7 +497,8 @@
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{StaticResource Gray500Brush}" Margin="10,0" />
                 <StackPanel Grid.Column="3" Grid.Row="0" Margin="10,0,0,0">
-                    <TextBlock Text="Package Preview"
+                    <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewTitleText}"
+                               d:Text="Package Preview"
                                Style="{StaticResource SubHeadline}"
                                Foreground="White"
                                HorizontalAlignment="Left"
@@ -509,7 +536,8 @@
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0"
                                            HorizontalAlignment="Left"
-                                           Text="Package ID" 
+                                           Text="{x:Static strings:PackageCreation.PackagePreviewPackageIdText}"
+                                           d:Text="Package ID" 
                                            Foreground="{StaticResource Gray300Brush}"/>
                                 <TextBlock Grid.Row="1"
                                            HorizontalAlignment="Left"
@@ -529,7 +557,8 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Row="0"
                                            Grid.Column="0"
-                                           Text="StoreId: "
+                                           Text="{x:Static strings:PackageCreation.PackagePreviewStoreIdText}"
+                                           d:Text="StoreId: "
                                            Foreground="{StaticResource Gray300Brush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="0"
@@ -537,7 +566,8 @@
                                            Foreground="White"/>
                                 <TextBlock Grid.Row="0"
                                            Grid.Column="1"
-                                           Text="Size estimate" 
+                                           Text="{x:Static strings:PackageCreation.PackagePreviewSizeEstimate}"
+                                           d:Text="Size estimate" 
                                            Foreground="{StaticResource Gray300Brush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="1"
@@ -545,7 +575,8 @@
                                            Foreground="White"/>
                                 <TextBlock Grid.Row="0"
                                            Grid.Column="2"
-                                           Text="Family" 
+                                           Text="{x:Static strings:PackageCreation.PackagePreviewFamilyText}"
+                                           d:Text="Family" 
                                            Foreground="{StaticResource Gray300Brush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="2"
@@ -557,12 +588,14 @@
                 </StackPanel>
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <Button Content="Cancel"
+                <Button Content="{x:Static strings:PackageCreation.CancelButtonText}"
+                        d:Content="Cancel"
                         Command="{Binding CancelButtonCommand}"
                         Width="90"
                         Height="32"
                         Margin="0,0,10,0" />
-                <Button Content="Create package"
+                <Button Content="{x:Static strings:PackageCreation.CreatePackageButtonText}"
+                        d:Content="Create package"
                         Command="{Binding MakePackageCommand}"
                         Width="128"
                         Height="34"/>

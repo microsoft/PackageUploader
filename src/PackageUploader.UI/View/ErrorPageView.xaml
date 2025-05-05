@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PackageUploader.UI.View"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=viewmodel:ErrorScreenViewModel}"
              Background="Black">
@@ -21,7 +22,8 @@
                    Height="130"
                    Width="130" />
             <TextBlock Style="{StaticResource SubHeadline}" 
-                       Text="We've run into an issue, go back to fix"
+                       Text="{x:Static strings:ErrorPage.ErrorTitleString}"
+                       d:Text="We've run into an issue, go back to fix"
                        Foreground="White"
                        HorizontalAlignment="Center"
                        Margin="0, 0, 0, 23" />
