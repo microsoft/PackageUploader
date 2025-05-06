@@ -19,6 +19,8 @@ namespace PackageUploader.UI.ViewModel;
 
 public partial class PackageUploadViewModel : BaseViewModel
 {
+    private const int MinimumBigIdLength = 12;
+
     private readonly PackageModelProvider _packageModelService;
     private readonly IPackageUploaderService _uploaderService;
     private readonly IWindowService _windowService;
@@ -396,7 +398,6 @@ public partial class PackageUploadViewModel : BaseViewModel
     public ICommand CancelButtonCommand { get; }
 
     private readonly string ConfileFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_GeneratedConfig_{DateTime.Now:yyyyMMddHHmmss}.log");
-
     private CancellationTokenSource? _uploadCancellationTokenSource;
     private bool _isUserCancelled = false;
 
@@ -688,7 +689,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private async void GetProductInfoAsync()
     {
-        if (string.IsNullOrEmpty(BigId) || BigId.Length < 12)
+        if (string.IsNullOrEmpty(BigId) || BigId.Length < MinimumBigIdLength)
         {
             ResetProductInfo();
             return;
