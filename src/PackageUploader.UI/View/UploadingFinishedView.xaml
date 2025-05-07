@@ -119,13 +119,7 @@
                     Command="{Binding ViewLogsCommand}"
                     Style="{StaticResource HyperlinkButtonStyle}"
                     Margin="0, 0, 20, 20" />
-            <Button Content="Close"
-                    Command="{Binding CloseCommand}"
-                    IsEnabled="True"
-                    Margin="0, 0, 10, 20"
-                    Width="150"
-                    Height="30"/>
-            <Button Content="Back to Home"
+            <Button Content="Go Home"
                     Command="{Binding HomeCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 20, 20"

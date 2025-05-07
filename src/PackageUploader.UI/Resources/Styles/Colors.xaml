@@ -37,6 +37,8 @@
     <Color x:Key="ErrorRedTransluscent">#1AFF889B</Color>
 
 
+    <Color x:Key="WarningColor">#FFFF00</Color>
+
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
@@ -61,4 +63,6 @@
     <SolidColorBrush x:Key="ErrorRedTransluscentBrush" Color="{StaticResource ErrorRedTransluscent}"/>
 
     <SolidColorBrush x:Key="LightPurplishBlueBrush" Color="{StaticResource LightPurplishBlue}"/>
+
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
 </ResourceDictionary>
