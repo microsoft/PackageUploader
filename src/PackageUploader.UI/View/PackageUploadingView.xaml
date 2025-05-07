@@ -6,6 +6,7 @@
              x:Class="PackageUploader.UI.View.PackageUploadingView"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageUploadingViewModel}"
              Background="{StaticResource Gray800Brush}">
@@ -43,7 +44,8 @@
         <TextBlock Grid.Row="1"
                    Margin="0, 0, 0, 23"
                    Style="{StaticResource SubHeadline}"
-                   Text="Uploading package to partner center"
+                   Text="{x:Static strings:PackageUploading.TitleText}"
+                   d:Text="Uploading package to partner center"
                    Foreground="White" />
         <!-- Loading Bar -->
         <Grid Grid.Row="2"

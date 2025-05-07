@@ -2,7 +2,7 @@
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
+    
     <!-- Colors -->
     <Color x:Key="Primary">#3E434B</Color>
     <Color x:Key="PrimaryDark">#ac99ea</Color>
