@@ -15,9 +15,9 @@ internal class UploadConfig
     public string? flightName { get; set; }
     public string marketGroupName { get; set; } = "default";
     public string packageFilePath { get; set; } = string.Empty;
-    public bool deltaUpload { get; set; } = false;
+    public bool deltaUpload { get; set; } = true;
     public GameAssets gameAssets { get; set; } = new GameAssets();
-    public int minutesToWaitForProcessing { get; set; } = 30;
+    public int minutesToWaitForProcessing { get; set; } = 60;
     public AvailabilityDate? availabilityDate { get; set; }
     public AvailabilityDate? preDownloadDate { get; set; }
     public UploadClientConfig uploadConfig { get; set; } = new UploadClientConfig();
@@ -48,7 +48,7 @@ internal class AvailabilityDate
 
 internal class UploadClientConfig
 {
-    public int httpTimeoutMs { get; set; } = 5000;
+    public int httpTimeoutMs { get; set; } = 300000;
     public int httpUploadTimeoutMs { get; set; } = 300000;
     public int maxParallelism { get; set; } = 24;
     public int defaultConnectionLimit { get; set; } = -1;

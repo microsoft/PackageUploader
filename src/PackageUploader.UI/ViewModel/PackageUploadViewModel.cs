@@ -14,12 +14,18 @@ using PackageUploader.UI.View;
 using System.IO;
 using PackageUploader.UI.Model;
 using System.Windows.Media.Imaging;
+using System.Text.Json;
 
 namespace PackageUploader.UI.ViewModel;
 
 public partial class PackageUploadViewModel : BaseViewModel
 {
     private const int MinimumBigIdLength = 12;
+
+    private readonly JsonSerializerOptions HumanReadableJson = new()
+    {
+        WriteIndented = true // Enable human-readable JSON formatting
+    };
 
     private readonly PackageModelProvider _packageModelService;
     private readonly IPackageUploaderService _uploaderService;
@@ -845,11 +851,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private void GenerateUploaderConfig()
     {
-        if (_branchesAndFlights == null)
-        {
-            return;
-        }
-        var branchOrFlight = _branchesAndFlights.FirstOrDefault(x => x.Name == BranchOrFlightDisplayName);
+        IGamePackageBranch? branchOrFlight = GetBranchOrFlightFromUISelection();
 
         if (branchOrFlight == null)
         {
@@ -870,7 +872,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             }
         };
 
-        string configFileText = System.Text.Json.JsonSerializer.Serialize(config);
+        string configFileText = JsonSerializer.Serialize(config, HumanReadableJson);
         File.WriteAllText(ConfileFilePath, configFileText);
     }
 
