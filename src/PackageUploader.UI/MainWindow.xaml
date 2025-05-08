@@ -12,7 +12,8 @@
         Background="#25282C"
         WindowStyle="None"
         ResizeMode="NoResize"
-        AllowsTransparency="True">
+        AllowsTransparency="True"
+        Icon="Resources/AppIcon/WindowsIcon.png">
     
     <WindowChrome.WindowChrome>
         <WindowChrome 
