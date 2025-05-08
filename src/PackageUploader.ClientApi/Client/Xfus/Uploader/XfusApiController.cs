@@ -44,6 +44,13 @@ internal class XfusApiController
         var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _uploadConfig.MaxParallelism };
         var uploadBlock = new ActionBlock<Block>(async block =>
         {
+            // Avoid a cancellation requiring reading ALL pending blocks from
+            // the package before the cancellation can be completed.
+            if (ct.IsCancellationRequested)
+            {
+                return;
+            }
+
             byte[] buffer;
             try
             {
@@ -62,10 +69,13 @@ internal class XfusApiController
 
                 await UploadBlockFromPayloadAsync(block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
 
-                blockProgressReporter.BlocksLeftToUpload--;
-                blockProgressReporter.BytesUploaded += bytesRead;
-                _logger.LogTrace("Uploaded block {blockId}. Total uploaded: {bytesUploaded} / {totalBlockBytes}.", block.Id, new ByteSize(blockProgressReporter.BytesUploaded), new ByteSize(blockProgressReporter.TotalBlockBytes));
-                blockProgressReporter.ReportProgress();
+                lock (blockProgressReporter)
+                {
+                    blockProgressReporter.BlocksLeftToUpload--;
+                    blockProgressReporter.BytesUploaded += bytesRead;
+                    _logger.LogTrace("Uploaded block {blockId}. Total uploaded: {bytesUploaded} / {totalBlockBytes}.", block.Id, new ByteSize(blockProgressReporter.BytesUploaded), new ByteSize(blockProgressReporter.TotalBlockBytes));
+                    blockProgressReporter.ReportProgress();
+                }
                 bytesProgress?.Report((ulong)bytesRead);
             }
             // Swallow exceptions so other chunk upload can proceed without ActionBlock terminating
