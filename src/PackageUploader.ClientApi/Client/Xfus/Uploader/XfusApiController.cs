@@ -73,6 +73,7 @@ internal class XfusApiController
             catch (Exception e)
             {
                 _logger.LogTrace(e, "Block {blockId} failed, will retry.", block.Id);
+                LogXfusExceptionDetails(e, "XFUS block upload", assetId, block.Id);
                 return;
             }
 
@@ -91,54 +92,91 @@ internal class XfusApiController
 
     internal async Task UploadBlockFromPayloadAsync(long contentLength, Guid assetId, long blockId, byte[] payload, CancellationToken ct)
     {
-        using var req = CreateStreamRequest(HttpMethod.Put, $"{assetId}/blocks/{blockId}/source/payload", payload, contentLength);
-
-        var response = await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
+            using var req = CreateStreamRequest(HttpMethod.Put, $"{assetId}/blocks/{blockId}/source/payload", payload, contentLength);
+
+            var response = await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
+            }
+        }
+        catch (Exception exception)
+        {
+            LogXfusExceptionDetails(exception, "XFUS block payload upload", assetId, blockId);
+            throw;
         }
     }
 
     internal async Task<UploadProgress> InitializeAssetAsync(Guid assetId, FileInfo uploadFile, bool deltaUpload, CancellationToken ct)
     {
-        _logger.LogInformation("Calling XFUS with AssetId: {assetId}", assetId);
+        try {
+            _logger.LogInformation("Calling XFUS with AssetId: {assetId}", assetId);
 
-        var properties = new UploadProperties
-        {
-            FileProperties = new FileProperties
+            var properties = new UploadProperties
             {
-                Name = uploadFile.Name,
-                Size = uploadFile.Length,
+                FileProperties = new FileProperties
+                {
+                    Name = uploadFile.Name,
+                    Size = uploadFile.Length,
+                }
+            };
+
+            using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", deltaUpload, properties, XfusJsonSerializerContext.Default.UploadProperties);
+            using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
+
+            var response = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
             }
-        };
 
-        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", deltaUpload, properties, XfusJsonSerializerContext.Default.UploadProperties);
-        using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
-
-        var response = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
-        
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
+            var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
+            return uploadProgress;
         }
-
-        var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
-        return uploadProgress;
+        catch (Exception exception) {
+            LogXfusExceptionDetails(exception, "XFUS asset initialization", assetId);
+            throw;
+        }
     }
 
     internal async Task<UploadProgress> ContinueAssetAsync(Guid assetId, bool deltaUpload, CancellationToken ct)
     {
-        using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", deltaUpload, string.Empty, XfusJsonSerializerContext.Default.String);
-
-        var response = await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
-        }
+            using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/continue", deltaUpload, string.Empty, XfusJsonSerializerContext.Default.String);
 
-        var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
-        return uploadProgress;
+            var response = await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new XfusServerException(response.StatusCode, response.ReasonPhrase);
+            }
+
+            var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
+            return uploadProgress;
+        }
+        catch (Exception exception)
+        {
+            LogXfusExceptionDetails(exception, "XFUS asset continuation", assetId);
+            throw;
+        }
+    }
+
+    private void LogXfusExceptionDetails(Exception exception, string operationType, Guid assetId, long? blockId = null)
+    {
+        var blockIdInfo = blockId.HasValue ? $" - Block ID: {blockId}" : "";
+        
+        _logger.LogError(exception, 
+            "XFUS Endpoint Error: {operationType} failed for AssetId: {assetId}{blockIdInfo}.\n" +
+            "To report this issue:\n" +
+            "1. Save the log file\n" +
+            "2. Contact the Package Uploader support team with the AssetId and error details\n" + 
+            "3. Consider opening a support ticket with Partner Center referencing the XFUS failure\n",
+            operationType, assetId, blockIdInfo);
     }
 
     private static HttpRequestMessage CreateJsonRequest<T>(HttpMethod method, string url, bool deltaUpload, T content, JsonTypeInfo<T> jsonTypeInfo)

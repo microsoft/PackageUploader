@@ -258,54 +258,62 @@ public class PackageUploaderService : IPackageUploaderService
             throw new FileNotFoundException("Package file not found.", packageFile.FullName);
         }
 
-        var xvcTargetPlatform = isXvc ? ReadXvcTargetPlatformFromMetaData(packageFile) : XvcTargetPlatform.NotSpecified;
-
-        _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
-        var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, isXvc, xvcTargetPlatform, ct).ConfigureAwait(false);
-
-        currentProgress.Stage = PackageUploadingProgressStage.UploadingPackage;
-        progress?.Report(currentProgress);
-
-        if (gameAssets is not null)
+        try
         {
-            // Upload EKB file if exists
-            if (!string.IsNullOrEmpty(gameAssets.EkbFilePath))
-            {
-                await UploadAssetAsync(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, bytesProgress, ct).ConfigureAwait(false);
-            }
-        }
+            var xvcTargetPlatform = isXvc ? ReadXvcTargetPlatformFromMetaData(packageFile) : XvcTargetPlatform.NotSpecified;
 
-        _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
-        await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, deltaUpload, bytesProgress, ct).ConfigureAwait(false);
-        _logger.LogDebug("Package file '{fileName}' uploaded.", packageFile.Name);
+            _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
+            var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, isXvc, xvcTargetPlatform, ct).ConfigureAwait(false);
 
-        currentProgress.Stage = PackageUploadingProgressStage.ProcessingPackage;
-        progress?.Report(currentProgress);
-
-        package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
-        _logger.LogInformation("Package is uploaded and is in processing.");
-
-        package = await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
-
-        if (gameAssets is not null)
-        {
-            currentProgress.Stage = PackageUploadingProgressStage.UploadingSupplementalFiles;
+            currentProgress.Stage = PackageUploadingProgressStage.UploadingPackage;
             progress?.Report(currentProgress);
 
-            // Upload the remaining assets
-            await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, bytesProgress, ct).ConfigureAwait(false);
+            if (gameAssets is not null)
+            {
+                // Upload EKB file if exists
+                if (!string.IsNullOrEmpty(gameAssets.EkbFilePath))
+                {
+                    await UploadAssetAsync(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, bytesProgress, ct).ConfigureAwait(false);
+                }
+            }
+
+            _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
+            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, deltaUpload, bytesProgress, ct).ConfigureAwait(false);
+            _logger.LogDebug("Package file '{fileName}' uploaded.", packageFile.Name);
+
+            currentProgress.Stage = PackageUploadingProgressStage.ProcessingPackage;
+            progress?.Report(currentProgress);
+
+            package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
+            _logger.LogInformation("Package is uploaded and is in processing.");
+
+            package = await WaitForPackageProcessingAsync(product, package, minutesToWaitForProcessing, 1, ct).ConfigureAwait(false);
+
+            if (gameAssets is not null)
+            {
+                currentProgress.Stage = PackageUploadingProgressStage.UploadingSupplementalFiles;
+                progress?.Report(currentProgress);
+
+                // Upload the remaining assets
+                await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, bytesProgress, ct).ConfigureAwait(false);
             
-            await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, bytesProgress, ct).ConfigureAwait(false);
+                await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, bytesProgress, ct).ConfigureAwait(false);
             
-            await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, bytesProgress, ct).ConfigureAwait(false);
+                await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, bytesProgress, ct).ConfigureAwait(false);
+            }
+
+            // Set progress to 100% when complete
+            currentProgress.Stage = PackageUploadingProgressStage.Done;
+            currentProgress.Percentage = 100;
+            progress?.Report(currentProgress);
+
+            return package;
         }
-
-        // Set progress to 100% when complete
-        currentProgress.Stage = PackageUploadingProgressStage.Done;
-        currentProgress.Percentage = 100;
-        progress?.Report(currentProgress);
-
-        return package;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while uploading the package '{fileName}' to branch '{branchName}' in product '{productId}'.", packageFile.Name, packageBranch.Name, product.ProductId);
+            throw;
+        }
     }
 
     public async Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, string packageFileName, CancellationToken ct)
@@ -415,7 +423,7 @@ public class PackageUploaderService : IPackageUploaderService
                     if (gameConfiguration.AvailabilityDate.IsEnabled)
                     {
                         marketGroupPackage.PackageAvailabilityDates ??= [];
-                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = gameConfiguration.AvailabilityDate.EffectiveDate;
+                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = gameConfiguration.AvailabilityDate.GetEffectiveDate();
                     }
                     else if (marketGroupPackage.PackageAvailabilityDates is not null)
                     {
@@ -458,7 +466,7 @@ public class PackageUploaderService : IPackageUploaderService
                     if (gameConfiguration.AvailabilityDate is not null)
                     {
                         marketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
-                            ? gameConfiguration.AvailabilityDate.EffectiveDate
+                            ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
                             : null;
                     }
 
@@ -468,7 +476,7 @@ public class PackageUploaderService : IPackageUploaderService
                         marketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                         {
                             IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                            EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
+                            EffectiveDate = gameConfiguration.MandatoryDate.GetEffectiveDate(),
                         };
                     }
                 }
@@ -553,7 +561,7 @@ public class PackageUploaderService : IPackageUploaderService
                                     if (gameConfiguration?.AvailabilityDate is not null)
                                     {
                                         destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
-                                            ? gameConfiguration.AvailabilityDate.EffectiveDate
+                                            ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
                                             : null;
                                     }
                                     else
@@ -580,7 +588,7 @@ public class PackageUploaderService : IPackageUploaderService
                                     if (gameConfiguration?.AvailabilityDate is not null)
                                     {
                                         destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
-                                            ? gameConfiguration.AvailabilityDate.EffectiveDate
+                                            ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
                                             : null;
                                     }
                                     else
@@ -605,7 +613,7 @@ public class PackageUploaderService : IPackageUploaderService
                             if (gameConfiguration.AvailabilityDate is not null)
                             {
                                 destinationMarketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
-                                    ? gameConfiguration.AvailabilityDate.EffectiveDate
+                                    ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
                                     : null;
                             }
                             if (gameConfiguration.MandatoryDate is not null)
@@ -613,7 +621,7 @@ public class PackageUploaderService : IPackageUploaderService
                                 destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                                 {
                                     IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                                    EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
+                                    EffectiveDate = gameConfiguration.MandatoryDate.GetEffectiveDate(),
                                 };
                             }
                         }
@@ -624,7 +632,7 @@ public class PackageUploaderService : IPackageUploaderService
                             {
                                 destinationMarketGroupPackage.AvailabilityDate =
                                     gameConfiguration.AvailabilityDate.IsEnabled
-                                        ? gameConfiguration.AvailabilityDate.EffectiveDate
+                                        ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
                                         : null;
                             }
 
@@ -635,7 +643,7 @@ public class PackageUploaderService : IPackageUploaderService
                                 destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                                 {
                                     IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                                    EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
+                                    EffectiveDate = gameConfiguration.MandatoryDate.GetEffectiveDate(),
                                 };
                             }
                         }
@@ -819,7 +827,7 @@ public class PackageUploaderService : IPackageUploaderService
     {
         return new GameMarketGroupPackageMetadata
         {
-            PreDownloadDate = preDownloadDate?.IsEnabled == true ? preDownloadDate.EffectiveDate : null,
+            PreDownloadDate = preDownloadDate?.IsEnabled == true ? preDownloadDate.GetEffectiveDate() : null,
         };
     }
 
