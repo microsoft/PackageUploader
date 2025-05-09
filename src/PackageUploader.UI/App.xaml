@@ -7,7 +7,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <!-- Default to Colors.Dark.xaml, will be swapped at runtime -->
+                <ResourceDictionary Source="Resources/Styles/Colors.Dark.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/WindowStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>

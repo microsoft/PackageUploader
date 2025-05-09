@@ -11,8 +11,8 @@
              Background="Black">
     <Border HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Background="{StaticResource Gray800Brush}"
-            BorderBrush="{StaticResource Gray800Brush}"
+            Background="{DynamicResource AppBackgroundBrush}"
+            BorderBrush="{DynamicResource AppBackgroundBrush}"
             BorderThickness="1"
             CornerRadius="6">
         <StackPanel Orientation="Vertical" Margin="20">
@@ -24,13 +24,13 @@
             <TextBlock Style="{StaticResource SubHeadline}" 
                        Text="{x:Static strings:ErrorPage.ErrorTitleString}"
                        d:Text="We've run into an issue, go back to fix"
-                       Foreground="White"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Center"
                        Margin="0, 0, 0, 23" />
-            <Border Background="{StaticResource ErrorRedTransluscentBrush}"
+            <Border Background="{DynamicResource ErrorRedTransluscentBrush}"
                     Margin="40,10,40,10"
                     CornerRadius="6"
-                    BorderBrush="{StaticResource ErrorRedTransluscentBrush}">
+                    BorderBrush="{DynamicResource ErrorRedTransluscentBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition />
@@ -51,13 +51,13 @@
                                Grid.Column="1"
                                Style="{StaticResource SubHeadline}"
                                Text="{Binding ErrorTitle, Mode=OneWay}"
-                               Foreground="{StaticResource ErrorRedBrush}"
+                               Foreground="{DynamicResource ErrorRedBrush}"
                                HorizontalAlignment="Left"
                                Margin="10, 10, 0, 0" />
                     <TextBlock Grid.Row="1"
                                Grid.ColumnSpan="2"
                                Text="{Binding ErrorDescription, Mode=OneWay}"
-                               Foreground="White"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                Margin="10, 10, 20, 20"
                                MaxHeight="300"/>
                     <Button Grid.Row="2"

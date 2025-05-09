@@ -8,14 +8,14 @@
              x:Class="PackageUploader.UI.View.MainPageView"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:MainPageViewModel}"
-             Background="{StaticResource Gray800Brush}">
+             Background="{DynamicResource AppBackgroundBrush}">
 
     <StackPanel Orientation="Vertical" Margin="30,0" >
         <TextBlock 
                Text="{x:Static strings:MainPage.TitleTextBlock}"
                d:Text="Make a package and upload it to Microsoft Partner Center" 
                Style="{StaticResource Headline}"
-               Foreground="White"
+               Foreground="{DynamicResource PrimaryTextBrush}"
                HorizontalAlignment="Left"
                Margin="0,25,0,25"/>
         
@@ -23,7 +23,7 @@
                Text="{x:Static strings:MainPage.SubTitleTextBlock}"
                d:Text="The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload."  
                HorizontalAlignment="Left"
-               Foreground="White"
+               Foreground="{DynamicResource PrimaryTextBrush}"
                TextWrapping="Wrap"/>
 
         <TextBlock Text="{Binding MakePkgUnavailableErrorMessage}"
@@ -45,7 +45,7 @@
             
             <Border Grid.Row="0" 
                     Grid.ColumnSpan="3" 
-                    Background="{StaticResource Gray900Brush}"
+                    Background="{DynamicResource Gray900Brush}"
                     Margin="0, 0, 0, 20"
                     Padding="10" 
                     CornerRadius="5"
@@ -57,13 +57,13 @@
                        d:Text="Sign in"
                        Style="{StaticResource SubHeadline}"
                        HorizontalAlignment="Left"
-                       Foreground="White" />
+                       Foreground="{DynamicResource PrimaryTextBrush}" />
 
                     <TextBlock Margin="0, 10, 0, 0"
                                Text="{x:Static strings:MainPage.SignInPreLoginText}"
                                d:Text="For seamless access to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files."
                                HorizontalAlignment="Left" 
-                               Foreground="{StaticResource DarkerTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                TextWrapping="Wrap"
                                Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
 
@@ -71,7 +71,7 @@
                                Text="{x:Static strings:MainPage.SignInLogginInText}"
                                d:Text="We are attempting to retrieve your sign-in information. If a browser page does not open within a few seconds, please click the sign-in button again to retry."
                                HorizontalAlignment="Left"
-                               Foreground="{StaticResource DarkerTextBrush}"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                TextWrapping="Wrap"
                                Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
@@ -87,7 +87,7 @@
 
             <Border Grid.Column="0"
                     Grid.Row="2"
-                    Background="{StaticResource Gray900Brush}"
+                    Background="{DynamicResource Gray900Brush}"
                     Padding="10"
                     CornerRadius="5">
                 <StackPanel HorizontalAlignment="Left"
@@ -97,11 +97,11 @@
                        d:Text="Make a package"
                        Style="{StaticResource SubHeadline}"
                        HorizontalAlignment="Left" 
-                       Foreground="White" />
+                       Foreground="{DynamicResource PrimaryTextBrush}" />
                        
                     <TextBlock Margin="0, 10, 0, 0"
                                TextWrapping="Wrap"
-                               Foreground="{StaticResource DarkerTextBrush}">
+                               Foreground="{DynamicResource SecondaryTextBrush}">
                         <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextOne}"
                             d:Text="Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file "/>
                         <Hyperlink Command="{Binding PackagingLearnMoreURL}" 
@@ -125,21 +125,21 @@
 
             <Border Grid.Column="2"
                     Grid.Row="2"
-                    Background="{StaticResource Gray900Brush}"
+                    Background="{DynamicResource Gray900Brush}"
                     Padding="10"
                     CornerRadius="5">
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock Text="{x:Static strings:MainPage.UploadPackageBlockTitle}"
                         d:Text="Upload a package (sign in required)"
                        Style="{StaticResource SubHeadline}"
-                       Foreground="White"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left" />
 
                     <TextBlock Margin="0, 10, 0, 0" TextWrapping="Wrap"
                        Text="{x:Static strings:MainPage.UploadPackageBlockBody}"
                        d:Text="Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account."
                        HorizontalAlignment="Left"
-                       Foreground="{StaticResource DarkerTextBrush}" />
+                       Foreground="{DynamicResource SecondaryTextBrush}" />
 
                     <Button Content="{x:Static strings:MainPage.UploadPackageBlockButtonText}"
                         d:Content="Upload package"

@@ -12,6 +12,9 @@ using PackageUploader.FileLogger;
 using PackageUploader.UI.Providers;
 using System.Windows.Controls;
 using PackageUploader.UI.Utility;
+using System;
+using Microsoft.Win32;
+using System.Windows.Media;
 
 namespace PackageUploader.UI;
 
@@ -22,6 +25,10 @@ public partial class App : System.Windows.Application
     public static string LogFilePath = System.IO.Path.Combine(
                         System.IO.Path.GetTempPath(),
                         $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");
+
+    private const string LightTheme = "Resources/Styles/Colors.Light.xaml";
+    private const string DarkTheme = "Resources/Styles/Colors.Dark.xaml";
+    private const string HighContrastTheme = "Resources/Styles/Colors.HighContrast.xaml";
 
     public App()
     {
@@ -103,10 +110,61 @@ public partial class App : System.Windows.Application
         var windowService = _host.Services.GetRequiredService<Utility.IWindowService>();
         windowService.NavigateTo(typeof(MainPageView));
 
+        SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+        ApplyTheme();
+    }
+
+    private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+    {
+        if (e.Category == UserPreferenceCategory.General || e.Category == UserPreferenceCategory.Color)
+        {
+            // Theme or high contrast setting may have changed
+            Dispatcher.Invoke(ApplyTheme);
+        }
+    }
+
+    private void ApplyTheme()
+    {
+        string themeToApply = GetSystemThemeResource();
+        var dicts = Resources.MergedDictionaries;
+        // Remove any of our theme dictionaries
+        for (int i = dicts.Count - 1; i >= 0; i--)
+        {
+            var src = dicts[i].Source?.ToString();
+            if (src != null && (src.EndsWith(LightTheme) || src.EndsWith(DarkTheme) || src.EndsWith(HighContrastTheme)))
+                dicts.RemoveAt(i);
+        }
+        dicts.Insert(0, new ResourceDictionary { Source = new Uri(themeToApply, UriKind.Relative) });
+    }
+
+    private static string GetSystemThemeResource()
+    {
+        // High Contrast detection
+        if (SystemParameters.HighContrast)
+        {
+            return HighContrastTheme;
+        }
+
+        // Light/Dark detection (Windows 10/11)
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            if (key != null)
+            {
+                var appsUseLightTheme = key.GetValue("AppsUseLightTheme");
+                if (appsUseLightTheme is int value)
+                {
+                    return value == 0 ? DarkTheme : LightTheme;
+                }
+            }
+        }
+        catch { /* fallback to dark */ }
+        return DarkTheme;
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
         _host.Dispose();
         base.OnExit(e);
     }

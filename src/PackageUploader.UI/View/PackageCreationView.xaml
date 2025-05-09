@@ -9,7 +9,7 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageCreationViewModel}">
   
-    <Grid Background="#25282C">
+    <Grid Background="{DynamicResource AppBackgroundBrush}">
         <StackPanel Margin="20">
             <!-- Add Back Arrow Icon -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
@@ -27,13 +27,13 @@
                    Text="{x:Static strings:PackageCreation.TitleString}"
                    d:Text="Make a game package"
                    Style="{StaticResource Headline}"
-                   Foreground="White"
+                   Foreground="{DynamicResource PrimaryTextBrush}"
                    HorizontalAlignment="Left"/>
             <TextBlock 
                    Text="{x:Static strings:PackageCreation.SubTitleText}"
                    d:Text="Locate your game's build to create a package. The Xbox Package Tool will remember these paths for easier access in the future."
                    HorizontalAlignment="Left"
-                   Foreground="White"
+                   Foreground="{DynamicResource PrimaryTextBrush}"
                    TextWrapping="Wrap"
                    Margin="0,5,0,20"/>
             
@@ -60,9 +60,9 @@
                        CornerRadius="12"
                        VerticalAlignment="Top"
                        Padding="2"
-                       BorderBrush="{StaticResource LightPurplishBlueBrush}"
+                       BorderBrush="{DynamicResource LightPurplishBlueBrush}"
                        BorderThickness="1">
-                       <TextBlock Text="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="1" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                    </Border>
                 </StackPanel>
                 <StackPanel Grid.Row="0"
@@ -86,36 +86,36 @@
                                Text="{x:Static strings:PackageCreation.BuildLocationTitle}"
                                d:Text="Build location" 
                                Style="{StaticResource SubHeadline}"
-                               Foreground="White"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                HorizontalAlignment="Left"
                                Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
                                Text="{x:Static strings:PackageCreation.BuildLocationText}"
                                d:Text="Locate your game files to package. Add a layout file under Additional Details. See docs for more information."
                                HorizontalAlignment="Left"
-                               Foreground="White"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                TextWrapping="Wrap"
                                Margin="0,0,0,10"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.GamePathTitleText}"
                                    d:Text="Game path"
-                                   Foreground="White"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.RequiredText}"
                                    d:Text="Required"
-                                   Foreground="{StaticResource Gray300Brush}"
+                                   Foreground="{DynamicResource Gray300Brush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3"
                                  Grid.Column="0" 
                                  x:Name="GamePathTextBox"
                                  Text="{Binding GameDataPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="{StaticResource Gray150Brush}"
-                                 Background="{StaticResource Gray700Brush}"
+                                 Foreground="{DynamicResource Gray150Brush}"
+                                 Background="{DynamicResource Gray700Brush}"
                                  Margin="0,0,0,10">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -159,7 +159,7 @@
                                    Height="16" 
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding GameConfigLoadError}"
-                                       Foreground="White"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -168,7 +168,7 @@
                         <Expander.Header>
                             <TextBlock Text="{x:Static strings:PackageCreation.AdditionalDetailsTitle}"
                                        d:Text="Additional details" 
-                                       Foreground="White"/>
+                                       Foreground="{DynamicResource PrimaryTextBrush}"/>
                         </Expander.Header>
                         <Grid Margin="0,10,0,0">
                             <Grid.RowDefinitions>
@@ -186,21 +186,21 @@
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.LayoutFileMapTitle}"
                                    d:Text="Layout file/content map"
-                                   Foreground="White"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
                             <TextBlock Grid.Row="0"
                                        Grid.Column="0"
                                        Text="{x:Static strings:PackageCreation.OptionalText}"
                                        d:Text="Optional"
-                                       Foreground="{StaticResource Gray300Brush}"
+                                       Foreground="{DynamicResource Gray300Brush}"
                                        HorizontalAlignment="Right"
                                        Margin="0,0,10,5"/>
                             <TextBox Grid.Row="1" Grid.Column="0"
                                  x:Name="MappingDataTextBox"
                                  Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="{StaticResource Gray150Brush}"
-                                 Background="{StaticResource Gray700Brush}"
+                                 Foreground="{DynamicResource Gray150Brush}"
+                                 Background="{DynamicResource Gray700Brush}"
                                  Margin="0,0,10,10">
                                 <TextBox.Style>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
@@ -246,7 +246,7 @@
                                        Height="16" 
                                        Margin="0,0,5,0"/>
                                 <TextBlock Text="{Binding LayoutParseError}"
-                                           Foreground="White"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
                                            HorizontalAlignment="Left"
                                            TextWrapping="Wrap"/>
                             </StackPanel>
@@ -254,7 +254,7 @@
                             <TextBlock Grid.Row="3" Grid.Column="0"
                                        Text="{x:Static strings:PackageCreation.ValidatorPathTitleText}"
                                        d:Text="Folder path for SubmissionValidator.dll"
-                                       Foreground="White"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        HorizontalAlignment="Left"
                                        Margin="0,0,0,5"
                                        Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
@@ -262,15 +262,15 @@
                                        Grid.Column="0"
                                        Text="{x:Static strings:PackageCreation.OptionalText}"
                                        d:Text="Optional"
-                                       Foreground="{StaticResource Gray300Brush}"
+                                       Foreground="{DynamicResource Gray300Brush}"
                                        HorizontalAlignment="Right"
                                        Margin="0,0,10,5"/>
                             <TextBox Grid.Row="4"
                                      Grid.Column="0"
                                      x:Name="SubValPathTextBox"
                                      Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Foreground="{StaticResource Gray150Brush}"
-                                     Background="{StaticResource Gray700Brush}"
+                                     Foreground="{DynamicResource Gray150Brush}"
+                                     Background="{DynamicResource Gray700Brush}"
                                      Margin="0,0,10,0"
                                      Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBox.Style>
@@ -317,7 +317,7 @@
                                        Height="16" 
                                        Margin="0,0,5,0"/>
                                 <TextBlock Text="{Binding SubValDllError}"
-                                           Foreground="White"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
                                            HorizontalAlignment="Left"
                                            TextWrapping="Wrap"/>
                             </StackPanel>
@@ -334,9 +334,9 @@
                         CornerRadius="12"
                         VerticalAlignment="Top"
                         Padding="2"
-                        BorderBrush="{StaticResource LightPurplishBlueBrush}"
+                        BorderBrush="{DynamicResource LightPurplishBlueBrush}"
                         BorderThickness="1">
-                        <TextBlock Text="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="2" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                 </StackPanel>
                 <StackPanel Grid.Row="1"
@@ -359,34 +359,34 @@
                                Text="{x:Static strings:PackageCreation.PackageOutputTitleText}"
                                d:Text="Package output location"
                                Style="{StaticResource SubHeadline}"
-                               Foreground="White"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                HorizontalAlignment="Left"
                                Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
                                Text="{x:Static strings:PackageCreation.PackageOutputBoxText}"
                                d:Text="Select the package output location."
                                HorizontalAlignment="Left"
-                               Foreground="White"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                TextWrapping="Wrap"
                                Margin="0,0,0,10"/>
                         <TextBlock Grid.Row="2" Grid.Column="0"
                                 Text="{x:Static strings:PackageCreation.PackagePathTitleText}"
                                 d:Text="Package path"
-                                Foreground="White"
+                                Foreground="{DynamicResource PrimaryTextBrush}"
                                 HorizontalAlignment="Left"
                                 Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.OptionalText}"
                                    d:Text="Optional"
-                                   Foreground="{StaticResource Gray300Brush}"
+                                   Foreground="{DynamicResource Gray300Brush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3" Grid.Column="0"
                                 x:Name="PackagePathTextBox"
                                 Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="{StaticResource Gray150Brush}"
-                                 Background="{StaticResource Gray700Brush}">
+                                 Foreground="{DynamicResource Gray150Brush}"
+                                 Background="{DynamicResource Gray700Brush}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Template">
@@ -429,21 +429,21 @@
                                    Height="16" 
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding OutputDirectoryError}"
-                                       Foreground="White"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{StaticResource Gray500Brush}" Margin="10,0" />
+                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{DynamicResource Gray500Brush}" Margin="10,0" />
                 <StackPanel Grid.Column="3" Grid.Row="0" Margin="10,0,0,0">
                     <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewTitleText}"
                                d:Text="Package Preview"
                                Style="{StaticResource SubHeadline}"
-                               Foreground="White"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                HorizontalAlignment="Left"
                                Margin="0,0,0,10"/>
-                    <Border BorderBrush="{StaticResource Gray500Brush}"
+                    <Border BorderBrush="{DynamicResource Gray500Brush}"
                             BorderThickness="1"
                             CornerRadius="6"
                             Padding="6"
@@ -478,11 +478,11 @@
                                            HorizontalAlignment="Left"
                                            Text="{x:Static strings:PackageCreation.PackagePreviewPackageIdText}"
                                            d:Text="Package ID" 
-                                           Foreground="{StaticResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource Gray300Brush}"/>
                                 <TextBlock Grid.Row="1"
                                            HorizontalAlignment="Left"
                                            Text="{Binding PackageId}" 
-                                           Foreground="White"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
                                            TextWrapping="Wrap"/>
                             </Grid>
                             <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
@@ -499,33 +499,33 @@
                                            Grid.Column="0"
                                            Text="{x:Static strings:PackageCreation.PackagePreviewStoreIdText}"
                                            d:Text="StoreId: "
-                                           Foreground="{StaticResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource Gray300Brush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="0"
                                            Text="{Binding BigId}"
-                                           Foreground="White"/>
+                                           Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 <TextBlock Grid.Row="0"
                                            Grid.Column="1"
                                            Text="{x:Static strings:PackageCreation.PackagePreviewSizeEstimate}"
                                            d:Text="Size estimate" 
-                                           Foreground="{StaticResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource Gray300Brush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="1"
                                            Text="{Binding PackageSize}" 
-                                           Foreground="White"/>
+                                           Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 <TextBlock Grid.Row="0"
                                            Grid.Column="2"
                                            Text="{x:Static strings:PackageCreation.PackagePreviewFamilyText}"
                                            d:Text="Family" 
-                                           Foreground="{StaticResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource Gray300Brush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="2"
                                            Text="{Binding PackageType}" 
-                                           Foreground="White"/>
+                                           Foreground="{DynamicResource PrimaryTextBrush}"/>
                             </Grid>
                             <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file."
-                                           Foreground="{StaticResource WarningBrush}"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
                                            TextWrapping="Wrap"/>
                             </Grid>
                         </Grid>

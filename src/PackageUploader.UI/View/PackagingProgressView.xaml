@@ -8,7 +8,7 @@
              xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackagingProgressViewModel}"
-             Background="{StaticResource Gray800Brush}">                                       
+             Background="{DynamicResource AppBackgroundBrush}">                                       
     <UserControl.Resources>
         <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
         <Storyboard x:Key="RotateAnimation">
@@ -44,7 +44,7 @@
                    Margin="0, 0, 0, 23"
                    Style="{StaticResource SubHeadline}"
                    Text="Getting your package ready..."
-                   Foreground="White" />
+                   Foreground="{DynamicResource PrimaryTextBrush}" />
         <!-- Loading Bar -->
         <Grid Grid.Row="2"
               Margin="300, 0, 300, 23">
@@ -60,16 +60,16 @@
                        Grid.Column="0"
                        Margin="0, 0, 0, 10"
                        Text="Packaging..."
-                       Foreground="White" 
+                       Foreground="{DynamicResource PrimaryTextBrush}" 
                        HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="0"
                         Grid.Column="1"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                           Foreground="White"/>
+                           Foreground="{DynamicResource PrimaryTextBrush}"/>
                 <TextBlock Text="% complete"
-                           Foreground="White" />
+                           Foreground="{DynamicResource PrimaryTextBrush}" />
             </StackPanel>
             <ProgressBar Grid.Row="1"
                          Grid.ColumnSpan="2"
@@ -77,8 +77,8 @@
                          Minimum="0"
                          Maximum="100"
                          Value="{Binding PackingProgressPercentage}"
-                         Foreground="{StaticResource LightPurplishBlueBrush}"
-                         Background="{StaticResource Gray500Brush}"
+                         Foreground="{DynamicResource LightPurplishBlueBrush}"
+                         Background="{DynamicResource Gray500Brush}"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Stretch"
                          Height="3"/>
@@ -129,7 +129,7 @@
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
                        Text="Validating files..."
-                       Foreground="White"/>
+                       Foreground="{DynamicResource PrimaryTextBrush}"/>
             <!-- Row 2 -->
             <Grid Grid.Row="1"
                   Grid.Column="0"
@@ -161,7 +161,7 @@
                    Margin="0, 30, 0, 0"/>
             <TextBlock Grid.Row="1" Grid.Column="1"
                        Text="Copying and encrypting data..."
-                       Foreground="White"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
                        Margin="0, 30, 0, 0"/>
@@ -197,7 +197,7 @@
             <TextBlock Grid.Row="2"
                        Grid.Column="1"
                        Text="Verifying package contents..."
-                       Foreground="White"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
                        Margin="0, 30, 0, 0"/>

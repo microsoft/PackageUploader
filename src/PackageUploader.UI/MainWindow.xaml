@@ -9,7 +9,7 @@
         x:Class="PackageUploader.UI.MainWindow"
         mc:Ignorable="d"
         Title="Xbox Package Tool" Height="800" Width="1200"
-        Background="#25282C"
+        Background="{DynamicResource AppBackgroundBrush}"
         WindowStyle="None"
         ResizeMode="NoResize"
         AllowsTransparency="True"
@@ -30,7 +30,7 @@
         </Grid.RowDefinitions>
         
         <!-- Custom Title Bar -->
-        <Grid Grid.Row="0" Background="#25282C">
+        <Grid Grid.Row="0" Background="{DynamicResource AppBackgroundBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -43,7 +43,7 @@
                        WindowChrome.IsHitTestVisibleInChrome="True"
                        VerticalAlignment="Center"/>
                 <TextBlock Text="Xbox Package Tool" 
-                       Foreground="White" 
+                       Foreground="{DynamicResource PrimaryTextBrush}" 
                        FontSize="12"
                        VerticalAlignment="Center"
                        Margin="5, 0, 0, 0"/>
@@ -63,13 +63,13 @@
                         ToolTip="Sign Out User">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" 
-                              Fill="{StaticResource Gray200Brush}" 
+                              Fill="{DynamicResource Gray200Brush}" 
                               Width="18" 
                               Height="18"
                               Stretch="Uniform"
                               Margin="0,0,8,0"/>
                         <TextBlock x:Name="UserDisplayText" 
-                                   Foreground="{StaticResource Gray200Brush}" 
+                                   Foreground="{DynamicResource Gray200Brush}" 
                                    FontSize="12" 
                                    VerticalAlignment="Center"/>
                     </StackPanel>

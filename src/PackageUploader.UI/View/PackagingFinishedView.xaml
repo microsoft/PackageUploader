@@ -7,7 +7,7 @@
       xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
       mc:Ignorable="d"
       d:DataContext="{d:DesignInstance Type=viewmodel:PackagingFinishedViewModel}"
-      Background="{StaticResource Gray800Brush}">
+      Background="{DynamicResource AppBackgroundBrush}">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -31,7 +31,7 @@
            Margin="0, 0, 0, 23"
            Style="{StaticResource SubHeadline}"
            Text="Packaging completed"
-           Foreground="White" />
+           Foreground="{DynamicResource PrimaryTextBrush}" />
         <Border Grid.Row="2"
                 Margin="100, 0, 100, 0"
                 BorderBrush="#6B7584"
@@ -61,10 +61,10 @@
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
                     <TextBlock HorizontalAlignment="Left"
                                Text="File name" 
-                               Foreground="{StaticResource Gray300Brush}"/>
+                               Foreground="{DynamicResource Gray300Brush}"/>
                     <TextBlock HorizontalAlignment="Left"
                                Text="{Binding PackageFileName}" 
-                               Foreground="White"/>
+                               Foreground="{DynamicResource PrimaryTextBrush}"/>
                 </StackPanel>
                 <Grid Margin="0, 10, 0, 0" Grid.Row="1" Grid.Column="1">
                     <Grid.ColumnDefinitions>
@@ -78,21 +78,21 @@
                                 Margin="0, 0, 50, 0">
                         <TextBlock HorizontalAlignment="Left"
                                    Text="Store ID" 
-                                   Foreground="{StaticResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource Gray300Brush}"/>
                         <TextBlock Text="{Binding StoreId}"
-                                   Foreground="White"/>
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
                         <TextBlock Text="Size" 
-                                   Foreground="{StaticResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource Gray300Brush}"/>
                         <TextBlock Text="{Binding PackageSize}" 
-                                   Foreground="White"/>
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
                         <TextBlock Text="Family" 
-                                   Foreground="{StaticResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource Gray300Brush}"/>
                         <TextBlock Text="{Binding PackageType}" 
-                                   Foreground="White"/>
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                 </Grid>
                 <Button Grid.RowSpan="4" Grid.Column="2"

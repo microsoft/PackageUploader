@@ -5,7 +5,7 @@
 
     <!-- TextBlock Styles -->
     <Style x:Key="Headline" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="FontSize" Value="32" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="TextAlignment" Value="Center" />
@@ -13,7 +13,7 @@
     </Style>
 
     <Style x:Key="SubHeadline" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="TextAlignment" Value="Center" />
@@ -22,7 +22,7 @@
     <!-- Button Style -->
     <Style TargetType="Button">
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="14,10" />
         <Setter Property="MinHeight" Value="44" />
@@ -41,18 +41,18 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource Gray300Brush}" />
-                <Setter Property="Background" Value="{StaticResource Gray600Brush}" />
+                <Setter Property="Foreground" Value="{DynamicResource Gray300Brush}" />
+                <Setter Property="Background" Value="{DynamicResource Gray600Brush}" />
             </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource TertiaryBrush}" />
+                <Setter Property="Background" Value="{DynamicResource PrimaryButtonBrush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <!-- Style for a chromeless hyperlink-like button -->
     <Style x:Key="HyperlinkButtonStyle" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource WhiteBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
@@ -70,14 +70,14 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Foreground" Value="{StaticResource TertiaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryButtonBrush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <!-- Style for a chromeless hyperlink-like button that is underlined -->
     <Style x:Key="HyperlinkUnderlinedButtonStyle" TargetType="Button">
-        <Setter Property="Foreground" Value="{StaticResource WhiteBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
@@ -96,36 +96,36 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Foreground" Value="{StaticResource TertiaryBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryButtonBrush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <!-- TextBox Style -->
     <Style TargetType="TextBox">
-        <Setter Property="Foreground" Value="{StaticResource BlackBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="MinHeight" Value="44" />
         <Setter Property="MinWidth" Value="44" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="{StaticResource Gray300Brush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Gray300Brush}" />
         <Setter Property="Padding" Value="5" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource Gray300Brush}" />
+                <Setter Property="Foreground" Value="{DynamicResource Gray300Brush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <!-- CheckBox Style -->
     <Style TargetType="CheckBox">
-        <Setter Property="Foreground" Value="{StaticResource BlackBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="MinHeight" Value="44" />
         <Setter Property="MinWidth" Value="44" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource Gray300Brush}" />
+                <Setter Property="Foreground" Value="{DynamicResource Gray300Brush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -168,14 +168,14 @@
 
     <!-- ComboBox Style -->
     <Style TargetType="ComboBox">
-        <Setter Property="Foreground" Value="{StaticResource Gray300Brush}" />
+        <Setter Property="Foreground" Value="{DynamicResource Gray300Brush}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{StaticResource Gray300Brush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Gray300Brush}" />
         <Setter Property="MinHeight" Value="44" />
         <Setter Property="MinWidth" Value="44" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource Gray300Brush}" />
+                <Setter Property="Foreground" Value="{DynamicResource Gray300Brush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -219,7 +219,7 @@
                             Focusable="False"
                             PopupAnimation="Slide">
                             <Border 
-                                Background="{StaticResource Gray900Brush}"
+                                Background="{DynamicResource Gray900Brush}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="6">
@@ -244,39 +244,39 @@
 
     <!-- ListBox Style -->
     <Style TargetType="ListBox">
-        <Setter Property="Foreground" Value="{StaticResource BlackBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{StaticResource Gray300Brush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Gray300Brush}" />
     </Style>
 
     <!-- RadioButton Style -->
     <Style TargetType="RadioButton">
-        <Setter Property="Foreground" Value="{StaticResource BlackBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="MinHeight" Value="44" />
         <Setter Property="MinWidth" Value="44" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource Gray300Brush}" />
+                <Setter Property="Foreground" Value="{DynamicResource Gray300Brush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <!-- ProgressBar Style -->
     <Style TargetType="ProgressBar">
-        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
-        <Setter Property="Background" Value="{StaticResource Gray200Brush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Background" Value="{DynamicResource Gray200Brush}" />
         <Setter Property="Height" Value="10" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="{StaticResource Gray300Brush}" />
+                <Setter Property="Foreground" Value="{DynamicResource Gray300Brush}" />
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <!-- Border Style -->
     <Style TargetType="Border">
-        <Setter Property="BorderBrush" Value="{StaticResource Gray300Brush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Gray300Brush}" />
         <Setter Property="BorderThickness" Value="1" />
     </Style>
 

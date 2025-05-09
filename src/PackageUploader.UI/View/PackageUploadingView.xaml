@@ -9,7 +9,7 @@
              xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageUploadingViewModel}"
-             Background="{StaticResource Gray800Brush}">
+             Background="{DynamicResource AppBackgroundBrush}">
     <UserControl.Resources>
         <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
         <Storyboard x:Key="RotateAnimation">
@@ -46,7 +46,7 @@
                    Style="{StaticResource SubHeadline}"
                    Text="{x:Static strings:PackageUploading.TitleText}"
                    d:Text="Uploading package to partner center"
-                   Foreground="White" />
+                   Foreground="{DynamicResource PrimaryTextBrush}" />
         <!-- Loading Bar -->
         <Grid Grid.Row="2"
               Margin="300, 0, 300, 23">
@@ -62,16 +62,16 @@
                        Grid.Column="0"
                        Margin="0, 0, 0, 10"
                        Text="Uploading"
-                       Foreground="White" 
+                       Foreground="{DynamicResource PrimaryTextBrush}" 
                        HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="0"
                         Grid.Column="1"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PackageUploadPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                           Foreground="White"/>
+                           Foreground="{DynamicResource PrimaryTextBrush}"/>
                 <TextBlock Text="% complete"
-                           Foreground="White" />
+                           Foreground="{DynamicResource PrimaryTextBrush}" />
             </StackPanel>
             <ProgressBar Grid.Row="1"
                          Grid.ColumnSpan="2"
@@ -80,8 +80,8 @@
                          Maximum="100"
                          Value="{Binding PackageUploadPercentage}"
                          Visibility="Visible"
-                         Foreground="{StaticResource LightPurplishBlueBrush}"
-                         Background="{StaticResource Gray500Brush}"
+                         Foreground="{DynamicResource LightPurplishBlueBrush}"
+                         Background="{DynamicResource Gray500Brush}"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Stretch"
                          Height="3"/>
@@ -127,7 +127,7 @@
             <TextBlock Grid.Row="0"
                        Grid.Column="1"
                        Text="Computing deltas..."
-                       Foreground="White"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"/>
             <!-- Row 2 -->
@@ -158,7 +158,7 @@
                    Width="16" />
             <TextBlock Grid.Row="1" Grid.Column="1"
                        Text="Uploading package..."
-                       Foreground="White"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"/>
             <!-- Row 3 -->
@@ -190,7 +190,7 @@
             <TextBlock Grid.Row="2"
                        Grid.Column="1"
                        Text="Processing package..."
-                       Foreground="White"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center" />
             <!-- Row 4 -->
@@ -222,7 +222,7 @@
             <TextBlock Grid.Row="3"
                        Grid.Column="1"
                        Text="Uploading supplemental files..."
-                       Foreground="White"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center" />
         </Grid>
