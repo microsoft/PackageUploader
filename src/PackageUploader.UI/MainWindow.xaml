@@ -63,13 +63,13 @@
                         ToolTip="Sign Out User">
                     <StackPanel Orientation="Horizontal">
                         <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" 
-                              Fill="{DynamicResource Gray200Brush}" 
+                              Fill="{DynamicResource SecondaryTextBrush}" 
                               Width="18" 
                               Height="18"
                               Stretch="Uniform"
                               Margin="0,0,8,0"/>
                         <TextBlock x:Name="UserDisplayText" 
-                                   Foreground="{DynamicResource Gray200Brush}" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}" 
                                    FontSize="12" 
                                    VerticalAlignment="Center"/>
                     </StackPanel>
@@ -84,7 +84,7 @@
                         Click="MinimizeButton_Click"
                         Style="{StaticResource WindowControlButtonStyle}">
                     <Path Data="M0,6 H10" 
-                          Stroke="White" 
+                          Stroke="{StaticResource PrimaryTextBrush}" 
                           StrokeThickness="1" 
                           Stretch="None" 
                           VerticalAlignment="Center" 
@@ -97,7 +97,7 @@
                         Style="{StaticResource WindowControlButtonStyle}">
                     <Path x:Name="MaximizeIcon" 
                           Data="M0,0 H10 V10 H0 V0" 
-                          Stroke="White" 
+                          Stroke="{StaticResource PrimaryTextBrush}" 
                           StrokeThickness="1" 
                           Stretch="None" 
                           VerticalAlignment="Center" 
@@ -109,7 +109,7 @@
                         Click="CloseButton_Click"
                         Style="{StaticResource WindowCloseButtonStyle}">
                     <Path Data="M0,0 L10,10 M0,10 L10,0" 
-                          Stroke="White" 
+                          Stroke="{StaticResource PrimaryTextBrush}" 
                           StrokeThickness="1" 
                           Stretch="None" 
                           VerticalAlignment="Center" 

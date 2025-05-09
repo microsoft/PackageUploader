@@ -12,7 +12,7 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/WindowStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            
+
             <!-- Value Converters -->
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />

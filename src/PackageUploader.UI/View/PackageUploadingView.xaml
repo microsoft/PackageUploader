@@ -80,8 +80,6 @@
                          Maximum="100"
                          Value="{Binding PackageUploadPercentage}"
                          Visibility="Visible"
-                         Foreground="{DynamicResource LightPurplishBlueBrush}"
-                         Background="{DynamicResource Gray500Brush}"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Stretch"
                          Height="3"/>

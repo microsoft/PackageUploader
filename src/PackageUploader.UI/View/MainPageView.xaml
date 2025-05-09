@@ -15,7 +15,6 @@
                Text="{x:Static strings:MainPage.TitleTextBlock}"
                d:Text="Make a package and upload it to Microsoft Partner Center" 
                Style="{StaticResource Headline}"
-               Foreground="{DynamicResource PrimaryTextBrush}"
                HorizontalAlignment="Left"
                Margin="0,25,0,25"/>
         
@@ -27,7 +26,7 @@
                TextWrapping="Wrap"/>
 
         <TextBlock Text="{Binding MakePkgUnavailableErrorMessage}"
-               Foreground="Red"
+               Foreground="{DynamicResource ErrorRedBrush}"
                Visibility="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" 
                Margin="0,0,0,25"/>
                
@@ -44,8 +43,9 @@
             </Grid.ColumnDefinitions>
             
             <Border Grid.Row="0" 
-                    Grid.ColumnSpan="3" 
-                    Background="{DynamicResource Gray900Brush}"
+                    Grid.ColumnSpan="3"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    Background="{DynamicResource AppBackgroundBrush}"
                     Margin="0, 0, 0, 20"
                     Padding="10" 
                     CornerRadius="5"
@@ -56,8 +56,7 @@
                        Text="{x:Static strings:MainPage.SignInTextBlockTitle}"
                        d:Text="Sign in"
                        Style="{StaticResource SubHeadline}"
-                       HorizontalAlignment="Left"
-                       Foreground="{DynamicResource PrimaryTextBrush}" />
+                       HorizontalAlignment="Left" />
 
                     <TextBlock Margin="0, 10, 0, 0"
                                Text="{x:Static strings:MainPage.SignInPreLoginText}"
@@ -79,15 +78,16 @@
                         Content="{x:Static strings:MainPage.SignInButtonContent}"
                         d:Content="Sign In"
                         Command="{Binding SignInCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
                         HorizontalAlignment="Left"
-                        Margin="0,15,0,10"
-                        Width="150"/>
+                        Width="90"
+                        Margin="0,15,0,10"/>
                 </StackPanel>
             </Border>
 
             <Border Grid.Column="0"
                     Grid.Row="2"
-                    Background="{DynamicResource Gray900Brush}"
+                    Background="{DynamicResource AppBackgroundBrush}"
                     Padding="10"
                     CornerRadius="5">
                 <StackPanel HorizontalAlignment="Left"
@@ -119,13 +119,13 @@
                             IsEnabled="{Binding IsMakePkgEnabled}"
                             HorizontalAlignment="Left"
                             Margin="0,15,0,10"
-                            Width="150" />
+                            Width="128" />
                 </StackPanel>
             </Border>
 
             <Border Grid.Column="2"
                     Grid.Row="2"
-                    Background="{DynamicResource Gray900Brush}"
+                    Background="{DynamicResource AppBackgroundBrush}"
                     Padding="10"
                     CornerRadius="5">
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -146,7 +146,7 @@
                         Command="{Binding NavigateToPackageUploadCommand}"
                         HorizontalAlignment="Left"
                         Margin="0,15,0,10"
-                        Width="150" />
+                        Width="133" />
                 </StackPanel>
             </Border>
         </Grid>

@@ -38,7 +38,7 @@
            Foreground="{DynamicResource PrimaryTextBrush}" />
         <Border Grid.Row="2"
                 Margin="100, 0, 100, 0"
-                BorderBrush="{DynamicResource Gray500Brush}"
+                BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1"
                 CornerRadius="6"
                 Height="100"
@@ -68,7 +68,7 @@
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
                     <TextBlock HorizontalAlignment="Left"
                                Text="File name" 
-                               Foreground="{DynamicResource Gray300Brush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock HorizontalAlignment="Left"
                                Text="{Binding PackageFileName}" 
                                Foreground="{DynamicResource PrimaryTextBrush}"/>
@@ -85,19 +85,19 @@
                                 Margin="0, 0, 50, 0">
                         <TextBlock HorizontalAlignment="Left"
                                    Text="Store ID" 
-                                   Foreground="{DynamicResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding StoreId}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
                         <TextBlock Text="Size" 
-                                   Foreground="{DynamicResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding PackageSize}" 
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
                         <TextBlock Text="Family" 
-                                   Foreground="{DynamicResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding PackageType}" 
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>

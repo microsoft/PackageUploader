@@ -102,7 +102,12 @@ public partial class App : System.Windows.Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        
+
+        FrameworkElement.StyleProperty.OverrideMetadata(typeof(Window), new FrameworkPropertyMetadata
+        {
+            DefaultValue = FindResource(typeof(Window))
+        });
+
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
         

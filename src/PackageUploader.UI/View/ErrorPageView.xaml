@@ -8,7 +8,7 @@
              xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=viewmodel:ErrorScreenViewModel}"
-             Background="Black">
+             Background="{DynamicResource ErrorScreenBackgroundBrush}">
     <Border HorizontalAlignment="Center"
             VerticalAlignment="Center"
             Background="{DynamicResource AppBackgroundBrush}"
@@ -75,10 +75,15 @@
                 <Button Content="Copy error"
                         Command="{Binding CopyErrorCommand}"
                         HorizontalAlignment="Center"
+                        Width="101"
+                        Height="32"
                         Margin="0, 0, 10, 0" />
                 <Button Content="Go back and fix"
                         Command="{Binding GoBackAndFixCommand}"
                         HorizontalAlignment="Center"
+                        Width="132"
+                        Height="32"
+                        Style="{StaticResource PrimaryButtonStyle}"
                         Margin="0, 0, 10, 0" />
             </StackPanel>
         </StackPanel>

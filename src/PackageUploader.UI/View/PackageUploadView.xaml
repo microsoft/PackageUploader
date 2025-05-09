@@ -18,12 +18,12 @@
         </Storyboard>
     </UserControl.Resources>
     <Grid Background="{DynamicResource AppBackgroundBrush}">
-        <StackPanel Margin="20">
+        <StackPanel Margin="32">
             <!-- Add Back Arrow Icon -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
                 <Button Width="16" Height="16" Command="{Binding CancelButtonCommand}" Style="{StaticResource WindowControlButtonStyle}">
                     <Path Data="M16,8 L4,8 M4,8 L8,4 M4,8 L8,12" 
-                          Stroke="White" 
+                          Stroke="{DynamicResource PrimaryTextBrush}" 
                           StrokeThickness="1.5" 
                           Stretch="None" 
                           VerticalAlignment="Center" 
@@ -56,7 +56,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="0"
                             Orientation="Horizontal"
-                            Margin="0, 5, 0, 0">
+                            Margin="0, 0, 0, 0">
                     <Border Width="24"
                             Height="24"
                             CornerRadius="12"
@@ -64,7 +64,7 @@
                             Padding="2"
                             BorderBrush="{DynamicResource LightPurplishBlueBrush}"
                             BorderThickness="1">
-                        <TextBlock Text="1" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="1" Foreground="{DynamicResource LightPurplishBlueBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
                     </Border>
                 </StackPanel>
                 <StackPanel Grid.Row="0"
@@ -104,34 +104,44 @@
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Text="Required"
-                                   Foreground="{DynamicResource Gray300Brush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3" Grid.Column="0" 
                                  x:Name="PackagePathTextBox"
                                  Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="{DynamicResource Gray150Brush}"
-                                 Background="{DynamicResource Gray700Brush}"
+                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                 Background="{DynamicResource AppBackgroundBrush}"
                                  Margin="0,0,0,10">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" 
+                                                <Border x:Name="Border"
+                                                        Background="{TemplateBinding Background}" 
                                                         BorderBrush="{TemplateBinding BorderBrush}" 
-                                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="6">
                                                     <Grid>
                                                         <TextBlock Text="Select or enter the package path" 
-                                                                   Foreground="Gray" 
+                                                                   Foreground="{DynamicResource SecondaryTextBrush}" 
                                                                    VerticalAlignment="Center"
                                                                    Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                                                    Margin="15,2"/>
                                                         <ScrollViewer x:Name="PART_ContentHost" 
-                                                       Margin="5,2" 
-                                                       VerticalAlignment="Center"/>
+                                                                      Margin="5,2" 
+                                                                      VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsFocused" Value="True">
+                                                        <Setter TargetName="Border" Property="Background" Value="{DynamicResource TextEntryHighlightedBackgroundBrush}" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding PackageErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" Value="Visible">
+                                                        <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
+                                                    </DataTrigger>
+                                                </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
@@ -142,6 +152,8 @@
                                 Content="Browse"
                                 Command="{Binding BrowseForPackageCommand}"
                                 IsEnabled="True"
+                                Width="90"
+                                Height="32"
                                 Margin="0,0,0,10"/>
 
                         <StackPanel Grid.Row="4"
@@ -152,10 +164,11 @@
                                     Visibility="{Binding PackageErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                             <Image Source="/Resources/AppIcon/ErrorIcon.png"
                                    Width="16" 
-                                   Height="16" 
+                                   Height="16"
+                                   VerticalAlignment="Top"
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding PackageErrorMessage}"
-                                       Foreground="Red"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
@@ -179,8 +192,8 @@
                             <TextBox Grid.Row="1"
                                      x:Name="StoreIdTextBox"
                                      Text="{Binding BigId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Foreground="#D2D2D3"
-                                     Background="#323538"
+                                     Foreground="{DynamicResource PrimaryTextBrush}"
+                                     Background="{DynamicResource AppBackgroundBrush}"
                                      Margin="0,0,10,10"
                                      HorizontalAlignment="Left"
                                      Width="530"
@@ -192,10 +205,11 @@
                                                 <ControlTemplate TargetType="TextBox">
                                                     <Border Background="{TemplateBinding Background}" 
                                                             BorderBrush="{TemplateBinding BorderBrush}" 
-                                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="6">
                                                         <Grid>
                                                             <TextBlock Text="Select a package with a StoreId or enter it manually for packages with no StoreId" 
-                                                                       Foreground="Gray" 
+                                                                       Foreground="{DynamicResource SecondaryTextBrush}" 
                                                                        VerticalAlignment="Center"
                                                                        Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                                                        Margin="15,2"/>
@@ -214,9 +228,9 @@
                     </Expander>
                 </StackPanel>
                 <StackPanel Grid.Row="1"
-                Grid.Column="0"
-                Orientation="Horizontal"
-                Margin="0, 5, 0, 0">
+                            Grid.Column="0"
+                            Orientation="Horizontal"
+                            Margin="0, 0, 0, 0">
                     <Border Width="24"
                             Height="24"
                             CornerRadius="12"
@@ -224,7 +238,7 @@
                             Padding="2"
                             BorderBrush="{DynamicResource LightPurplishBlueBrush}"
                             BorderThickness="1">
-                        <TextBlock Text="2" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="2" Foreground="{DynamicResource LightPurplishBlueBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"  FontWeight="Bold"/>
                     </Border>
                 </StackPanel>
                 <StackPanel Grid.Row="1"
@@ -269,7 +283,7 @@
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Text="Required"
-                                   Foreground="{DynamicResource Gray300Brush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
                         <ComboBox Grid.Row="3"
@@ -279,6 +293,12 @@
                                   SelectedItem="{Binding BranchOrFlightDisplayName, Mode=TwoWay}"
                                   IsEnabled="{Binding IsLoadingBranchesAndFlights, Converter={StaticResource InverseBooleanConverter}}"
                                   Style="{StaticResource CustomComboBoxStyle}" />
+                        <Border Grid.Row="3"
+                                Grid.Column="0"
+                                BorderBrush="{DynamicResource ErrorRedBrush}"
+                                CornerRadius="6"
+                                BorderThickness="1"
+                                Visibility="{Binding BranchOrFlightErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
                         <StackPanel Grid.Row="3"
                                     Grid.Column="2"
                                     HorizontalAlignment="Left"
@@ -304,10 +324,11 @@
                                     Visibility="{Binding BranchOrFlightErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                             <Image Source="/Resources/AppIcon/ErrorIcon.png"
                                    Width="16" 
-                                   Height="16" 
+                                   Height="16"
+                                   VerticalAlignment="Top"
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding BranchOrFlightErrorMessage}"
-                                       Foreground="Red"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
@@ -321,7 +342,7 @@
                         <TextBlock Grid.Row="5"
                                    Grid.Column="0"
                                    Text="Required"
-                                   Foreground="{DynamicResource Gray300Brush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,10,0,5"/>
                         <ComboBox Grid.Row="6"
@@ -337,6 +358,12 @@
                                 </MultiBinding>
                             </ComboBox.IsEnabled>
                         </ComboBox>
+                        <Border Grid.Row="6"
+                                Grid.Column="0"
+                                BorderBrush="{DynamicResource ErrorRedBrush}"
+                                CornerRadius="6"
+                                BorderThickness="1"
+                                Visibility="{Binding MarketGroupErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
                         <StackPanel Grid.Row="6"
                                     Grid.Column="2"
                                     HorizontalAlignment="Left"
@@ -362,24 +389,25 @@
                                     Visibility="{Binding MarketGroupErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                             <Image Source="/Resources/AppIcon/ErrorIcon.png"
                                    Width="16" 
-                                   Height="16" 
+                                   Height="16"
+                                   VerticalAlignment="Top"
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding MarketGroupErrorMessage}"
-                                       Foreground="Red"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{DynamicResource Gray500Brush}" Margin="10,0" />
+                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{DynamicResource BorderBrush}" Margin="10,0" />
                 <StackPanel Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="10,0,0,0">
                     <TextBlock Text="Upload Preview"
                                Style="{StaticResource SubHeadline}"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                HorizontalAlignment="Left"
                                Margin="0,0,0,10"/>
-                    <Border BorderBrush="#6B7584"
+                    <Border BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6"
                             Padding="6"
@@ -411,7 +439,7 @@
                                         HorizontalAlignment="Left"
                                         Margin="0, 0, 0, 10">
                                 <TextBlock Text="Product name"
-                                           Foreground="{DynamicResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding ProductName}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"/>
                             </StackPanel>
@@ -424,13 +452,13 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="Destination"
-                                               Foreground="{DynamicResource Gray300Brush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding BranchOrFlightDisplayName}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="Market"
-                                               Foreground="{DynamicResource Gray300Brush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding MarketGroupName}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
@@ -441,7 +469,7 @@
                                         HorizontalAlignment="Left"
                                         Margin="0,0,0,10">
                                 <TextBlock Text="File name"
-                                           Foreground="{DynamicResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding PackageName}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
                                            TextWrapping="Wrap"/>
@@ -454,19 +482,19 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="Store ID"
-                                               Foreground="{DynamicResource Gray300Brush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding BigId}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="Size"
-                                               Foreground="{DynamicResource Gray300Brush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding PackageSize}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="Family"
-                                               Foreground="{DynamicResource Gray300Brush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding PackageType}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
@@ -488,7 +516,8 @@
                 <Button Grid.Column="1"
                         Content="Upload Package" 
                         Command="{Binding UploadPackageCommand}"
-                        Width="128"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Width="133"
                         Height="34" />
             </StackPanel>
         </StackPanel>

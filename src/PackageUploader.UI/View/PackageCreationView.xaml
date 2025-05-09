@@ -10,12 +10,12 @@
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageCreationViewModel}">
   
     <Grid Background="{DynamicResource AppBackgroundBrush}">
-        <StackPanel Margin="20">
+        <StackPanel Margin="32">
             <!-- Add Back Arrow Icon -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
                 <Button Width="16" Height="16" Command="{Binding CancelButtonCommand}" Style="{StaticResource WindowControlButtonStyle}">
                     <Path Data="M16,8 L4,8 M4,8 L8,4 M4,8 L8,12" 
-                          Stroke="White" 
+                          Stroke="{DynamicResource PrimaryTextBrush}" 
                           StrokeThickness="1.5" 
                           Stretch="None" 
                           VerticalAlignment="Center" 
@@ -53,16 +53,15 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="0"
                             Orientation="Horizontal"
-                            Margin="0, 5, 0, 0">
-                   <Border
-                       Width="24"
-                       Height="24"
-                       CornerRadius="12"
-                       VerticalAlignment="Top"
-                       Padding="2"
-                       BorderBrush="{DynamicResource LightPurplishBlueBrush}"
-                       BorderThickness="1">
-                        <TextBlock Text="1" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            Margin="0, 0, 0, 0">
+                   <Border Width="24"
+                           Height="24"
+                           CornerRadius="12"
+                           VerticalAlignment="Top"
+                           Padding="2"
+                           BorderBrush="{DynamicResource LightPurplishBlueBrush}"
+                           BorderThickness="1">
+                        <TextBlock Text="1" Foreground="{DynamicResource LightPurplishBlueBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
                    </Border>
                 </StackPanel>
                 <StackPanel Grid.Row="0"
@@ -107,28 +106,30 @@
                                    Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.RequiredText}"
                                    d:Text="Required"
-                                   Foreground="{DynamicResource Gray300Brush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3"
                                  Grid.Column="0" 
                                  x:Name="GamePathTextBox"
                                  Text="{Binding GameDataPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="{DynamicResource Gray150Brush}"
-                                 Background="{DynamicResource Gray700Brush}"
+                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                 Background="{DynamicResource SecondaryButtonBrush}"
                                  Margin="0,0,0,10">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" 
-                                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                                <Border x:Name="Border"
+                                                        Background="{TemplateBinding Background}" 
+                                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="6">
                                                     <Grid>
                                                         <TextBlock Text="{x:Static strings:PackageCreation.GamePathBoxDefaultText}"
                                                                    d:Text="Select or enter the game's location" 
-                                                                   Foreground="Gray" 
+                                                                   Foreground="{DynamicResource SecondaryTextBrush}" 
                                                                    VerticalAlignment="Center"
                                                                    Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                                                    Margin="15,2"/>
@@ -137,6 +138,14 @@
                                                                    VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsFocused" Value="True">
+                                                        <Setter TargetName="Border" Property="Background" Value="{DynamicResource TextEntryHighlightedBackgroundBrush}" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding GameConfigLoadError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" Value="Visible">
+                                                        <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
+                                                    </DataTrigger>
+                                                </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
@@ -144,11 +153,13 @@
                             </TextBox.Style>
                         </TextBox>
                         <Button Grid.Row="3" Grid.Column="2"
-                            d:Content="Browse"
-                            Content="{x:Static strings:PackageCreation.BrowseText}"
-                            Command="{Binding BrowseGameDataPathCommand}"
-                            IsEnabled="True"
-                            Margin="0,0,0,10"/>
+                                d:Content="Browse"
+                                Content="{x:Static strings:PackageCreation.BrowseText}"
+                                Command="{Binding BrowseGameDataPathCommand}"
+                                IsEnabled="True"
+                                Width="90"
+                                Height="32"
+                                Margin="0,0,0,10"/>
                         <StackPanel Grid.Row="4"
                                     Grid.Column="0"
                                     Orientation="Horizontal"
@@ -156,7 +167,8 @@
                                     Visibility="{Binding GameConfigLoadError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                             <Image Source="/Resources/AppIcon/ErrorIcon.png"
                                    Width="16" 
-                                   Height="16" 
+                                   Height="16"
+                                   VerticalAlignment="Top"
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding GameConfigLoadError}"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
@@ -193,27 +205,29 @@
                                        Grid.Column="0"
                                        Text="{x:Static strings:PackageCreation.OptionalText}"
                                        d:Text="Optional"
-                                       Foreground="{DynamicResource Gray300Brush}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
                                        HorizontalAlignment="Right"
                                        Margin="0,0,10,5"/>
                             <TextBox Grid.Row="1" Grid.Column="0"
                                  x:Name="MappingDataTextBox"
                                  Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="{DynamicResource Gray150Brush}"
-                                 Background="{DynamicResource Gray700Brush}"
+                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                 Background="{DynamicResource SecondaryButtonBrush}"
                                  Margin="0,0,10,10">
                                 <TextBox.Style>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="TextBox">
-                                                    <Border Background="{TemplateBinding Background}" 
-                                                        BorderBrush="{TemplateBinding BorderBrush}" 
-                                                        BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <Border x:Name="Border"
+                                                            Background="{TemplateBinding Background}" 
+                                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="6">
                                                         <Grid>
                                                             <TextBlock Text="{x:Static strings:PackageCreation.ContentMapPathBoxDefaultText}"
                                                                        d:Text="Select or enter the content map location" 
-                                                                       Foreground="Gray" 
+                                                                       Foreground="{DynamicResource SecondaryTextBrush}" 
                                                                        VerticalAlignment="Center"
                                                                        Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                                                        Margin="15,2"/>
@@ -222,6 +236,14 @@
                                                                        VerticalAlignment="Center"/>
                                                         </Grid>
                                                     </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsFocused" Value="True">
+                                                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TextEntryHighlightedBackgroundBrush}" />
+                                                        </Trigger>
+                                                        <DataTrigger Binding="{Binding LayoutParseError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" Value="Visible">
+                                                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
+                                                        </DataTrigger>
+                                                    </ControlTemplate.Triggers>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -229,11 +251,13 @@
                                 </TextBox.Style>
                             </TextBox>
                             <Button Grid.Row="1" Grid.Column="1"
-                                d:Content="Browse"
-                                Content="{x:Static strings:PackageCreation.BrowseText}"
-                                Command="{Binding BrowseMappingDataXmlPathCommand}"
-                                IsEnabled="True"
-                                Margin="0,0,0,10"/>
+                                    d:Content="Browse"
+                                    Content="{x:Static strings:PackageCreation.BrowseText}"
+                                    Command="{Binding BrowseMappingDataXmlPathCommand}"
+                                    IsEnabled="True"
+                                    Width="90"
+                                    Height="32"
+                                    Margin="0,0,0,10"/>
 
                             <StackPanel Grid.Row="2"
                                         Grid.Column="0"
@@ -243,7 +267,8 @@
                                         Visibility="{Binding LayoutParseError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                                 <Image Source="/Resources/AppIcon/ErrorIcon.png"
                                        Width="16" 
-                                       Height="16" 
+                                       Height="16"
+                                       VerticalAlignment="Top"
                                        Margin="0,0,5,0"/>
                                 <TextBlock Text="{Binding LayoutParseError}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
@@ -262,15 +287,15 @@
                                        Grid.Column="0"
                                        Text="{x:Static strings:PackageCreation.OptionalText}"
                                        d:Text="Optional"
-                                       Foreground="{DynamicResource Gray300Brush}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
                                        HorizontalAlignment="Right"
                                        Margin="0,0,10,5"/>
                             <TextBox Grid.Row="4"
                                      Grid.Column="0"
                                      x:Name="SubValPathTextBox"
                                      Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Foreground="{DynamicResource Gray150Brush}"
-                                     Background="{DynamicResource Gray700Brush}"
+                                     Foreground="{DynamicResource PrimaryTextBrush}"
+                                     Background="{DynamicResource SecondaryButtonBrush}"
                                      Margin="0,0,10,0"
                                      Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBox.Style>
@@ -278,13 +303,15 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="TextBox">
-                                                    <Border Background="{TemplateBinding Background}" 
+                                                    <Border x:Name="Border"
+                                                            Background="{TemplateBinding Background}" 
                                                             BorderBrush="{TemplateBinding BorderBrush}" 
-                                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="6">
                                                         <Grid>
                                                             <TextBlock Text="{x:Static strings:PackageCreation.ValidatorPathBoxDefaultText}"
                                                                        d:Text="Select or enter the folder path for SubmissionValidator.dll" 
-                                                                       Foreground="Gray"
+                                                                       Foreground="{DynamicResource SecondaryTextBrush}"
                                                                        VerticalAlignment="Center"
                                                                        Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                                                        Margin="15,2"/>
@@ -293,6 +320,14 @@
                                                                           VerticalAlignment="Center"/>
                                                         </Grid>
                                                     </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsFocused" Value="True">
+                                                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TextEntryHighlightedBackgroundBrush}" />
+                                                        </Trigger>
+                                                        <DataTrigger Binding="{Binding SubValDllError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" Value="Visible">
+                                                            <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
+                                                        </DataTrigger>
+                                                    </ControlTemplate.Triggers>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -304,6 +339,8 @@
                                     Content="{x:Static strings:PackageCreation.BrowseText}"
                                     d:Content="Browse"
                                     Command="{Binding BrowseSubValPathCommand}"
+                                    Width="90"
+                                    Height="32"
                                     Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                             <StackPanel Grid.Row="5"
@@ -314,7 +351,8 @@
                                         Visibility="{Binding SubValDllError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                                 <Image Source="/Resources/AppIcon/ErrorIcon.png"
                                        Width="16" 
-                                       Height="16" 
+                                       Height="16"
+                                       VerticalAlignment="Top"
                                        Margin="0,0,5,0"/>
                                 <TextBlock Text="{Binding SubValDllError}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
@@ -327,7 +365,7 @@
                 <StackPanel Grid.Row="1"
                             Grid.Column="0"
                             Orientation="Horizontal"
-                            Margin="0, 5, 0, 0">
+                            Margin="0, 0, 0, 0">
                     <Border
                         Width="24"
                         Height="24"
@@ -336,7 +374,7 @@
                         Padding="2"
                         BorderBrush="{DynamicResource LightPurplishBlueBrush}"
                         BorderThickness="1">
-                        <TextBlock Text="2" Foreground="{DynamicResource PrimaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="2" Foreground="{DynamicResource LightPurplishBlueBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
                     </Border>
                 </StackPanel>
                 <StackPanel Grid.Row="1"
@@ -379,26 +417,28 @@
                                    Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.OptionalText}"
                                    d:Text="Optional"
-                                   Foreground="{DynamicResource Gray300Brush}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3" Grid.Column="0"
-                                x:Name="PackagePathTextBox"
-                                Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="{DynamicResource Gray150Brush}"
-                                 Background="{DynamicResource Gray700Brush}">
+                                 x:Name="PackagePathTextBox"
+                                 Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Foreground="{DynamicResource PrimaryTextBrush}"
+                                 Background="{DynamicResource SecondaryButtonBrush}">
                             <TextBox.Style>
                                 <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" 
-                                                    BorderBrush="{TemplateBinding BorderBrush}" 
-                                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                                <Border x:Name="Border"
+                                                        Background="{TemplateBinding Background}" 
+                                                        BorderBrush="{TemplateBinding BorderBrush}" 
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="6">
                                                     <Grid>
                                                         <TextBlock Text="{x:Static strings:PackageCreation.PackageOutputBoxText}"
                                                                    d:Text="Select or enter the package output location" 
-                                                                   Foreground="Gray"
+                                                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                                                    VerticalAlignment="Center"
                                                                    Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
                                                                    Margin="15,2"/>
@@ -407,6 +447,14 @@
                                                                    VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsFocused" Value="True">
+                                                        <Setter TargetName="Border" Property="Background" Value="{DynamicResource TextEntryHighlightedBackgroundBrush}" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding OutputDirectoryError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" Value="Visible">
+                                                        <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
+                                                    </DataTrigger>
+                                                </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
@@ -416,6 +464,8 @@
                         <Button Grid.Row="3" Grid.Column="2"
                                 Content="{x:Static strings:PackageCreation.BrowseText}"
                                 d:Content="Browse"
+                                Width="90"
+                                Height="32"
                                 Command="{Binding BrowsePackageOutputPathCommand}"/>
 
                         <StackPanel Grid.Row="4"
@@ -426,7 +476,8 @@
                                     Visibility="{Binding OutputDirectoryError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                             <Image Source="/Resources/AppIcon/ErrorIcon.png"
                                    Width="16" 
-                                   Height="16" 
+                                   Height="16"
+                                   VerticalAlignment="Top"
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding OutputDirectoryError}"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
@@ -435,7 +486,7 @@
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{DynamicResource Gray500Brush}" Margin="10,0" />
+                <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{DynamicResource BorderBrush}" Margin="10,0" />
                 <StackPanel Grid.Column="3" Grid.Row="0" Margin="10,0,0,0">
                     <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewTitleText}"
                                d:Text="Package Preview"
@@ -443,7 +494,7 @@
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                HorizontalAlignment="Left"
                                Margin="0,0,0,10"/>
-                    <Border BorderBrush="{DynamicResource Gray500Brush}"
+                    <Border BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6"
                             Padding="6"
@@ -478,7 +529,7 @@
                                            HorizontalAlignment="Left"
                                            Text="{x:Static strings:PackageCreation.PackagePreviewPackageIdText}"
                                            d:Text="Package ID" 
-                                           Foreground="{DynamicResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Grid.Row="1"
                                            HorizontalAlignment="Left"
                                            Text="{Binding PackageId}" 
@@ -499,7 +550,7 @@
                                            Grid.Column="0"
                                            Text="{x:Static strings:PackageCreation.PackagePreviewStoreIdText}"
                                            d:Text="StoreId: "
-                                           Foreground="{DynamicResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="0"
                                            Text="{Binding BigId}"
@@ -508,7 +559,7 @@
                                            Grid.Column="1"
                                            Text="{x:Static strings:PackageCreation.PackagePreviewSizeEstimate}"
                                            d:Text="Size estimate" 
-                                           Foreground="{DynamicResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="1"
                                            Text="{Binding PackageSize}" 
@@ -517,7 +568,7 @@
                                            Grid.Column="2"
                                            Text="{x:Static strings:PackageCreation.PackagePreviewFamilyText}"
                                            d:Text="Family" 
-                                           Foreground="{DynamicResource Gray300Brush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="2"
                                            Text="{Binding PackageType}" 
@@ -537,13 +588,12 @@
                         d:Content="Cancel"
                         Command="{Binding CancelButtonCommand}"
                         Width="90"
-                        Height="32"
                         Margin="0,0,10,0" />
                 <Button Content="{x:Static strings:PackageCreation.CreatePackageButtonText}"
                         d:Content="Create package"
                         Command="{Binding MakePackageCommand}"
-                        Width="128"
-                        Height="34"/>
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Width="128"/>
             </StackPanel>
         </StackPanel>
     </Grid>

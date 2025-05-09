@@ -77,8 +77,6 @@
                          Minimum="0"
                          Maximum="100"
                          Value="{Binding PackingProgressPercentage}"
-                         Foreground="{DynamicResource LightPurplishBlueBrush}"
-                         Background="{DynamicResource Gray500Brush}"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Stretch"
                          Height="3"/>
@@ -209,8 +207,8 @@
                     Command="{Binding CancelCreationCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 50, 50"
-                    Width="150"
-                    Height="30"
+                    Width="141"
+                    Height="32"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"/>
         </StackPanel>

@@ -4,44 +4,73 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Colors -->
-    <Color x:Key="PrimaryTextColor">#1A1B1E</Color>
+    <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
     <Color x:Key="SecondaryTextColor">#9FA0A1</Color>
 
-    <Color x:Key="PrimaryButtonColor">#4A24AE</Color>
+    <Color x:Key="TextEntryHighlightedBackgroundColor">#323539</Color>
 
-    <Color x:Key="Gray150">#D2D2D3</Color>
-    <Color x:Key="Gray200">#C8C8C8</Color>
-    <Color x:Key="Gray300">#ACACAC</Color>
-    <Color x:Key="Gray500">#6E6E6E</Color>
-    <Color x:Key="Gray600">#404040</Color>
-    <Color x:Key="Gray700">#303030</Color>
-    <Color x:Key="Gray900">#212121</Color>
+    <Color x:Key="PrimaryButtonColor">#4A24AE</Color>
+    <Color x:Key="PrimaryButtonHoverColor">#5F41C9</Color>
+    <Color x:Key="PrimaryButtonDisabledColor">#9F99AF</Color>
+    <Color x:Key="PrimaryButtonClickedColor">#8479AB</Color>
+
+    <Color x:Key="SecondaryButtonColor">#3E434B</Color>
+    <Color x:Key="SecondaryButtonHoverColor">#484E58</Color>
+    <Color x:Key="SecondaryButtonDisabledColor">#9D9E9F</Color>
+    <Color x:Key="SecondaryButtonClickedColor">#909294</Color>
+
+    <Color x:Key="ComboBoxBorderHighlightColor">#6B7584</Color>
+    <Color x:Key="HighlightedComboBoxItemColor">#3A3E45</Color>
+
+    <Color x:Key="ApplicationControlsColor">#404040</Color>
+    <Color x:Key="ApplicationControlsSelectColor">#212121</Color>
 
     <Color x:Key="ErrorRed">#FF889B</Color>
     <Color x:Key="ErrorRedTransluscent">#1AFF889B</Color>
 
     <Color x:Key="LightPurplishBlue">#B8B4FF</Color>
 
-    <Color x:Key="BackgroundColor">#FFFFFF</Color>
+    <Color x:Key="BorderColor">#6B7584</Color>
+    <Color x:Key="ErrorScreenBackgroundColor">#181A1D</Color>
+    <Color x:Key="BackgroundColor">#25282C</Color>
+
+    <Color x:Key="ProgressBarForegroundColor">#B8B4FF</Color>
+    <Color x:Key="ProgressBarBackgroundColor">#56595C</Color>
 
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}"/>
     <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
 
-    <SolidColorBrush x:Key="PrimaryButtonBrush" Color="{StaticResource PrimaryButtonColor}"/>
+    <SolidColorBrush x:Key="TextEntryHighlightedBackgroundBrush" Color="{StaticResource TextEntryHighlightedBackgroundColor}" />
 
-    <SolidColorBrush x:Key="Gray150Brush" Color="{StaticResource Gray150}"/>
-    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
-    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
-    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
-    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
-    <SolidColorBrush x:Key="Gray700Brush" Color="{StaticResource Gray700}"/>
-    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
+    <SolidColorBrush x:Key="PrimaryButtonBrush" Color="{StaticResource PrimaryButtonColor}"/>
+    <SolidColorBrush x:Key="PrimaryButtonHoverBrush" Color="{StaticResource PrimaryButtonHoverColor}"/>
+    <SolidColorBrush x:Key="PrimaryButtonDisabledBrush" Color="{StaticResource PrimaryButtonDisabledColor}"/>
+    <SolidColorBrush x:Key="PrimaryButtonClickedBrush" Color="{StaticResource PrimaryButtonClickedColor}"/>
+
+    <SolidColorBrush x:Key="SecondaryButtonBrush" Color="{StaticResource SecondaryButtonColor}"/>
+    <SolidColorBrush x:Key="SecondaryButtonHoverBrush" Color="{StaticResource SecondaryButtonHoverColor}"/>
+    <SolidColorBrush x:Key="SecondaryButtonDisabledBrush" Color="{StaticResource SecondaryButtonDisabledColor}"/>
+    <SolidColorBrush x:Key="SecondaryButtonClickedBrush" Color="{StaticResource SecondaryButtonClickedColor}"/>
+
+    <SolidColorBrush x:Key="ComboBoxBorderHighlightBrush" Color="{StaticResource ComboBoxBorderHighlightColor}"/>
+    <SolidColorBrush x:Key="HighlightedComboBoxItemBrush" Color="{StaticResource HighlightedComboBoxItemColor}"/>
+
+    <SolidColorBrush x:Key="ApplicationControlsBrush" Color="{StaticResource ApplicationControlsColor}"/>
+    <SolidColorBrush x:Key="ApplicationControlsSelectBrush" Color="{StaticResource ApplicationControlsSelectColor}"/>
 
     <SolidColorBrush x:Key="ErrorRedBrush" Color="{StaticResource ErrorRed}"/>
     <SolidColorBrush x:Key="ErrorRedTransluscentBrush" Color="{StaticResource ErrorRedTransluscent}"/>
 
     <SolidColorBrush x:Key="LightPurplishBlueBrush" Color="{StaticResource LightPurplishBlue}"/>
 
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="ErrorScreenBackgroundBrush" Color="{StaticResource ErrorScreenBackgroundColor}" />
     <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+
+    <SolidColorBrush x:Key="ProgressBarForegroundBrush" Color="{StaticResource ProgressBarForegroundColor}"/>
+    <SolidColorBrush x:Key="ProgressBarBackgroundBrush" Color="{StaticResource ProgressBarBackgroundColor}"/>
+
+    <SolidColorBrush x:Key="ErrorBrush" Color="#FFD32F2F" />
+
 </ResourceDictionary>

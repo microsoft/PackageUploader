@@ -706,6 +706,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             return;
         }
 
+        PackageErrorMessage = string.Empty;
         IsLoadingBranchesAndFlights = true;
         BranchOrFlightErrorMessage = string.Empty;
 

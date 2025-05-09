@@ -32,7 +32,6 @@
 
   <ItemGroup>
     <Resource Include="Resources\Images\*" />
-    <Resource Include="Resources\Fonts\*" />
     <Resource Include="Resources\AppIcon\*" />
   </ItemGroup>
 

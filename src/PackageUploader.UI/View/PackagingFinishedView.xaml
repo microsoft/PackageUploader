@@ -61,7 +61,7 @@
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
                     <TextBlock HorizontalAlignment="Left"
                                Text="File name" 
-                               Foreground="{DynamicResource Gray300Brush}"/>
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock HorizontalAlignment="Left"
                                Text="{Binding PackageFileName}" 
                                Foreground="{DynamicResource PrimaryTextBrush}"/>
@@ -78,19 +78,19 @@
                                 Margin="0, 0, 50, 0">
                         <TextBlock HorizontalAlignment="Left"
                                    Text="Store ID" 
-                                   Foreground="{DynamicResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding StoreId}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
                         <TextBlock Text="Size" 
-                                   Foreground="{DynamicResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding PackageSize}" 
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
                         <TextBlock Text="Family" 
-                                   Foreground="{DynamicResource Gray300Brush}"/>
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding PackageType}" 
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
@@ -99,15 +99,15 @@
                         Content="Install game"
                         Command="{Binding InstallGameCommand}"
                         IsEnabled="True"
-                        Width="150"
-                        Height="30"
+                        Width="107"
+                        Height="32"
                         Margin="10, 0, 10, 0"/>
                 <Button Grid.RowSpan="4" Grid.Column="3"
                         Content="View package"
                         Command="{Binding ViewPackageCommand}"
                         IsEnabled="True"
-                        Width="150"
-                        Height="30"
+                        Width="116"
+                        Height="32"
                         Margin="0, 0, 10, 0"/>
             </Grid>
         </Border>
@@ -117,7 +117,7 @@
                     VerticalAlignment="Bottom">
             <Button Content="View logs"
                     Command="{Binding ViewLogsCommand}"
-                    Style="{StaticResource HyperlinkButtonStyle}"
+                    Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
                     Margin="0, 0, 20, 20" />
             <Button Content="Go Home"
                     Command="{Binding GoHomeCommand}"
@@ -129,8 +129,9 @@
                     Command="{Binding ConfigureUploadCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 25, 20"
-                    Width="150"
-                    Height="30"/>
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Width="140"
+                    Height="34"/>
         </StackPanel>
     </Grid>
 </UserControl>
