@@ -87,7 +87,7 @@ namespace PackageUploader.UI.ViewModel
             VersionNum = _packageModelProvider.Package.Version;
             StoreId = _packageModelProvider.Package.BigId;
 
-            FileInfo packageInfo = new FileInfo(_packageModelProvider.Package.PackageFilePath);
+            FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
             PackageFileName = packageInfo.Name;
             PackageSize = TranslateFileSize(packageInfo.Length);
             PackageType = _packageModelProvider.Package.PackageType;
@@ -103,7 +103,7 @@ namespace PackageUploader.UI.ViewModel
 
         public static void OnViewLogs()
         {
-            string logPath = App.LogFilePath;
+            string logPath = App.GetLogFilePath();
             Process.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
 

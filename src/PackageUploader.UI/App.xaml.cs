@@ -22,13 +22,15 @@ public partial class App : System.Windows.Application
 {
     private readonly IHost _host;
 
-    public static string LogFilePath = System.IO.Path.Combine(
-                        System.IO.Path.GetTempPath(),
-                        $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");
+    private static readonly string LogFilePath = System.IO.Path.Combine(
+                           System.IO.Path.GetTempPath(),
+                           $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");
 
     private const string LightTheme = "Resources/Styles/Colors.Light.xaml";
     private const string DarkTheme = "Resources/Styles/Colors.Dark.xaml";
     private const string HighContrastTheme = "Resources/Styles/Colors.HighContrast.xaml";
+
+    public static string GetLogFilePath() => LogFilePath;
 
     public App()
     {
@@ -73,12 +75,9 @@ public partial class App : System.Windows.Application
                 // Register WindowService (will be initialized after MainWindow is created)
                 services.AddSingleton<IWindowService>(provider => {
                     var mainWindow = provider.GetRequiredService<MainWindow>();
-                    var contentControl = mainWindow.FindName("ContentArea") as ContentControl;
-                    if (contentControl == null)
-                    {
-                        throw new InvalidOperationException("Failed to find ContentArea control in MainWindow");
-                    }
-                    return new WindowService(contentControl, provider);
+                    return mainWindow.FindName("ContentArea") is not ContentControl contentControl
+                        ? throw new InvalidOperationException("Failed to find ContentArea control in MainWindow")
+                        : (IWindowService)new WindowService(contentControl, provider);
                 });
             })
             .ConfigureLogging((context, logging) => 
@@ -90,9 +89,6 @@ public partial class App : System.Windows.Application
                     // Configure formatter options if needed
                 }, fileOptions => {
                     // Set custom log file path
-                    /*fileOptions.Path = System.IO.Path.Combine(
-                        System.IO.Path.GetTempPath(), 
-                        $"PackageUploader_UI_{DateTime.Now:yyyyMMddHHmmss}.log");*/
                     fileOptions.Path = LogFilePath;
                 });
             })
@@ -105,7 +101,7 @@ public partial class App : System.Windows.Application
 
         FrameworkElement.StyleProperty.OverrideMetadata(typeof(Window), new FrameworkPropertyMetadata
         {
-            DefaultValue = FindResource(typeof(Window))
+            DefaultValue = TryFindResource(typeof(Window)) ?? new Style()
         });
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
@@ -166,7 +162,8 @@ public partial class App : System.Windows.Application
         catch (Exception ex)
         {
             // Handle exceptions (e.g., registry access issues)
-            Console.WriteLine($"Error accessing registry: {ex.Message}");
+            var logger = ((App)Current)._host.Services.GetRequiredService<ILogger<App>>();
+            logger.LogError(ex, "Error accessing registry.");
         }
         return DarkTheme;
     }

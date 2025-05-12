@@ -888,7 +888,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         _errorModelProvider.Error.MainMessage = errorTitle;
         _errorModelProvider.Error.DetailMessage = errorDescription;
         _errorModelProvider.Error.OriginPage = typeof(PackageUploadView);
-        _errorModelProvider.Error.LogsPath = App.LogFilePath;
+        _errorModelProvider.Error.LogsPath = App.GetLogFilePath();
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             _windowService.NavigateTo(typeof(ErrorPageView));
