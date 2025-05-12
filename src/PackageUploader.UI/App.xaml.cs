@@ -163,7 +163,11 @@ public partial class App : System.Windows.Application
                 }
             }
         }
-        catch { /* fallback to dark */ }
+        catch (Exception ex)
+        {
+            // Handle exceptions (e.g., registry access issues)
+            Console.WriteLine($"Error accessing registry: {ex.Message}");
+        }
         return DarkTheme;
     }
 
