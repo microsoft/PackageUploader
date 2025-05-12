@@ -13,7 +13,11 @@
         <StackPanel Margin="32">
             <!-- Add Back Arrow Icon -->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
-                <Button Width="16" Height="16" Command="{Binding CancelButtonCommand}" Style="{StaticResource WindowControlButtonStyle}">
+                <Button Width="16"
+                        Height="16"
+                        Command="{Binding CancelButtonCommand}"
+                        Style="{StaticResource WindowControlButtonStyle}"
+                        AutomationProperties.HelpText="Back to home">
                     <Path Data="M16,8 L4,8 M4,8 L8,4 M4,8 L8,12" 
                           Stroke="{DynamicResource PrimaryTextBrush}" 
                           StrokeThickness="1.5" 
@@ -112,6 +116,7 @@
                         <TextBox Grid.Row="3"
                                  Grid.Column="0" 
                                  x:Name="GamePathTextBox"
+                                 AutomationProperties.HelpText="Path to game files"
                                  Text="{Binding GameDataPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  Foreground="{DynamicResource PrimaryTextBrush}"
                                  Background="{DynamicResource SecondaryButtonBrush}"
@@ -154,6 +159,7 @@
                         </TextBox>
                         <Button Grid.Row="3" Grid.Column="2"
                                 d:Content="Browse"
+                                AutomationProperties.HelpText="Browse to game files"
                                 Content="{x:Static strings:PackageCreation.BrowseText}"
                                 Command="{Binding BrowseGameDataPathCommand}"
                                 IsEnabled="True"
@@ -208,12 +214,14 @@
                                        Foreground="{DynamicResource SecondaryTextBrush}"
                                        HorizontalAlignment="Right"
                                        Margin="0,0,10,5"/>
-                            <TextBox Grid.Row="1" Grid.Column="0"
-                                 x:Name="MappingDataTextBox"
-                                 Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 Foreground="{DynamicResource PrimaryTextBrush}"
-                                 Background="{DynamicResource SecondaryButtonBrush}"
-                                 Margin="0,0,10,10">
+                            <TextBox Grid.Row="1"
+                                     Grid.Column="0"
+                                     x:Name="MappingDataTextBox"
+                                     AutomationProperties.HelpText="Path to layout file"
+                                     Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Foreground="{DynamicResource PrimaryTextBrush}"
+                                     Background="{DynamicResource SecondaryButtonBrush}"
+                                     Margin="0,0,10,10">
                                 <TextBox.Style>
                                     <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                         <Setter Property="Template">
@@ -252,6 +260,7 @@
                             </TextBox>
                             <Button Grid.Row="1" Grid.Column="1"
                                     d:Content="Browse"
+                                    AutomationProperties.HelpText="Browse to layout file"
                                     Content="{x:Static strings:PackageCreation.BrowseText}"
                                     Command="{Binding BrowseMappingDataXmlPathCommand}"
                                     IsEnabled="True"
@@ -293,6 +302,7 @@
                             <TextBox Grid.Row="4"
                                      Grid.Column="0"
                                      x:Name="SubValPathTextBox"
+                                     AutomationProperties.HelpText="Submission Validator folder path"
                                      Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      Foreground="{DynamicResource PrimaryTextBrush}"
                                      Background="{DynamicResource SecondaryButtonBrush}"
@@ -338,6 +348,7 @@
                                     Grid.Column="1"
                                     Content="{x:Static strings:PackageCreation.BrowseText}"
                                     d:Content="Browse"
+                                    AutomationProperties.HelpText="Browse to Submission Validator folder path"
                                     Command="{Binding BrowseSubValPathCommand}"
                                     Width="90"
                                     Height="32"
@@ -422,6 +433,7 @@
                                    Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3" Grid.Column="0"
                                  x:Name="PackagePathTextBox"
+                                 AutomationProperties.HelpText="Output folder"
                                  Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  Foreground="{DynamicResource PrimaryTextBrush}"
                                  Background="{DynamicResource SecondaryButtonBrush}">
@@ -464,6 +476,7 @@
                         <Button Grid.Row="3" Grid.Column="2"
                                 Content="{x:Static strings:PackageCreation.BrowseText}"
                                 d:Content="Browse"
+                                AutomationProperties.HelpText="Browse to output folder"
                                 Width="90"
                                 Height="32"
                                 Command="{Binding BrowsePackageOutputPathCommand}"/>

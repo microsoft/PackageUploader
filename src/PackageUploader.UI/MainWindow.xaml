@@ -81,11 +81,12 @@
             
             <!-- Window Controls -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="MinimizeButton" 
+                <Button x:Name="MinimizeButton"
                         Width="46" Height="32" 
                         WindowChrome.IsHitTestVisibleInChrome="True"
                         Click="MinimizeButton_Click"
-                        Style="{StaticResource WindowControlButtonStyle}">
+                        Style="{StaticResource WindowControlButtonStyle}"
+                        AutomationProperties.HelpText="Minimize the window">
                     <Path Data="M0,6 H10" 
                           Stroke="{StaticResource SecondaryTextBrush}" 
                           StrokeThickness="1" 
@@ -97,7 +98,8 @@
                         Width="46" Height="32" 
                         WindowChrome.IsHitTestVisibleInChrome="True"
                         Click="MaximizeButton_Click"
-                        Style="{StaticResource WindowControlButtonStyle}">
+                        Style="{StaticResource WindowControlButtonStyle}"
+                        AutomationProperties.HelpText="Maximize the window">
                     <Path x:Name="MaximizeIcon" 
                           Data="M0,0 H10 V10 H0 V0" 
                           Stroke="{StaticResource SecondaryTextBrush}" 
@@ -110,7 +112,8 @@
                         Width="46" Height="32" 
                         WindowChrome.IsHitTestVisibleInChrome="True"
                         Click="CloseButton_Click"
-                        Style="{StaticResource WindowCloseButtonStyle}">
+                        Style="{StaticResource WindowCloseButtonStyle}"
+                        AutomationProperties.HelpText="Close the application">
                     <Path Data="M0,0 L10,10 M0,10 L10,0" 
                           Stroke="{StaticResource SecondaryTextBrush}" 
                           StrokeThickness="1" 

@@ -257,6 +257,9 @@
                                 BorderThickness="0"
                                 CornerRadius="8"
                                 Margin="5">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="{DynamicResource DropShadowComboBoxItemColor}" BlurRadius="12" ShadowDepth="2" Opacity="0.40"/>
+                                </Border.Effect>
                                 <ScrollViewer>
                                     <ItemsPresenter />
                                 </ScrollViewer>

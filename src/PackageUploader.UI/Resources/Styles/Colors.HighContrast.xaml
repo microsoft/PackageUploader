@@ -20,7 +20,8 @@
     <Color x:Key="SecondaryButtonClickedColor">#333333</Color>
 
     <Color x:Key="ComboBoxBorderHighlightColor">#FFFFFF</Color>
-    <Color x:Key="HighlightedComboBoxItemColor">#000000</Color>
+    <Color x:Key="HighlightedComboBoxItemColor">#C0C0C0</Color>
+    <Color x:Key="DropShadowComboBoxItemColor">#C0C0C0</Color>
 
     <Color x:Key="ApplicationControlsColor">#000000</Color>
     <Color x:Key="ApplicationControlsSelectColor">#FFFFFF</Color>

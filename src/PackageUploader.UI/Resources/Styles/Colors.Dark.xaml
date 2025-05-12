@@ -21,6 +21,7 @@
 
     <Color x:Key="ComboBoxBorderHighlightColor">#6B7584</Color>
     <Color x:Key="HighlightedComboBoxItemColor">#3A3E45</Color>
+    <Color x:Key="DropShadowComboBoxItemColor">#3A3E45</Color>
 
     <Color x:Key="ApplicationControlsColor">#404040</Color>
     <Color x:Key="ApplicationControlsSelectColor">#212121</Color>
