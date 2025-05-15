@@ -70,7 +70,8 @@
                         HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PackageUploadPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                            Foreground="{DynamicResource PrimaryTextBrush}"/>
-                <TextBlock Text="% complete"
+                <TextBlock Text="{x:Static strings:PackageUploading.PercentCompleteText}"
+                           d:Text="% complete"
                            Foreground="{DynamicResource PrimaryTextBrush}" />
             </StackPanel>
             <ProgressBar Grid.Row="1"
@@ -124,7 +125,8 @@
                    Width="16" />
             <TextBlock Grid.Row="0"
                        Grid.Column="1"
-                       Text="Computing deltas..."
+                       Text="{x:Static strings:PackageUploading.ComputingDeltasText}"
+                       d:Text="Computing deltas..."
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"/>
@@ -155,7 +157,8 @@
                    Height="16"
                    Width="16" />
             <TextBlock Grid.Row="1" Grid.Column="1"
-                       Text="Uploading package..."
+                       Text="{x:Static strings:PackageUploading.UploadingPackageText}"
+                       d:Text="Uploading package..."
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"/>
@@ -187,7 +190,8 @@
                    Width="16" />
             <TextBlock Grid.Row="2"
                        Grid.Column="1"
-                       Text="Processing package..."
+                       Text="{x:Static strings:PackageUploading.ProcessingPackageText}"
+                       d:Text="Processing package..."
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center" />
@@ -219,7 +223,8 @@
                    Width="16" />
             <TextBlock Grid.Row="3"
                        Grid.Column="1"
-                       Text="Uploading supplemental files..."
+                       Text="{x:Static strings:PackageUploading.UploadingExtraFilesText}"
+                       d:Text="Uploading supplemental files..."
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center" />
@@ -227,7 +232,8 @@
         <StackPanel Grid.Row="4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button Content="Cancel upload"
+            <Button Content="{x:Static strings:PackageUploading.CancelUploadButtonText}"
+                    d:Content="Cancel upload"
                     Command="{Binding CancelUploadCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 50, 50"

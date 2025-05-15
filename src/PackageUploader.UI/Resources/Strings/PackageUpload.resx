@@ -117,25 +117,73 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CancelUploadButtonText" xml:space="preserve">
-    <value>Cancel upload</value>
+  <data name="AditionalDetailsText" xml:space="preserve">
+    <value>Additional details</value>
   </data>
-  <data name="ComputingDeltasText" xml:space="preserve">
-    <value>Computing deltas...</value>
+  <data name="BrowsePackagePathHelpText" xml:space="preserve">
+    <value>Browse to package file</value>
   </data>
-  <data name="PercentCompleteText" xml:space="preserve">
-    <value>% complete</value>
+  <data name="CancelButtonHelpText" xml:space="preserve">
+    <value>Cancel the operation</value>
   </data>
-  <data name="ProcessingPackageText" xml:space="preserve">
-    <value>Processing package...</value>
+  <data name="CancelContentText" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="TitleText" xml:space="preserve">
-    <value>Uploading package to partner center</value>
+  <data name="ConfirmLocationSubtitleText" xml:space="preserve">
+    <value>Confirm the location of the package</value>
   </data>
-  <data name="UploadingExtraFilesText" xml:space="preserve">
-    <value>Uploading supplemental files...</value>
+  <data name="DestinationTitleText" xml:space="preserve">
+    <value>Destination</value>
   </data>
-  <data name="UploadingPackageText" xml:space="preserve">
-    <value>Uploading package...</value>
+  <data name="FamilyTitleText" xml:space="preserve">
+    <value>Family</value>
+  </data>
+  <data name="FileNameTitleText" xml:space="preserve">
+    <value>File name</value>
+  </data>
+  <data name="MarketTitleText" xml:space="preserve">
+    <value>Market</value>
+  </data>
+  <data name="PackageLocationTitleText" xml:space="preserve">
+    <value>Package location</value>
+  </data>
+  <data name="PackagePathHelpText" xml:space="preserve">
+    <value>Path to package file</value>
+  </data>
+  <data name="PackagePathText" xml:space="preserve">
+    <value>Package path</value>
+  </data>
+  <data name="ProductNameText" xml:space="preserve">
+    <value>Product name</value>
+  </data>
+  <data name="RequiredText" xml:space="preserve">
+    <value>Required</value>
+  </data>
+  <data name="SelectDestinationText" xml:space="preserve">
+    <value>Select a destination and market for the package upload.</value>
+  </data>
+  <data name="SelectEnterPackagePathText" xml:space="preserve">
+    <value>Select or enter the package path</value>
+  </data>
+  <data name="SizeTitleText" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="StoreIdTitleText" xml:space="preserve">
+    <value>Store ID</value>
+  </data>
+  <data name="UploadButtonContentText" xml:space="preserve">
+    <value>Upload Package</value>
+  </data>
+  <data name="UploadButtonHelpText" xml:space="preserve">
+    <value>Start uploading the package</value>
+  </data>
+  <data name="UploadPackageSubtitleText" xml:space="preserve">
+    <value>Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future.</value>
+  </data>
+  <data name="UploadPackageTitleText" xml:space="preserve">
+    <value>Upload a package</value>
+  </data>
+  <data name="UploadPreviewTitleText" xml:space="preserve">
+    <value>Upload Preview</value>
   </data>
 </root>

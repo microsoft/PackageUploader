@@ -22,14 +22,14 @@ namespace PackageUploader.UI.Resources.Strings {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class PackageUploading {
+    public class UploadingFinished {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal PackageUploading() {
+        internal UploadingFinished() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace PackageUploader.UI.Resources.Strings {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PackageUploader.UI.Resources.Strings.PackageUploading", typeof(PackageUploading).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PackageUploader.UI.Resources.Strings.UploadingFinished", typeof(UploadingFinished).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,65 +61,74 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cancel upload.
+        ///   Looks up a localized string similar to Family.
         /// </summary>
-        public static string CancelUploadButtonText {
+        public static string FamilyTitleText {
             get {
-                return ResourceManager.GetString("CancelUploadButtonText", resourceCulture);
+                return ResourceManager.GetString("FamilyTitleText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Computing deltas....
+        ///   Looks up a localized string similar to File name.
         /// </summary>
-        public static string ComputingDeltasText {
+        public static string FileNameTitleText {
             get {
-                return ResourceManager.GetString("ComputingDeltasText", resourceCulture);
+                return ResourceManager.GetString("FileNameTitleText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to % complete.
+        ///   Looks up a localized string similar to Go Home.
         /// </summary>
-        public static string PercentCompleteText {
+        public static string GoHomeButtonContent {
             get {
-                return ResourceManager.GetString("PercentCompleteText", resourceCulture);
+                return ResourceManager.GetString("GoHomeButtonContent", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Processing package....
+        ///   Looks up a localized string similar to Size.
         /// </summary>
-        public static string ProcessingPackageText {
+        public static string SizeTitleText {
             get {
-                return ResourceManager.GetString("ProcessingPackageText", resourceCulture);
+                return ResourceManager.GetString("SizeTitleText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uploading package to partner center.
+        ///   Looks up a localized string similar to Store ID.
         /// </summary>
-        public static string TitleText {
+        public static string StoreIdTitleText {
             get {
-                return ResourceManager.GetString("TitleText", resourceCulture);
+                return ResourceManager.GetString("StoreIdTitleText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uploading supplemental files....
+        ///   Looks up a localized string similar to Upload complete.
         /// </summary>
-        public static string UploadingExtraFilesText {
+        public static string UploadCompleteTitleText {
             get {
-                return ResourceManager.GetString("UploadingExtraFilesText", resourceCulture);
+                return ResourceManager.GetString("UploadCompleteTitleText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uploading package....
+        ///   Looks up a localized string similar to View logs.
         /// </summary>
-        public static string UploadingPackageText {
+        public static string ViewLogsButtonContent {
             get {
-                return ResourceManager.GetString("UploadingPackageText", resourceCulture);
+                return ResourceManager.GetString("ViewLogsButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View in Partner Center.
+        /// </summary>
+        public static string ViewPartnerCenterButtonContent {
+            get {
+                return ResourceManager.GetString("ViewPartnerCenterButtonContent", resourceCulture);
             }
         }
     }

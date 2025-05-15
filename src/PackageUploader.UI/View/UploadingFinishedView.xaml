@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:PackageUploader.UI.View"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=viewmodel:UploadingFinishedViewModel}"
              Background="{DynamicResource AppBackgroundBrush}">
@@ -34,7 +35,8 @@
         <TextBlock Grid.Row="1"
            Margin="0, 0, 0, 23"
            Style="{StaticResource SubHeadline}"
-           Text="Upload complete"
+           Text="{x:Static strings:UploadingFinished.UploadCompleteTitleText}"
+           d:Text="Upload complete"
            Foreground="{DynamicResource PrimaryTextBrush}" />
         <Border Grid.Row="2"
                 Margin="100, 0, 100, 0"
@@ -67,7 +69,8 @@
                        Margin="10,0,15,0"/>
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
                     <TextBlock HorizontalAlignment="Left"
-                               Text="File name" 
+                               Text="{x:Static strings:UploadingFinished.FileNameTitleText}"
+                               d:Text="File name" 
                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock HorizontalAlignment="Left"
                                Text="{Binding PackageFileName}" 
@@ -84,26 +87,30 @@
                                 HorizontalAlignment="Left"
                                 Margin="0, 0, 50, 0">
                         <TextBlock HorizontalAlignment="Left"
-                                   Text="Store ID" 
+                                   Text="{x:Static strings:UploadingFinished.StoreIdTitleText}"
+                                   d:Text="Store ID" 
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding StoreId}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock Text="Size" 
+                        <TextBlock Text="{x:Static strings:UploadingFinished.SizeTitleText}"
+                                   d:Text="Size" 
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding PackageSize}" 
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock Text="Family" 
+                        <TextBlock Text="{x:Static strings:UploadingFinished.FamilyTitleText}"
+                                   d:Text="Family" 
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding PackageType}" 
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                 </Grid>
                 <Button Grid.RowSpan="4" Grid.Column="2"
-                        Content="View in Partner Center"
+                        Content="{x:Static strings:UploadingFinished.ViewPartnerCenterButtonContent}"
+                        d:Content="View in Partner Center"
                         Command="{Binding ViewInPartnerCenterCommand}"
                         IsEnabled="True"
                         Width="150"
@@ -115,11 +122,13 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom">
-            <Button Content="View logs"
+            <Button Content="{x:Static strings:UploadingFinished.ViewLogsButtonContent}"
+                    d:Content="View logs"
                     Command="{Binding ViewLogsCommand}"
                     Style="{StaticResource HyperlinkButtonStyle}"
                     Margin="0, 0, 20, 20" />
-            <Button Content="Go Home"
+            <Button Content="{x:Static strings:UploadingFinished.GoHomeButtonContent}"
+                    d:Content="Go Home"
                     Command="{Binding HomeCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 20, 20"

@@ -6,6 +6,7 @@
              x:Class="PackageUploader.UI.View.PackagingProgressView"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackagingProgressViewModel}"
              Background="{DynamicResource AppBackgroundBrush}">                                       
@@ -43,7 +44,8 @@
         <TextBlock Grid.Row="1"
                    Margin="0, 0, 0, 23"
                    Style="{StaticResource SubHeadline}"
-                   Text="Getting your package ready..."
+                   Text="{x:Static strings:PackagingProgress.PackagingProgressTitleText}"
+                   d:Text="Getting your package ready..."
                    Foreground="{DynamicResource PrimaryTextBrush}" />
         <!-- Loading Bar -->
         <Grid Grid.Row="2"
@@ -59,7 +61,8 @@
             <TextBlock Grid.Row="0"
                        Grid.Column="0"
                        Margin="0, 0, 0, 10"
-                       Text="Packaging..."
+                       d:Text="Packaging..."
+                       Text="{x:Static strings:PackagingProgress.PackingText}"
                        Foreground="{DynamicResource PrimaryTextBrush}" 
                        HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="0"
@@ -68,7 +71,8 @@
                         HorizontalAlignment="Right">
                 <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                            Foreground="{DynamicResource PrimaryTextBrush}"/>
-                <TextBlock Text="% complete"
+                <TextBlock Text="{x:Static strings:PackagingProgress.PercentComplete}"
+                           d:Text="% complete"
                            Foreground="{DynamicResource PrimaryTextBrush}" />
             </StackPanel>
             <ProgressBar Grid.Row="1"
@@ -126,7 +130,8 @@
                        Grid.Column="1"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
-                       Text="Validating files..."
+                       Text="{x:Static strings:PackagingProgress.ValidatingFilesText}"
+                       d:Text="Validating files..."
                        Foreground="{DynamicResource PrimaryTextBrush}"/>
             <!-- Row 2 -->
             <Grid Grid.Row="1"
@@ -158,7 +163,8 @@
                    Width="16"
                    Margin="0, 30, 0, 0"/>
             <TextBlock Grid.Row="1" Grid.Column="1"
-                       Text="Copying and encrypting data..."
+                       Text="{x:Static strings:PackagingProgress.CopyingAndEncryptingText}"
+                       d:Text="Copying and encrypting data..."
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
@@ -194,7 +200,8 @@
                    Margin="0, 30, 0, 0"/>
             <TextBlock Grid.Row="2"
                        Grid.Column="1"
-                       Text="Verifying package contents..."
+                       Text="{x:Static strings:PackagingProgress.VerifyingPackageContentsText}"
+                       d:Text="Verifying package contents..."
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
@@ -203,7 +210,8 @@
         <StackPanel Grid.Row="4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
-            <Button Content="Cancel packaging"
+            <Button Content="{x:Static strings:PackagingProgress.CancelPackagingButtonContentText}"
+                    d:Content="Cancel packaging"
                     Command="{Binding CancelCreationCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 50, 50"

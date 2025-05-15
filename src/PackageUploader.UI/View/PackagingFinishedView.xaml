@@ -5,6 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
       xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
+      xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
       mc:Ignorable="d"
       d:DataContext="{d:DesignInstance Type=viewmodel:PackagingFinishedViewModel}"
       Background="{DynamicResource AppBackgroundBrush}">
@@ -28,10 +29,11 @@
                Height="130"
                Width="130" />
         <TextBlock Grid.Row="1"
-           Margin="0, 0, 0, 23"
-           Style="{StaticResource SubHeadline}"
-           Text="Packaging completed"
-           Foreground="{DynamicResource PrimaryTextBrush}" />
+                   Margin="0, 0, 0, 23"
+                   Style="{StaticResource SubHeadline}"
+                   Text="{x:Static strings:PackagingFinished.PackagingCompletedTitleText}"
+                   d:Text="Packaging completed"
+                   Foreground="{DynamicResource PrimaryTextBrush}" />
         <Border Grid.Row="2"
                 Margin="100, 0, 100, 0"
                 BorderBrush="#6B7584"
@@ -60,7 +62,8 @@
                        Margin="10,0,15,0"/>
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
                     <TextBlock HorizontalAlignment="Left"
-                               Text="File name" 
+                               Text="{x:Static strings:PackagingFinished.FileNameTitleText}"
+                               d:Text="File name" 
                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                     <TextBlock HorizontalAlignment="Left"
                                Text="{Binding PackageFileName}" 
@@ -77,33 +80,38 @@
                                 HorizontalAlignment="Left"
                                 Margin="0, 0, 50, 0">
                         <TextBlock HorizontalAlignment="Left"
-                                   Text="Store ID" 
+                                   Text="{x:Static strings:PackagingFinished.StoreIdTitleText}"
+                                   d:Text="Store ID" 
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding StoreId}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock Text="Size" 
+                        <TextBlock Text="{x:Static strings:PackagingFinished.SizeTitleText}"
+                                   d:Text="Size" 
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding PackageSize}" 
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock Text="Family" 
+                        <TextBlock Text="{x:Static strings:PackagingFinished.FamilyTitleText}"
+                                   d:Text="Family" 
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding PackageType}" 
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                 </Grid>
                 <Button Grid.RowSpan="4" Grid.Column="2"
-                        Content="Install game"
+                        d:Content="Install game"
+                        Content="{x:Static strings:PackagingFinished.InstallGameButtonContent}"
                         Command="{Binding InstallGameCommand}"
                         IsEnabled="True"
                         Width="107"
                         Height="32"
                         Margin="10, 0, 10, 0"/>
                 <Button Grid.RowSpan="4" Grid.Column="3"
-                        Content="View package"
+                        d:Content="View package"
+                        Content="{x:Static strings:PackagingFinished.ViewPackageButtonContent}"
                         Command="{Binding ViewPackageCommand}"
                         IsEnabled="True"
                         Width="116"
@@ -115,17 +123,20 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom">
-            <Button Content="View logs"
+            <Button Content="{x:Static strings:PackagingFinished.ViewLogsButtonContent}"
+                    d:Content="View logs"
                     Command="{Binding ViewLogsCommand}"
                     Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
                     Margin="0, 0, 20, 20" />
-            <Button Content="Go Home"
+            <Button Content="{x:Static strings:PackagingFinished.GoHomeButtonContent}"
+                    d:Content="Go home"
                     Command="{Binding GoHomeCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 10, 20"
                     Width="150"
                     Height="30"/>
-            <Button Content="Configure upload"
+            <Button Content="{x:Static strings:PackagingFinished.ConfigureUploadButtonContent}"
+                    d:Content="Configure upload"
                     Command="{Binding ConfigureUploadCommand}"
                     IsEnabled="True"
                     Margin="0, 0, 25, 20"

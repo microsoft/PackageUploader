@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              x:Class="PackageUploader.UI.View.PackageUploadView"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageUploadViewModel}">
@@ -35,11 +36,13 @@
                 </Button>
             </StackPanel>
 
-            <TextBlock Text="Upload a package"
+            <TextBlock Text="{x:Static strings:PackageUpload.UploadPackageTitleText}"
+                   d:Text="Upload a package"
                    Style="{StaticResource Headline}"
                    Foreground="{DynamicResource PrimaryTextBrush}"
                    HorizontalAlignment="Left"/>
-            <TextBlock Text="Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future."
+            <TextBlock Text="{x:Static strings:PackageUpload.UploadPackageSubtitleText}"
+                       d:Text="Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future."
                        HorizontalAlignment="Left"
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        TextWrapping="Wrap"
@@ -89,31 +92,36 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0" 
-                                   Text="Package location" 
+                                   Text="{x:Static strings:PackageUpload.PackageLocationTitleText}"
+                                   d:Text="Package location" 
                                    Style="{StaticResource SubHeadline}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
-                                   Text="Confirm the location of the package"
+                                   Text="{x:Static strings:PackageUpload.ConfirmLocationSubtitleText}"
+                                   d:Text="Confirm the location of the package"
                                    HorizontalAlignment="Left"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,10"/>
                         <TextBlock Grid.Row="2" Grid.Column="0"
-                                   Text="Package path"
+                                   Text="{x:Static strings:PackageUpload.PackagePathText}"
+                                   d:Text="Package path"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="Required"
+                                   Text="{x:Static strings:PackageUpload.RequiredText}"
+                                   d:Text="Required"
                                    Foreground="{DynamicResource SecondaryTextBrush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
                         <TextBox Grid.Row="3" Grid.Column="0" 
                                  x:Name="PackagePathTextBox"
-                                 AutomationProperties.HelpText="Path to package file"
+                                 AutomationProperties.HelpText="{x:Static strings:PackageUpload.PackagePathHelpText}"
+                                 d:AutomationProperties.HelpText="Path to package file"
                                  Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  Foreground="{DynamicResource PrimaryTextBrush}"
                                  Background="{DynamicResource AppBackgroundBrush}"
@@ -129,7 +137,8 @@
                                                         BorderThickness="{TemplateBinding BorderThickness}"
                                                         CornerRadius="6">
                                                     <Grid>
-                                                        <TextBlock Text="Select or enter the package path" 
+                                                        <TextBlock Text="{x:Static strings:PackageUpload.SelectEnterPackagePathText}"
+                                                                   d:Text="Select or enter the package path" 
                                                                    Foreground="{DynamicResource SecondaryTextBrush}" 
                                                                    VerticalAlignment="Center"
                                                                    Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
@@ -155,7 +164,8 @@
                         </TextBox>
                         <Button Grid.Row="3" Grid.Column="2"
                                 Content="Browse"
-                                AutomationProperties.HelpText="Browse to package file"
+                                AutomationProperties.HelpText="{x:Static strings:PackageUpload.BrowsePackagePathHelpText}"
+                                d:AutomationProperties.HelpText="Browse to package file"
                                 Command="{Binding BrowseForPackageCommand}"
                                 IsEnabled="True"
                                 Width="90"
@@ -182,7 +192,8 @@
                     </Grid>
                     <Expander Style="{StaticResource CustomExpanderStyle}" Margin="0,10,0,20">
                         <Expander.Header>
-                            <TextBlock Text="Additional details" 
+                            <TextBlock Text="{x:Static strings:PackageUpload.AditionalDetailsText}"
+                                       d:Text="Additional details" 
                                        Foreground="{DynamicResource PrimaryTextBrush}"/>
                         </Expander.Header>
                         <Grid Margin="0,10,0,0">
@@ -191,7 +202,8 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0"
-                                       Text="StoreId"
+                                       Text="{x:Static strings:PackageUpload.StoreIdTitleText}"
+                                       d:Text="StoreId"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
                                        HorizontalAlignment="Left"
                                        Margin="0,0,0,5"/>
@@ -272,27 +284,31 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
-                                   Text="Destination"
+                                   Text="{x:Static strings:PackageUpload.DestinationTitleText}"
+                                   d:Text="Destination"
                                    Style="{StaticResource SubHeadline}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="1"
                                    Grid.ColumnSpan="2"
-                                   Text="Select a destination and market for the package upload."
+                                   Text="{x:Static strings:PackageUpload.SelectDestinationText}"
+                                   d:Text="Select a destination and market for the package upload."
                                    HorizontalAlignment="Left"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,10"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="Destination"
+                                   Text="{x:Static strings:PackageUpload.DestinationTitleText}"
+                                   d:Text="Destination"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
-                                   Text="Required"
+                                   Text="{x:Static strings:PackageUpload.RequiredText}"
+                                   d:Text="Required"
                                    Foreground="{DynamicResource SecondaryTextBrush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,0,0,5"/>
@@ -349,13 +365,15 @@
                         </StackPanel>
                         <TextBlock Grid.Row="5"
                                    Grid.Column="0"
-                                   Text="Market"
+                                   Text="{x:Static strings:PackageUpload.MarketTitleText}"
+                                   d:Text="Market"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,10,0,5"/>
                         <TextBlock Grid.Row="5"
                                    Grid.Column="0"
-                                   Text="Required"
+                                   Text="{x:Static strings:PackageUpload.RequiredText}"
+                                   d:Text="Required"
                                    Foreground="{DynamicResource SecondaryTextBrush}"
                                    HorizontalAlignment="Right"
                                    Margin="0,10,0,5"/>
@@ -420,7 +438,8 @@
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{DynamicResource BorderBrush}" Margin="10,0" />
                 <StackPanel Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="10,0,0,0">
-                    <TextBlock Text="Upload Preview"
+                    <TextBlock Text="{x:Static strings:PackageUpload.UploadPreviewTitleText}"
+                               d:Text="Upload Preview"
                                Style="{StaticResource SubHeadline}"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                HorizontalAlignment="Left"
@@ -456,7 +475,8 @@
                                         Orientation="Vertical"
                                         HorizontalAlignment="Left"
                                         Margin="0, 0, 0, 10">
-                                <TextBlock Text="Product name"
+                                <TextBlock Text="{x:Static strings:PackageUpload.ProductNameText}"
+                                           d:Text="Product name"
                                            Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding ProductName}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"/>
@@ -469,13 +489,15 @@
                                     <ColumnDefinition Width="50*" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
-                                    <TextBlock Text="Destination"
+                                    <TextBlock Text="{x:Static strings:PackageUpload.DestinationTitleText}"
+                                               d:Text="Destination"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding BranchOrFlightDisplayName}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
-                                    <TextBlock Text="Market"
+                                    <TextBlock Text="{x:Static strings:PackageUpload.MarketTitleText }"
+                                               d:Text="Market"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding MarketGroupName}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
@@ -486,7 +508,8 @@
                                         Orientation="Vertical" 
                                         HorizontalAlignment="Left"
                                         Margin="0,0,0,10">
-                                <TextBlock Text="File name"
+                                <TextBlock Text="{x:Static strings:PackageUpload.FileNameTitleText}"
+                                           d:Text="File name"
                                            Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding PackageName}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
@@ -499,19 +522,22 @@
                                     <ColumnDefinition Width="33*" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
-                                    <TextBlock Text="Store ID"
+                                    <TextBlock Text="{x:Static strings:PackageUpload.StoreIdTitleText}"
+                                               d:Text="Store ID"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding BigId}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
-                                    <TextBlock Text="Size"
+                                    <TextBlock Text="{x:Static strings:PackageUpload.SizeTitleText}"
+                                               d:Text="Size"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding PackageSize}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
-                                    <TextBlock Text="Family"
+                                    <TextBlock Text="{x:Static strings:PackageUpload.FamilyTitleText}"
+                                               d:Text="Family"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding PackageType}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
@@ -525,23 +551,27 @@
             <!-- Button panel -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                 <Button Grid.Column="0"
-                        Content="Cancel" 
+                        d:Content="Cancel" 
+                        Content="{x:Static strings:PackageUpload.CancelContentText}"
                         Command="{Binding CancelButtonCommand}"
                         Width="90"
                         Height="32"
                         Margin="0,0,10,0"
                         AutomationProperties.Name="Cancel Button"
-                        AutomationProperties.HelpText="Cancel the operation"
+                        d:AutomationProperties.HelpText="Cancel the operation"
+                        AutomationProperties.HelpText="{x:Static strings:PackageUpload.CancelButtonHelpText}"
                         TabIndex="4" />
 
                 <Button Grid.Column="1"
-                        Content="Upload Package" 
+                        d:Content="Upload Package" 
+                        Content="{x:Static strings:PackageUpload.UploadButtonContentText}"
                         Command="{Binding UploadPackageCommand}"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Width="133"
                         Height="34"
                         AutomationProperties.Name="Upload Package Button"
-                        AutomationProperties.HelpText="Start uploading the package"
+                        d:AutomationProperties.HelpText="Start uploading the package"
+                        AutomationProperties.HelpText="{x:Static strings:PackageUpload.UploadButtonHelpText}"
                         TabIndex="5" />
             </StackPanel>
         </StackPanel>

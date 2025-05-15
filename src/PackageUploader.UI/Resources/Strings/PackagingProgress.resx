@@ -117,25 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CancelUploadButtonText" xml:space="preserve">
-    <value>Cancel upload</value>
+  <data name="CancelPackagingButtonContentText" xml:space="preserve">
+    <value>Cancel packaging</value>
   </data>
-  <data name="ComputingDeltasText" xml:space="preserve">
-    <value>Computing deltas...</value>
+  <data name="CopyingAndEncryptingText" xml:space="preserve">
+    <value>Copying and encrypting data...</value>
   </data>
-  <data name="PercentCompleteText" xml:space="preserve">
+  <data name="PackagingProgressTitleText" xml:space="preserve">
+    <value>Getting your package ready...</value>
+  </data>
+  <data name="PackingText" xml:space="preserve">
+    <value>Packing...</value>
+  </data>
+  <data name="PercentComplete" xml:space="preserve">
     <value>% complete</value>
   </data>
-  <data name="ProcessingPackageText" xml:space="preserve">
-    <value>Processing package...</value>
+  <data name="ValidatingFilesText" xml:space="preserve">
+    <value>Validating files...</value>
   </data>
-  <data name="TitleText" xml:space="preserve">
-    <value>Uploading package to partner center</value>
-  </data>
-  <data name="UploadingExtraFilesText" xml:space="preserve">
-    <value>Uploading supplemental files...</value>
-  </data>
-  <data name="UploadingPackageText" xml:space="preserve">
-    <value>Uploading package...</value>
+  <data name="VerifyingPackageContentsText" xml:space="preserve">
+    <value>Verifying package contents...</value>
   </data>
 </root>

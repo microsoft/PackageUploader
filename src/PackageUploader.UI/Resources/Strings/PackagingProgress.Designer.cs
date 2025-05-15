@@ -22,14 +22,14 @@ namespace PackageUploader.UI.Resources.Strings {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class PackageUploading {
+    public class PackagingProgress {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal PackageUploading() {
+        internal PackagingProgress() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace PackageUploader.UI.Resources.Strings {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PackageUploader.UI.Resources.Strings.PackageUploading", typeof(PackageUploading).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PackageUploader.UI.Resources.Strings.PackagingProgress", typeof(PackagingProgress).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,65 +61,65 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cancel upload.
+        ///   Looks up a localized string similar to Cancel packaging.
         /// </summary>
-        public static string CancelUploadButtonText {
+        public static string CancelPackagingButtonContentText {
             get {
-                return ResourceManager.GetString("CancelUploadButtonText", resourceCulture);
+                return ResourceManager.GetString("CancelPackagingButtonContentText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Computing deltas....
+        ///   Looks up a localized string similar to Copying and encrypting data....
         /// </summary>
-        public static string ComputingDeltasText {
+        public static string CopyingAndEncryptingText {
             get {
-                return ResourceManager.GetString("ComputingDeltasText", resourceCulture);
+                return ResourceManager.GetString("CopyingAndEncryptingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Getting your package ready....
+        /// </summary>
+        public static string PackagingProgressTitleText {
+            get {
+                return ResourceManager.GetString("PackagingProgressTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing....
+        /// </summary>
+        public static string PackingText {
+            get {
+                return ResourceManager.GetString("PackingText", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to % complete.
         /// </summary>
-        public static string PercentCompleteText {
+        public static string PercentComplete {
             get {
-                return ResourceManager.GetString("PercentCompleteText", resourceCulture);
+                return ResourceManager.GetString("PercentComplete", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Processing package....
+        ///   Looks up a localized string similar to Validating files....
         /// </summary>
-        public static string ProcessingPackageText {
+        public static string ValidatingFilesText {
             get {
-                return ResourceManager.GetString("ProcessingPackageText", resourceCulture);
+                return ResourceManager.GetString("ValidatingFilesText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uploading package to partner center.
+        ///   Looks up a localized string similar to Verifying package contents....
         /// </summary>
-        public static string TitleText {
+        public static string VerifyingPackageContentsText {
             get {
-                return ResourceManager.GetString("TitleText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Uploading supplemental files....
-        /// </summary>
-        public static string UploadingExtraFilesText {
-            get {
-                return ResourceManager.GetString("UploadingExtraFilesText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Uploading package....
-        /// </summary>
-        public static string UploadingPackageText {
-            get {
-                return ResourceManager.GetString("UploadingPackageText", resourceCulture);
+                return ResourceManager.GetString("VerifyingPackageContentsText", resourceCulture);
             }
         }
     }
