@@ -138,14 +138,50 @@
   <data name="CreatePackageButtonText" xml:space="preserve">
     <value>Create package</value>
   </data>
+  <data name="DragAndDropMessage" xml:space="preserve">
+    <value>Drag and drop the Identity Data folder here or click to browse</value>
+  </data>
+  <data name="ErrorCreatingPackageErrorMsg" xml:space="preserve">
+    <value>Error creating package.</value>
+  </data>
+  <data name="FailedToCreateOutputDirectoryErrorMsg" xml:space="preserve">
+    <value>Failed to create output directory</value>
+  </data>
+  <data name="FailedToGenerateLayoutFileErrorMsg" xml:space="preserve">
+    <value>Failed to generate a layout file</value>
+  </data>
+  <data name="FolderDoesNotContainConfigErrMsg" xml:space="preserve">
+    <value>Provided folder does not contain a MicrosoftGame.config file</value>
+  </data>
   <data name="GamePathBoxDefaultText" xml:space="preserve">
     <value>Select or enter the game's location</value>
   </data>
   <data name="GamePathTitleText" xml:space="preserve">
     <value>Game path</value>
   </data>
+  <data name="GeneratingLayoutFileErrorMsg" xml:space="preserve">
+    <value>Error generating layout file.</value>
+  </data>
   <data name="LayoutFileMapTitle" xml:space="preserve">
     <value>Layout file/content map</value>
+  </data>
+  <data name="LayoutFileParsingErrorMsg" xml:space="preserve">
+    <value>There was an error parsing the layout file</value>
+  </data>
+  <data name="MicrosoftGameConfigInvalidErrMsg" xml:space="preserve">
+    <value>The MicrosoftGame.config in the provided folder is invalid</value>
+  </data>
+  <data name="MsftGameCOnfigLacksValidIdentityErrMsg" xml:space="preserve">
+    <value>The MicrosoftGame.config lacks a valid Identity node</value>
+  </data>
+  <data name="MsftGameConfigLogoFileNotExistErrMsg" xml:space="preserve">
+    <value>The logo file specified by the MicrosoftGame.config does not exist</value>
+  </data>
+  <data name="MsftGameConfigMissingLogoFilesErrMsg" xml:space="preserve">
+    <value>The MicrosoftGame.config does not have the required Logo files in the ShellVisuals</value>
+  </data>
+  <data name="NoFilesInLayoutFileErrorMsg" xml:space="preserve">
+    <value>There were no files found in the layout file</value>
   </data>
   <data name="OptionalText" xml:space="preserve">
     <value>Optional</value>
@@ -174,14 +210,26 @@
   <data name="PackagePreviewTitleText" xml:space="preserve">
     <value>Package Preview</value>
   </data>
+  <data name="ProvideGameDataPathErrorMsg" xml:space="preserve">
+    <value>Please provide the game data path</value>
+  </data>
   <data name="RequiredText" xml:space="preserve">
     <value>Required</value>
+  </data>
+  <data name="SelectMapXmlTitleText" xml:space="preserve">
+    <value>Select Mapping Data XML File</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
     <value>Locate your game's build to create a package. The Xbox Package Tool will remember these paths for easier access in the future.</value>
   </data>
+  <data name="SubValDllNotFoundErrorMsg" xml:space="preserve">
+    <value>SubmissionValidator.dll not found in the specified path.</value>
+  </data>
   <data name="TitleString" xml:space="preserve">
     <value>Make a game package</value>
+  </data>
+  <data name="UnknownText" xml:space="preserve">
+    <value>Unknown</value>
   </data>
   <data name="ValidatorPathBoxDefaultText" xml:space="preserve">
     <value>Select or enter the folder path for SubmissionValidator.dll</value>

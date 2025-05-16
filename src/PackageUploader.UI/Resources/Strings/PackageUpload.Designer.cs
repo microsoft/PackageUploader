@@ -70,11 +70,38 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Branch.
+        /// </summary>
+        public static string BranchNotFoundErrMsgPartOne {
+            get {
+                return ResourceManager.GetString("BranchNotFoundErrMsgPartOne", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to not found.
+        /// </summary>
+        public static string BranchNotFoundErrMsgPartTwo {
+            get {
+                return ResourceManager.GetString("BranchNotFoundErrMsgPartTwo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Browse to package file.
         /// </summary>
         public static string BrowsePackagePathHelpText {
             get {
                 return ResourceManager.GetString("BrowsePackagePathHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BuildId mismatch in the Submission Validator log file.
+        /// </summary>
+        public static string BuildIdMismatchSubValErrMsg {
+            get {
+                return ResourceManager.GetString("BuildIdMismatchSubValErrMsg", resourceCulture);
             }
         }
         
@@ -115,6 +142,78 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Directory not found.
+        /// </summary>
+        public static string DirectoryNotFoundErrMsg {
+            get {
+                return ResourceManager.GetString("DirectoryNotFoundErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error extracting package information.
+        /// </summary>
+        public static string ErrorExtractingInfoErrMsg {
+            get {
+                return ResourceManager.GetString("ErrorExtractingInfoErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error getting market groups.
+        /// </summary>
+        public static string ErrorGettingMarketGroupsErrMsg {
+            get {
+                return ResourceManager.GetString("ErrorGettingMarketGroupsErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error getting product information.
+        /// </summary>
+        public static string ErrorGettingProdInfo {
+            get {
+                return ResourceManager.GetString("ErrorGettingProdInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error processing package.
+        /// </summary>
+        public static string ErrorProcessingPackageErrMsg {
+            get {
+                return ResourceManager.GetString("ErrorProcessingPackageErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error selecting file.
+        /// </summary>
+        public static string ErrorSelectingFileErrMsg {
+            get {
+                return ResourceManager.GetString("ErrorSelectingFileErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error uploading package.
+        /// </summary>
+        public static string ErrUploadPackageErrMsg {
+            get {
+                return ResourceManager.GetString("ErrUploadPackageErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expected.
+        /// </summary>
+        public static string ExpectedText {
+            get {
+                return ResourceManager.GetString("ExpectedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Family.
         /// </summary>
         public static string FamilyTitleText {
@@ -133,11 +232,65 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Found.
+        /// </summary>
+        public static string FoundText {
+            get {
+                return ResourceManager.GetString("FoundText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid file path..
+        /// </summary>
+        public static string InvalidFilePathErrMsg {
+            get {
+                return ResourceManager.GetString("InvalidFilePathErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Market.
         /// </summary>
         public static string MarketTitleText {
             get {
                 return ResourceManager.GetString("MarketTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Branches found for this product.
+        /// </summary>
+        public static string NoBranchesFoundErrMsg {
+            get {
+                return ResourceManager.GetString("NoBranchesFoundErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No Product Information.
+        /// </summary>
+        public static string NoProdInfoTitleText {
+            get {
+                return ResourceManager.GetString("NoProdInfoTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Null Branch/Flight.
+        /// </summary>
+        public static string NullBranchFlightErrTitleText {
+            get {
+                return ResourceManager.GetString("NullBranchFlightErrTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in additional details below..
+        /// </summary>
+        public static string PackageHasNoBigIdConfigureMsftGameCfgErrMsg {
+            get {
+                return ResourceManager.GetString("PackageHasNoBigIdConfigureMsftGameCfgErrMsg", resourceCulture);
             }
         }
         
@@ -169,11 +322,38 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Product information not available. Please enter a valid BigId and try again..
+        /// </summary>
+        public static string ProductInfoNotAvailableErrMsg {
+            get {
+                return ResourceManager.GetString("ProductInfoNotAvailableErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Product name.
         /// </summary>
         public static string ProductNameText {
             get {
                 return ResourceManager.GetString("ProductNameText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Product with BigID.
+        /// </summary>
+        public static string ProductWithBigIdNotFoundConfigHereErrMsgPart1 {
+            get {
+                return ResourceManager.GetString("ProductWithBigIdNotFoundConfigHereErrMsgPart1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to not found. Configure your product at https://partner.microsoft.com/.
+        /// </summary>
+        public static string ProductWithBigIdNotFoundConfigHereErrMsgPart2 {
+            get {
+                return ResourceManager.GetString("ProductWithBigIdNotFoundConfigHereErrMsgPart2", resourceCulture);
             }
         }
         
@@ -205,6 +385,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select a Package File.
+        /// </summary>
+        public static string SelectPackageFileText {
+            get {
+                return ResourceManager.GetString("SelectPackageFileText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Size.
         /// </summary>
         public static string SizeTitleText {
@@ -223,6 +412,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Submission Validator log not found.
+        /// </summary>
+        public static string SubValLogNotFoundErrMsg {
+            get {
+                return ResourceManager.GetString("SubValLogNotFoundErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Upload Package.
         /// </summary>
         public static string UploadButtonContentText {
@@ -237,6 +435,15 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string UploadButtonHelpText {
             get {
                 return ResourceManager.GetString("UploadButtonHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload cancelled..
+        /// </summary>
+        public static string UploadCancelledErrMsg {
+            get {
+                return ResourceManager.GetString("UploadCancelledErrMsg", resourceCulture);
             }
         }
         

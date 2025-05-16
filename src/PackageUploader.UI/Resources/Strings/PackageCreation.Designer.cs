@@ -124,6 +124,51 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Drag and drop the Identity Data folder here or click to browse.
+        /// </summary>
+        public static string DragAndDropMessage {
+            get {
+                return ResourceManager.GetString("DragAndDropMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error creating package..
+        /// </summary>
+        public static string ErrorCreatingPackageErrorMsg {
+            get {
+                return ResourceManager.GetString("ErrorCreatingPackageErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to create output directory.
+        /// </summary>
+        public static string FailedToCreateOutputDirectoryErrorMsg {
+            get {
+                return ResourceManager.GetString("FailedToCreateOutputDirectoryErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to generate a layout file.
+        /// </summary>
+        public static string FailedToGenerateLayoutFileErrorMsg {
+            get {
+                return ResourceManager.GetString("FailedToGenerateLayoutFileErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided folder does not contain a MicrosoftGame.config file.
+        /// </summary>
+        public static string FolderDoesNotContainConfigErrMsg {
+            get {
+                return ResourceManager.GetString("FolderDoesNotContainConfigErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select or enter the game&apos;s location.
         /// </summary>
         public static string GamePathBoxDefaultText {
@@ -142,11 +187,74 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error generating layout file..
+        /// </summary>
+        public static string GeneratingLayoutFileErrorMsg {
+            get {
+                return ResourceManager.GetString("GeneratingLayoutFileErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Layout file/content map.
         /// </summary>
         public static string LayoutFileMapTitle {
             get {
                 return ResourceManager.GetString("LayoutFileMapTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error parsing the layout file.
+        /// </summary>
+        public static string LayoutFileParsingErrorMsg {
+            get {
+                return ResourceManager.GetString("LayoutFileParsingErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The MicrosoftGame.config in the provided folder is invalid.
+        /// </summary>
+        public static string MicrosoftGameConfigInvalidErrMsg {
+            get {
+                return ResourceManager.GetString("MicrosoftGameConfigInvalidErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The MicrosoftGame.config lacks a valid Identity node.
+        /// </summary>
+        public static string MsftGameCOnfigLacksValidIdentityErrMsg {
+            get {
+                return ResourceManager.GetString("MsftGameCOnfigLacksValidIdentityErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The logo file specified by the MicrosoftGame.config does not exist.
+        /// </summary>
+        public static string MsftGameConfigLogoFileNotExistErrMsg {
+            get {
+                return ResourceManager.GetString("MsftGameConfigLogoFileNotExistErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The MicrosoftGame.config does not have the required Logo files in the ShellVisuals.
+        /// </summary>
+        public static string MsftGameConfigMissingLogoFilesErrMsg {
+            get {
+                return ResourceManager.GetString("MsftGameConfigMissingLogoFilesErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There were no files found in the layout file.
+        /// </summary>
+        public static string NoFilesInLayoutFileErrorMsg {
+            get {
+                return ResourceManager.GetString("NoFilesInLayoutFileErrorMsg", resourceCulture);
             }
         }
         
@@ -232,11 +340,29 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please provide the game data path.
+        /// </summary>
+        public static string ProvideGameDataPathErrorMsg {
+            get {
+                return ResourceManager.GetString("ProvideGameDataPathErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Required.
         /// </summary>
         public static string RequiredText {
             get {
                 return ResourceManager.GetString("RequiredText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Mapping Data XML File.
+        /// </summary>
+        public static string SelectMapXmlTitleText {
+            get {
+                return ResourceManager.GetString("SelectMapXmlTitleText", resourceCulture);
             }
         }
         
@@ -250,11 +376,29 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SubmissionValidator.dll not found in the specified path..
+        /// </summary>
+        public static string SubValDllNotFoundErrorMsg {
+            get {
+                return ResourceManager.GetString("SubValDllNotFoundErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Make a game package.
         /// </summary>
         public static string TitleString {
             get {
                 return ResourceManager.GetString("TitleString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown.
+        /// </summary>
+        public static string UnknownText {
+            get {
+                return ResourceManager.GetString("UnknownText", resourceCulture);
             }
         }
         

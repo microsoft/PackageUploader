@@ -151,12 +151,12 @@ public partial class PackageUploadViewModel : BaseViewModel
                 MarketGroupNames = [];
                 MarketGroupName = string.Empty;
 
-                MarketGroupErrorMessage = "No Branches found for this product";
+                MarketGroupErrorMessage = Resources.Strings.PackageUpload.NoBranchesFoundErrMsg; //"No Branches found for this product";
             }
         }
         catch (Exception ex)
         {
-            MarketGroupErrorMessage = $"Error getting market groups: {ex.Message}";
+            MarketGroupErrorMessage = $"{Resources.Strings.PackageUpload.ErrorGettingMarketGroupsErrMsg}: {ex.Message}"; //$"Error getting market groups: {ex.Message}";
         }
         finally
         {
@@ -467,7 +467,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Filter = "Package Files (*.xvc;*.msixvc)|*.xvc;*.msixvc|All Files (*.*)|*.*",
-                Title = "Select a Package File"
+                Title = Resources.Strings.PackageUpload.SelectPackageFileText //"Select a Package File"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -478,7 +478,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            PackageErrorMessage = $"Error selecting file: {ex.Message}";
+            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorSelectingFileErrMsg}: {ex.Message}"; //$"Error selecting file: {ex.Message}";
         }
     }
 
@@ -486,7 +486,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     {
         if (string.IsNullOrEmpty(filePath))
         {
-            PackageErrorMessage = "Invalid file path.";
+            PackageErrorMessage = $"{Resources.Strings.PackageUpload.InvalidFilePathErrMsg}"; // "Invalid file path."
             return;
         }
 
@@ -518,7 +518,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            PackageErrorMessage = $"Error processing package: {ex.Message}";
+            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorProcessingPackageErrMsg}: {ex.Message}"; // "Error processing package: {ex.Message}";
         }
     }
 
@@ -571,7 +571,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
             if (!Directory.Exists(baseFolder))
             {
-                throw new DirectoryNotFoundException($"Directory not found: {baseFolder}");
+                throw new DirectoryNotFoundException($"{Resources.Strings.PackageUpload.DirectoryNotFoundErrMsg}: {baseFolder}"); // "Directory not found: {baseFolder}"
             }
             string fileName = Path.GetFileNameWithoutExtension(packagePath);
 
@@ -609,7 +609,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             {
                 BigId = string.Empty;
                 IsPackageMissingStoreId = true;
-                PackageErrorMessage = $"Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in additional details below.";
+                PackageErrorMessage = Resources.Strings.PackageUpload.PackageHasNoBigIdConfigureMsftGameCfgErrMsg; //$"Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in additional details below.";
             }
 
             // Update package preview information
@@ -637,7 +637,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            PackageErrorMessage = $"Error extracting package information: {ex.Message}";
+            PackageErrorMessage = Resources.Strings.PackageUpload.ErrorExtractingInfoErrMsg; //$"Error extracting package information: {ex.Message}";
         }
     }
 
@@ -660,7 +660,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         // Read the XML file and extract the TitleId and StoreId
         if (!File.Exists(SubValFilePath))
         {
-            throw new FileNotFoundException($"Submission Validator log not found: {SubValFilePath}");
+            throw new FileNotFoundException($"{Resources.Strings.PackageUpload.SubValLogNotFoundErrMsg}: {SubValFilePath}");//$"Submission Validator log not found: {SubValFilePath}");
         }
 
         using FileStream stream = File.OpenRead(SubValFilePath);
@@ -676,7 +676,11 @@ public partial class PackageUploadViewModel : BaseViewModel
 
             if (buildId != expectedBuildId)
             {
-                throw new Exception($"BuildId mismatch in the Submission Validator log file. Expected: {expectedBuildId}, Found: {buildId}");
+                string expectedMsg = Resources.Strings.PackageUpload.ExpectedText;
+                string foundMsg = Resources.Strings.PackageUpload.FoundText;
+                string mainMsg = Resources.Strings.PackageUpload.BuildIdMismatchSubValErrMsg;
+                //throw new Exception($"BuildId mismatch in the Submission Validator log file. Expected: {expectedBuildId}, Found: {buildId}");
+                throw new Exception($"{mainMsg}. {expectedMsg}: {expectedBuildId}, {foundMsg}: {buildId}");
             }
         }
 
@@ -743,11 +747,13 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (ProductNotFoundException)
         {
-            BranchOrFlightErrorMessage = $"Product with BigId '{BigId}' not found. Configure your product at https://partner.microsoft.com/";
+            string part1 = Resources.Strings.PackageUpload.ProductWithBigIdNotFoundConfigHereErrMsgPart1;
+            string part2 = Resources.Strings.PackageUpload.ProductWithBigIdNotFoundConfigHereErrMsgPart2;
+            BranchOrFlightErrorMessage = $"{part1} '{BigId}' {part2}"; //$"Product with BigId '{BigId}' not found. Configure your product at https://partner.microsoft.com/";
         }
         catch (Exception ex)
         {
-            BranchOrFlightErrorMessage = $"Error getting product information: {ex.Message}";
+            BranchOrFlightErrorMessage = $"{Resources.Strings.PackageUpload.ErrorGettingProdInfo}: {ex.Message}"; //$"Error getting product information: {ex.Message}";
         }
         finally
         {
@@ -764,8 +770,9 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         if (_gameProduct == null || _branchesAndFlights == null || _gamePackageConfiguration == null)
         {
-            PackageErrorMessage = "Product information not available. Please enter a valid BigId and try again.";
-            SetErrorAndGoToErrorPage("No Product Information", PackageErrorMessage);
+            PackageErrorMessage = Resources.Strings.PackageUpload.ProductInfoNotAvailableErrMsg; //$"Product information not available. Please enter a valid BigId and try again.";
+            string ErrorTitle = Resources.Strings.PackageUpload.NoProdInfoTitleText; //$"No Product Information";
+            SetErrorAndGoToErrorPage(ErrorTitle, PackageErrorMessage);
             return;
         }
 
@@ -779,9 +786,12 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         if (branchOrFlight == null)
         {
-            PackageErrorMessage = $"Branch '{BranchOrFlightDisplayName}' not found.";
+            string errorTitle = Resources.Strings.PackageUpload.NullBranchFlightErrTitleText; //$"Null Branch/Flight";
+            string errMsgPartOne = Resources.Strings.PackageUpload.BranchNotFoundErrMsgPartOne;
+            string errMsgPartTwo = Resources.Strings.PackageUpload.BranchNotFoundErrMsgPartTwo;
+            PackageErrorMessage = $"{errMsgPartOne} '{BranchOrFlightDisplayName}' {errMsgPartTwo}."; // "Branch {BranchOrFlightDisplayName} not found."
             IsUploadInProgress = false;
-            SetErrorAndGoToErrorPage("Null Branch/Flight", PackageErrorMessage);
+            SetErrorAndGoToErrorPage(errorTitle, PackageErrorMessage);
             return;
         }
 
@@ -829,12 +839,12 @@ public partial class PackageUploadViewModel : BaseViewModel
             {
                 SetErrorAndGoToErrorPage(nameof(OperationCanceledException), oce.ToString());
             }
-            PackageErrorMessage = "Upload cancelled.";
+            PackageErrorMessage = Resources.Strings.PackageUpload.UploadCancelledErrMsg; //"Upload cancelled.";
         }
         catch (Exception ex)
         {
             SetErrorAndGoToErrorPage(nameof(Exception), ex.ToString());
-            PackageErrorMessage = $"Error uploading package: {ex.Message}";
+            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrUploadPackageErrMsg}: {ex.Message}"; // "Error uploading package: {ex.Message}";
         }
         finally
         {

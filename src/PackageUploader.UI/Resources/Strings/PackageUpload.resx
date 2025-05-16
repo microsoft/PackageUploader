@@ -120,8 +120,17 @@
   <data name="AditionalDetailsText" xml:space="preserve">
     <value>Additional details</value>
   </data>
+  <data name="BranchNotFoundErrMsgPartOne" xml:space="preserve">
+    <value>Branch</value>
+  </data>
+  <data name="BranchNotFoundErrMsgPartTwo" xml:space="preserve">
+    <value>not found</value>
+  </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
     <value>Browse to package file</value>
+  </data>
+  <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
+    <value>BuildId mismatch in the Submission Validator log file</value>
   </data>
   <data name="CancelButtonHelpText" xml:space="preserve">
     <value>Cancel the operation</value>
@@ -135,14 +144,56 @@
   <data name="DestinationTitleText" xml:space="preserve">
     <value>Destination</value>
   </data>
+  <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
+    <value>Directory not found</value>
+  </data>
+  <data name="ErrorExtractingInfoErrMsg" xml:space="preserve">
+    <value>Error extracting package information</value>
+  </data>
+  <data name="ErrorGettingMarketGroupsErrMsg" xml:space="preserve">
+    <value>Error getting market groups</value>
+  </data>
+  <data name="ErrorGettingProdInfo" xml:space="preserve">
+    <value>Error getting product information</value>
+  </data>
+  <data name="ErrorProcessingPackageErrMsg" xml:space="preserve">
+    <value>Error processing package</value>
+  </data>
+  <data name="ErrorSelectingFileErrMsg" xml:space="preserve">
+    <value>Error selecting file</value>
+  </data>
+  <data name="ErrUploadPackageErrMsg" xml:space="preserve">
+    <value>Error uploading package</value>
+  </data>
+  <data name="ExpectedText" xml:space="preserve">
+    <value>Expected</value>
+  </data>
   <data name="FamilyTitleText" xml:space="preserve">
     <value>Family</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
     <value>File name</value>
   </data>
+  <data name="FoundText" xml:space="preserve">
+    <value>Found</value>
+  </data>
+  <data name="InvalidFilePathErrMsg" xml:space="preserve">
+    <value>Invalid file path.</value>
+  </data>
   <data name="MarketTitleText" xml:space="preserve">
     <value>Market</value>
+  </data>
+  <data name="NoBranchesFoundErrMsg" xml:space="preserve">
+    <value>No Branches found for this product</value>
+  </data>
+  <data name="NoProdInfoTitleText" xml:space="preserve">
+    <value>No Product Information</value>
+  </data>
+  <data name="NullBranchFlightErrTitleText" xml:space="preserve">
+    <value>Null Branch/Flight</value>
+  </data>
+  <data name="PackageHasNoBigIdConfigureMsftGameCfgErrMsg" xml:space="preserve">
+    <value>Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in additional details below.</value>
   </data>
   <data name="PackageLocationTitleText" xml:space="preserve">
     <value>Package location</value>
@@ -153,8 +204,17 @@
   <data name="PackagePathText" xml:space="preserve">
     <value>Package path</value>
   </data>
+  <data name="ProductInfoNotAvailableErrMsg" xml:space="preserve">
+    <value>Product information not available. Please enter a valid BigId and try again.</value>
+  </data>
   <data name="ProductNameText" xml:space="preserve">
     <value>Product name</value>
+  </data>
+  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart1" xml:space="preserve">
+    <value>Product with BigID</value>
+  </data>
+  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart2" xml:space="preserve">
+    <value>not found. Configure your product at https://partner.microsoft.com/</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
     <value>Required</value>
@@ -165,17 +225,26 @@
   <data name="SelectEnterPackagePathText" xml:space="preserve">
     <value>Select or enter the package path</value>
   </data>
+  <data name="SelectPackageFileText" xml:space="preserve">
+    <value>Select a Package File</value>
+  </data>
   <data name="SizeTitleText" xml:space="preserve">
     <value>Size</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
     <value>Store ID</value>
   </data>
+  <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
+    <value>Submission Validator log not found</value>
+  </data>
   <data name="UploadButtonContentText" xml:space="preserve">
     <value>Upload Package</value>
   </data>
   <data name="UploadButtonHelpText" xml:space="preserve">
     <value>Start uploading the package</value>
+  </data>
+  <data name="UploadCancelledErrMsg" xml:space="preserve">
+    <value>Upload cancelled.</value>
   </data>
   <data name="UploadPackageSubtitleText" xml:space="preserve">
     <value>Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future.</value>

@@ -106,6 +106,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MakePkg.exe was not found. Please install the GDK in order to package game contents..
+        /// </summary>
+        public static string MakePackageNotFoundErrorMsg {
+            get {
+                return ResourceManager.GetString("MakePackageNotFoundErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sign In.
         /// </summary>
         public static string SignInButtonContent {

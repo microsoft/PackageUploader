@@ -130,7 +130,8 @@ public partial class MainPageViewModel : BaseViewModel
         else
         {
             IsMakePkgEnabled = false;
-            MakePkgUnavailableErrorMessage = "MakePkg.exe was not found. Please install the GDK in order to package game contents.";
+            //MakePkgUnavailableErrorMessage = "MakePkg.exe was not found. Please install the GDK in order to package game contents.";
+            MakePkgUnavailableErrorMessage = PackageUploader.UI.Resources.Strings.MainPage.MakePackageNotFoundErrorMsg;
         }
 
         // Log version of the tool
