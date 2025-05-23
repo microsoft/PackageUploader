@@ -47,7 +47,8 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
             var azureCredentialOptions = SetTokenCredentialOptions(new InteractiveBrowserCredentialOptions
             {
                 TokenCachePersistenceOptions = new TokenCachePersistenceOptions(),
-                AuthenticationRecord = record
+                AuthenticationRecord = record,
+                AdditionallyAllowedTenants = { "*" }
             });
             var azureCredential = new InteractiveBrowserCredential(azureCredentialOptions);
 
