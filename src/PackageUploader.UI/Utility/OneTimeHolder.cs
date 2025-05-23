@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PackageUploader.UI.Utility
 {
-    class OneTimeHolder<T> where T : class
+    public class OneTimeHolder<T> where T : class
     {
         private T? _value;
         public T? Value
