@@ -16,8 +16,16 @@ public partial class PackageModelProvider : INotifyPropertyChanged
         get => _package;
         set
         {
-            _package = value;
-            OnPropertyChanged();
+            if(value == null) //suggested by copilot
+            {
+                _package = new PackageModel();
+                OnPropertyChanged();
+            }
+            else if (_package != value)
+            {
+                _package = value;
+                OnPropertyChanged();
+            }
         }
     }
 

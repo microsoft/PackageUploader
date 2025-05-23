@@ -36,10 +36,10 @@ namespace PackageUploader.UI.ViewModel
         }
         public void GoBackAndFix()
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
+            //System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            //{
                 _windowService.NavigateTo(_errorModelProvider.Error.OriginPage);
-            });
+            //});
         }
 
         public void ViewLogs()

@@ -67,6 +67,16 @@ namespace PackageUploader.UI.Providers
             }
         }
 
+        public UploadingProgressPercentageProvider()
+        {
+            _uploadProgress = new PackageUploadingProgress
+            {
+                Percentage = 0,
+                Stage = PackageUploadingProgressStage.NotStarted
+            };
+            _uploadingCancelled = false;
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {

@@ -14,8 +14,16 @@ public partial class ErrorModelProvider : INotifyPropertyChanged
         get => _errorModel;
         set
         {
-            _errorModel = value;
-            OnPropertyChanged();
+            if (value == null) //Idea suggested by copilot, not a bad idea
+            {
+                _errorModel = new ErrorModel();
+                OnPropertyChanged();
+            }
+            else if (_errorModel != value)
+            {
+                _errorModel = value;
+                OnPropertyChanged();
+            }
         }
     }
 

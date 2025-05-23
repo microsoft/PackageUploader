@@ -30,6 +30,12 @@ namespace PackageUploader.UI.Providers
             }
         }
 
+        public PackingProgressPercentageProvider()
+        {
+            _packingProgressPercentage = 0;
+            _packingCancelled = false;
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {

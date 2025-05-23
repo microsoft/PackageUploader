@@ -52,6 +52,11 @@ namespace PackageUploader.UI.Providers
             }
         }
 
+        public UserLoggedInProvider()
+        {
+            UserLoggedIn = false;
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
