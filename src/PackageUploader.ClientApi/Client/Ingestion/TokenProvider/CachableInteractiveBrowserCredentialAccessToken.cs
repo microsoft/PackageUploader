@@ -18,6 +18,9 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
         private static readonly string TokenCacheName = ".PackageUploader_Cache.bin";
         private static readonly string TokenCacheDir = MsalCacheHelper.UserRootDirectory;
 
+        // TODO: This should be specified a different way, not as a static property.
+        public static string TenantId { get; set; } = null;
+
         public CachableInteractiveBrowserCredentialAccessToken(IOptions<AccessTokenProviderConfig> config, ILogger<CachableInteractiveBrowserCredentialAccessToken> logger) : base(config, logger)
         { }
 
@@ -63,7 +66,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
                 }
             }
 
-            return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
+            return await GetIngestionAccessTokenAsync(azureCredential, TenantId, ct).ConfigureAwait(false);
         }
     }
 }

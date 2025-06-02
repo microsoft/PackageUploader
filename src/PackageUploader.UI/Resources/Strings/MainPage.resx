@@ -162,4 +162,7 @@
   <data name="UploadPackageBlockTitle" xml:space="preserve">
     <value>Upload a package (sign in required)</value>
   </data>
+  <data name="ChooseTenantButtonText" xml:space="preserve">
+    <value>Advanced: List available tenants</value>
+  </data>
 </root>

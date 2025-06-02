@@ -10,6 +10,8 @@ using PackageUploader.UI.View;
 using PackageUploader.UI.Utility;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
+using PackageUploader.UI.Model;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -19,11 +21,14 @@ public partial class MainPageViewModel : BaseViewModel
     private readonly UserLoggedInProvider _userLoggedInProvider;
     private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<MainPageViewModel> _logger;
+    private CancellationTokenSource _tenantsLoadingCts = new();
 
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
     public ICommand SignInCommand { get; }
     public ICommand PackagingLearnMoreURL { get; }
+    public ICommand ShowTenantSelectionCommand { get; }
+    public ICommand GetTenantsCommand { get; }
 
     private bool _isMakePkgEnabled = true;
     public bool IsMakePkgEnabled 
@@ -62,6 +67,54 @@ public partial class MainPageViewModel : BaseViewModel
             {
                 _signinStarted = value;
                 OnPropertyChanged(nameof(SigninStarted));
+            }
+        }
+    }
+
+    private bool _showTenantSelection = false;
+    public bool ShowTenantSelection
+    {
+        get => _showTenantSelection;
+        set
+        {
+            if (_showTenantSelection != value)
+            {
+                _showTenantSelection = value;
+                OnPropertyChanged(nameof(ShowTenantSelection));
+            }
+        }
+    }
+
+    private bool _isLoadingTenants = false;
+    public bool IsLoadingTenants
+    {
+        get => _isLoadingTenants;
+        set
+        {
+            if (_isLoadingTenants != value)
+            {
+                _isLoadingTenants = value;
+                OnPropertyChanged(nameof(IsLoadingTenants));
+            }
+        }
+    }
+
+    private ObservableCollection<TenantInfo> _availableTenants = [];
+    public ObservableCollection<TenantInfo> AvailableTenants
+    {
+        get => _availableTenants;
+        set => SetProperty(ref _availableTenants, value);
+    }
+
+    private TenantInfo? _selectedTenant;
+    public TenantInfo? SelectedTenant
+    {
+        get => _selectedTenant;
+        set
+        {
+            if (SetProperty(ref _selectedTenant, value) && value != null)
+            {
+                _authenticationService.TenantId = value.Id;
             }
         }
     }
@@ -118,6 +171,22 @@ public partial class MainPageViewModel : BaseViewModel
             });
         });
 
+        ShowTenantSelectionCommand = new RelayCommand(() =>
+        {
+            ShowTenantSelection = !ShowTenantSelection;
+            
+            if (ShowTenantSelection && AvailableTenants.Count == 0)
+            {
+                // Load tenants when showing the selection for the first time
+                LoadAvailableTenants();
+            }
+        });
+        
+        GetTenantsCommand = new RelayCommand(() =>
+        {
+            LoadAvailableTenants();
+        });
+
         IsUserLoggedIn = false;
 
         string makePkgPath = ResolveExecutablePath("MakePkg.exe");
@@ -144,6 +213,40 @@ public partial class MainPageViewModel : BaseViewModel
             makePkgVersion = fileVersionInfo.FileVersion ?? string.Empty;
 
             _logger.LogInformation("Using MakePkg.exe version: {makePkgVersion} from location {makePkgLocation}.", makePkgVersion, makePkgPath);
+        }
+    }
+
+    private async void LoadAvailableTenants()
+    {
+        try
+        {
+            // Cancel any previous loading operation
+            _tenantsLoadingCts.Cancel();
+            _tenantsLoadingCts = new CancellationTokenSource();
+
+            IsLoadingTenants = true;
+            AvailableTenants.Clear();
+            
+            var tenants = await _authenticationService.GetAvailableTenants();
+            
+            foreach (var tenant in tenants)
+            {
+                AvailableTenants.Add(tenant);
+            }
+            
+            // If we have tenants, select the first one by default
+            if (AvailableTenants.Count > 0 && SelectedTenant == null)
+            {
+                SelectedTenant = AvailableTenants[0];
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load available tenants");
+        }
+        finally
+        {
+            IsLoadingTenants = false;
         }
     }
 

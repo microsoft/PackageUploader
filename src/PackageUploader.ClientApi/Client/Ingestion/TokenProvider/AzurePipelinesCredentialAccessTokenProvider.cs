@@ -27,6 +27,6 @@ public class AzurePipelinesCredentialAccessTokenProvider : CredentialAccessToken
         var azureCredential = new AzurePipelinesCredential(_azurePipelinesAuthInfo.TenantId, _azurePipelinesAuthInfo.ClientId, _azurePipelinesAuthInfo.ServiceConnectionId,
             _azurePipelinesAuthInfo.SystemAccessToken, azureCredentialOptions);
 
-        return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
+        return await GetIngestionAccessTokenAsync(azureCredential, null, ct).ConfigureAwait(false);
     }
 }

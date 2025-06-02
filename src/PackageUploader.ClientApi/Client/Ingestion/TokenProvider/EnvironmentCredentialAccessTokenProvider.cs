@@ -22,6 +22,6 @@ public class EnvironmentCredentialAccessTokenProvider : CredentialAccessTokenPro
         var azureCredentialOptions = SetTokenCredentialOptions(new EnvironmentCredentialOptions());
         var azureCredential = new EnvironmentCredential(azureCredentialOptions);
 
-        return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
+        return await GetIngestionAccessTokenAsync(azureCredential, null, ct).ConfigureAwait(false);
     }
 }

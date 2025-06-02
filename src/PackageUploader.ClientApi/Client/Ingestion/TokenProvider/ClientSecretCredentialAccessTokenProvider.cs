@@ -42,6 +42,6 @@ public class ClientSecretCredentialAccessTokenProvider : CredentialAccessTokenPr
         var azureCredentialOptions = SetTokenCredentialOptions(new ClientSecretCredentialOptions());
         var azureCredential = new ClientSecretCredential(_aadAuthInfo.TenantId, _aadAuthInfo.ClientId, _aadAuthInfo.ClientSecret, azureCredentialOptions);
 
-        return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
+        return await GetIngestionAccessTokenAsync(azureCredential, null, ct).ConfigureAwait(false);
     }
 }

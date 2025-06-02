@@ -30,11 +30,11 @@ public abstract class CredentialAccessTokenProvider
         return tokenCredentialOptions;
     }
 
-    protected async Task<IngestionAccessToken> GetIngestionAccessTokenAsync(TokenCredential tokenCredential, CancellationToken ct)
+    protected async Task<IngestionAccessToken> GetIngestionAccessTokenAsync(TokenCredential tokenCredential, string tenantId, CancellationToken ct)
     {
         _logger.LogDebug("Requesting authentication token");
         var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
-        var requestContext = new TokenRequestContext(scopes);
+        var requestContext = new TokenRequestContext(scopes: scopes, tenantId: tenantId);
         var token = await tokenCredential.GetTokenAsync(requestContext, ct).ConfigureAwait(false);
 
         return new IngestionAccessToken

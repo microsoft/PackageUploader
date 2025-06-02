@@ -21,6 +21,6 @@ public class AzureCliCredentialAccessTokenProvider : CredentialAccessTokenProvid
         var azureCredentialOptions = SetTokenCredentialOptions(new AzureCliCredentialOptions());
         var azureCredential = new AzureCliCredential(azureCredentialOptions);
 
-        return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
+        return await GetIngestionAccessTokenAsync(azureCredential, null, ct).ConfigureAwait(false);
     }
 }

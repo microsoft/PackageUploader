@@ -26,6 +26,6 @@ public class ManagedIdentityCredentialAccessTokenProvider : CredentialAccessToke
         var azureCredentialOptions = SetTokenCredentialOptions(new ManagedIdentityCredentialOptions());
         var azureCredential = new ManagedIdentityCredential(_managedIdentityAuthInfo.ClientId, azureCredentialOptions);
 
-        return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
+        return await GetIngestionAccessTokenAsync(azureCredential, null, ct).ConfigureAwait(false);
     }
 }

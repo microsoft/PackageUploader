@@ -48,15 +48,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources\Strings\ErrorPage.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ErrorPage.resx</DependentUpon>
-    </Compile>
     <Compile Update="Resources\Strings\MainPage.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>MainPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Strings\ErrorPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ErrorPage.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\Strings\PackageCreation.Designer.cs">
       <DesignTime>True</DesignTime>
