@@ -23,9 +23,17 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
         public CachableInteractiveBrowserCredentialAccessToken(
             IOptions<AccessTokenProviderConfig> config, 
             ILogger<CachableInteractiveBrowserCredentialAccessToken> logger,
+            IOptions<BrowserAuthInfo> browserAuthInfo = null,
             IAzureTenantService tenantService = null) : base(config, logger)
         {
             _tenantService = tenantService;
+            
+            // Initialize tenant ID from browser auth info if provided
+            if (browserAuthInfo?.Value?.TenantId != null)
+            {
+                _tenantId = browserAuthInfo.Value.TenantId;
+                Logger.LogInformation("Using configured tenant ID for browser authentication: {TenantId}", _tenantId);
+            }
         }
 
         public static void ClearCache()
@@ -87,6 +95,12 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
                 {
                     record = AuthenticationRecord.Deserialize(stream, ct);
                 }
+            }
+
+            // Log the tenant ID being used
+            if (!string.IsNullOrEmpty(_tenantId))
+            {
+                Logger.LogInformation("Using tenant ID for authentication: {TenantId}", _tenantId);
             }
 
             var azureCredentialOptions = SetTokenCredentialOptions(new InteractiveBrowserCredentialOptions
