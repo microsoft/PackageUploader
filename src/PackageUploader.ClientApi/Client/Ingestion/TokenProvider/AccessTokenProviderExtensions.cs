@@ -70,6 +70,7 @@ internal static class AccessTokenProviderExtensions
     public static IServiceCollection AddCacheableInteractiveBrowserCredentialAccessTokenProvider(this IServiceCollection services)
     {
         services.AddAccessTokenProviderOptions();
+        services.AddAzureTenantServices();
         services.AddScoped<IAccessTokenProvider, CachableInteractiveBrowserCredentialAccessToken>();
 
         return services;
@@ -115,7 +116,14 @@ internal static class AccessTokenProviderExtensions
 
         return services;
     }
-    
+
+    public static IServiceCollection AddAzureTenantServices(this IServiceCollection services)
+    {
+        services.AddHttpClient<IAzureTenantService, AzureTenantService>();
+        services.AddScoped<IAzureTenantService, AzureTenantService>();
+        return services;
+    }
+
     private static void AddAccessTokenProviderOptions(this IServiceCollection services)
     {
         services.AddSingleton<IValidateOptions<AccessTokenProviderConfig>, AccessTokenProviderConfigValidator>();

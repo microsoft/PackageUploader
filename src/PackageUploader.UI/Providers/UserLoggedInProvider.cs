@@ -52,6 +52,20 @@ namespace PackageUploader.UI.Providers
             }
         }
 
+        private string _tenantName = string.Empty;
+        public string TenantName
+        {
+            get => _tenantName;
+            set
+            {
+                if (_tenantName != value)
+                {
+                    _tenantName = value;
+                    OnPropertyChanged(nameof(TenantName));
+                }
+            }
+        }
+
         public UserLoggedInProvider()
         {
             UserLoggedIn = false;

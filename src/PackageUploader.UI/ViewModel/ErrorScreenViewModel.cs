@@ -36,10 +36,15 @@ namespace PackageUploader.UI.ViewModel
         }
         public void GoBackAndFix()
         {
-            //System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            //{
+            if (_errorModelProvider.Error.OriginPage != null)
+            {
                 _windowService.NavigateTo(_errorModelProvider.Error.OriginPage);
-            //});
+            }
+            else
+            {
+                // If the origin page is null, navigate to the main page
+                _windowService.NavigateTo(typeof(MainPageViewModel));
+            }
         }
 
         public void ViewLogs()

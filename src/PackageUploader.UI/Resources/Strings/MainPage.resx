@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ChooseTenantButtonText" xml:space="preserve">
+    <value>Advanced: List available tenants</value>
+  </data>
   <data name="MakeAPackageBodyTextOne" xml:space="preserve">
     <value>Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file </value>
   </data>

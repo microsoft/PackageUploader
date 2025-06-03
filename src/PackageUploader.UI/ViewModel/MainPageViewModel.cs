@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.UI.Providers;
+using PackageUploader.UI.Utility;
+using PackageUploader.UI.View;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Windows.Input;
-using Microsoft.Win32;
-using PackageUploader.UI.Providers;
-using PackageUploader.UI.View;
-using PackageUploader.UI.Utility;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel;
 
 namespace PackageUploader.UI.ViewModel;
 
@@ -19,11 +21,14 @@ public partial class MainPageViewModel : BaseViewModel
     private readonly UserLoggedInProvider _userLoggedInProvider;
     private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<MainPageViewModel> _logger;
+    private CancellationTokenSource _tenantsLoadingCts = new();
 
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
     public ICommand SignInCommand { get; }
     public ICommand PackagingLearnMoreURL { get; }
+    public ICommand ShowTenantSelectionCommand { get; }
+    public ICommand GetTenantsCommand { get; }
 
     private bool _isMakePkgEnabled = true;
     public bool IsMakePkgEnabled 
@@ -66,6 +71,54 @@ public partial class MainPageViewModel : BaseViewModel
         }
     }
 
+    private bool _showTenantSelection = false;
+    public bool ShowTenantSelection
+    {
+        get => _showTenantSelection;
+        set
+        {
+            if (_showTenantSelection != value)
+            {
+                _showTenantSelection = value;
+                OnPropertyChanged(nameof(ShowTenantSelection));
+            }
+        }
+    }
+
+    private bool _isLoadingTenants = false;
+    public bool IsLoadingTenants
+    {
+        get => _isLoadingTenants;
+        set
+        {
+            if (_isLoadingTenants != value)
+            {
+                _isLoadingTenants = value;
+                OnPropertyChanged(nameof(IsLoadingTenants));
+            }
+        }
+    }
+
+    private ObservableCollection<AzureTenant> _availableTenants = [];
+    public ObservableCollection<AzureTenant> AvailableTenants
+    {
+        get => _availableTenants;
+        set => SetProperty(ref _availableTenants, value);
+    }
+
+    public AzureTenant? SelectedTenant
+    {
+        get => _authenticationService.Tenant;
+        set
+        {
+            if (value != _authenticationService.Tenant)
+            {
+                _authenticationService.Tenant = value;
+                OnPropertyChanged(nameof(SelectedTenant));
+            }
+        }
+    }
+
     public MainPageViewModel(
         PathConfigurationProvider pathConfigurationService, 
         UserLoggedInProvider userLoggedInProvider, 
@@ -91,6 +144,10 @@ public partial class MainPageViewModel : BaseViewModel
             SigninStarted = true;
             await _authenticationService.SignInAsync();
             SigninStarted = false;
+
+            // Reset Tenant selection after sign-in to avoid showing stale data on signout.
+            ShowTenantSelection = false;
+            AvailableTenants.Clear();
             OnPropertyChanged(nameof(IsUserLoggedIn));
         });
 
@@ -116,6 +173,21 @@ public partial class MainPageViewModel : BaseViewModel
                 FileName = url,
                 UseShellExecute = true
             });
+        });
+
+        ShowTenantSelectionCommand = new RelayCommand(() =>
+        {
+            ShowTenantSelection = !ShowTenantSelection;
+
+            if (ShowTenantSelection)
+            {
+                LoadAvailableTenants();
+            }
+        });
+
+        GetTenantsCommand = new RelayCommand(() =>
+        {
+            LoadAvailableTenants();
         });
 
         IsUserLoggedIn = false;
@@ -144,6 +216,41 @@ public partial class MainPageViewModel : BaseViewModel
             makePkgVersion = fileVersionInfo.FileVersion ?? string.Empty;
 
             _logger.LogInformation("Using MakePkg.exe version: {makePkgVersion} from location {makePkgLocation}.", makePkgVersion, makePkgPath);
+        }
+    }
+
+    private async void LoadAvailableTenants()
+    {
+        try
+        {
+            // Cancel any previous loading operation
+            _tenantsLoadingCts.Cancel();
+            _tenantsLoadingCts = new CancellationTokenSource();
+
+            IsLoadingTenants = true;
+            AvailableTenants.Clear();
+
+            var tenants = await _authenticationService.GetAvailableTenants();
+
+            for (int i = 0; i < tenants.Value.Count; i++)
+            {
+                var tenant = tenants.Value[i];
+                AvailableTenants.Add(tenant);
+            }
+
+            // If we have tenants, select the first one by default
+            if (AvailableTenants.Count > 0)
+            {
+                SelectedTenant = AvailableTenants[0];
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load available tenants");
+        }
+        finally
+        {
+            IsLoadingTenants = false;
         }
     }
 

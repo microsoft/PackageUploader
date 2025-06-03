@@ -637,7 +637,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            PackageErrorMessage = Resources.Strings.PackageUpload.ErrorExtractingInfoErrMsg; //$"Error extracting package information: {ex.Message}";
+            PackageErrorMessage = Resources.Strings.PackageUpload.ErrorExtractingInfoErrMsg + " " + ex.Message;
         }
     }
 

@@ -39,7 +39,8 @@ namespace PackageUploader.UI
 
         private void UserLoggedInProvider_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(UserLoggedInProvider.UserName) || 
+            if (e.PropertyName == nameof(UserLoggedInProvider.UserName) ||
+                e.PropertyName == nameof(UserLoggedInProvider.TenantName) ||
                 e.PropertyName == nameof(UserLoggedInProvider.UserLoggedIn) ||
                 e.PropertyName == nameof(UserLoggedInProvider.AccessToken))
             {
@@ -51,7 +52,14 @@ namespace PackageUploader.UI
         {
             if (_userLoggedInProvider.UserLoggedIn && !string.IsNullOrEmpty(_userLoggedInProvider.UserName))
             {
-                UserDisplayText.Text = _userLoggedInProvider.UserName;
+                if (string.IsNullOrEmpty(_userLoggedInProvider.TenantName))
+                {
+                    UserDisplayText.Text = _userLoggedInProvider.UserName;
+                }
+                else
+                {
+                    UserDisplayText.Text = _userLoggedInProvider.UserName + " - " + _userLoggedInProvider.TenantName;
+                }
                 UserSignoutButton.Visibility = Visibility.Visible;
             }
             else
