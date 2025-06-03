@@ -19,7 +19,10 @@ public class InteractiveBrowserCredentialAccessTokenProvider : CredentialAccessT
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
-        var azureCredentialOptions = SetTokenCredentialOptions(new InteractiveBrowserCredentialOptions());
+        var azureCredentialOptions = SetTokenCredentialOptions(new InteractiveBrowserCredentialOptions
+        {
+            AdditionallyAllowedTenants = { "*" } // Allow any tenant
+        });
         var azureCredential = new InteractiveBrowserCredential(azureCredentialOptions);
 
         return await GetIngestionAccessTokenAsync(azureCredential, null, ct).ConfigureAwait(false);
