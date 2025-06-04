@@ -53,6 +53,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ErrorPage.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Strings\MainPage.zh-CN.Designer.cs">
+      <DependentUpon>MainPage.zh-CN.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\Strings\MainPage.ja-JP.Designer.cs">
+      <DependentUpon>MainPage.ja-JP.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\Strings\MainPage.ko-KR.Designer.cs">
+      <DependentUpon>MainPage.ko-KR.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Resources\Strings\MainPage.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -94,6 +109,21 @@
     <EmbeddedResource Update="Resources\Strings\ErrorPage.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ErrorPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings\MainPage.zh-CN.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>MainPage.zh-CN.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings\MainPage.ja-JP.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>MainPage.ja-JP.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Strings\MainPage.ko-KR.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>MainPage.ko-KR.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Strings\MainPage.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

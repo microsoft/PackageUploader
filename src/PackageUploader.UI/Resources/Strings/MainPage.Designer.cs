@@ -169,7 +169,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Xbox Game Package Manager bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload..
+        ///   Looks up a localized string similar to The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload..
         /// </summary>
         public static string SubTitleTextBlock {
             get {

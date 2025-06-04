@@ -125,9 +125,11 @@
   </data>
   <data name="MakeAPackageBodyTextOne" xml:space="preserve">
     <value>Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file </value>
+    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
   </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
     <value>, then upload.</value>
+    <comment>The part of the string that comes after the hyperlink, if any.</comment>
   </data>
   <data name="MakeAPackageBodyURLText" xml:space="preserve">
     <value>(Learn more)</value>
@@ -154,7 +156,7 @@
     <value>Sign in</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
-    <value>The Xbox Game Package Manager bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
+    <value>The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
   </data>
   <data name="TitleTextBlock" xml:space="preserve">
     <value>Make a package and upload it to Microsoft Partner Center</value>
