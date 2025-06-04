@@ -182,7 +182,9 @@
                                        TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
-                    <Expander Style="{StaticResource CustomExpanderStyle}" Margin="0,10,0,20">
+                    <Expander Style="{StaticResource CustomExpanderStyle}" 
+                             Margin="0,10,0,20"
+                             IsExpanded="{Binding IsAdditionalDetailsExpanded, Mode=TwoWay}">
                         <Expander.Header>
                             <TextBlock Text="{x:Static strings:PackageCreation.AdditionalDetailsTitle}"
                                        d:Text="Additional details" 
