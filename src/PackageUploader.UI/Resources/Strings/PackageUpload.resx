@@ -247,7 +247,7 @@
     <value>Upload cancelled.</value>
   </data>
   <data name="UploadPackageSubtitleText" xml:space="preserve">
-    <value>Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future.</value>
+    <value>Locate the package for uploading. The Xbox Game Package Manager will remember these paths for easier access in the future.</value>
   </data>
   <data name="UploadPackageTitleText" xml:space="preserve">
     <value>Upload a package</value>

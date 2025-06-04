@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ApplicationName" xml:space="preserve">
+    <value>Xbox Game Package Manager</value>
+  </data>
   <data name="ChooseTenantButtonText" xml:space="preserve">
     <value>Advanced: List available tenants</value>
   </data>
@@ -151,7 +154,7 @@
     <value>Sign in</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
-    <value>The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
+    <value>The Xbox Game Package Manager bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
   </data>
   <data name="TitleTextBlock" xml:space="preserve">
     <value>Make a package and upload it to Microsoft Partner Center</value>

@@ -367,7 +367,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Locate your game&apos;s build to create a package. The Xbox Package Tool will remember these paths for easier access in the future..
+        ///   Looks up a localized string similar to Locate your game&apos;s build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future..
         /// </summary>
         public static string SubTitleText {
             get {

@@ -719,7 +719,7 @@
           "System.Text.Json": "[8.0.5, )"
         }
       },
-      "XboxPackageTool": {
+      "XboxGamePackageManager": {
         "type": "Project",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection": "[8.0.1, )",

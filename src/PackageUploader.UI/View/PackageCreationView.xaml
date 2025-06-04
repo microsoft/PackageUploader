@@ -35,7 +35,7 @@
                    HorizontalAlignment="Left"/>
             <TextBlock 
                    Text="{x:Static strings:PackageCreation.SubTitleText}"
-                   d:Text="Locate your game's build to create a package. The Xbox Package Tool will remember these paths for easier access in the future."
+                   d:Text="Locate your game's build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future."
                    HorizontalAlignment="Left"
                    Foreground="{DynamicResource PrimaryTextBrush}"
                    TextWrapping="Wrap"

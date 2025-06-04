@@ -42,7 +42,7 @@
                    Foreground="{DynamicResource PrimaryTextBrush}"
                    HorizontalAlignment="Left"/>
             <TextBlock Text="{x:Static strings:PackageUpload.UploadPackageSubtitleText}"
-                       d:Text="Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future."
+                       d:Text="Locate the package for uploading. The Xbox Game Package Manager will remember these paths for easier access in the future."
                        HorizontalAlignment="Left"
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        TextWrapping="Wrap"

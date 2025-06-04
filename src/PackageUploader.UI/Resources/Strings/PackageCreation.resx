@@ -220,7 +220,7 @@
     <value>Select Mapping Data XML File</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
-    <value>Locate your game's build to create a package. The Xbox Package Tool will remember these paths for easier access in the future.</value>
+    <value>Locate your game's build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future.</value>
   </data>
   <data name="SubValDllNotFoundErrorMsg" xml:space="preserve">
     <value>SubmissionValidator.dll not found in the specified path.</value>

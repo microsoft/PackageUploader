@@ -20,7 +20,7 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
 
-    <AssemblyName>XboxPackageTool</AssemblyName>
+    <AssemblyName>XboxGamePackageManager</AssemblyName>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
