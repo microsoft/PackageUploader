@@ -26,6 +26,7 @@ namespace PackageUploader.UI.Utility
     {
         private readonly UserLoggedInProvider _userLoggedInProvider;
         private readonly IAccessTokenProvider _accessTokenProvider;
+        private readonly IAuthenticationResetService _authResetService;
         private readonly ILogger<AuthenticationService> _logger;
         private CancellationTokenSource _cancellationTokenSource = new();
 
@@ -36,10 +37,12 @@ namespace PackageUploader.UI.Utility
         public AuthenticationService(
             UserLoggedInProvider userLoggedInProvider,
             IAccessTokenProvider accessTokenProvider,
+            IAuthenticationResetService authResetService,
             ILogger<AuthenticationService> logger)
         {
             _userLoggedInProvider = userLoggedInProvider;
             _accessTokenProvider = accessTokenProvider;
+            _authResetService = authResetService;
             _logger = logger;
         }
 
@@ -121,7 +124,8 @@ namespace PackageUploader.UI.Utility
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource = new CancellationTokenSource();
 
-                CachableInteractiveBrowserCredentialAccessToken.ClearCache();
+                // Reset all authentication tokens and caches
+                _authResetService.ResetAuthentication();
 
                 // Reset user state
                 _userLoggedInProvider.UserLoggedIn = false;

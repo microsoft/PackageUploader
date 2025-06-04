@@ -29,6 +29,7 @@ public static class IngestionExtensions
         AuthenticationMethod authenticationMethod = AuthenticationMethod.Default) =>
         services
             .AddScoped<IPackageUploaderService, PackageUploaderService>()
+            .AddScoped<IAuthenticationResetService, AuthenticationResetService>()
             .AddIngestionService()
             .AddIngestionAuthentication(authenticationMethod)
             .AddXfusService();
