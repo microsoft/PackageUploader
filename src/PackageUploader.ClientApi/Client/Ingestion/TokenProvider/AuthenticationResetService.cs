@@ -8,18 +8,58 @@ using System.Collections.Generic;
 namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
 {
     /// <summary>
+    /// Static helper for auth token management - needed because HTTP message handlers can be created in 
+    /// different DI scopes that the reset service can't access directly
+    /// </summary>
+    public static class AuthenticationTokenManager
+    {
+        private static readonly List<WeakReference<IngestionAuthenticationDelegatingHandler>> _handlers
+            = new List<WeakReference<IngestionAuthenticationDelegatingHandler>>();
+
+        /// <summary>
+        /// Register a handler to be notified when tokens should be reset
+        /// </summary>
+        public static void RegisterHandler(IngestionAuthenticationDelegatingHandler handler)
+        {
+            lock (_handlers)
+            {
+                // Clean up any dead references first
+                _handlers.RemoveAll(h => !h.TryGetTarget(out _));
+                _handlers.Add(new WeakReference<IngestionAuthenticationDelegatingHandler>(handler));
+            }
+        }
+
+        /// <summary>
+        /// Reset all active token handlers
+        /// </summary>
+        public static void ResetAllTokens()
+        {
+            lock (_handlers)
+            {
+                // Find all handlers that are still alive and reset them
+                foreach (var weakRef in _handlers.ToArray())
+                {
+                    if (weakRef.TryGetTarget(out var handler))
+                    {
+                        handler.ResetToken();
+                    }
+                }
+
+                // Clean up dead references
+                _handlers.RemoveAll(h => !h.TryGetTarget(out _));
+            }
+        }
+    }
+
+    /// <summary>
     /// Provides a way to reset authentication tokens and caches across the application
     /// </summary>
     public class AuthenticationResetService : IAuthenticationResetService
     {
-        private readonly IEnumerable<IngestionAuthenticationDelegatingHandler> _authHandlers;
         private readonly ILogger<AuthenticationResetService> _logger;
 
-        public AuthenticationResetService(
-            IEnumerable<IngestionAuthenticationDelegatingHandler> authHandlers,
-            ILogger<AuthenticationResetService> logger)
+        public AuthenticationResetService(ILogger<AuthenticationResetService> logger)
         {
-            _authHandlers = authHandlers;
             _logger = logger;
         }
 
@@ -35,11 +75,8 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider
                 // Clear the MSAL token cache file
                 CachableInteractiveBrowserCredentialAccessToken.ClearCache();
                 
-                // Reset any active tokens in HTTP handlers
-                foreach (var handler in _authHandlers)
-                {
-                    handler.ResetToken();
-                }
+                // Reset all registered authentication handlers
+                AuthenticationTokenManager.ResetAllTokens();
             }
             catch (Exception ex)
             {

@@ -50,13 +50,13 @@ namespace PackageUploader.UI
 
         private void UpdateUsernameDisplay()
         {
-            if (_userLoggedInProvider.UserLoggedIn && !string.IsNullOrEmpty(_userLoggedInProvider.UserName))
+            if (_userLoggedInProvider.UserLoggedIn)
             {
                 if (string.IsNullOrEmpty(_userLoggedInProvider.TenantName))
                 {
                     UserDisplayText.Text = _userLoggedInProvider.UserName;
                 }
-                else
+                else if (!string.IsNullOrEmpty(_userLoggedInProvider.UserName))
                 {
                     UserDisplayText.Text = _userLoggedInProvider.UserName + " - " + _userLoggedInProvider.TenantName;
                 }

@@ -23,6 +23,9 @@ public class IngestionAuthenticationDelegatingHandler : DelegatingHandler
     {
         _accessTokenProvider = accessTokenProvider;
         _logger = logger;
+        
+        // Register with the token manager so we can be reset when needed
+        AuthenticationTokenManager.RegisterHandler(this);
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)

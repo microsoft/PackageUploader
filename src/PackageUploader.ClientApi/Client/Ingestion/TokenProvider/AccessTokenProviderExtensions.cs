@@ -17,7 +17,6 @@ internal static class AccessTokenProviderExtensions
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, AzureApplicationSecretAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -29,7 +28,6 @@ internal static class AccessTokenProviderExtensions
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, AzureApplicationCertificateAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -38,7 +36,6 @@ internal static class AccessTokenProviderExtensions
     {
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, AzureCliCredentialAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -50,7 +47,6 @@ internal static class AccessTokenProviderExtensions
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, ManagedIdentityCredentialAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -59,7 +55,6 @@ internal static class AccessTokenProviderExtensions
     {
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, DefaultAzureCredentialAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -69,7 +64,6 @@ internal static class AccessTokenProviderExtensions
         services.AddAccessTokenProviderOptions();
         services.AddOptions<BrowserAuthInfo>().BindConfiguration(BrowserAuthInfo.ConfigName);
         services.AddScoped<IAccessTokenProvider, InteractiveBrowserCredentialAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -80,7 +74,7 @@ internal static class AccessTokenProviderExtensions
         services.AddOptions<BrowserAuthInfo>().BindConfiguration(BrowserAuthInfo.ConfigName);
         services.AddAzureTenantServices();
         services.AddScoped<IAccessTokenProvider, CachableInteractiveBrowserCredentialAccessToken>();
-        services.AddAuthenticationResetService();
+        services.AddScoped<IAuthenticationResetService, AuthenticationResetService>();
 
         return services;
     }
@@ -89,7 +83,6 @@ internal static class AccessTokenProviderExtensions
     {
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, EnvironmentCredentialAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -101,7 +94,6 @@ internal static class AccessTokenProviderExtensions
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, AzurePipelinesCredentialAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -113,7 +105,6 @@ internal static class AccessTokenProviderExtensions
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, ClientSecretCredentialAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -125,7 +116,6 @@ internal static class AccessTokenProviderExtensions
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, ClientCertificateCredentialAccessTokenProvider>();
-        services.AddAuthenticationResetService();
 
         return services;
     }
@@ -134,12 +124,6 @@ internal static class AccessTokenProviderExtensions
     {
         services.AddHttpClient<IAzureTenantService, AzureTenantService>();
         services.AddScoped<IAzureTenantService, AzureTenantService>();
-        return services;
-    }
-
-    public static IServiceCollection AddAuthenticationResetService(this IServiceCollection services)
-    {
-        services.AddSingleton<IAuthenticationResetService, AuthenticationResetService>();
         return services;
     }
 
