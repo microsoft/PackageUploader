@@ -118,15 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CopyError" xml:space="preserve">
-    <value>Copy error</value>
+    <value>エラーをコピー</value>
   </data>
   <data name="ErrorTitleString" xml:space="preserve">
-    <value>We've run into an issue, go back to fix</value>
+    <value>問題が発生しました。戻って修正してください</value>
   </data>
   <data name="GoBackAndFix" xml:space="preserve">
-    <value>Go back and fix</value>
+    <value>戻って修正</value>
   </data>
   <data name="ViewLogs" xml:space="preserve">
-    <value>View logs</value>
+    <value>ログを表示</value>
   </data>
 </root>

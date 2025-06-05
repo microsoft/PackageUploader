@@ -118,56 +118,56 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ApplicationName" xml:space="preserve">
-    <value>Xbox Game Package Manager</value>
+    <value>Xbox 游戏包管理器</value>
   </data>
   <data name="ChooseTenantButtonText" xml:space="preserve">
-    <value>Advanced: List available tenants</value>
+    <value>高级：列出可用租户</value>
   </data>
   <data name="MakeAPackageBodyTextOne" xml:space="preserve">
-    <value>Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file </value>
+    <value>游戏包能够加速上传过程，确保安装安全，并优化 Xbox 性能。只需添加构建文件和配置文件 </value>
     <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
   </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
-    <value>, then upload.</value>
+    <value>，然后上传。</value>
     <comment>The part of the string that comes after the hyperlink, if any.</comment>
   </data>
   <data name="MakeAPackageBodyURLText" xml:space="preserve">
-    <value>(Learn more)</value>
+    <value>（了解更多）</value>
   </data>
   <data name="MakeAPackageButtonText" xml:space="preserve">
-    <value>Create package</value>
+    <value>创建包</value>
   </data>
   <data name="MakeAPackageTextBlockTitle" xml:space="preserve">
-    <value>Make a package</value>
+    <value>制作包</value>
   </data>
   <data name="MakePackageNotFoundErrorMsg" xml:space="preserve">
-    <value>MakePkg.exe was not found. Please install the GDK in order to package game contents.</value>
+    <value>未找到 MakePkg.exe。请安装 GDK 以打包游戏内容。</value>
   </data>
   <data name="SignInButtonContent" xml:space="preserve">
-    <value>Sign In</value>
+    <value>登录</value>
   </data>
   <data name="SignInLogginInText" xml:space="preserve">
-    <value>We are attempting to retrieve your sign-in information. If a browser page does not open within a few seconds, please click the sign-in button again to retry.</value>
+    <value>我们正在尝试检索您的登录信息。如果几秒钟后浏览器页面未打开，请再次点击登录按钮重试。</value>
   </data>
   <data name="SignInPreLoginText" xml:space="preserve">
-    <value>For seamless access to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files.</value>
+    <value>要无缝访问您的产品 ID 和发布目标，请登录您的 Microsoft 合作伙伴中心帐户。如果您只是创建没有配置的游戏包，此步骤是可选的，但对于计划上传包、检索产品 ID 或将其链接到配置文件的任何人都是必需的。</value>
   </data>
   <data name="SignInTextBlockTitle" xml:space="preserve">
-    <value>Sign in</value>
+    <value>登录</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
-    <value>The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
+    <value>包创建工具将您的游戏文件、资产和元数据打包成结构化的包，确保一致性和合规性，实现更快、更可靠的上传。</value>
   </data>
   <data name="TitleTextBlock" xml:space="preserve">
-    <value>Make a package and upload it to Microsoft Partner Center</value>
+    <value>制作包并将其上传到 Microsoft 合作伙伴中心</value>
   </data>
   <data name="UploadPackageBlockBody" xml:space="preserve">
-    <value>Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account.</value>
+    <value>将您的游戏包上传到合作伙伴中心，以在 Xbox 上分发和管理它。准备好完整的包和 Microsoft 帐户即可开始。</value>
   </data>
   <data name="UploadPackageBlockButtonText" xml:space="preserve">
-    <value>Upload package</value>
+    <value>上传包</value>
   </data>
   <data name="UploadPackageBlockTitle" xml:space="preserve">
-    <value>Upload a package (sign in required)</value>
+    <value>上传包（需要登录）</value>
   </data>
 </root>

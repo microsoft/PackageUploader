@@ -118,27 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FamilyTitleText" xml:space="preserve">
-    <value>Family</value>
+    <value>패밀리</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
-    <value>File name</value>
+    <value>파일 이름</value>
   </data>
   <data name="GoHomeButtonContent" xml:space="preserve">
-    <value>Go Home</value>
+    <value>홈으로 가기</value>
   </data>
   <data name="SizeTitleText" xml:space="preserve">
-    <value>Size</value>
+    <value>크기</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>Store ID</value>
+    <value>스토어 ID</value>
   </data>
   <data name="UploadCompleteTitleText" xml:space="preserve">
-    <value>Upload complete</value>
+    <value>업로드 완료</value>
   </data>
   <data name="ViewLogsButtonContent" xml:space="preserve">
-    <value>View logs</value>
+    <value>로그 보기</value>
   </data>
   <data name="ViewPartnerCenterButtonContent" xml:space="preserve">
-    <value>View in Partner Center</value>
+    <value>파트너 센터에서 보기</value>
   </data>
 </root>
