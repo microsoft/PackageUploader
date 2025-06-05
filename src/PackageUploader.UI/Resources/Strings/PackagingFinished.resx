@@ -136,7 +136,7 @@
     <value>Install game</value>
   </data>
   <data name="ViewPackageButtonContent" xml:space="preserve">
-    <value>VIew package</value>
+    <value>View package</value>
   </data>
   <data name="ViewLogsButtonContent" xml:space="preserve">
     <value>View logs</value>

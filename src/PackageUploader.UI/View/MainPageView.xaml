@@ -74,14 +74,41 @@
                                TextWrapping="Wrap"
                                Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                    <Button 
-                        Content="{x:Static strings:MainPage.SignInButtonContent}"
-                        d:Content="Sign In"
-                        Command="{Binding SignInCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        HorizontalAlignment="Left"
-                        Width="90"
-                        Margin="0,15,0,10"/>
+                    <Grid Margin="0,15,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="{x:Static strings:MainPage.SignInButtonContent}"
+                                d:Content="Sign In"
+                                Command="{Binding SignInCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                HorizontalAlignment="Left"
+                                Width="90"
+                                Height="32"/>
+
+                        <Button Grid.Column="2"
+                                Content="{x:Static strings:MainPage.ChooseTenantButtonText}"
+                                d:Content="Advanced: Choose Entra Tenant"
+                                Command="{Binding ShowTenantSelectionCommand}"
+                                Visibility="{Binding ShowTenantSelection, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
+                                HorizontalAlignment="Left"
+                                Height="32"/>
+
+                        <ComboBox Grid.Column="3"
+                                  Margin="20, 0, 0, 0"
+                                  ItemsSource="{Binding AvailableTenants}"
+                                  SelectedItem="{Binding SelectedTenant}"
+                                  DisplayMemberPath="DisplayName"
+                                  Visibility="{Binding ShowTenantSelection, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                  MinWidth="150"
+                                  Style="{StaticResource CustomComboBoxStyle}"
+                                  HorizontalAlignment="Stretch"/>
+                    </Grid>
                 </StackPanel>
             </Border>
 

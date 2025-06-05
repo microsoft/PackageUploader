@@ -29,6 +29,13 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     private Process? _makePackageProcess;
 
+    private bool _isAdditionalDetailsExpanded = false;
+    public bool IsAdditionalDetailsExpanded
+    {
+        get => _isAdditionalDetailsExpanded;
+        set => SetProperty(ref _isAdditionalDetailsExpanded, value);
+    }
+
     private string _gameDataPath = string.Empty;
     public string GameDataPath
     {
@@ -177,6 +184,13 @@ public partial class PackageCreationViewModel : BaseViewModel
             if (_layoutParseError != value)
             {
                 SetProperty(ref _layoutParseError, value);
+                
+                // If an error is being set, expand the details section
+                if (!string.IsNullOrEmpty(value))
+                {
+                    IsAdditionalDetailsExpanded = true;
+                }
+                
                 if (MakePackageCommand is RelayCommand relayCommand)
                 {
                     relayCommand.RaiseCanExecuteChanged();
@@ -189,7 +203,19 @@ public partial class PackageCreationViewModel : BaseViewModel
     public string SubValDllError
     {
         get => _subValDllError;
-        set => SetProperty(ref _subValDllError, value);
+        set
+        {
+            if (_subValDllError != value)
+            {
+                SetProperty(ref _subValDllError, value);
+                
+                // If an error is being set, expand the details section
+                if (!string.IsNullOrEmpty(value))
+                {
+                    IsAdditionalDetailsExpanded = true;
+                }
+            }
+        }
     }
 
     private string _outputDirectoryError = string.Empty;
@@ -394,7 +420,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             if (fileGroups == null || fileGroups.Count == 0)
             {
                 _logger.LogWarning("No FileGroup elements found in layout file");
-                LayoutParseError = PackageUploader.UI.Resources.Strings.PackageCreation.NoFilesInLayoutFileErrorMsg; //"There were no files found in the layout file";
+                LayoutParseError = Resources.Strings.PackageCreation.NoFilesInLayoutFileErrorMsg; //"There were no files found in the layout file";
                 return "0"; // Return 0 bytes if no file groups found
             }
 
@@ -463,7 +489,7 @@ public partial class PackageCreationViewModel : BaseViewModel
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error calculating size for path: {Path}", fullSourcePath);
-                    LayoutParseError = PackageUploader.UI.Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg;
+                    LayoutParseError = Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg;
                 }
             }
 
@@ -475,13 +501,13 @@ public partial class PackageCreationViewModel : BaseViewModel
         catch (XmlException xmlEx)
         {
             _logger.LogError(xmlEx, "XML parsing error in layout file");
-            LayoutParseError = PackageUploader.UI.Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg; //"There was an error parsing the layout file";
+            LayoutParseError = Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg; //"There was an error parsing the layout file";
             return GetDirectorySizeInBytes(GameDataPath).ToString();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error parsing layout file for size calculation");
-            LayoutParseError = PackageUploader.UI.Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg; //"There was an error parsing the layout file";
+            LayoutParseError = Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg; //"There was an error parsing the layout file";
             return GetDirectorySizeInBytes(GameDataPath).ToString();
         }
     }
@@ -547,7 +573,7 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         if (string.IsNullOrEmpty(GameDataPath))
         {
-            GameConfigLoadError = PackageUploader.UI.Resources.Strings.PackageCreation.ProvideGameDataPathErrorMsg; //"Please provide the game data path";
+            GameConfigLoadError = Resources.Strings.PackageCreation.ProvideGameDataPathErrorMsg; //"Please provide the game data path";
             return;
         }
 
@@ -567,7 +593,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             }
             catch(Exception)
             {
-                OutputDirectoryError = PackageUploader.UI.Resources.Strings.PackageCreation.FailedToCreateOutputDirectoryErrorMsg; //"Failed to create output directory";
+                OutputDirectoryError = Resources.Strings.PackageCreation.FailedToCreateOutputDirectoryErrorMsg; //"Failed to create output directory";
                 return;
             }
         }
@@ -581,11 +607,11 @@ public partial class PackageCreationViewModel : BaseViewModel
         // Return if we still don't have a mapping file.
         if (string.IsNullOrEmpty(MappingDataXmlPath) || !File.Exists(MappingDataXmlPath))
         {
-            LayoutParseError = PackageUploader.UI.Resources.Strings.PackageCreation.FailedToGenerateLayoutFileErrorMsg; //"Failed to generate a layout file";
+            LayoutParseError = Resources.Strings.PackageCreation.FailedToGenerateLayoutFileErrorMsg; //"Failed to generate a layout file";
             return;
         }
 
-        string cmdFormat = "pack /v /f {0} /d {1} /pd {2}";
+        string cmdFormat = "pack /v /f \"{0}\" /d \"{1}\" /pd \"{2}\"";
         string arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, buildPath);
 
         SubValDllError = string.Empty;
@@ -593,11 +619,11 @@ public partial class PackageCreationViewModel : BaseViewModel
         {
             if (File.Exists(Path.Combine(SubValPath, "SubmissionValidator.dll")))
             {
-                arguments += $" /validationpath {SubValPath}";
+                arguments += $" /validationpath \"{SubValPath}\"";
             }
             else
             {
-                SubValDllError = PackageUploader.UI.Resources.Strings.PackageCreation.SubValDllNotFoundErrorMsg; //"SubmissionValidator.dll not found in the specified path.";
+                SubValDllError = Resources.Strings.PackageCreation.SubValDllNotFoundErrorMsg; //"SubmissionValidator.dll not found in the specified path.";
                 return;
             }
         }
@@ -692,6 +718,8 @@ public partial class PackageCreationViewModel : BaseViewModel
                     {
                         _windowService.NavigateTo(typeof(ErrorPageView));
                     });
+
+                    _logger.LogError("Package creation failed with exit code {ExitCode}.", exitCode);
                 }
                 return;
             }
@@ -707,6 +735,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         ProgressValue = 0;
         IsCreationInProgress = true;
 
+        _logger.LogInformation("Calling '{Command}'", _makePackageProcess.StartInfo.FileName + " " + _makePackageProcess.StartInfo.Arguments);
         _makePackageProcess.Start();
         _makePackageProcess.BeginOutputReadLine();
         _makePackageProcess.BeginErrorReadLine();
@@ -722,7 +751,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     {
         Process? makePackageProcess;
         ArrayList processOutput = [];
-        string cmdFormat = "genmap /f {0} /d {1}";
+        string cmdFormat = "genmap /f \"{0}\" /d \"{1}\"";
 
         string layoutFile = Path.Combine(tempBuildPath, "generated_layout.xml");
 
@@ -762,13 +791,17 @@ public partial class PackageCreationViewModel : BaseViewModel
             if (makePackageProcess.ExitCode != 0)
             {
                 // Show error message
-                LayoutParseError = PackageUploader.UI.Resources.Strings.PackageCreation.GeneratingLayoutFileErrorMsg; //"Error generating layout file.";
+                LayoutParseError = Resources.Strings.PackageCreation.GeneratingLayoutFileErrorMsg; //"Error generating layout file.";
+
+                _logger.LogError("Error generating layout file. Exit code: {ExitCode}", makePackageProcess.ExitCode);
                 return;
             }
             MappingDataXmlPath = layoutFile;
         };
 
         processOutput.Clear();
+
+        _logger.LogInformation("Calling '{Command}'", makePackageProcess.StartInfo.FileName + " " + makePackageProcess.StartInfo.Arguments);
         makePackageProcess.Start();
         makePackageProcess.BeginOutputReadLine();
         makePackageProcess.BeginErrorReadLine();
@@ -894,7 +927,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         string gameConfigPath = Path.Combine(GameDataPath, "MicrosoftGame.config");
         if (String.IsNullOrEmpty(gameConfigPath) || !File.Exists(gameConfigPath))
         {
-            GameConfigLoadError = PackageUploader.UI.Resources.Strings.PackageCreation.FolderDoesNotContainConfigErrMsg;  //"Provided folder does not contain a MicrosoftGame.config file";
+            GameConfigLoadError = Resources.Strings.PackageCreation.FolderDoesNotContainConfigErrMsg;  //"Provided folder does not contain a MicrosoftGame.config file";
             return;
         }
         PartialGameConfigModel gameConfig;
@@ -905,23 +938,23 @@ public partial class PackageCreationViewModel : BaseViewModel
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading game config.");
-            GameConfigLoadError = PackageUploader.UI.Resources.Strings.PackageCreation.MicrosoftGameConfigInvalidErrMsg; //"The MicrosoftGame.config in the provided folder is invalid";
+            GameConfigLoadError = Resources.Strings.PackageCreation.MicrosoftGameConfigInvalidErrMsg; //"The MicrosoftGame.config in the provided folder is invalid";
             return;
         }
 
         if (string.IsNullOrEmpty(gameConfig.Identity.Name))
         {
-            GameConfigLoadError = PackageUploader.UI.Resources.Strings.PackageCreation.MsftGameCOnfigLacksValidIdentityErrMsg;//"The MicrosoftGame.config lacks a valid Identity node";
+            GameConfigLoadError = Resources.Strings.PackageCreation.MsftGameCOnfigLacksValidIdentityErrMsg;//"The MicrosoftGame.config lacks a valid Identity node";
             return;
         }
         if (string.IsNullOrEmpty(gameConfig.ShellVisuals.Square150x150Logo))
         {
-            GameConfigLoadError = PackageUploader.UI.Resources.Strings.PackageCreation.MsftGameConfigMissingLogoFilesErrMsg;//"The MicrosoftGame.config does not have the required Logo files in the ShellVisuals";
+            GameConfigLoadError = Resources.Strings.PackageCreation.MsftGameConfigMissingLogoFilesErrMsg;//"The MicrosoftGame.config does not have the required Logo files in the ShellVisuals";
             return;
         }
         if (!File.Exists(gameConfig.ShellVisuals.Square150x150Logo))
         {
-            GameConfigLoadError = PackageUploader.UI.Resources.Strings.PackageCreation.MsftGameConfigLogoFileNotExistErrMsg;//"The logo file specified by the MicrosoftGame.config does not exist";
+            GameConfigLoadError = Resources.Strings.PackageCreation.MsftGameConfigLogoFileNotExistErrMsg;//"The logo file specified by the MicrosoftGame.config does not exist";
             return;
         }
 

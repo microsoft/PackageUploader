@@ -122,9 +122,11 @@
   </data>
   <data name="BranchNotFoundErrMsgPartOne" xml:space="preserve">
     <value>Branch</value>
+    <comment>Part before the branch name for the 'branch X not found' message, if any.</comment>
   </data>
   <data name="BranchNotFoundErrMsgPartTwo" xml:space="preserve">
     <value>not found</value>
+    <comment>Part after the branch name for the 'branch X not found' message, if any.</comment>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
     <value>Browse to package file</value>
@@ -212,9 +214,11 @@
   </data>
   <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart1" xml:space="preserve">
     <value>Product with BigID</value>
+    <comment>Part before the productId for the 'Product with BigID X not found. Configure your product at https://partner.microsoft.com/' message, if any.</comment>
   </data>
   <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart2" xml:space="preserve">
     <value>not found. Configure your product at https://partner.microsoft.com/</value>
+    <comment>Part after the productId for the 'Product with BigID X not found. Configure your product at https://partner.microsoft.com/' message, if any.</comment>
   </data>
   <data name="RequiredText" xml:space="preserve">
     <value>Required</value>
@@ -247,7 +251,7 @@
     <value>Upload cancelled.</value>
   </data>
   <data name="UploadPackageSubtitleText" xml:space="preserve">
-    <value>Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future.</value>
+    <value>Locate the package for uploading. The Xbox Game Package Manaa will remember these paths for easier access in the future.</value>
   </data>
   <data name="UploadPackageTitleText" xml:space="preserve">
     <value>Upload a package</value>

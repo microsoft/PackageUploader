@@ -1,19 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Windows;
-using PackageUploader.UI.View;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PackageUploader.UI.ViewModel;
-using PackageUploader.ClientApi;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
+using PackageUploader.ClientApi;
 using PackageUploader.FileLogger;
 using PackageUploader.UI.Providers;
-using System.Windows.Controls;
 using PackageUploader.UI.Utility;
+using PackageUploader.UI.View;
+using PackageUploader.UI.ViewModel;
 using System;
-using Microsoft.Win32;
+using System.Globalization;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace PackageUploader.UI;
@@ -48,6 +50,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<PackingProgressPercentageProvider>();
                 services.AddSingleton<UploadingProgressPercentageProvider>();
                 services.AddSingleton<ErrorModelProvider>();
+                services.AddSingleton<LanguageProvider>(); // Add the LanguageProvider
 
                 // Register ViewModels
                 services.AddSingleton<MainPageViewModel>();
@@ -97,6 +100,9 @@ public partial class App : System.Windows.Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        // Initialize language settings before loading UI components
+        InitializeLanguage();
+
         base.OnStartup(e);
 
         FrameworkElement.StyleProperty.OverrideMetadata(typeof(Window), new FrameworkPropertyMetadata
@@ -113,6 +119,25 @@ public partial class App : System.Windows.Application
 
         SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
         ApplyTheme();
+    }
+
+    private void InitializeLanguage()
+    {
+        // Get the language provider
+        var languageProvider = _host.Services.GetRequiredService<LanguageProvider>();
+
+        // Get the Windows language
+        var windowsLanguage = CultureInfo.InstalledUICulture.Name;
+        languageProvider.CurrentCulture = new CultureInfo(windowsLanguage);
+
+        // For testing, you can uncomment one of the below lines to set the language to one of the supported languages
+        //languageProvider.CurrentCulture = new CultureInfo("ja-JP");
+        //languageProvider.CurrentCulture = new CultureInfo("ko-KR");
+        //languageProvider.CurrentCulture = new CultureInfo("zh-CN");
+
+        // Set the current culture for the thread
+        Thread.CurrentThread.CurrentCulture = languageProvider.CurrentCulture;
+        Thread.CurrentThread.CurrentUICulture = languageProvider.CurrentCulture;
     }
 
     private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)

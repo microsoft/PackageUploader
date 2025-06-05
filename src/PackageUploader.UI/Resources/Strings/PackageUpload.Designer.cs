@@ -448,7 +448,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Locate the package for uploading. The Xbox Package Tool will remember these paths for easier access in the future..
+        ///   Looks up a localized string similar to Locate the package for uploading. The Xbox Game Package Manaa will remember these paths for easier access in the future..
         /// </summary>
         public static string UploadPackageSubtitleText {
             get {

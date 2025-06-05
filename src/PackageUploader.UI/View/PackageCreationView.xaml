@@ -35,7 +35,7 @@
                    HorizontalAlignment="Left"/>
             <TextBlock 
                    Text="{x:Static strings:PackageCreation.SubTitleText}"
-                   d:Text="Locate your game's build to create a package. The Xbox Package Tool will remember these paths for easier access in the future."
+                   d:Text="Locate your game's build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future."
                    HorizontalAlignment="Left"
                    Foreground="{DynamicResource PrimaryTextBrush}"
                    TextWrapping="Wrap"
@@ -182,7 +182,9 @@
                                        TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
-                    <Expander Style="{StaticResource CustomExpanderStyle}" Margin="0,10,0,20">
+                    <Expander Style="{StaticResource CustomExpanderStyle}" 
+                             Margin="0,10,0,20"
+                             IsExpanded="{Binding IsAdditionalDetailsExpanded, Mode=TwoWay}">
                         <Expander.Header>
                             <TextBlock Text="{x:Static strings:PackageCreation.AdditionalDetailsTitle}"
                                        d:Text="Additional details" 

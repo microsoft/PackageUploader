@@ -142,7 +142,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to VIew package.
+        ///   Looks up a localized string similar to View package.
         /// </summary>
         public static string ViewPackageButtonContent {
             get {

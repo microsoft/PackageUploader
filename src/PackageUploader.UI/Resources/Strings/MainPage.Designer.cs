@@ -61,6 +61,24 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Xbox Game Package Manager.
+        /// </summary>
+        public static string ApplicationName {
+            get {
+                return ResourceManager.GetString("ApplicationName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Advanced: List available tenants.
+        /// </summary>
+        public static string ChooseTenantButtonText {
+            get {
+                return ResourceManager.GetString("ChooseTenantButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file .
         /// </summary>
         public static string MakeAPackageBodyTextOne {

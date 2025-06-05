@@ -62,6 +62,7 @@ internal static class AccessTokenProviderExtensions
     public static IServiceCollection AddInteractiveBrowserCredentialAccessTokenProvider(this IServiceCollection services)
     {
         services.AddAccessTokenProviderOptions();
+        services.AddOptions<BrowserAuthInfo>().BindConfiguration(BrowserAuthInfo.ConfigName);
         services.AddScoped<IAccessTokenProvider, InteractiveBrowserCredentialAccessTokenProvider>();
 
         return services;
@@ -70,7 +71,10 @@ internal static class AccessTokenProviderExtensions
     public static IServiceCollection AddCacheableInteractiveBrowserCredentialAccessTokenProvider(this IServiceCollection services)
     {
         services.AddAccessTokenProviderOptions();
+        services.AddOptions<BrowserAuthInfo>().BindConfiguration(BrowserAuthInfo.ConfigName);
+        services.AddAzureTenantServices();
         services.AddScoped<IAccessTokenProvider, CachableInteractiveBrowserCredentialAccessToken>();
+        services.AddScoped<IAuthenticationResetService, AuthenticationResetService>();
 
         return services;
     }
@@ -96,8 +100,8 @@ internal static class AccessTokenProviderExtensions
 
     public static IServiceCollection AddClientSecretCredentialAccessTokenProvider(this IServiceCollection services)
     {
-        services.AddSingleton<IValidateOptions<AzureApplicationSecretAuthInfo>, AzureApplicationSecretAuthInfoValidator>();
-        services.AddOptions<AzureApplicationSecretAuthInfo>().BindConfiguration(AadAuthInfo.ConfigName);
+        services.AddSingleton<IValidateOptions<ClientSecretAuthInfo>, ClientSecretAuthInfoValidator>();
+        services.AddOptions<ClientSecretAuthInfo>().BindConfiguration(ClientSecretAuthInfo.ConfigName);
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, ClientSecretCredentialAccessTokenProvider>();
@@ -107,15 +111,22 @@ internal static class AccessTokenProviderExtensions
 
     public static IServiceCollection AddClientCertificateCredentialAccessTokenProvider(this IServiceCollection services)
     {
-        services.AddSingleton<IValidateOptions<AzureApplicationCertificateAuthInfo>, AzureApplicationCertificateAuthInfoValidator>();
-        services.AddOptions<AzureApplicationCertificateAuthInfo>().BindConfiguration(AadAuthInfo.ConfigName);
+        services.AddSingleton<IValidateOptions<ClientCertificateAuthInfo>, ClientCertificateAuthInfoValidator>();
+        services.AddOptions<ClientCertificateAuthInfo>().BindConfiguration(ClientCertificateAuthInfo.ConfigName);
 
         services.AddAccessTokenProviderOptions();
         services.AddScoped<IAccessTokenProvider, ClientCertificateCredentialAccessTokenProvider>();
 
         return services;
     }
-    
+
+    public static IServiceCollection AddAzureTenantServices(this IServiceCollection services)
+    {
+        services.AddHttpClient<IAzureTenantService, AzureTenantService>();
+        services.AddScoped<IAzureTenantService, AzureTenantService>();
+        return services;
+    }
+
     private static void AddAccessTokenProviderOptions(this IServiceCollection services)
     {
         services.AddSingleton<IValidateOptions<AccessTokenProviderConfig>, AccessTokenProviderConfigValidator>();
