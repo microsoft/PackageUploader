@@ -198,6 +198,9 @@
   <data name="PackagePreviewFamilyText" xml:space="preserve">
     <value>系列</value>
   </data>
+  <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
+    <value>由于提供的 MicrosoftGame.config 文件没有 StoreId，无法显示完整预览。请在 MicrosoftGame.config 文件中添加您的 StoreId。</value>
+  </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
     <value>包 ID</value>
   </data>

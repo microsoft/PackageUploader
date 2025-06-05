@@ -198,6 +198,9 @@
   <data name="PackagePreviewFamilyText" xml:space="preserve">
     <value>Family</value>
   </data>
+  <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
+    <value>Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file.</value>
+  </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
     <value>Package ID</value>
   </data>

@@ -24,7 +24,8 @@
     </data>
     <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment></data>
+        <comment>This is a comment</comment>
+    </data>
                 
     There are any number of "resheader" rows that contain simple 
     name/value pairs.
@@ -196,6 +197,9 @@
   </data>
   <data name="PackagePreviewFamilyText" xml:space="preserve">
     <value>패밀리</value>
+  </data>
+  <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
+    <value>제공된 MicrosoftGame.config 파일에 StoreId가 없어 전체 미리보기를 사용할 수 없습니다. MicrosoftGame.config 파일에 StoreId를 추가하세요.</value>
   </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
     <value>패키지 ID</value>

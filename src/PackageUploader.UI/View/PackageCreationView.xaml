@@ -590,7 +590,8 @@
                                            Foreground="{DynamicResource PrimaryTextBrush}"/>
                             </Grid>
                             <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file."
+                                <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewNoPreviewAvailable}"
+                                           d:Text="Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file."
                                            Foreground="{DynamicResource PrimaryTextBrush}"
                                            TextWrapping="Wrap"/>
                             </Grid>

@@ -198,6 +198,9 @@
   <data name="PackagePreviewFamilyText" xml:space="preserve">
     <value>ファミリー</value>
   </data>
+  <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
+    <value>提供されたMicrosoftGame.configファイルにStoreIdがないため、完全なプレビューは利用できません。MicrosoftGame.configファイルにStoreIdを追加してください。</value>
+  </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
     <value>パッケージ ID</value>
   </data>
