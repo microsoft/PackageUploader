@@ -62,7 +62,8 @@
                                MaxHeight="300"/>
                     <Button Grid.Row="2"
                             Grid.Column="1"
-                            Content="View logs"
+                            Content="{x:Static strings:ErrorPage.ViewLogs}"
+                            d:Content="View logs"
                             HorizontalAlignment="Right"
                             Command="{Binding ViewLogsCommand}"
                             Style="{StaticResource HyperlinkButtonStyle}"
@@ -72,13 +73,15 @@
 
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Center">
-                <Button Content="Copy error"
+                <Button Content="{x:Static strings:ErrorPage.CopyError}"
+                        d:Content="Copy error"
                         Command="{Binding CopyErrorCommand}"
                         HorizontalAlignment="Center"
                         Width="101"
                         Height="32"
                         Margin="0, 0, 10, 0" />
-                <Button Content="Go back and fix"
+                <Button Content="{x:Static strings:ErrorPage.GoBackAndFix}"
+                        d:Content="Go back and fix"
                         Command="{Binding GoBackAndFixCommand}"
                         HorizontalAlignment="Center"
                         Width="132"

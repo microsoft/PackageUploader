@@ -61,11 +61,38 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy error.
+        /// </summary>
+        public static string CopyError {
+            get {
+                return ResourceManager.GetString("CopyError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to We&apos;ve run into an issue, go back to fix.
         /// </summary>
         public static string ErrorTitleString {
             get {
                 return ResourceManager.GetString("ErrorTitleString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Go back and fix.
+        /// </summary>
+        public static string GoBackAndFix {
+            get {
+                return ResourceManager.GetString("GoBackAndFix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View logs.
+        /// </summary>
+        public static string ViewLogs {
+            get {
+                return ResourceManager.GetString("ViewLogs", resourceCulture);
             }
         }
     }
