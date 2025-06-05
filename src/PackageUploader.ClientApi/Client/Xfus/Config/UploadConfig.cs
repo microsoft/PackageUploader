@@ -29,4 +29,6 @@ public class UploadConfig
 
     [Required]
     public bool UseNagleAlgorithm { get; set; } = false;
+
+    public int RetryCount { get; set; } = 5;
 }

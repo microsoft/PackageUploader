@@ -49,7 +49,8 @@ internal static class XfusExtensions
         }).AddPolicyHandler((serviceProvider, _) =>
         {
             // Use exponential backoff with jitter for retries
-            const int retryCount = 5;
+            var uploadConfig = serviceProvider.GetRequiredService<IOptions<UploadConfig>>().Value;
+            var retryCount = uploadConfig.RetryCount > 0 ? uploadConfig.RetryCount : 3;
             var delay = Backoff.ExponentialBackoff(TimeSpan.FromSeconds(2), retryCount, factor: 2);
             return HttpPolicyExtensions
             .HandleTransientHttpError()
