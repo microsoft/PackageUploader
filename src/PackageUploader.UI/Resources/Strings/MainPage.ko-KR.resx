@@ -121,17 +121,16 @@
     <value>Xbox 게임 패키지 관리자</value>
   </data>
   <data name="ChooseTenantButtonText" xml:space="preserve">
-    <value>고급: 사용 가능한 테넌트 목록</value>
+    <value>고급: 사용 가능한 테넌트 나열</value>
   </data>
   <data name="CloseWindow" xml:space="preserve">
     <value>닫기</value>
   </data>
-  <data name="MakeAPackageBodyTextOne" xml:space="preserve">
-    <value>게임 패키지는 업로드를 가속화하고, 안전한 설치를 보장하며, Xbox 성능을 최적화합니다. 빌드 파일과 구성 파일만 추가하면 </value>
-    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
+  <data name="GitHubIssues" xml:space="preserve">
+    <value>피드백 보내기...</value>
   </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
-    <value>, 그 후 업로드하세요.</value>
+    <value>, 그런 다음 업로드하세요.</value>
     <comment>The part of the string that comes after the hyperlink, if any.</comment>
   </data>
   <data name="MakeAPackageBodyURLText" xml:space="preserve">
@@ -159,7 +158,7 @@
     <value>로그인 정보를 검색하는 중입니다. 몇 초 내에 브라우저 페이지가 열리지 않으면 로그인 버튼을 다시 클릭하여 재시도하세요.</value>
   </data>
   <data name="SignInPreLoginText" xml:space="preserve">
-    <value>제품 ID 및 게시 대상에 원활하게 액세스하려면 Microsoft 파트너 센터 계정에 로그인하세요. 구성 없이 게임 패키지만 생성하는 경우 이 단계는 선택 사항이지만, 패키지를 업로드하거나 제품 ID를 검색하거나 구성 파일에 연결하려는 사용자에게는 필수입니다.</value>
+    <value>제품 ID 및 게시 대상에 원활하게 액세스하려면 Microsoft 파트너 센터 계정에 로그인하세요. 이 단계는 구성 없이 게임 패키지를 만드는 경우에는 선택 사항이지만, 패키지를 업로드하거나 제품 ID를 검색하거나 구성 파일에 연결하려는 사용자에게는 필수입니다.</value>
   </data>
   <data name="SignInTextBlockTitle" xml:space="preserve">
     <value>로그인</value>
@@ -168,21 +167,25 @@
     <value>사용자 로그아웃</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
-    <value>패키지 생성 도구는 게임 파일, 에셋 및 메타데이터를 구조화된 패키지로 번들링하여 일관성과 규정 준수를 보장하고 더 빠르고 안정적인 업로드를 가능하게 합니다.</value>
+    <value>패키지 생성 도구는 게임 파일, 자산 및 메타데이터를 구조화된 패키지로 번들링하여 더 빠르고 안정적인 업로드를 위한 일관성과 규정 준수를 보장합니다.</value>
   </data>
   <data name="TitleTextBlock" xml:space="preserve">
-    <value>패키지를 만들어 Microsoft 파트너 센터에 업로드</value>
+    <value>패키지를 만들어 Microsoft 파트너 센터에 업로드하세요</value>
   </data>
   <data name="UploadPackageBlockBody" xml:space="preserve">
-    <value>게임 패키지를 파트너 센터에 업로드하여 Xbox에서 배포 및 관리하세요. 완성된 패키지와 Microsoft 계정으로 시작하세요.</value>
+    <value>게임 패키지를 파트너 센터에 업로드하여 Xbox에서 배포하고 관리하세요. 완성된 패키지와 Microsoft 계정으로 시작하세요.</value>
   </data>
   <data name="UploadPackageBlockButtonText" xml:space="preserve">
     <value>패키지 업로드</value>
   </data>
   <data name="UploadPackageBlockTitle" xml:space="preserve">
-    <value>패키지 업로드(로그인 필요)</value>
+    <value>패키지 업로드 (로그인 필요)</value>
   </data>
   <data name="VersionLabel" xml:space="preserve">
     <value>버전 {0}</value>
+  </data>
+  <data name="MakeAPackageBodyTextOne" xml:space="preserve">
+    <value>게임 패키지는 업로드 속도를 높이고, 안전한 설치를 보장하며, Xbox 성능을 최적화합니다. 빌드 파일 및 구성 파일을 추가하기만 하면 됩니다.</value>
+    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
   </data>
 </root>

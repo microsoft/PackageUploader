@@ -88,6 +88,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Send feedback....
+        /// </summary>
+        public static string GitHubIssues {
+            get {
+                return ResourceManager.GetString("GitHubIssues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file .
         /// </summary>
         public static string MakeAPackageBodyTextOne {
@@ -106,7 +115,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to (Learn more).
+        ///   Looks up a localized string similar to (learn more).
         /// </summary>
         public static string MakeAPackageBodyURLText {
             get {

@@ -70,20 +70,11 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Branch.
+        ///   Looks up a localized string similar to Branch {0} not found..
         /// </summary>
-        public static string BranchNotFoundErrMsgPartOne {
+        public static string BranchNotFoundErrMsg {
             get {
-                return ResourceManager.GetString("BranchNotFoundErrMsgPartOne", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to not found.
-        /// </summary>
-        public static string BranchNotFoundErrMsgPartTwo {
-            get {
-                return ResourceManager.GetString("BranchNotFoundErrMsgPartTwo", resourceCulture);
+                return ResourceManager.GetString("BranchNotFoundErrMsg", resourceCulture);
             }
         }
         
@@ -340,20 +331,11 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product with BigID.
+        ///   Looks up a localized string similar to Product with StoreId {0} not found. Configure your product at https://aka.ms/mpc-ag.
         /// </summary>
-        public static string ProductWithBigIdNotFoundConfigHereErrMsgPart1 {
+        public static string ProductWithStoreIdNotFoundConfigHereErrMsg {
             get {
-                return ResourceManager.GetString("ProductWithBigIdNotFoundConfigHereErrMsgPart1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to not found. Configure your product at https://partner.microsoft.com/.
-        /// </summary>
-        public static string ProductWithBigIdNotFoundConfigHereErrMsgPart2 {
-            get {
-                return ResourceManager.GetString("ProductWithBigIdNotFoundConfigHereErrMsgPart2", resourceCulture);
+                return ResourceManager.GetString("ProductWithStoreIdNotFoundConfigHereErrMsg", resourceCulture);
             }
         }
         

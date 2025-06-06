@@ -126,9 +126,8 @@
   <data name="CloseWindow" xml:space="preserve">
     <value>关闭</value>
   </data>
-  <data name="MakeAPackageBodyTextOne" xml:space="preserve">
-    <value>游戏包能够加速上传过程，确保安装安全，并优化 Xbox 性能。只需添加构建文件和配置文件 </value>
-    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
+  <data name="GitHubIssues" xml:space="preserve">
+    <value>发送反馈...</value>
   </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
     <value>，然后上传。</value>
@@ -184,5 +183,9 @@
   </data>
   <data name="VersionLabel" xml:space="preserve">
     <value>版本 {0}</value>
+  </data>
+  <data name="MakeAPackageBodyTextOne" xml:space="preserve">
+    <value>游戏包能够加速上传过程，确保安装安全，并优化 Xbox 性能。只需添加构建文件和配置文件 </value>
+    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
   </data>
 </root>

@@ -24,7 +24,8 @@
     </data>
     <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment></data>
+        <comment>This is a comment</comment>
+    </data>
                 
     There are any number of "resheader" rows that contain simple 
     name/value pairs.
@@ -119,11 +120,8 @@
   <data name="AditionalDetailsText" xml:space="preserve">
     <value>추가 세부 정보</value>
   </data>
-  <data name="BranchNotFoundErrMsgPartOne" xml:space="preserve">
-    <value>브랜치</value>
-  </data>
-  <data name="BranchNotFoundErrMsgPartTwo" xml:space="preserve">
-    <value>를 찾을 수 없습니다</value>
+  <data name="BranchNotFoundErrMsg" xml:space="preserve">
+    <value>브랜치 {0}을(를) 찾을 수 없습니다.</value>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
     <value>패키지 파일 찾아보기</value>
@@ -209,12 +207,6 @@
   <data name="ProductNameText" xml:space="preserve">
     <value>제품명</value>
   </data>
-  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart1" xml:space="preserve">
-    <value>BigID가</value>
-  </data>
-  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart2" xml:space="preserve">
-    <value>인 제품을 찾을 수 없습니다. https://partner.microsoft.com/ 에서 제품을 구성하세요</value>
-  </data>
   <data name="RequiredText" xml:space="preserve">
     <value>필수</value>
   </data>
@@ -253,5 +245,8 @@
   </data>
   <data name="UploadPreviewTitleText" xml:space="preserve">
     <value>업로드 미리보기</value>
+  </data>
+  <data name="ProductWithStoreIdNotFoundConfigHereErrMsg" xml:space="preserve">
+    <value>StoreId {0}인 제품을 찾을 수 없습니다. https://aka.ms/mpc-ag에서 제품을 구성하세요</value>
   </data>
 </root>

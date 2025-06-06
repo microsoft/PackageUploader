@@ -5,6 +5,8 @@ using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.ViewModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -118,6 +120,15 @@ namespace PackageUploader.UI
         {
             // Sign out the user
             _authenticationService.SignOut();
+        }
+
+        private void GitHubIssuesButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Open the GitHub issues page
+            Process.Start(new ProcessStartInfo("https://github.com/microsoft/PackageUploader/issues/new")
+            {
+                UseShellExecute = true
+            });
         }
     }
 }

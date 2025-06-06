@@ -120,11 +120,8 @@
   <data name="AditionalDetailsText" xml:space="preserve">
     <value>附加详情</value>
   </data>
-  <data name="BranchNotFoundErrMsgPartOne" xml:space="preserve">
-    <value>分支</value>
-  </data>
-  <data name="BranchNotFoundErrMsgPartTwo" xml:space="preserve">
-    <value>未找到</value>
+  <data name="BranchNotFoundErrMsg" xml:space="preserve">
+    <value>未找到分支 {0}。</value>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
     <value>浏览到包文件</value>
@@ -210,12 +207,6 @@
   <data name="ProductNameText" xml:space="preserve">
     <value>产品名称</value>
   </data>
-  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart1" xml:space="preserve">
-    <value>未找到 BigID 为</value>
-  </data>
-  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart2" xml:space="preserve">
-    <value>的产品。在 https://partner.microsoft.com/ 配置您的产品</value>
-  </data>
   <data name="RequiredText" xml:space="preserve">
     <value>必需</value>
   </data>
@@ -254,5 +245,8 @@
   </data>
   <data name="UploadPreviewTitleText" xml:space="preserve">
     <value>上传预览</value>
+  </data>
+  <data name="ProductWithStoreIdNotFoundConfigHereErrMsg" xml:space="preserve">
+    <value>未找到 StoreId 为 {0} 的产品。请在 https://aka.ms/mpc-ag 配置您的产品</value>
   </data>
 </root>

@@ -120,13 +120,8 @@
   <data name="AditionalDetailsText" xml:space="preserve">
     <value>Additional details</value>
   </data>
-  <data name="BranchNotFoundErrMsgPartOne" xml:space="preserve">
-    <value>Branch</value>
-    <comment>Part before the branch name for the 'branch X not found' message, if any.</comment>
-  </data>
-  <data name="BranchNotFoundErrMsgPartTwo" xml:space="preserve">
-    <value>not found</value>
-    <comment>Part after the branch name for the 'branch X not found' message, if any.</comment>
+  <data name="BranchNotFoundErrMsg" xml:space="preserve">
+    <value>Branch {0} not found.</value>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
     <value>Browse to package file</value>
@@ -212,14 +207,6 @@
   <data name="ProductNameText" xml:space="preserve">
     <value>Product name</value>
   </data>
-  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart1" xml:space="preserve">
-    <value>Product with BigID</value>
-    <comment>Part before the productId for the 'Product with BigID X not found. Configure your product at https://partner.microsoft.com/' message, if any.</comment>
-  </data>
-  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart2" xml:space="preserve">
-    <value>not found. Configure your product at https://partner.microsoft.com/</value>
-    <comment>Part after the productId for the 'Product with BigID X not found. Configure your product at https://partner.microsoft.com/' message, if any.</comment>
-  </data>
   <data name="RequiredText" xml:space="preserve">
     <value>Required</value>
   </data>
@@ -258,5 +245,8 @@
   </data>
   <data name="UploadPreviewTitleText" xml:space="preserve">
     <value>Upload Preview</value>
+  </data>
+  <data name="ProductWithStoreIdNotFoundConfigHereErrMsg" xml:space="preserve">
+    <value>Product with StoreId {0} not found. Configure your product at https://aka.ms/mpc-ag</value>
   </data>
 </root>

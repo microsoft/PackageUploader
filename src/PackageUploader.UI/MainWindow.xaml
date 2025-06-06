@@ -89,6 +89,26 @@
 
                 <!-- Window Controls -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <!-- Send feedback button -->
+                    <Grid x:Name="HelpButtonGrid" Margin="0,0,5,0">
+                        <Button x:Name="HelpButton"
+                                Width="46" Height="32" 
+                                WindowChrome.IsHitTestVisibleInChrome="True"
+                                Click="GitHubIssuesButton_Click"
+                                Style="{StaticResource WindowControlButtonStyle}"
+                                AutomationProperties.HelpText="Send feedback about the application"
+                                ToolTip="{x:Static strings:MainPage.GitHubIssues}">
+                            <Path Data="M 0 0 L 0 9  L 3 9 L 3 13 L 6 9  L 12 9 L 12 0 z"
+                                  Stroke="{StaticResource SecondaryTextBrush}"
+                                  StrokeThickness="1"
+                                  StrokeEndLineCap="Square"
+                                  StrokeStartLineCap="Square"
+                                  Width="14"
+                                  Height="14"
+                                  Stretch="Uniform"/>
+                        </Button>
+                    </Grid>
+                    
                     <Button x:Name="MinimizeButton"
                             Width="46" Height="32" 
                             WindowChrome.IsHitTestVisibleInChrome="True"

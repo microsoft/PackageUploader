@@ -126,16 +126,15 @@
   <data name="CloseWindow" xml:space="preserve">
     <value>Close</value>
   </data>
-  <data name="MakeAPackageBodyTextOne" xml:space="preserve">
-    <value>Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file </value>
-    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
+  <data name="GitHubIssues" xml:space="preserve">
+    <value>Send feedback...</value>
   </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
     <value>, then upload.</value>
     <comment>The part of the string that comes after the hyperlink, if any.</comment>
   </data>
   <data name="MakeAPackageBodyURLText" xml:space="preserve">
-    <value>(Learn more)</value>
+    <value>(learn more)</value>
   </data>
   <data name="MakeAPackageButtonText" xml:space="preserve">
     <value>Create package</value>
@@ -184,5 +183,9 @@
   </data>
   <data name="VersionLabel" xml:space="preserve">
     <value>Version {0}</value>
+  </data>
+  <data name="MakeAPackageBodyTextOne" xml:space="preserve">
+    <value>Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file </value>
+    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
   </data>
 </root>

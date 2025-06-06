@@ -120,11 +120,8 @@
   <data name="AditionalDetailsText" xml:space="preserve">
     <value>追加詳細情報</value>
   </data>
-  <data name="BranchNotFoundErrMsgPartOne" xml:space="preserve">
-    <value>ブランチ</value>
-  </data>
-  <data name="BranchNotFoundErrMsgPartTwo" xml:space="preserve">
-    <value>が見つかりません</value>
+  <data name="BranchNotFoundErrMsg" xml:space="preserve">
+    <value>ブランチ {0} が見つかりません。</value>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
     <value>パッケージファイルを参照</value>
@@ -210,12 +207,6 @@
   <data name="ProductNameText" xml:space="preserve">
     <value>製品名</value>
   </data>
-  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart1" xml:space="preserve">
-    <value>BigID</value>
-  </data>
-  <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart2" xml:space="preserve">
-    <value>の製品が見つかりません。https://partner.microsoft.com/ で製品を構成してください</value>
-  </data>
   <data name="RequiredText" xml:space="preserve">
     <value>必須</value>
   </data>
@@ -254,5 +245,8 @@
   </data>
   <data name="UploadPreviewTitleText" xml:space="preserve">
     <value>アップロードプレビュー</value>
+  </data>
+  <data name="ProductWithStoreIdNotFoundConfigHereErrMsg" xml:space="preserve">
+    <value>StoreId {0} の製品が見つかりません。https://aka.ms/mpc-ag で製品を構成してください</value>
   </data>
 </root>

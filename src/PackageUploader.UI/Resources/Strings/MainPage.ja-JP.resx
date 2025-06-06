@@ -126,9 +126,8 @@
   <data name="CloseWindow" xml:space="preserve">
     <value>閉じる</value>
   </data>
-  <data name="MakeAPackageBodyTextOne" xml:space="preserve">
-    <value>ゲームパッケージはアップロードを高速化し、安全なインストールを確保し、Xbox のパフォーマンスを最適化します。ビルドファイルと構成ファイルを追加するだけで</value>
-    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
+  <data name="GitHubIssues" xml:space="preserve">
+    <value>フィードバックを送信...</value>
   </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
     <value>、その後アップロードします。</value>
@@ -184,5 +183,9 @@
   </data>
   <data name="VersionLabel" xml:space="preserve">
     <value>バージョン {0}</value>
+  </data>
+  <data name="MakeAPackageBodyTextOne" xml:space="preserve">
+    <value>ゲームパッケージはアップロードを高速化し、安全なインストールを確保し、Xbox のパフォーマンスを最適化します。ビルドファイルと構成ファイルを追加するだけで</value>
+    <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
   </data>
 </root>
