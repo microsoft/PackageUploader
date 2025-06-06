@@ -121,16 +121,16 @@
     <value>追加詳細情報</value>
   </data>
   <data name="BranchNotFoundErrMsg" xml:space="preserve">
-    <value>ブランチ {0} が見つかりません。</value>
+    <value>ブランチ {0} が見つかりませんでした。</value>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
-    <value>パッケージファイルを参照</value>
+    <value>パッケージファイルを参照してください。</value>
   </data>
   <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
-    <value>Submission Validator ログファイルの BuildId が一致しません</value>
+    <value>Submission Validator ログファイルの BuildId が一致しません。</value>
   </data>
   <data name="CancelButtonHelpText" xml:space="preserve">
-    <value>操作をキャンセル</value>
+    <value>操作をキャンセルします。</value>
   </data>
   <data name="CancelContentText" xml:space="preserve">
     <value>キャンセル</value>
@@ -142,25 +142,25 @@
     <value>送信先</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
-    <value>ディレクトリが見つかりません</value>
+    <value>ディレクトリが見つかりませんでした。</value>
   </data>
   <data name="ErrorExtractingInfoErrMsg" xml:space="preserve">
-    <value>パッケージ情報の抽出中にエラーが発生しました</value>
+    <value>パッケージ情報の抽出中にエラーが発生しました。</value>
   </data>
   <data name="ErrorGettingMarketGroupsErrMsg" xml:space="preserve">
-    <value>マーケットグループの取得中にエラーが発生しました</value>
+    <value>マーケットグループの取得中にエラーが発生しました。</value>
   </data>
   <data name="ErrorGettingProdInfo" xml:space="preserve">
-    <value>製品情報の取得中にエラーが発生しました</value>
+    <value>製品情報の取得中にエラーが発生しました。</value>
   </data>
   <data name="ErrorProcessingPackageErrMsg" xml:space="preserve">
-    <value>パッケージの処理中にエラーが発生しました</value>
+    <value>パッケージの処理中にエラーが発生しました。</value>
   </data>
   <data name="ErrorSelectingFileErrMsg" xml:space="preserve">
-    <value>ファイル選択中にエラーが発生しました</value>
+    <value>ファイル選択中にエラーが発生しました。</value>
   </data>
   <data name="ErrUploadPackageErrMsg" xml:space="preserve">
-    <value>パッケージのアップロード中にエラーが発生しました</value>
+    <value>パッケージのアップロード中にエラーが発生しました。</value>
   </data>
   <data name="ExpectedText" xml:space="preserve">
     <value>期待値</value>
@@ -175,13 +175,13 @@
     <value>検出値</value>
   </data>
   <data name="InvalidFilePathErrMsg" xml:space="preserve">
-    <value>無効なファイルパスです。</value>
+    <value>ファイルパスが無効です。</value>
   </data>
   <data name="MarketTitleText" xml:space="preserve">
     <value>マーケット</value>
   </data>
   <data name="NoBranchesFoundErrMsg" xml:space="preserve">
-    <value>この製品にブランチが見つかりません</value>
+    <value>この製品のブランチが見つかりませんでした。</value>
   </data>
   <data name="NoProdInfoTitleText" xml:space="preserve">
     <value>製品情報がありません</value>
@@ -190,19 +190,19 @@
     <value>ブランチ/フライトが null です</value>
   </data>
   <data name="PackageHasNoBigIdConfigureMsftGameCfgErrMsg" xml:space="preserve">
-    <value>パッケージに StoreId/BigId がありません。パッケージを作成する前に MicrosoftGame.config ファイルで StoreId を設定するか、以下の追加詳細に手動で入力してください。</value>
+    <value>パッケージに StoreId がありません。パッケージをビルドする前に MicrosoftGame.config ファイルで StoreId を設定するか、追加詳細情報で手動で入力してください。</value>
   </data>
   <data name="PackageLocationTitleText" xml:space="preserve">
     <value>パッケージの場所</value>
   </data>
   <data name="PackagePathHelpText" xml:space="preserve">
-    <value>パッケージファイルへのパス</value>
+    <value>パッケージファイルへのパス。</value>
   </data>
   <data name="PackagePathText" xml:space="preserve">
     <value>パッケージパス</value>
   </data>
   <data name="ProductInfoNotAvailableErrMsg" xml:space="preserve">
-    <value>製品情報を利用できません。有効な BigId を入力して再試行してください。</value>
+    <value>製品情報を利用できません。有効な StoreId を入力して再試行してください。</value>
   </data>
   <data name="ProductNameText" xml:space="preserve">
     <value>製品名</value>
@@ -211,7 +211,7 @@
     <value>必須</value>
   </data>
   <data name="SelectDestinationText" xml:space="preserve">
-    <value>パッケージアップロードの送信先とマーケットを選択してください。</value>
+    <value>パッケージアップロードの送信先とマーケットを選択してください</value>
   </data>
   <data name="SelectEnterPackagePathText" xml:space="preserve">
     <value>パッケージパスを選択または入力してください</value>
@@ -223,30 +223,30 @@
     <value>サイズ</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>ストア ID</value>
+    <value>StoreId</value>
   </data>
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
-    <value>Submission Validator ログが見つかりません</value>
+    <value>Submission Validator ログが見つかりませんでした。</value>
   </data>
   <data name="UploadButtonContentText" xml:space="preserve">
     <value>パッケージをアップロード</value>
   </data>
   <data name="UploadButtonHelpText" xml:space="preserve">
-    <value>パッケージのアップロードを開始</value>
+    <value>パッケージのアップロードを開始します。</value>
   </data>
   <data name="UploadCancelledErrMsg" xml:space="preserve">
     <value>アップロードがキャンセルされました。</value>
   </data>
   <data name="UploadPackageSubtitleText" xml:space="preserve">
-    <value>アップロードするパッケージを探してください。Xbox ゲームパッケージマネージャーは、将来簡単にアクセスできるようにこれらのパスを記憶します。</value>
+    <value>アップロードするパッケージを探してください。Xbox Game Package Manager は将来より簡単にアクセスできるようにこれらのパスを記憶します。</value>
   </data>
   <data name="UploadPackageTitleText" xml:space="preserve">
     <value>パッケージをアップロード</value>
   </data>
   <data name="UploadPreviewTitleText" xml:space="preserve">
-    <value>アップロードプレビュー</value>
+    <value>プレビュー</value>
   </data>
   <data name="ProductWithStoreIdNotFoundConfigHereErrMsg" xml:space="preserve">
-    <value>StoreId {0} の製品が見つかりません。https://aka.ms/mpc-ag で製品を構成してください</value>
+    <value>StoreId {0} の製品が見つかりません。https://aka.ms/mpc-ag で製品を構成してください。</value>
   </data>
 </root>

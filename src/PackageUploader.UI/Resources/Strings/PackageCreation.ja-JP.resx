@@ -145,10 +145,10 @@
     <value>出力ディレクトリの作成に失敗しました</value>
   </data>
   <data name="FailedToGenerateLayoutFileErrorMsg" xml:space="preserve">
-    <value>レイアウトファイルの生成に失敗しました</value>
+    <value>レイアウトファイルが生成されませんでした。</value>
   </data>
   <data name="FolderDoesNotContainConfigErrMsg" xml:space="preserve">
-    <value>指定されたフォルダには MicrosoftGame.config ファイルが含まれていません</value>
+    <value>指定されたフォルダには MicrosoftGame.config ファイルが含まれていません。</value>
   </data>
   <data name="GamePathBoxDefaultText" xml:space="preserve">
     <value>ゲームの場所を選択または入力してください</value>
@@ -163,22 +163,22 @@
     <value>レイアウトファイル/コンテンツマップ</value>
   </data>
   <data name="LayoutFileParsingErrorMsg" xml:space="preserve">
-    <value>レイアウトファイルの解析中にエラーが発生しました</value>
+    <value>レイアウトファイルの解析中にエラーが発生しました。</value>
   </data>
   <data name="MicrosoftGameConfigInvalidErrMsg" xml:space="preserve">
-    <value>指定されたフォルダ内の MicrosoftGame.config が無効です</value>
+    <value>指定されたフォルダ内の MicrosoftGame.config ファイルは有効ではありません。</value>
   </data>
   <data name="MsftGameCOnfigLacksValidIdentityErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config に有効な Identity ノードがありません</value>
+    <value>MicrosoftGame.config ファイルに有効な Identity ノードがありません。</value>
   </data>
   <data name="MsftGameConfigLogoFileNotExistErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config で指定されたロゴファイルが存在しません</value>
+    <value>MicrosoftGame.config ファイルで指定されたロゴファイルが存在しません。</value>
   </data>
   <data name="MsftGameConfigMissingLogoFilesErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config の ShellVisuals に必要なロゴファイルがありません</value>
+    <value>MicrosoftGame.config ファイルの ShellVisuals に必要なロゴファイルがありません。</value>
   </data>
   <data name="NoFilesInLayoutFileErrorMsg" xml:space="preserve">
-    <value>レイアウトファイル内にファイルが見つかりませんでした</value>
+    <value>レイアウトファイル内にファイルが見つかりませんでした。</value>
   </data>
   <data name="OptionalText" xml:space="preserve">
     <value>任意</value>
@@ -196,10 +196,10 @@
     <value>ファミリー</value>
   </data>
   <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
-    <value>提供されたMicrosoftGame.configファイルにStoreIdがないため、完全なプレビューは利用できません。MicrosoftGame.configファイルにStoreIdを追加してください。</value>
+    <value>提供された MicrosoftGame.config ファイルに StoreId がないため、完全なプレビューは利用できません。MicrosoftGame.config ファイルに StoreId を追加してください。</value>
   </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
-    <value>パッケージ ID</value>
+    <value>パッケージ ID 名</value>
   </data>
   <data name="PackagePreviewSizeEstimate" xml:space="preserve">
     <value>サイズ推定</value>
@@ -208,10 +208,10 @@
     <value>StoreId</value>
   </data>
   <data name="PackagePreviewTitleText" xml:space="preserve">
-    <value>パッケージプレビュー</value>
+    <value>プレビュー</value>
   </data>
   <data name="ProvideGameDataPathErrorMsg" xml:space="preserve">
-    <value>ゲームデータのパスを指定してください</value>
+    <value>ゲームの場所を指定してください。</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
     <value>必須</value>
@@ -220,7 +220,7 @@
     <value>マッピングデータ XML ファイルを選択</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
-    <value>パッケージを作成するためにゲームのビルドを探してください。Xbox ゲームパッケージマネージャーは、将来簡単にアクセスできるようにこれらのパスを記憶します。</value>
+    <value>パッケージを作成するためにゲームのビルドを探してください。Xbox Game Package Manager は将来より簡単にアクセスできるようにこれらのパスを記憶します。</value>
   </data>
   <data name="SubValDllNotFoundErrorMsg" xml:space="preserve">
     <value>指定されたパスに SubmissionValidator.dll が見つかりませんでした。</value>

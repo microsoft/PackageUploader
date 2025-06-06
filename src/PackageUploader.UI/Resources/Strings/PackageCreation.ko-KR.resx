@@ -24,8 +24,7 @@
     </data>
     <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
+        <comment>This is a comment</comment></data>
                 
     There are any number of "resheader" rows that contain simple 
     name/value pairs.
@@ -142,13 +141,13 @@
     <value>패키지 생성 중 오류가 발생했습니다.</value>
   </data>
   <data name="FailedToCreateOutputDirectoryErrorMsg" xml:space="preserve">
-    <value>출력 디렉토리를 생성하지 못했습니다</value>
+    <value>출력 디렉터리를 생성하지 못했습니다</value>
   </data>
   <data name="FailedToGenerateLayoutFileErrorMsg" xml:space="preserve">
-    <value>레이아웃 파일을 생성하지 못했습니다</value>
+    <value>레이아웃 파일이 생성되지 않았습니다.</value>
   </data>
   <data name="FolderDoesNotContainConfigErrMsg" xml:space="preserve">
-    <value>제공된 폴더에 MicrosoftGame.config 파일이 없습니다</value>
+    <value>제공된 폴더에 MicrosoftGame.config 파일이 없습니다.</value>
   </data>
   <data name="GamePathBoxDefaultText" xml:space="preserve">
     <value>게임 위치를 선택하거나 입력하세요</value>
@@ -163,22 +162,22 @@
     <value>레이아웃 파일/콘텐츠 맵</value>
   </data>
   <data name="LayoutFileParsingErrorMsg" xml:space="preserve">
-    <value>레이아웃 파일 구문 분석 중 오류가 발생했습니다</value>
+    <value>레이아웃 파일 구문 분석 중 오류가 발생했습니다.</value>
   </data>
   <data name="MicrosoftGameConfigInvalidErrMsg" xml:space="preserve">
-    <value>제공된 폴더의 MicrosoftGame.config가 유효하지 않습니다</value>
+    <value>제공된 폴더의 MicrosoftGame.config 파일이 유효하지 않습니다.</value>
   </data>
   <data name="MsftGameCOnfigLacksValidIdentityErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config에 유효한 Identity 노드가 없습니다</value>
+    <value>MicrosoftGame.config 파일에 유효한 Identity 노드가 없습니다.</value>
   </data>
   <data name="MsftGameConfigLogoFileNotExistErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config에 지정된 로고 파일이 존재하지 않습니다</value>
+    <value>MicrosoftGame.config 파일에 지정된 로고 파일이 존재하지 않습니다.</value>
   </data>
   <data name="MsftGameConfigMissingLogoFilesErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config의 ShellVisuals에 필요한 로고 파일이 없습니다</value>
+    <value>MicrosoftGame.config 파일의 ShellVisuals에 필요한 로고 파일이 없습니다.</value>
   </data>
   <data name="NoFilesInLayoutFileErrorMsg" xml:space="preserve">
-    <value>레이아웃 파일에서 파일을 찾을 수 없습니다</value>
+    <value>레이아웃 파일에서 파일을 찾을 수 없습니다.</value>
   </data>
   <data name="OptionalText" xml:space="preserve">
     <value>선택 사항</value>
@@ -199,7 +198,7 @@
     <value>제공된 MicrosoftGame.config 파일에 StoreId가 없어 전체 미리보기를 사용할 수 없습니다. MicrosoftGame.config 파일에 StoreId를 추가하세요.</value>
   </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
-    <value>패키지 ID</value>
+    <value>패키지 ID 이름</value>
   </data>
   <data name="PackagePreviewSizeEstimate" xml:space="preserve">
     <value>크기 예상</value>
@@ -208,10 +207,10 @@
     <value>StoreId</value>
   </data>
   <data name="PackagePreviewTitleText" xml:space="preserve">
-    <value>패키지 미리보기</value>
+    <value>미리보기</value>
   </data>
   <data name="ProvideGameDataPathErrorMsg" xml:space="preserve">
-    <value>게임 데이터 경로를 제공해 주세요</value>
+    <value>게임의 위치를 제공해 주세요.</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
     <value>필수</value>
@@ -220,7 +219,7 @@
     <value>매핑 데이터 XML 파일 선택</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
-    <value>패키지를 만들기 위해 게임 빌드를 찾습니다. Xbox 게임 패키지 관리자는 향후 쉽게 접근할 수 있도록 이러한 경로를 기억합니다.</value>
+    <value>패키지를 만들기 위해 게임 빌드를 찾습니다. Xbox Game Package Manager는 향후 더 쉽게 접근할 수 있도록 이러한 경로를 기억합니다.</value>
   </data>
   <data name="SubValDllNotFoundErrorMsg" xml:space="preserve">
     <value>지정된 경로에서 SubmissionValidator.dll을 찾을 수 없습니다.</value>

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ApplicationName" xml:space="preserve">
-    <value>Xbox ゲームパッケージマネージャー</value>
+    <value>Xbox Game Package Manager</value>
   </data>
   <data name="ChooseTenantButtonText" xml:space="preserve">
     <value>詳細設定：利用可能なテナントを一覧表示</value>
@@ -140,10 +140,10 @@
     <value>パッケージを作成</value>
   </data>
   <data name="MakeAPackageTextBlockTitle" xml:space="preserve">
-    <value>パッケージを作る</value>
+    <value>パッケージを作成</value>
   </data>
   <data name="MakePackageNotFoundErrorMsg" xml:space="preserve">
-    <value>MakePkg.exe が見つかりません。ゲームコンテンツをパッケージ化するには GDK をインストールしてください。</value>
+    <value>MakePkg.exe が見つかりませんでした。ゲームコンテンツをパッケージ化するには GDK をインストールしてください。</value>
   </data>
   <data name="MaximizeWindow" xml:space="preserve">
     <value>最大化</value>
@@ -155,10 +155,10 @@
     <value>サインイン</value>
   </data>
   <data name="SignInLogginInText" xml:space="preserve">
-    <value>サインイン情報を取得しようとしています。数秒以内にブラウザページが開かない場合は、サインインボタンをもう一度クリックして再試行してください。</value>
+    <value>サインイン情報を取得しています。数秒以内にブラウザページが開かない場合は、サインインボタンを再度選択して再試行してください。</value>
   </data>
   <data name="SignInPreLoginText" xml:space="preserve">
-    <value>製品 ID や公開先へのシームレスなアクセスについては、Microsoft パートナーセンターのアカウントにサインインしてください。構成なしでゲームパッケージを作成するだけの場合、この手順は任意ですが、パッケージのアップロード、製品 ID の取得、または構成ファイルへのリンクを予定している場合は必須です。</value>
+    <value>製品と公開先へのシームレスなアクセスのために、Microsoft パートナーセンターのアカウントにサインインしてください。この手順は構成なしでゲームパッケージを作成するだけの場合は任意ですが、パッケージのアップロード、製品の取得、または構成ファイルへのリンクを予定している場合は必須です。</value>
   </data>
   <data name="SignInTextBlockTitle" xml:space="preserve">
     <value>サインイン</value>
@@ -173,7 +173,7 @@
     <value>パッケージを作成して Microsoft パートナーセンターにアップロード</value>
   </data>
   <data name="UploadPackageBlockBody" xml:space="preserve">
-    <value>ゲームパッケージをパートナーセンターにアップロードして、Xbox 上で配布および管理します。完成したパッケージと Microsoft アカウントから始めましょう。</value>
+    <value>ゲームパッケージを Partner Center にアップロードして、Xbox 上で配布および管理します。完成したパッケージと Microsoft アカウントから始めましょう。</value>
   </data>
   <data name="UploadPackageBlockButtonText" xml:space="preserve">
     <value>パッケージをアップロード</value>
