@@ -5,7 +5,7 @@ name: Run Unittests on PR
 
 on:
   push:
-    branches: [ "main", "PackageUploaderUI" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
