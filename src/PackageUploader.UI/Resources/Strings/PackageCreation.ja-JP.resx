@@ -118,123 +118,126 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AdditionalDetailsTitle" xml:space="preserve">
-    <value>Additional details</value>
+    <value>追加詳細情報</value>
   </data>
   <data name="BrowseText" xml:space="preserve">
-    <value>Browse</value>
+    <value>参照</value>
   </data>
   <data name="BuildLocationText" xml:space="preserve">
-    <value>Locate your game files to package. Add a layout file under Additional Details. See docs for more information.</value>
+    <value>パッケージ化するゲームファイルを探してください。追加詳細情報でレイアウトファイルを追加してください。詳細はドキュメントを参照してください。</value>
   </data>
   <data name="BuildLocationTitle" xml:space="preserve">
-    <value>Build location</value>
+    <value>ビルド場所</value>
   </data>
   <data name="CancelButtonText" xml:space="preserve">
-    <value>Cancel</value>
+    <value>キャンセル</value>
   </data>
   <data name="ContentMapPathBoxDefaultText" xml:space="preserve">
-    <value>Select or enter the content map location</value>
+    <value>コンテンツマップの場所を選択または入力してください</value>
   </data>
   <data name="CreatePackageButtonText" xml:space="preserve">
-    <value>Create package</value>
+    <value>パッケージを作成</value>
   </data>
   <data name="DragAndDropMessage" xml:space="preserve">
-    <value>Drag and drop the Identity Data folder here or click to browse</value>
+    <value>ID データフォルダをここにドラッグ＆ドロップするか、クリックして参照してください</value>
   </data>
   <data name="ErrorCreatingPackageErrorMsg" xml:space="preserve">
-    <value>Error creating package.</value>
+    <value>パッケージの作成中にエラーが発生しました。</value>
   </data>
   <data name="FailedToCreateOutputDirectoryErrorMsg" xml:space="preserve">
-    <value>Failed to create output directory</value>
+    <value>出力ディレクトリの作成に失敗しました</value>
   </data>
   <data name="FailedToGenerateLayoutFileErrorMsg" xml:space="preserve">
-    <value>Failed to generate a layout file</value>
+    <value>レイアウトファイルの生成に失敗しました</value>
   </data>
   <data name="FolderDoesNotContainConfigErrMsg" xml:space="preserve">
-    <value>Provided folder does not contain a MicrosoftGame.config file</value>
+    <value>指定されたフォルダには MicrosoftGame.config ファイルが含まれていません</value>
   </data>
   <data name="GamePathBoxDefaultText" xml:space="preserve">
-    <value>Select or enter the game's location</value>
+    <value>ゲームの場所を選択または入力してください</value>
   </data>
   <data name="GamePathTitleText" xml:space="preserve">
-    <value>Game path</value>
+    <value>ゲームパス</value>
   </data>
   <data name="GeneratingLayoutFileErrorMsg" xml:space="preserve">
-    <value>Error generating layout file.</value>
+    <value>レイアウトファイルの生成中にエラーが発生しました。</value>
   </data>
   <data name="LayoutFileMapTitle" xml:space="preserve">
-    <value>Layout file/content map</value>
+    <value>レイアウトファイル/コンテンツマップ</value>
   </data>
   <data name="LayoutFileParsingErrorMsg" xml:space="preserve">
-    <value>There was an error parsing the layout file</value>
+    <value>レイアウトファイルの解析中にエラーが発生しました</value>
   </data>
   <data name="MicrosoftGameConfigInvalidErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config in the provided folder is invalid</value>
+    <value>指定されたフォルダ内の MicrosoftGame.config が無効です</value>
   </data>
   <data name="MsftGameCOnfigLacksValidIdentityErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config lacks a valid Identity node</value>
+    <value>MicrosoftGame.config に有効な Identity ノードがありません</value>
   </data>
   <data name="MsftGameConfigLogoFileNotExistErrMsg" xml:space="preserve">
-    <value>The logo file specified by the MicrosoftGame.config does not exist</value>
+    <value>MicrosoftGame.config で指定されたロゴファイルが存在しません</value>
   </data>
   <data name="MsftGameConfigMissingLogoFilesErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config does not have the required Logo files in the ShellVisuals</value>
+    <value>MicrosoftGame.config の ShellVisuals に必要なロゴファイルがありません</value>
   </data>
   <data name="NoFilesInLayoutFileErrorMsg" xml:space="preserve">
-    <value>There were no files found in the layout file</value>
+    <value>レイアウトファイル内にファイルが見つかりませんでした</value>
   </data>
   <data name="OptionalText" xml:space="preserve">
-    <value>Optional</value>
+    <value>任意</value>
   </data>
   <data name="PackageOutputBoxText" xml:space="preserve">
-    <value>Select or enter the package output location</value>
+    <value>パッケージの出力場所を選択または入力してください</value>
   </data>
   <data name="PackageOutputTitleText" xml:space="preserve">
-    <value>Package output location</value>
+    <value>パッケージ出力場所</value>
   </data>
   <data name="PackagePathTitleText" xml:space="preserve">
-    <value>Package path</value>
+    <value>パッケージパス</value>
   </data>
   <data name="PackagePreviewFamilyText" xml:space="preserve">
-    <value>Family</value>
+    <value>ファミリー</value>
+  </data>
+  <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
+    <value>提供されたMicrosoftGame.configファイルにStoreIdがないため、完全なプレビューは利用できません。MicrosoftGame.configファイルにStoreIdを追加してください。</value>
   </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
-    <value>Package ID</value>
+    <value>パッケージ ID</value>
   </data>
   <data name="PackagePreviewSizeEstimate" xml:space="preserve">
-    <value>Size estimate</value>
+    <value>サイズ推定</value>
   </data>
   <data name="PackagePreviewStoreIdText" xml:space="preserve">
-    <value>StoreId: </value>
+    <value>ストア ID: </value>
   </data>
   <data name="PackagePreviewTitleText" xml:space="preserve">
-    <value>Package Preview</value>
+    <value>パッケージプレビュー</value>
   </data>
   <data name="ProvideGameDataPathErrorMsg" xml:space="preserve">
-    <value>Please provide the game data path</value>
+    <value>ゲームデータのパスを指定してください</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
-    <value>Required</value>
+    <value>必須</value>
   </data>
   <data name="SelectMapXmlTitleText" xml:space="preserve">
-    <value>Select Mapping Data XML File</value>
+    <value>マッピングデータ XML ファイルを選択</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
-    <value>Locate your game's build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future.</value>
+    <value>パッケージを作成するためにゲームのビルドを探してください。Xbox ゲームパッケージマネージャーは、将来簡単にアクセスできるようにこれらのパスを記憶します。</value>
   </data>
   <data name="SubValDllNotFoundErrorMsg" xml:space="preserve">
-    <value>SubmissionValidator.dll not found in the specified path.</value>
+    <value>指定されたパスに SubmissionValidator.dll が見つかりませんでした。</value>
   </data>
   <data name="TitleString" xml:space="preserve">
-    <value>Make a game package</value>
+    <value>ゲームパッケージを作成</value>
   </data>
   <data name="UnknownText" xml:space="preserve">
-    <value>Unknown</value>
+    <value>不明</value>
   </data>
   <data name="ValidatorPathBoxDefaultText" xml:space="preserve">
-    <value>Select or enter the folder path for SubmissionValidator.dll</value>
+    <value>SubmissionValidator.dll のフォルダパスを選択または入力してください</value>
   </data>
   <data name="ValidatorPathTitleText" xml:space="preserve">
-    <value>Folder path for SubmissionValidator.dll</value>
+    <value>SubmissionValidator.dll のフォルダパス</value>
   </data>
 </root>

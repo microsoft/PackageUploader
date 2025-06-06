@@ -118,24 +118,24 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CancelPackagingButtonContentText" xml:space="preserve">
-    <value>Cancel packaging</value>
+    <value>パッケージングをキャンセル</value>
   </data>
   <data name="CopyingAndEncryptingText" xml:space="preserve">
-    <value>Copying and encrypting data...</value>
+    <value>データをコピーして暗号化中...</value>
   </data>
   <data name="PackagingProgressTitleText" xml:space="preserve">
-    <value>Getting your package ready...</value>
+    <value>パッケージを準備中...</value>
   </data>
   <data name="PackingText" xml:space="preserve">
-    <value>Packing...</value>
+    <value>パッキング中...</value>
   </data>
   <data name="PercentComplete" xml:space="preserve">
-    <value>% complete</value>
+    <value>% 完了</value>
   </data>
   <data name="ValidatingFilesText" xml:space="preserve">
-    <value>Validating files...</value>
+    <value>ファイルを検証中...</value>
   </data>
   <data name="VerifyingPackageContentsText" xml:space="preserve">
-    <value>Verifying package contents...</value>
+    <value>パッケージの内容を検証中...</value>
   </data>
 </root>

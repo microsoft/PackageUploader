@@ -118,141 +118,141 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AditionalDetailsText" xml:space="preserve">
-    <value>Additional details</value>
+    <value>附加详情</value>
   </data>
   <data name="BranchNotFoundErrMsgPartOne" xml:space="preserve">
-    <value>Branch</value>
+    <value>分支</value>
   </data>
   <data name="BranchNotFoundErrMsgPartTwo" xml:space="preserve">
-    <value>not found</value>
+    <value>未找到</value>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
-    <value>Browse to package file</value>
+    <value>浏览到包文件</value>
   </data>
   <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
-    <value>BuildId mismatch in the Submission Validator log file</value>
+    <value>Submission Validator 日志文件中的 BuildId 不匹配</value>
   </data>
   <data name="CancelButtonHelpText" xml:space="preserve">
-    <value>Cancel the operation</value>
+    <value>取消操作</value>
   </data>
   <data name="CancelContentText" xml:space="preserve">
-    <value>Cancel</value>
+    <value>取消</value>
   </data>
   <data name="ConfirmLocationSubtitleText" xml:space="preserve">
-    <value>Confirm the location of the package</value>
+    <value>确认包的位置</value>
   </data>
   <data name="DestinationTitleText" xml:space="preserve">
-    <value>Destination</value>
+    <value>目标位置</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
-    <value>Directory not found</value>
+    <value>目录未找到</value>
   </data>
   <data name="ErrorExtractingInfoErrMsg" xml:space="preserve">
-    <value>Error extracting package information</value>
+    <value>提取包信息时出错</value>
   </data>
   <data name="ErrorGettingMarketGroupsErrMsg" xml:space="preserve">
-    <value>Error getting market groups</value>
+    <value>获取市场组时出错</value>
   </data>
   <data name="ErrorGettingProdInfo" xml:space="preserve">
-    <value>Error getting product information</value>
+    <value>获取产品信息时出错</value>
   </data>
   <data name="ErrorProcessingPackageErrMsg" xml:space="preserve">
-    <value>Error processing package</value>
+    <value>处理包时出错</value>
   </data>
   <data name="ErrorSelectingFileErrMsg" xml:space="preserve">
-    <value>Error selecting file</value>
+    <value>选择文件时出错</value>
   </data>
   <data name="ErrUploadPackageErrMsg" xml:space="preserve">
-    <value>Error uploading package</value>
+    <value>上传包时出错</value>
   </data>
   <data name="ExpectedText" xml:space="preserve">
-    <value>Expected</value>
+    <value>预期</value>
   </data>
   <data name="FamilyTitleText" xml:space="preserve">
-    <value>Family</value>
+    <value>系列</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
-    <value>File name</value>
+    <value>文件名</value>
   </data>
   <data name="FoundText" xml:space="preserve">
-    <value>Found</value>
+    <value>找到</value>
   </data>
   <data name="InvalidFilePathErrMsg" xml:space="preserve">
-    <value>Invalid file path.</value>
+    <value>无效的文件路径。</value>
   </data>
   <data name="MarketTitleText" xml:space="preserve">
-    <value>Market</value>
+    <value>市场</value>
   </data>
   <data name="NoBranchesFoundErrMsg" xml:space="preserve">
-    <value>No Branches found for this product</value>
+    <value>没有找到此产品的分支</value>
   </data>
   <data name="NoProdInfoTitleText" xml:space="preserve">
-    <value>No Product Information</value>
+    <value>没有产品信息</value>
   </data>
   <data name="NullBranchFlightErrTitleText" xml:space="preserve">
-    <value>Null Branch/Flight</value>
+    <value>空分支/航班</value>
   </data>
   <data name="PackageHasNoBigIdConfigureMsftGameCfgErrMsg" xml:space="preserve">
-    <value>Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in additional details below.</value>
+    <value>包没有 StoreId/BigId。在构建包之前在 MicrosoftGame.config 文件中配置您的 StoreId，或在下面的附加详情中手动输入。</value>
   </data>
   <data name="PackageLocationTitleText" xml:space="preserve">
-    <value>Package location</value>
+    <value>包位置</value>
   </data>
   <data name="PackagePathHelpText" xml:space="preserve">
-    <value>Path to package file</value>
+    <value>包文件的路径</value>
   </data>
   <data name="PackagePathText" xml:space="preserve">
-    <value>Package path</value>
+    <value>包路径</value>
   </data>
   <data name="ProductInfoNotAvailableErrMsg" xml:space="preserve">
-    <value>Product information not available. Please enter a valid BigId and try again.</value>
+    <value>产品信息不可用。请输入有效的 BigId 并重试。</value>
   </data>
   <data name="ProductNameText" xml:space="preserve">
-    <value>Product name</value>
+    <value>产品名称</value>
   </data>
   <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart1" xml:space="preserve">
-    <value>Product with BigID</value>
+    <value>未找到 BigID 为</value>
   </data>
   <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart2" xml:space="preserve">
-    <value>not found. Configure your product at https://partner.microsoft.com/</value>
+    <value>的产品。在 https://partner.microsoft.com/ 配置您的产品</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
-    <value>Required</value>
+    <value>必需</value>
   </data>
   <data name="SelectDestinationText" xml:space="preserve">
-    <value>Select a destination and market for the package upload.</value>
+    <value>为包上传选择目标位置和市场。</value>
   </data>
   <data name="SelectEnterPackagePathText" xml:space="preserve">
-    <value>Select or enter the package path</value>
+    <value>选择或输入包路径</value>
   </data>
   <data name="SelectPackageFileText" xml:space="preserve">
-    <value>Select a Package File</value>
+    <value>选择包文件</value>
   </data>
   <data name="SizeTitleText" xml:space="preserve">
-    <value>Size</value>
+    <value>大小</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>Store ID</value>
+    <value>商店 ID</value>
   </data>
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
-    <value>Submission Validator log not found</value>
+    <value>未找到 Submission Validator 日志</value>
   </data>
   <data name="UploadButtonContentText" xml:space="preserve">
-    <value>Upload Package</value>
+    <value>上传包</value>
   </data>
   <data name="UploadButtonHelpText" xml:space="preserve">
-    <value>Start uploading the package</value>
+    <value>开始上传包</value>
   </data>
   <data name="UploadCancelledErrMsg" xml:space="preserve">
-    <value>Upload cancelled.</value>
+    <value>上传已取消。</value>
   </data>
   <data name="UploadPackageSubtitleText" xml:space="preserve">
-    <value>Locate the package for uploading. The Xbox Game Package Manager will remember these paths for easier access in the future.</value>
+    <value>定位要上传的包。Xbox 游戏包管理器将记住这些路径，以便将来更轻松地访问。</value>
   </data>
   <data name="UploadPackageTitleText" xml:space="preserve">
-    <value>Upload a package</value>
+    <value>上传包</value>
   </data>
   <data name="UploadPreviewTitleText" xml:space="preserve">
-    <value>Upload Preview</value>
+    <value>上传预览</value>
   </data>
 </root>

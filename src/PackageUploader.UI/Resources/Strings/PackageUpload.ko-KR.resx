@@ -24,8 +24,7 @@
     </data>
     <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
+        <comment>This is a comment</comment></data>
                 
     There are any number of "resheader" rows that contain simple 
     name/value pairs.
@@ -118,141 +117,141 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AditionalDetailsText" xml:space="preserve">
-    <value>Additional details</value>
+    <value>추가 세부 정보</value>
   </data>
   <data name="BranchNotFoundErrMsgPartOne" xml:space="preserve">
-    <value>Branch</value>
+    <value>브랜치</value>
   </data>
   <data name="BranchNotFoundErrMsgPartTwo" xml:space="preserve">
-    <value>not found</value>
+    <value>를 찾을 수 없습니다</value>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
-    <value>Browse to package file</value>
+    <value>패키지 파일 찾아보기</value>
   </data>
   <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
-    <value>BuildId mismatch in the Submission Validator log file</value>
+    <value>제출 검증기 로그 파일의 BuildId가 일치하지 않습니다</value>
   </data>
   <data name="CancelButtonHelpText" xml:space="preserve">
-    <value>Cancel the operation</value>
+    <value>작업 취소</value>
   </data>
   <data name="CancelContentText" xml:space="preserve">
-    <value>Cancel</value>
+    <value>취소</value>
   </data>
   <data name="ConfirmLocationSubtitleText" xml:space="preserve">
-    <value>Confirm the location of the package</value>
+    <value>패키지 위치 확인</value>
   </data>
   <data name="DestinationTitleText" xml:space="preserve">
-    <value>Destination</value>
+    <value>대상</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
-    <value>Directory not found</value>
+    <value>디렉터리를 찾을 수 없습니다</value>
   </data>
   <data name="ErrorExtractingInfoErrMsg" xml:space="preserve">
-    <value>Error extracting package information</value>
+    <value>패키지 정보 추출 중 오류</value>
   </data>
   <data name="ErrorGettingMarketGroupsErrMsg" xml:space="preserve">
-    <value>Error getting market groups</value>
+    <value>시장 그룹 가져오기 오류</value>
   </data>
   <data name="ErrorGettingProdInfo" xml:space="preserve">
-    <value>Error getting product information</value>
+    <value>제품 정보 가져오기 오류</value>
   </data>
   <data name="ErrorProcessingPackageErrMsg" xml:space="preserve">
-    <value>Error processing package</value>
+    <value>패키지 처리 중 오류</value>
   </data>
   <data name="ErrorSelectingFileErrMsg" xml:space="preserve">
-    <value>Error selecting file</value>
+    <value>파일 선택 중 오류</value>
   </data>
   <data name="ErrUploadPackageErrMsg" xml:space="preserve">
-    <value>Error uploading package</value>
+    <value>패키지 업로드 중 오류</value>
   </data>
   <data name="ExpectedText" xml:space="preserve">
-    <value>Expected</value>
+    <value>예상됨</value>
   </data>
   <data name="FamilyTitleText" xml:space="preserve">
-    <value>Family</value>
+    <value>패밀리</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
-    <value>File name</value>
+    <value>파일 이름</value>
   </data>
   <data name="FoundText" xml:space="preserve">
-    <value>Found</value>
+    <value>발견됨</value>
   </data>
   <data name="InvalidFilePathErrMsg" xml:space="preserve">
-    <value>Invalid file path.</value>
+    <value>잘못된 파일 경로입니다.</value>
   </data>
   <data name="MarketTitleText" xml:space="preserve">
-    <value>Market</value>
+    <value>시장</value>
   </data>
   <data name="NoBranchesFoundErrMsg" xml:space="preserve">
-    <value>No Branches found for this product</value>
+    <value>이 제품에 대한 브랜치를 찾을 수 없습니다</value>
   </data>
   <data name="NoProdInfoTitleText" xml:space="preserve">
-    <value>No Product Information</value>
+    <value>제품 정보 없음</value>
   </data>
   <data name="NullBranchFlightErrTitleText" xml:space="preserve">
-    <value>Null Branch/Flight</value>
+    <value>null 브랜치/플라이트</value>
   </data>
   <data name="PackageHasNoBigIdConfigureMsftGameCfgErrMsg" xml:space="preserve">
-    <value>Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in additional details below.</value>
+    <value>패키지에 StoreId/BigId가 없습니다. 패키지를 빌드하기 전에 MicrosoftGame.config 파일에서 StoreId를 구성하거나 아래 추가 세부 정보에 수동으로 입력하세요.</value>
   </data>
   <data name="PackageLocationTitleText" xml:space="preserve">
-    <value>Package location</value>
+    <value>패키지 위치</value>
   </data>
   <data name="PackagePathHelpText" xml:space="preserve">
-    <value>Path to package file</value>
+    <value>패키지 파일 경로</value>
   </data>
   <data name="PackagePathText" xml:space="preserve">
-    <value>Package path</value>
+    <value>패키지 경로</value>
   </data>
   <data name="ProductInfoNotAvailableErrMsg" xml:space="preserve">
-    <value>Product information not available. Please enter a valid BigId and try again.</value>
+    <value>제품 정보를 사용할 수 없습니다. 유효한 BigId를 입력하고 다시 시도하세요.</value>
   </data>
   <data name="ProductNameText" xml:space="preserve">
-    <value>Product name</value>
+    <value>제품명</value>
   </data>
   <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart1" xml:space="preserve">
-    <value>Product with BigID</value>
+    <value>BigID가</value>
   </data>
   <data name="ProductWithBigIdNotFoundConfigHereErrMsgPart2" xml:space="preserve">
-    <value>not found. Configure your product at https://partner.microsoft.com/</value>
+    <value>인 제품을 찾을 수 없습니다. https://partner.microsoft.com/ 에서 제품을 구성하세요</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
-    <value>Required</value>
+    <value>필수</value>
   </data>
   <data name="SelectDestinationText" xml:space="preserve">
-    <value>Select a destination and market for the package upload.</value>
+    <value>패키지 업로드를 위한 대상 및 시장을 선택하세요.</value>
   </data>
   <data name="SelectEnterPackagePathText" xml:space="preserve">
-    <value>Select or enter the package path</value>
+    <value>패키지 경로를 선택하거나 입력하세요</value>
   </data>
   <data name="SelectPackageFileText" xml:space="preserve">
-    <value>Select a Package File</value>
+    <value>패키지 파일 선택</value>
   </data>
   <data name="SizeTitleText" xml:space="preserve">
-    <value>Size</value>
+    <value>크기</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>Store ID</value>
+    <value>스토어 ID</value>
   </data>
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
-    <value>Submission Validator log not found</value>
+    <value>제출 검증기 로그를 찾을 수 없습니다</value>
   </data>
   <data name="UploadButtonContentText" xml:space="preserve">
-    <value>Upload Package</value>
+    <value>패키지 업로드</value>
   </data>
   <data name="UploadButtonHelpText" xml:space="preserve">
-    <value>Start uploading the package</value>
+    <value>패키지 업로드 시작</value>
   </data>
   <data name="UploadCancelledErrMsg" xml:space="preserve">
-    <value>Upload cancelled.</value>
+    <value>업로드가 취소되었습니다.</value>
   </data>
   <data name="UploadPackageSubtitleText" xml:space="preserve">
-    <value>Locate the package for uploading. The Xbox Game Package Manager will remember these paths for easier access in the future.</value>
+    <value>업로드할 패키지를 찾으세요. Xbox 게임 패키지 관리자는 향후 더 쉽게 접근할 수 있도록 이 경로를 기억합니다.</value>
   </data>
   <data name="UploadPackageTitleText" xml:space="preserve">
-    <value>Upload a package</value>
+    <value>패키지 업로드</value>
   </data>
   <data name="UploadPreviewTitleText" xml:space="preserve">
-    <value>Upload Preview</value>
+    <value>업로드 미리보기</value>
   </data>
 </root>

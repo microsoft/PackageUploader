@@ -118,56 +118,56 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ApplicationName" xml:space="preserve">
-    <value>Xbox Game Package Manager</value>
+    <value>Xbox ゲームパッケージマネージャー</value>
   </data>
   <data name="ChooseTenantButtonText" xml:space="preserve">
-    <value>Advanced: List available tenants</value>
+    <value>詳細設定：利用可能なテナントを一覧表示</value>
   </data>
   <data name="MakeAPackageBodyTextOne" xml:space="preserve">
-    <value>Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file </value>
+    <value>ゲームパッケージはアップロードを高速化し、安全なインストールを確保し、Xbox のパフォーマンスを最適化します。ビルドファイルと構成ファイルを追加するだけで</value>
     <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
   </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
-    <value>, then upload.</value>
+    <value>、その後アップロードします。</value>
     <comment>The part of the string that comes after the hyperlink, if any.</comment>
   </data>
   <data name="MakeAPackageBodyURLText" xml:space="preserve">
-    <value>(Learn more)</value>
+    <value>(詳細情報)</value>
   </data>
   <data name="MakeAPackageButtonText" xml:space="preserve">
-    <value>Create package</value>
+    <value>パッケージを作成</value>
   </data>
   <data name="MakeAPackageTextBlockTitle" xml:space="preserve">
-    <value>Make a package</value>
+    <value>パッケージを作る</value>
   </data>
   <data name="MakePackageNotFoundErrorMsg" xml:space="preserve">
-    <value>MakePkg.exe was not found. Please install the GDK in order to package game contents.</value>
+    <value>MakePkg.exe が見つかりません。ゲームコンテンツをパッケージ化するには GDK をインストールしてください。</value>
   </data>
   <data name="SignInButtonContent" xml:space="preserve">
-    <value>Sign In</value>
+    <value>サインイン</value>
   </data>
   <data name="SignInLogginInText" xml:space="preserve">
-    <value>We are attempting to retrieve your sign-in information. If a browser page does not open within a few seconds, please click the sign-in button again to retry.</value>
+    <value>サインイン情報を取得しようとしています。数秒以内にブラウザページが開かない場合は、サインインボタンをもう一度クリックして再試行してください。</value>
   </data>
   <data name="SignInPreLoginText" xml:space="preserve">
-    <value>For seamless access to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files.</value>
+    <value>製品 ID や公開先へのシームレスなアクセスについては、Microsoft パートナーセンターのアカウントにサインインしてください。構成なしでゲームパッケージを作成するだけの場合、この手順は任意ですが、パッケージのアップロード、製品 ID の取得、または構成ファイルへのリンクを予定している場合は必須です。</value>
   </data>
   <data name="SignInTextBlockTitle" xml:space="preserve">
-    <value>Sign in</value>
+    <value>サインイン</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
-    <value>The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
+    <value>パッケージ作成ツールは、ゲームファイル、アセット、およびメタデータを構造化されたパッケージにバンドルし、より高速で信頼性の高いアップロードのための一貫性とコンプライアンスを確保します。</value>
   </data>
   <data name="TitleTextBlock" xml:space="preserve">
-    <value>Make a package and upload it to Microsoft Partner Center</value>
+    <value>パッケージを作成して Microsoft パートナーセンターにアップロード</value>
   </data>
   <data name="UploadPackageBlockBody" xml:space="preserve">
-    <value>Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account.</value>
+    <value>ゲームパッケージをパートナーセンターにアップロードして、Xbox 上で配布および管理します。完成したパッケージと Microsoft アカウントから始めましょう。</value>
   </data>
   <data name="UploadPackageBlockButtonText" xml:space="preserve">
-    <value>Upload package</value>
+    <value>パッケージをアップロード</value>
   </data>
   <data name="UploadPackageBlockTitle" xml:space="preserve">
-    <value>Upload a package (sign in required)</value>
+    <value>パッケージをアップロード（サインインが必要）</value>
   </data>
 </root>

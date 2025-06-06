@@ -118,123 +118,126 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AdditionalDetailsTitle" xml:space="preserve">
-    <value>Additional details</value>
+    <value>附加详情</value>
   </data>
   <data name="BrowseText" xml:space="preserve">
-    <value>Browse</value>
+    <value>浏览</value>
   </data>
   <data name="BuildLocationText" xml:space="preserve">
-    <value>Locate your game files to package. Add a layout file under Additional Details. See docs for more information.</value>
+    <value>定位要打包的游戏文件。在附加详情下添加布局文件。查看文档了解更多信息。</value>
   </data>
   <data name="BuildLocationTitle" xml:space="preserve">
-    <value>Build location</value>
+    <value>构建位置</value>
   </data>
   <data name="CancelButtonText" xml:space="preserve">
-    <value>Cancel</value>
+    <value>取消</value>
   </data>
   <data name="ContentMapPathBoxDefaultText" xml:space="preserve">
-    <value>Select or enter the content map location</value>
+    <value>选择或输入内容映射位置</value>
   </data>
   <data name="CreatePackageButtonText" xml:space="preserve">
-    <value>Create package</value>
+    <value>创建包</value>
   </data>
   <data name="DragAndDropMessage" xml:space="preserve">
-    <value>Drag and drop the Identity Data folder here or click to browse</value>
+    <value>将身份数据文件夹拖放到此处或点击浏览</value>
   </data>
   <data name="ErrorCreatingPackageErrorMsg" xml:space="preserve">
-    <value>Error creating package.</value>
+    <value>创建包时出错。</value>
   </data>
   <data name="FailedToCreateOutputDirectoryErrorMsg" xml:space="preserve">
-    <value>Failed to create output directory</value>
+    <value>无法创建输出目录</value>
   </data>
   <data name="FailedToGenerateLayoutFileErrorMsg" xml:space="preserve">
-    <value>Failed to generate a layout file</value>
+    <value>无法生成布局文件</value>
   </data>
   <data name="FolderDoesNotContainConfigErrMsg" xml:space="preserve">
-    <value>Provided folder does not contain a MicrosoftGame.config file</value>
+    <value>提供的文件夹不包含 MicrosoftGame.config 文件</value>
   </data>
   <data name="GamePathBoxDefaultText" xml:space="preserve">
-    <value>Select or enter the game's location</value>
+    <value>选择或输入游戏位置</value>
   </data>
   <data name="GamePathTitleText" xml:space="preserve">
-    <value>Game path</value>
+    <value>游戏路径</value>
   </data>
   <data name="GeneratingLayoutFileErrorMsg" xml:space="preserve">
-    <value>Error generating layout file.</value>
+    <value>生成布局文件时出错。</value>
   </data>
   <data name="LayoutFileMapTitle" xml:space="preserve">
-    <value>Layout file/content map</value>
+    <value>布局文件/内容映射</value>
   </data>
   <data name="LayoutFileParsingErrorMsg" xml:space="preserve">
-    <value>There was an error parsing the layout file</value>
+    <value>解析布局文件时出错</value>
   </data>
   <data name="MicrosoftGameConfigInvalidErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config in the provided folder is invalid</value>
+    <value>提供文件夹中的 MicrosoftGame.config 无效</value>
   </data>
   <data name="MsftGameCOnfigLacksValidIdentityErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config lacks a valid Identity node</value>
+    <value>MicrosoftGame.config 缺少有效的 Identity 节点</value>
   </data>
   <data name="MsftGameConfigLogoFileNotExistErrMsg" xml:space="preserve">
-    <value>The logo file specified by the MicrosoftGame.config does not exist</value>
+    <value>MicrosoftGame.config 指定的徽标文件不存在</value>
   </data>
   <data name="MsftGameConfigMissingLogoFilesErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config does not have the required Logo files in the ShellVisuals</value>
+    <value>MicrosoftGame.config 在 ShellVisuals 中没有所需的徽标文件</value>
   </data>
   <data name="NoFilesInLayoutFileErrorMsg" xml:space="preserve">
-    <value>There were no files found in the layout file</value>
+    <value>在布局文件中未找到文件</value>
   </data>
   <data name="OptionalText" xml:space="preserve">
-    <value>Optional</value>
+    <value>可选</value>
   </data>
   <data name="PackageOutputBoxText" xml:space="preserve">
-    <value>Select or enter the package output location</value>
+    <value>选择或输入包输出位置</value>
   </data>
   <data name="PackageOutputTitleText" xml:space="preserve">
-    <value>Package output location</value>
+    <value>包输出位置</value>
   </data>
   <data name="PackagePathTitleText" xml:space="preserve">
-    <value>Package path</value>
+    <value>包路径</value>
   </data>
   <data name="PackagePreviewFamilyText" xml:space="preserve">
-    <value>Family</value>
+    <value>系列</value>
+  </data>
+  <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
+    <value>由于提供的 MicrosoftGame.config 文件没有 StoreId，无法显示完整预览。请在 MicrosoftGame.config 文件中添加您的 StoreId。</value>
   </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
-    <value>Package ID</value>
+    <value>包 ID</value>
   </data>
   <data name="PackagePreviewSizeEstimate" xml:space="preserve">
-    <value>Size estimate</value>
+    <value>大小估计</value>
   </data>
   <data name="PackagePreviewStoreIdText" xml:space="preserve">
-    <value>StoreId: </value>
+    <value>商店 ID: </value>
   </data>
   <data name="PackagePreviewTitleText" xml:space="preserve">
-    <value>Package Preview</value>
+    <value>包预览</value>
   </data>
   <data name="ProvideGameDataPathErrorMsg" xml:space="preserve">
-    <value>Please provide the game data path</value>
+    <value>请提供游戏数据路径</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
-    <value>Required</value>
+    <value>必需</value>
   </data>
   <data name="SelectMapXmlTitleText" xml:space="preserve">
-    <value>Select Mapping Data XML File</value>
+    <value>选择映射数据 XML 文件</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
-    <value>Locate your game's build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future.</value>
+    <value>定位游戏构建以创建包。Xbox 游戏包管理器将记住这些路径，以便将来更轻松地访问。</value>
   </data>
   <data name="SubValDllNotFoundErrorMsg" xml:space="preserve">
-    <value>SubmissionValidator.dll not found in the specified path.</value>
+    <value>在指定路径中未找到 SubmissionValidator.dll。</value>
   </data>
   <data name="TitleString" xml:space="preserve">
-    <value>Make a game package</value>
+    <value>制作游戏包</value>
   </data>
   <data name="UnknownText" xml:space="preserve">
-    <value>Unknown</value>
+    <value>未知</value>
   </data>
   <data name="ValidatorPathBoxDefaultText" xml:space="preserve">
-    <value>Select or enter the folder path for SubmissionValidator.dll</value>
+    <value>选择或输入 SubmissionValidator.dll 的文件夹路径</value>
   </data>
   <data name="ValidatorPathTitleText" xml:space="preserve">
-    <value>Folder path for SubmissionValidator.dll</value>
+    <value>SubmissionValidator.dll 的文件夹路径</value>
   </data>
 </root>

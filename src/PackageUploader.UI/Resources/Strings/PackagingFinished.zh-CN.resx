@@ -118,33 +118,33 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PackagingCompletedTitleText" xml:space="preserve">
-    <value>Packaging completed</value>
+    <value>打包已完成</value>
   </data>
   <data name="SizeTitleText" xml:space="preserve">
-    <value>Size</value>
+    <value>大小</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>Store ID</value>
+    <value>商店 ID</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
-    <value>File name</value>
+    <value>文件名</value>
   </data>
   <data name="FamilyTitleText" xml:space="preserve">
-    <value>Family</value>
+    <value>系列</value>
   </data>
   <data name="InstallGameButtonContent" xml:space="preserve">
-    <value>Install game</value>
+    <value>安装游戏</value>
   </data>
   <data name="ViewPackageButtonContent" xml:space="preserve">
-    <value>View package</value>
+    <value>查看包</value>
   </data>
   <data name="ViewLogsButtonContent" xml:space="preserve">
-    <value>View logs</value>
+    <value>查看日志</value>
   </data>
   <data name="GoHomeButtonContent" xml:space="preserve">
-    <value>Go Home</value>
+    <value>返回主页</value>
   </data>
   <data name="ConfigureUploadButtonContent" xml:space="preserve">
-    <value>Configure upload</value>
+    <value>配置上传</value>
   </data>
 </root>

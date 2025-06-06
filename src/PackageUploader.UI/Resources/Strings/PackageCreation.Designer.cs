@@ -304,6 +304,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file..
+        /// </summary>
+        public static string PackagePreviewNoPreviewAvailable {
+            get {
+                return ResourceManager.GetString("PackagePreviewNoPreviewAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package ID.
         /// </summary>
         public static string PackagePreviewPackageIdText {

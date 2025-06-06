@@ -118,27 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="FamilyTitleText" xml:space="preserve">
-    <value>Family</value>
+    <value>ファミリー</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
-    <value>File name</value>
+    <value>ファイル名</value>
   </data>
   <data name="GoHomeButtonContent" xml:space="preserve">
-    <value>Go Home</value>
+    <value>ホームに戻る</value>
   </data>
   <data name="SizeTitleText" xml:space="preserve">
-    <value>Size</value>
+    <value>サイズ</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>Store ID</value>
+    <value>ストア ID</value>
   </data>
   <data name="UploadCompleteTitleText" xml:space="preserve">
-    <value>Upload complete</value>
+    <value>アップロード完了</value>
   </data>
   <data name="ViewLogsButtonContent" xml:space="preserve">
-    <value>View logs</value>
+    <value>ログを表示</value>
   </data>
   <data name="ViewPartnerCenterButtonContent" xml:space="preserve">
-    <value>View in Partner Center</value>
+    <value>パートナーセンターで表示</value>
   </data>
 </root>
