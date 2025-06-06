@@ -283,13 +283,6 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _isDragDropVisible, value);
     }
 
-    private string _dragDropMessage = PackageUploader.UI.Resources.Strings.PackageCreation.DragAndDropMessage; //"Drag and drop the Identity Data folder here or click to browse";
-    public string DragDropMessage
-    {
-        get => _dragDropMessage;
-        set => SetProperty(ref _dragDropMessage, value);
-    }
-
     private bool _supportsCustomSubValPath = false;
     public bool SupportsCustomSubValPath
     {

@@ -134,7 +134,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <TextBlock Text="{TemplateBinding Content}" 
-                               Foreground="{TemplateBinding Foreground}" 
+                               Foreground="{TemplateBinding Foreground}"
                                TextDecorations="Underline"
                                Cursor="Hand" />
                 </ControlTemplate>
@@ -145,6 +145,65 @@
                 <Setter Property="Foreground" Value="{DynamicResource SecondaryButtonHoverBrush}" />
             </Trigger>
         </Style.Triggers>
+    </Style>
+
+    <!-- Style for a chromeless hyperlink-like button that is underlined and inline in other text -->
+    <Style x:Key="HyperlinkUnderlinedInlineButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0, -10, 0, 0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <TextBlock Text="{TemplateBinding Content}" 
+                           Foreground="{TemplateBinding Foreground}"
+                           TextDecorations="Underline"
+                           Cursor="Hand" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource SecondaryButtonHoverBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- New style for help menu items -->
+    <Style x:Key="HelpMenuItemStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="10,2" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource HighlightedComboBoxItemBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- TextBox Style -->

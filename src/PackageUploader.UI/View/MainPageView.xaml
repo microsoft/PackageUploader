@@ -131,13 +131,15 @@
                                Foreground="{DynamicResource SecondaryTextBrush}">
                         <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextOne}"
                             d:Text="Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file "/>
-                        <Hyperlink Command="{Binding PackagingLearnMoreURL}" 
-                                  CommandParameter="https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/packaging/gc-packaging-toc">
-                            <Run Text="{x:Static strings:MainPage.MakeAPackageBodyURLText}"
-                                d:Text="(Learn more)"/>
+                        <Hyperlink Command="{Binding PackagingLearnMoreURL}"
+                                   CommandParameter="https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/packaging/gc-packaging-toc">
+                            <TextBlock Text="{x:Static strings:MainPage.MakeAPackageBodyURLText}"
+                                       d:Text="(learn more)"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       TextDecorations="Underline"/>
                         </Hyperlink>
                         <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextTwo}"
-                            d:Text=", then upload."/>
+                             d:Text=", then upload."/>
                     </TextBlock>
 
                     <Button Content="{x:Static strings:MainPage.MakeAPackageButtonText}"

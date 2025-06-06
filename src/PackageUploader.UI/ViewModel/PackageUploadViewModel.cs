@@ -747,9 +747,8 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (ProductNotFoundException)
         {
-            string part1 = Resources.Strings.PackageUpload.ProductWithBigIdNotFoundConfigHereErrMsgPart1;
-            string part2 = Resources.Strings.PackageUpload.ProductWithBigIdNotFoundConfigHereErrMsgPart2;
-            BranchOrFlightErrorMessage = $"{part1} '{BigId}' {part2}"; //$"Product with BigId '{BigId}' not found. Configure your product at https://partner.microsoft.com/";
+            string formatString = Resources.Strings.PackageUpload.ProductWithStoreIdNotFoundConfigHereErrMsg;
+            BranchOrFlightErrorMessage = string.Format(formatString, BigId);
         }
         catch (Exception ex)
         {
@@ -787,9 +786,8 @@ public partial class PackageUploadViewModel : BaseViewModel
         if (branchOrFlight == null)
         {
             string errorTitle = Resources.Strings.PackageUpload.NullBranchFlightErrTitleText; //$"Null Branch/Flight";
-            string errMsgPartOne = Resources.Strings.PackageUpload.BranchNotFoundErrMsgPartOne;
-            string errMsgPartTwo = Resources.Strings.PackageUpload.BranchNotFoundErrMsgPartTwo;
-            PackageErrorMessage = $"{errMsgPartOne} '{BranchOrFlightDisplayName}' {errMsgPartTwo}."; // "Branch {BranchOrFlightDisplayName} not found."
+            string formatString = Resources.Strings.PackageUpload.BranchNotFoundErrMsg;
+            PackageErrorMessage = string.Format(formatString, BranchOrFlightDisplayName); // "Branch {BranchOrFlightDisplayName} not found."
             IsUploadInProgress = false;
             SetErrorAndGoToErrorPage(errorTitle, PackageErrorMessage);
             return;

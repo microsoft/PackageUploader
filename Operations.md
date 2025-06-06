@@ -64,6 +64,7 @@
    - **defaultConnectionLimit**: (default and recommended: -1)
    - **expect100Continue**: (default and recommended: false)
    - **useNagleAlgorithm**: (default and recommended: false)
+   - **retryCount**: (default and  recommended: 3)
 
 # UploadXvcPackage
 ###### Uploads Xvc game package and assets
@@ -102,6 +103,7 @@
    - **defaultConnectionLimit**: (default and recommended: -1)
    - **expect100Continue**: (default and recommended: false)
    - **useNagleAlgorithm**: (default and recommended: false)
+   - **retryCount**: (default and  recommended: 3)
   
 # RemovePackages
 ###### Removes game packages and assets from a branch

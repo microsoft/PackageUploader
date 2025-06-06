@@ -70,25 +70,16 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Branch.
+        ///   Looks up a localized string similar to Branch {0} wasn&apos;t found..
         /// </summary>
-        public static string BranchNotFoundErrMsgPartOne {
+        public static string BranchNotFoundErrMsg {
             get {
-                return ResourceManager.GetString("BranchNotFoundErrMsgPartOne", resourceCulture);
+                return ResourceManager.GetString("BranchNotFoundErrMsg", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to not found.
-        /// </summary>
-        public static string BranchNotFoundErrMsgPartTwo {
-            get {
-                return ResourceManager.GetString("BranchNotFoundErrMsgPartTwo", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Browse to package file.
+        ///   Looks up a localized string similar to Browse to the package file..
         /// </summary>
         public static string BrowsePackagePathHelpText {
             get {
@@ -97,7 +88,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to BuildId mismatch in the Submission Validator log file.
+        ///   Looks up a localized string similar to There is a BuildId mismatch in the Submission Validator log file..
         /// </summary>
         public static string BuildIdMismatchSubValErrMsg {
             get {
@@ -106,7 +97,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cancel the operation.
+        ///   Looks up a localized string similar to Cancel the operation..
         /// </summary>
         public static string CancelButtonHelpText {
             get {
@@ -142,7 +133,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Directory not found.
+        ///   Looks up a localized string similar to The directory wasn&apos;t found..
         /// </summary>
         public static string DirectoryNotFoundErrMsg {
             get {
@@ -151,7 +142,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error extracting package information.
+        ///   Looks up a localized string similar to An error occurred while extracting the package information..
         /// </summary>
         public static string ErrorExtractingInfoErrMsg {
             get {
@@ -160,7 +151,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error getting market groups.
+        ///   Looks up a localized string similar to An error occurred while getting the market groups..
         /// </summary>
         public static string ErrorGettingMarketGroupsErrMsg {
             get {
@@ -169,7 +160,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error getting product information.
+        ///   Looks up a localized string similar to An error occurred while getting the product information..
         /// </summary>
         public static string ErrorGettingProdInfo {
             get {
@@ -178,7 +169,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error processing package.
+        ///   Looks up a localized string similar to An error occurred while processing the package..
         /// </summary>
         public static string ErrorProcessingPackageErrMsg {
             get {
@@ -187,7 +178,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error selecting file.
+        ///   Looks up a localized string similar to An error occurred while selecting the file..
         /// </summary>
         public static string ErrorSelectingFileErrMsg {
             get {
@@ -196,7 +187,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error uploading package.
+        ///   Looks up a localized string similar to An error occurred while uploading the package..
         /// </summary>
         public static string ErrUploadPackageErrMsg {
             get {
@@ -241,7 +232,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid file path..
+        ///   Looks up a localized string similar to The file path is invalid..
         /// </summary>
         public static string InvalidFilePathErrMsg {
             get {
@@ -259,7 +250,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No Branches found for this product.
+        ///   Looks up a localized string similar to No branches were found for this product..
         /// </summary>
         public static string NoBranchesFoundErrMsg {
             get {
@@ -268,7 +259,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No Product Information.
+        ///   Looks up a localized string similar to No product information.
         /// </summary>
         public static string NoProdInfoTitleText {
             get {
@@ -277,7 +268,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Null Branch/Flight.
+        ///   Looks up a localized string similar to Null branch/flight.
         /// </summary>
         public static string NullBranchFlightErrTitleText {
             get {
@@ -286,7 +277,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package has no StoreId/BigId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in additional details below..
+        ///   Looks up a localized string similar to The package has no StoreId. Configure your StoreId in the MicrosoftGame.config file before building your package or manually enter it in Additional details..
         /// </summary>
         public static string PackageHasNoBigIdConfigureMsftGameCfgErrMsg {
             get {
@@ -304,7 +295,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Path to package file.
+        ///   Looks up a localized string similar to The path to the package file..
         /// </summary>
         public static string PackagePathHelpText {
             get {
@@ -322,7 +313,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product information not available. Please enter a valid BigId and try again..
+        ///   Looks up a localized string similar to Product information isn&apos;t available. Please enter a valid StoreId and try again..
         /// </summary>
         public static string ProductInfoNotAvailableErrMsg {
             get {
@@ -340,20 +331,11 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Product with BigID.
+        ///   Looks up a localized string similar to The product with StoreId {0} wasn&apos;t found. Configure your product at https://aka.ms/mpc-ag..
         /// </summary>
-        public static string ProductWithBigIdNotFoundConfigHereErrMsgPart1 {
+        public static string ProductWithStoreIdNotFoundConfigHereErrMsg {
             get {
-                return ResourceManager.GetString("ProductWithBigIdNotFoundConfigHereErrMsgPart1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to not found. Configure your product at https://partner.microsoft.com/.
-        /// </summary>
-        public static string ProductWithBigIdNotFoundConfigHereErrMsgPart2 {
-            get {
-                return ResourceManager.GetString("ProductWithBigIdNotFoundConfigHereErrMsgPart2", resourceCulture);
+                return ResourceManager.GetString("ProductWithStoreIdNotFoundConfigHereErrMsg", resourceCulture);
             }
         }
         
@@ -367,7 +349,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select a destination and market for the package upload..
+        ///   Looks up a localized string similar to Select a destination and market for the package upload.
         /// </summary>
         public static string SelectDestinationText {
             get {
@@ -385,7 +367,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select a Package File.
+        ///   Looks up a localized string similar to Select a package file.
         /// </summary>
         public static string SelectPackageFileText {
             get {
@@ -403,7 +385,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Store ID.
+        ///   Looks up a localized string similar to StoreId.
         /// </summary>
         public static string StoreIdTitleText {
             get {
@@ -412,7 +394,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Submission Validator log not found.
+        ///   Looks up a localized string similar to The Submission Validator log wasn&apos;t found..
         /// </summary>
         public static string SubValLogNotFoundErrMsg {
             get {
@@ -421,7 +403,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload Package.
+        ///   Looks up a localized string similar to Upload package.
         /// </summary>
         public static string UploadButtonContentText {
             get {
@@ -430,7 +412,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Start uploading the package.
+        ///   Looks up a localized string similar to Start uploading a package..
         /// </summary>
         public static string UploadButtonHelpText {
             get {
@@ -439,7 +421,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload cancelled..
+        ///   Looks up a localized string similar to The upload was canceled..
         /// </summary>
         public static string UploadCancelledErrMsg {
             get {
@@ -448,7 +430,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Locate the package for uploading. The Xbox Game Package Manaa will remember these paths for easier access in the future..
+        ///   Looks up a localized string similar to Locate the package for uploading. The Xbox Game Package Manager retains these paths for easier access in the future..
         /// </summary>
         public static string UploadPackageSubtitleText {
             get {
@@ -466,7 +448,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload Preview.
+        ///   Looks up a localized string similar to Preview.
         /// </summary>
         public static string UploadPreviewTitleText {
             get {

@@ -79,7 +79,25 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file .
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string CloseWindow {
+            get {
+                return ResourceManager.GetString("CloseWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Send feedback....
+        /// </summary>
+        public static string GitHubIssues {
+            get {
+                return ResourceManager.GetString("GitHubIssues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game packages speed up uploads, ensure secure installations, and optimize Xbox performance. Just add build files and a config file .
         /// </summary>
         public static string MakeAPackageBodyTextOne {
             get {
@@ -88,7 +106,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to , then upload..
+        ///   Looks up a localized string similar to , and then upload..
         /// </summary>
         public static string MakeAPackageBodyTextTwo {
             get {
@@ -97,7 +115,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to (Learn more).
+        ///   Looks up a localized string similar to (learn more).
         /// </summary>
         public static string MakeAPackageBodyURLText {
             get {
@@ -106,7 +124,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create package.
+        ///   Looks up a localized string similar to Create a package.
         /// </summary>
         public static string MakeAPackageButtonText {
             get {
@@ -124,7 +142,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to MakePkg.exe was not found. Please install the GDK in order to package game contents..
+        ///   Looks up a localized string similar to MakePkg.exe wasn&apos;t found. Please install the GDK to package game contents..
         /// </summary>
         public static string MakePackageNotFoundErrorMsg {
             get {
@@ -133,7 +151,25 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sign In.
+        ///   Looks up a localized string similar to Maximize.
+        /// </summary>
+        public static string MaximizeWindow {
+            get {
+                return ResourceManager.GetString("MaximizeWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minimize.
+        /// </summary>
+        public static string MinimizeWindow {
+            get {
+                return ResourceManager.GetString("MinimizeWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sign in.
         /// </summary>
         public static string SignInButtonContent {
             get {
@@ -142,7 +178,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to We are attempting to retrieve your sign-in information. If a browser page does not open within a few seconds, please click the sign-in button again to retry..
+        ///   Looks up a localized string similar to We&apos;re trying to get your sign-in information. If the browser page doesn&apos;t open within a few seconds, please select the sign-in button again to retry..
         /// </summary>
         public static string SignInLogginInText {
             get {
@@ -151,7 +187,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For seamless access to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you&apos;re only creating game packages without configurations, but it&apos;s required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files..
+        ///   Looks up a localized string similar to For seamless access to your product and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you&apos;re only creating game packages without configurations, but it&apos;s required for anyone planning to upload packages, retrieve products, or link them to configuration files..
         /// </summary>
         public static string SignInPreLoginText {
             get {
@@ -165,6 +201,15 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string SignInTextBlockTitle {
             get {
                 return ResourceManager.GetString("SignInTextBlockTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sign out user.
+        /// </summary>
+        public static string SignOutUser {
+            get {
+                return ResourceManager.GetString("SignOutUser", resourceCulture);
             }
         }
         
@@ -196,7 +241,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload package.
+        ///   Looks up a localized string similar to Upload a package.
         /// </summary>
         public static string UploadPackageBlockButtonText {
             get {
@@ -205,11 +250,20 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload a package (sign in required).
+        ///   Looks up a localized string similar to Upload a package (sign-in required).
         /// </summary>
         public static string UploadPackageBlockTitle {
             get {
                 return ResourceManager.GetString("UploadPackageBlockTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version {0}.
+        /// </summary>
+        public static string VersionLabel {
+            get {
+                return ResourceManager.GetString("VersionLabel", resourceCulture);
             }
         }
     }

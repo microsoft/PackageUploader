@@ -70,7 +70,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to We&apos;ve run into an issue, go back to fix.
+        ///   Looks up a localized string similar to We&apos;ve run into an issue, please try again..
         /// </summary>
         public static string ErrorTitleString {
             get {
@@ -79,7 +79,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go back and fix.
+        ///   Looks up a localized string similar to Go back to update.
         /// </summary>
         public static string GoBackAndFix {
             get {

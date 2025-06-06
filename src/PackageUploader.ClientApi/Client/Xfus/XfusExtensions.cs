@@ -2,11 +2,17 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PackageUploader.ClientApi.Client.Xfus.Config;
+using PackageUploader.ClientApi.Client.Xfus.Exceptions;
 using PackageUploader.ClientApi.Client.Xfus.Uploader;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
+using Polly.Extensions.Http;
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
@@ -40,6 +46,41 @@ internal static class XfusExtensions
                 MaxConnectionsPerServer = uploadConfig.DefaultConnectionLimit < 0 ? 12 * Environment.ProcessorCount : uploadConfig.DefaultConnectionLimit,
                 ConnectCallback = (context, ct) => ConnectCallback(context, uploadConfig.UseNagleAlgorithm, ct),
             };
+        }).AddPolicyHandler((serviceProvider, _) =>
+        {
+            // Use exponential backoff with jitter for retries
+            var uploadConfig = serviceProvider.GetRequiredService<IOptions<UploadConfig>>().Value;
+            var retryCount = uploadConfig.RetryCount > 0 ? uploadConfig.RetryCount : 3;
+            var delay = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromSeconds(2), retryCount);
+            return HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .OrResult(response => (int)response.StatusCode >= 500)
+            .OrInner<TimeoutException>()
+            .OrInner<TaskCanceledException>()
+            .Or<XfusServerException>(ex => ex.IsRetryable || ex.HttpStatusCode == HttpStatusCode.ServiceUnavailable || (int)ex.HttpStatusCode >= 500)
+            .WaitAndRetryAsync(
+                delay, (result, timeSpan, retryAttempt, _) =>
+                {
+                    var logger = serviceProvider.GetRequiredService<ILogger<XfusUploader>>();
+                    string errorMessage;
+
+                    if (result.Exception is XfusServerException xfusEx)
+                    {
+                        errorMessage = $"Status: {xfusEx.HttpStatusCode}, IsRetryable: {xfusEx.IsRetryable}, Message: {xfusEx.Message}";
+                    }
+                    else if (result.Exception != null)
+                    {
+                        errorMessage = $"Exception: {result.Exception.GetType().Name}, Message: {result.Exception.Message}";
+                    }
+                    else
+                    {
+                        errorMessage = $"Status: {result.Result?.StatusCode}, Reason: {result.Result?.ReasonPhrase ?? "Unknown"}";
+                    }
+
+                    logger.LogWarning("XFUS call failed. {ErrorDetails}. Retrying in {RetryTimeSpan:N1}s. Attempt {RetryAttempt}/{RetryCount}",
+                        errorMessage, timeSpan.TotalSeconds, retryAttempt, retryCount);
+                }
+            );
         });
 
         return services;

@@ -124,7 +124,7 @@
     <value>Size</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>Store ID</value>
+    <value>StoreId</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
     <value>File name</value>
@@ -142,7 +142,7 @@
     <value>View logs</value>
   </data>
   <data name="GoHomeButtonContent" xml:space="preserve">
-    <value>Go Home</value>
+    <value>Home</value>
   </data>
   <data name="ConfigureUploadButtonContent" xml:space="preserve">
     <value>Configure upload</value>

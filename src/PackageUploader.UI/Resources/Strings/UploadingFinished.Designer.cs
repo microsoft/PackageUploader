@@ -79,7 +79,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go Home.
+        ///   Looks up a localized string similar to Home.
         /// </summary>
         public static string GoHomeButtonContent {
             get {
@@ -97,7 +97,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Store ID.
+        ///   Looks up a localized string similar to StoreId.
         /// </summary>
         public static string StoreIdTitleText {
             get {

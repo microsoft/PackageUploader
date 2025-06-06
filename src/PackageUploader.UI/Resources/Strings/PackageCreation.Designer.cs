@@ -124,15 +124,6 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Drag and drop the Identity Data folder here or click to browse.
-        /// </summary>
-        public static string DragAndDropMessage {
-            get {
-                return ResourceManager.GetString("DragAndDropMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error creating package..
         /// </summary>
         public static string ErrorCreatingPackageErrorMsg {
@@ -151,7 +142,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to generate a layout file.
+        ///   Looks up a localized string similar to A layout file wasn&apos;t generated..
         /// </summary>
         public static string FailedToGenerateLayoutFileErrorMsg {
             get {
@@ -160,7 +151,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Provided folder does not contain a MicrosoftGame.config file.
+        ///   Looks up a localized string similar to The provided folder doesn&apos;t contain a MicrosoftGame.config file..
         /// </summary>
         public static string FolderDoesNotContainConfigErrMsg {
             get {
@@ -187,7 +178,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error generating layout file..
+        ///   Looks up a localized string similar to There was an error when generating the layout file..
         /// </summary>
         public static string GeneratingLayoutFileErrorMsg {
             get {
@@ -205,7 +196,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There was an error parsing the layout file.
+        ///   Looks up a localized string similar to There was an error when parsing the layout file..
         /// </summary>
         public static string LayoutFileParsingErrorMsg {
             get {
@@ -214,7 +205,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The MicrosoftGame.config in the provided folder is invalid.
+        ///   Looks up a localized string similar to The MicrosoftGame.config file in the provided folder isn&apos;t valid..
         /// </summary>
         public static string MicrosoftGameConfigInvalidErrMsg {
             get {
@@ -223,7 +214,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The MicrosoftGame.config lacks a valid Identity node.
+        ///   Looks up a localized string similar to The MicrosoftGame.config file doesn&apos;t have a valid Identity node..
         /// </summary>
         public static string MsftGameCOnfigLacksValidIdentityErrMsg {
             get {
@@ -232,7 +223,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The logo file specified by the MicrosoftGame.config does not exist.
+        ///   Looks up a localized string similar to The logo file specified by the MicrosoftGame.config file doesn&apos;t exist..
         /// </summary>
         public static string MsftGameConfigLogoFileNotExistErrMsg {
             get {
@@ -241,7 +232,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The MicrosoftGame.config does not have the required Logo files in the ShellVisuals.
+        ///   Looks up a localized string similar to The MicrosoftGame.config file doesn&apos;t have the required Logo files in the ShellVisuals..
         /// </summary>
         public static string MsftGameConfigMissingLogoFilesErrMsg {
             get {
@@ -250,7 +241,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There were no files found in the layout file.
+        ///   Looks up a localized string similar to No files were found in the layout file..
         /// </summary>
         public static string NoFilesInLayoutFileErrorMsg {
             get {
@@ -304,7 +295,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file..
+        ///   Looks up a localized string similar to Full preview isn&apos;t available because the provided MicrosoftGame.config file doesn&apos;t have a StoreId. Please add your StoreId to your MicrosoftGame.config file..
         /// </summary>
         public static string PackagePreviewNoPreviewAvailable {
             get {
@@ -313,7 +304,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package ID.
+        ///   Looks up a localized string similar to Package Identity Name.
         /// </summary>
         public static string PackagePreviewPackageIdText {
             get {
@@ -331,7 +322,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to StoreId: .
+        ///   Looks up a localized string similar to StoreId.
         /// </summary>
         public static string PackagePreviewStoreIdText {
             get {
@@ -340,7 +331,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package Preview.
+        ///   Looks up a localized string similar to Preview.
         /// </summary>
         public static string PackagePreviewTitleText {
             get {
@@ -349,7 +340,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please provide the game data path.
+        ///   Looks up a localized string similar to Please provide the location of your game..
         /// </summary>
         public static string ProvideGameDataPathErrorMsg {
             get {
@@ -367,7 +358,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select Mapping Data XML File.
+        ///   Looks up a localized string similar to Select the Mapping Data XML file.
         /// </summary>
         public static string SelectMapXmlTitleText {
             get {
@@ -376,7 +367,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Locate your game&apos;s build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future..
+        ///   Looks up a localized string similar to Locate your game&apos;s build to create a package. The Xbox Game Package Manager retains these paths for easier access in the future..
         /// </summary>
         public static string SubTitleText {
             get {
@@ -385,7 +376,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SubmissionValidator.dll not found in the specified path..
+        ///   Looks up a localized string similar to SubmissionValidator.dll wasn&apos;t found in the specified path..
         /// </summary>
         public static string SubValDllNotFoundErrorMsg {
             get {

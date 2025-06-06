@@ -138,9 +138,6 @@
   <data name="CreatePackageButtonText" xml:space="preserve">
     <value>Create package</value>
   </data>
-  <data name="DragAndDropMessage" xml:space="preserve">
-    <value>Drag and drop the Identity Data folder here or click to browse</value>
-  </data>
   <data name="ErrorCreatingPackageErrorMsg" xml:space="preserve">
     <value>Error creating package.</value>
   </data>
@@ -148,10 +145,10 @@
     <value>Failed to create output directory</value>
   </data>
   <data name="FailedToGenerateLayoutFileErrorMsg" xml:space="preserve">
-    <value>Failed to generate a layout file</value>
+    <value>A layout file wasn't generated.</value>
   </data>
   <data name="FolderDoesNotContainConfigErrMsg" xml:space="preserve">
-    <value>Provided folder does not contain a MicrosoftGame.config file</value>
+    <value>The provided folder doesn't contain a MicrosoftGame.config file.</value>
   </data>
   <data name="GamePathBoxDefaultText" xml:space="preserve">
     <value>Select or enter the game's location</value>
@@ -160,28 +157,28 @@
     <value>Game path</value>
   </data>
   <data name="GeneratingLayoutFileErrorMsg" xml:space="preserve">
-    <value>Error generating layout file.</value>
+    <value>There was an error when generating the layout file.</value>
   </data>
   <data name="LayoutFileMapTitle" xml:space="preserve">
     <value>Layout file/content map</value>
   </data>
   <data name="LayoutFileParsingErrorMsg" xml:space="preserve">
-    <value>There was an error parsing the layout file</value>
+    <value>There was an error when parsing the layout file.</value>
   </data>
   <data name="MicrosoftGameConfigInvalidErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config in the provided folder is invalid</value>
+    <value>The MicrosoftGame.config file in the provided folder isn't valid.</value>
   </data>
   <data name="MsftGameCOnfigLacksValidIdentityErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config lacks a valid Identity node</value>
+    <value>The MicrosoftGame.config file doesn't have a valid Identity node.</value>
   </data>
   <data name="MsftGameConfigLogoFileNotExistErrMsg" xml:space="preserve">
-    <value>The logo file specified by the MicrosoftGame.config does not exist</value>
+    <value>The logo file specified by the MicrosoftGame.config file doesn't exist.</value>
   </data>
   <data name="MsftGameConfigMissingLogoFilesErrMsg" xml:space="preserve">
-    <value>The MicrosoftGame.config does not have the required Logo files in the ShellVisuals</value>
+    <value>The MicrosoftGame.config file doesn't have the required Logo files in the ShellVisuals.</value>
   </data>
   <data name="NoFilesInLayoutFileErrorMsg" xml:space="preserve">
-    <value>There were no files found in the layout file</value>
+    <value>No files were found in the layout file.</value>
   </data>
   <data name="OptionalText" xml:space="preserve">
     <value>Optional</value>
@@ -199,34 +196,34 @@
     <value>Family</value>
   </data>
   <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
-    <value>Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file.</value>
+    <value>Full preview isn't available because the provided MicrosoftGame.config file doesn't have a StoreId. Please add your StoreId to your MicrosoftGame.config file.</value>
   </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
-    <value>Package ID</value>
+    <value>Package Identity Name</value>
   </data>
   <data name="PackagePreviewSizeEstimate" xml:space="preserve">
     <value>Size estimate</value>
   </data>
   <data name="PackagePreviewStoreIdText" xml:space="preserve">
-    <value>StoreId: </value>
+    <value>StoreId</value>
   </data>
   <data name="PackagePreviewTitleText" xml:space="preserve">
-    <value>Package Preview</value>
+    <value>Preview</value>
   </data>
   <data name="ProvideGameDataPathErrorMsg" xml:space="preserve">
-    <value>Please provide the game data path</value>
+    <value>Please provide the location of your game.</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
     <value>Required</value>
   </data>
   <data name="SelectMapXmlTitleText" xml:space="preserve">
-    <value>Select Mapping Data XML File</value>
+    <value>Select the Mapping Data XML file</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
-    <value>Locate your game's build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future.</value>
+    <value>Locate your game's build to create a package. The Xbox Game Package Manager retains these paths for easier access in the future.</value>
   </data>
   <data name="SubValDllNotFoundErrorMsg" xml:space="preserve">
-    <value>SubmissionValidator.dll not found in the specified path.</value>
+    <value>SubmissionValidator.dll wasn't found in the specified path.</value>
   </data>
   <data name="TitleString" xml:space="preserve">
     <value>Make a game package</value>

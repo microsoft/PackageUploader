@@ -138,9 +138,6 @@
   <data name="CreatePackageButtonText" xml:space="preserve">
     <value>创建包</value>
   </data>
-  <data name="DragAndDropMessage" xml:space="preserve">
-    <value>将身份数据文件夹拖放到此处或点击浏览</value>
-  </data>
   <data name="ErrorCreatingPackageErrorMsg" xml:space="preserve">
     <value>创建包时出错。</value>
   </data>
@@ -148,10 +145,10 @@
     <value>无法创建输出目录</value>
   </data>
   <data name="FailedToGenerateLayoutFileErrorMsg" xml:space="preserve">
-    <value>无法生成布局文件</value>
+    <value>布局文件未生成。</value>
   </data>
   <data name="FolderDoesNotContainConfigErrMsg" xml:space="preserve">
-    <value>提供的文件夹不包含 MicrosoftGame.config 文件</value>
+    <value>提供的文件夹不包含 MicrosoftGame.config 文件。</value>
   </data>
   <data name="GamePathBoxDefaultText" xml:space="preserve">
     <value>选择或输入游戏位置</value>
@@ -166,22 +163,22 @@
     <value>布局文件/内容映射</value>
   </data>
   <data name="LayoutFileParsingErrorMsg" xml:space="preserve">
-    <value>解析布局文件时出错</value>
+    <value>解析布局文件时出错。</value>
   </data>
   <data name="MicrosoftGameConfigInvalidErrMsg" xml:space="preserve">
-    <value>提供文件夹中的 MicrosoftGame.config 无效</value>
+    <value>提供文件夹中的 MicrosoftGame.config 文件无效。</value>
   </data>
   <data name="MsftGameCOnfigLacksValidIdentityErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config 缺少有效的 Identity 节点</value>
+    <value>MicrosoftGame.config 文件缺少有效的 Identity 节点。</value>
   </data>
   <data name="MsftGameConfigLogoFileNotExistErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config 指定的徽标文件不存在</value>
+    <value>MicrosoftGame.config 文件指定的徽标文件不存在。</value>
   </data>
   <data name="MsftGameConfigMissingLogoFilesErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config 在 ShellVisuals 中没有所需的徽标文件</value>
+    <value>MicrosoftGame.config 文件在 ShellVisuals 中没有所需的徽标文件。</value>
   </data>
   <data name="NoFilesInLayoutFileErrorMsg" xml:space="preserve">
-    <value>在布局文件中未找到文件</value>
+    <value>在布局文件中未找到文件。</value>
   </data>
   <data name="OptionalText" xml:space="preserve">
     <value>可选</value>
@@ -202,19 +199,19 @@
     <value>由于提供的 MicrosoftGame.config 文件没有 StoreId，无法显示完整预览。请在 MicrosoftGame.config 文件中添加您的 StoreId。</value>
   </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
-    <value>包 ID</value>
+    <value>包标识名称</value>
   </data>
   <data name="PackagePreviewSizeEstimate" xml:space="preserve">
     <value>大小估计</value>
   </data>
   <data name="PackagePreviewStoreIdText" xml:space="preserve">
-    <value>商店 ID: </value>
+    <value>StoreId</value>
   </data>
   <data name="PackagePreviewTitleText" xml:space="preserve">
-    <value>包预览</value>
+    <value>预览</value>
   </data>
   <data name="ProvideGameDataPathErrorMsg" xml:space="preserve">
-    <value>请提供游戏数据路径</value>
+    <value>请提供游戏的位置。</value>
   </data>
   <data name="RequiredText" xml:space="preserve">
     <value>必需</value>
@@ -223,7 +220,7 @@
     <value>选择映射数据 XML 文件</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
-    <value>定位游戏构建以创建包。Xbox 游戏包管理器将记住这些路径，以便将来更轻松地访问。</value>
+    <value>定位游戏构建以创建包。Xbox Game Package Manager 会记住这些路径，以便将来更轻松地访问。</value>
   </data>
   <data name="SubValDllNotFoundErrorMsg" xml:space="preserve">
     <value>在指定路径中未找到 SubmissionValidator.dll。</value>
