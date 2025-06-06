@@ -137,7 +137,7 @@ public partial class MainPageViewModel : BaseViewModel
         NavigateToPackageCreationCommand = new RelayCommand(() => 
         {
             windowService.NavigateTo(typeof(PackageCreationView));
-        }, () => IsMakePkgEnabled);
+        }, () => { return IsMakePkgEnabled; });
         
         SignInCommand = new RelayCommand(async () =>
         {

@@ -24,7 +24,13 @@ namespace PackageUploader.UI.ViewModel
 
         public bool CanExecute(object? parameter) => _canExecute();
 
-        public void Execute(object? parameter) => _execute();
+        public void Execute(object? parameter)
+        {
+            if (CanExecute(null))
+            {
+                _execute();
+            }
+        }
         
         public void RaiseCanExecuteChanged()
         {

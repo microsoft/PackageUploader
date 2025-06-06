@@ -19,6 +19,7 @@ namespace PackageUploader.UI.Test
         private UserLoggedInProvider _userLoggedInProvider;
         private Mock<IAccessTokenProvider> _mockAccessTokenProvider;
         private Mock<ILogger<AuthenticationService>> _mockLogger;
+        private Mock<AuthenticationResetService> _mockAuthResetService;
         private AuthenticationService _authService;
 
         [TestInitialize]
@@ -27,10 +28,12 @@ namespace PackageUploader.UI.Test
             _userLoggedInProvider = new UserLoggedInProvider();
             _mockAccessTokenProvider = new Mock<IAccessTokenProvider>();
             _mockLogger = new Mock<ILogger<AuthenticationService>>();
+            _mockAuthResetService = new Mock<AuthenticationResetService>();
 
             _authService = new AuthenticationService(
                 _userLoggedInProvider,
                 _mockAccessTokenProvider.Object,
+                _mockAuthResetService.Object,
                 _mockLogger.Object
             );
         }
