@@ -121,10 +121,10 @@
     <value>Copy error</value>
   </data>
   <data name="ErrorTitleString" xml:space="preserve">
-    <value>We've run into an issue, go back to fix</value>
+    <value>We've run into an issue, please try again.</value>
   </data>
   <data name="GoBackAndFix" xml:space="preserve">
-    <value>Go back and fix</value>
+    <value>Go back to update</value>
   </data>
   <data name="ViewLogs" xml:space="preserve">
     <value>View logs</value>

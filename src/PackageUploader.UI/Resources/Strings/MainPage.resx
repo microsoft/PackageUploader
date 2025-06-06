@@ -130,20 +130,20 @@
     <value>Send feedback...</value>
   </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
-    <value>, then upload.</value>
+    <value>, and then upload.</value>
     <comment>The part of the string that comes after the hyperlink, if any.</comment>
   </data>
   <data name="MakeAPackageBodyURLText" xml:space="preserve">
     <value>(learn more)</value>
   </data>
   <data name="MakeAPackageButtonText" xml:space="preserve">
-    <value>Create package</value>
+    <value>Create a package</value>
   </data>
   <data name="MakeAPackageTextBlockTitle" xml:space="preserve">
     <value>Make a package</value>
   </data>
   <data name="MakePackageNotFoundErrorMsg" xml:space="preserve">
-    <value>MakePkg.exe was not found. Please install the GDK in order to package game contents.</value>
+    <value>MakePkg.exe wasn't found. Please install the GDK to package game contents.</value>
   </data>
   <data name="MaximizeWindow" xml:space="preserve">
     <value>Maximize</value>
@@ -152,19 +152,19 @@
     <value>Minimize</value>
   </data>
   <data name="SignInButtonContent" xml:space="preserve">
-    <value>Sign In</value>
+    <value>Sign in</value>
   </data>
   <data name="SignInLogginInText" xml:space="preserve">
-    <value>We are attempting to retrieve your sign-in information. If a browser page does not open within a few seconds, please click the sign-in button again to retry.</value>
+    <value>We're trying to get your sign-in information. If the browser page doesn't open within a few seconds, please select the sign-in button again to retry.</value>
   </data>
   <data name="SignInPreLoginText" xml:space="preserve">
-    <value>For seamless access to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files.</value>
+    <value>For seamless access to your product and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve products, or link them to configuration files.</value>
   </data>
   <data name="SignInTextBlockTitle" xml:space="preserve">
     <value>Sign in</value>
   </data>
   <data name="SignOutUser" xml:space="preserve">
-    <value>Sign Out User</value>
+    <value>Sign out user</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
     <value>The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
@@ -176,16 +176,16 @@
     <value>Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account.</value>
   </data>
   <data name="UploadPackageBlockButtonText" xml:space="preserve">
-    <value>Upload package</value>
+    <value>Upload a package</value>
   </data>
   <data name="UploadPackageBlockTitle" xml:space="preserve">
-    <value>Upload a package (sign in required)</value>
+    <value>Upload a package (sign-in required)</value>
   </data>
   <data name="VersionLabel" xml:space="preserve">
     <value>Version {0}</value>
   </data>
   <data name="MakeAPackageBodyTextOne" xml:space="preserve">
-    <value>Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file </value>
+    <value>Game packages speed up uploads, ensure secure installations, and optimize Xbox performance. Just add build files and a config file </value>
     <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
   </data>
 </root>

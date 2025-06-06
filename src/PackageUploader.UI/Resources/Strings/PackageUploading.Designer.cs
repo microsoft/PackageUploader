@@ -97,7 +97,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uploading package to partner center.
+        ///   Looks up a localized string similar to Uploading package to Partner Center.
         /// </summary>
         public static string TitleText {
             get {

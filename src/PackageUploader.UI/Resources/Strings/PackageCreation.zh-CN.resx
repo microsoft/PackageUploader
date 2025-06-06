@@ -138,9 +138,6 @@
   <data name="CreatePackageButtonText" xml:space="preserve">
     <value>创建包</value>
   </data>
-  <data name="DragAndDropMessage" xml:space="preserve">
-    <value>将身份数据文件夹拖放到此处或点击浏览</value>
-  </data>
   <data name="ErrorCreatingPackageErrorMsg" xml:space="preserve">
     <value>创建包时出错。</value>
   </data>
@@ -208,7 +205,7 @@
     <value>大小估计</value>
   </data>
   <data name="PackagePreviewStoreIdText" xml:space="preserve">
-    <value>商店 ID: </value>
+    <value>StoreId</value>
   </data>
   <data name="PackagePreviewTitleText" xml:space="preserve">
     <value>包预览</value>

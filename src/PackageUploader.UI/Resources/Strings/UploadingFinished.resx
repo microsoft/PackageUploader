@@ -124,13 +124,13 @@
     <value>File name</value>
   </data>
   <data name="GoHomeButtonContent" xml:space="preserve">
-    <value>Go Home</value>
+    <value>Home</value>
   </data>
   <data name="SizeTitleText" xml:space="preserve">
     <value>Size</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>Store ID</value>
+    <value>StoreId</value>
   </data>
   <data name="UploadCompleteTitleText" xml:space="preserve">
     <value>Upload complete</value>

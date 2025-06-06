@@ -138,9 +138,6 @@
   <data name="CreatePackageButtonText" xml:space="preserve">
     <value>パッケージを作成</value>
   </data>
-  <data name="DragAndDropMessage" xml:space="preserve">
-    <value>ID データフォルダをここにドラッグ＆ドロップするか、クリックして参照してください</value>
-  </data>
   <data name="ErrorCreatingPackageErrorMsg" xml:space="preserve">
     <value>パッケージの作成中にエラーが発生しました。</value>
   </data>
@@ -208,7 +205,7 @@
     <value>サイズ推定</value>
   </data>
   <data name="PackagePreviewStoreIdText" xml:space="preserve">
-    <value>ストア ID: </value>
+    <value>StoreId</value>
   </data>
   <data name="PackagePreviewTitleText" xml:space="preserve">
     <value>パッケージプレビュー</value>
