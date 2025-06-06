@@ -123,6 +123,9 @@
   <data name="ChooseTenantButtonText" xml:space="preserve">
     <value>Advanced: List available tenants</value>
   </data>
+  <data name="CloseWindow" xml:space="preserve">
+    <value>Close</value>
+  </data>
   <data name="MakeAPackageBodyTextOne" xml:space="preserve">
     <value>Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file </value>
     <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
@@ -143,6 +146,12 @@
   <data name="MakePackageNotFoundErrorMsg" xml:space="preserve">
     <value>MakePkg.exe was not found. Please install the GDK in order to package game contents.</value>
   </data>
+  <data name="MaximizeWindow" xml:space="preserve">
+    <value>Maximize</value>
+  </data>
+  <data name="MinimizeWindow" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
   <data name="SignInButtonContent" xml:space="preserve">
     <value>Sign In</value>
   </data>
@@ -154,6 +163,9 @@
   </data>
   <data name="SignInTextBlockTitle" xml:space="preserve">
     <value>Sign in</value>
+  </data>
+  <data name="SignOutUser" xml:space="preserve">
+    <value>Sign Out User</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
     <value>The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
@@ -169,5 +181,8 @@
   </data>
   <data name="UploadPackageBlockTitle" xml:space="preserve">
     <value>Upload a package (sign in required)</value>
+  </data>
+  <data name="VersionLabel" xml:space="preserve">
+    <value>Version {0}</value>
   </data>
 </root>

@@ -123,6 +123,9 @@
   <data name="ChooseTenantButtonText" xml:space="preserve">
     <value>高级：列出可用租户</value>
   </data>
+  <data name="CloseWindow" xml:space="preserve">
+    <value>关闭</value>
+  </data>
   <data name="MakeAPackageBodyTextOne" xml:space="preserve">
     <value>游戏包能够加速上传过程，确保安装安全，并优化 Xbox 性能。只需添加构建文件和配置文件 </value>
     <comment>The part of the string that needs to come before the hyperlink (if any)</comment>
@@ -143,6 +146,12 @@
   <data name="MakePackageNotFoundErrorMsg" xml:space="preserve">
     <value>未找到 MakePkg.exe。请安装 GDK 以打包游戏内容。</value>
   </data>
+  <data name="MaximizeWindow" xml:space="preserve">
+    <value>最大化</value>
+  </data>
+  <data name="MinimizeWindow" xml:space="preserve">
+    <value>最小化</value>
+  </data>
   <data name="SignInButtonContent" xml:space="preserve">
     <value>登录</value>
   </data>
@@ -154,6 +163,9 @@
   </data>
   <data name="SignInTextBlockTitle" xml:space="preserve">
     <value>登录</value>
+  </data>
+  <data name="SignOutUser" xml:space="preserve">
+    <value>注销用户</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
     <value>包创建工具将您的游戏文件、资产和元数据打包成结构化的包，确保一致性和合规性，实现更快、更可靠的上传。</value>
@@ -169,5 +181,8 @@
   </data>
   <data name="UploadPackageBlockTitle" xml:space="preserve">
     <value>上传包（需要登录）</value>
+  </data>
+  <data name="VersionLabel" xml:space="preserve">
+    <value>版本 {0}</value>
   </data>
 </root>

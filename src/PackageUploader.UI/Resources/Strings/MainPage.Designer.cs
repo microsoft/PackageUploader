@@ -79,6 +79,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string CloseWindow {
+            get {
+                return ResourceManager.GetString("CloseWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file .
         /// </summary>
         public static string MakeAPackageBodyTextOne {
@@ -133,6 +142,24 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Maximize.
+        /// </summary>
+        public static string MaximizeWindow {
+            get {
+                return ResourceManager.GetString("MaximizeWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minimize.
+        /// </summary>
+        public static string MinimizeWindow {
+            get {
+                return ResourceManager.GetString("MinimizeWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sign In.
         /// </summary>
         public static string SignInButtonContent {
@@ -165,6 +192,15 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string SignInTextBlockTitle {
             get {
                 return ResourceManager.GetString("SignInTextBlockTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sign Out User.
+        /// </summary>
+        public static string SignOutUser {
+            get {
+                return ResourceManager.GetString("SignOutUser", resourceCulture);
             }
         }
         
@@ -210,6 +246,15 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string UploadPackageBlockTitle {
             get {
                 return ResourceManager.GetString("UploadPackageBlockTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version {0}.
+        /// </summary>
+        public static string VersionLabel {
+            get {
+                return ResourceManager.GetString("VersionLabel", resourceCulture);
             }
         }
     }

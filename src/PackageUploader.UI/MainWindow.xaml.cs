@@ -5,6 +5,7 @@ using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.ViewModel;
 using System.ComponentModel;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -29,6 +30,9 @@ namespace PackageUploader.UI
 
             // Initial update of username display
             UpdateUsernameDisplay();
+
+            // Set version display
+            VersionText.Text = string.Format(UI.Resources.Strings.MainPage.VersionLabel, GetVersion());
         }
 
         private void RegisterContentAreaChangeHandler()
@@ -73,7 +77,19 @@ namespace PackageUploader.UI
         {
             bool isOnMainPage = (ContentArea.Content as FrameworkElement)?.DataContext is MainPageViewModel;
             UserSignoutButton.IsEnabled = isOnMainPage;
-            UserSignoutButton.ToolTip = isOnMainPage ? "Sign Out User" : null;
+            UserSignoutButton.ToolTip = isOnMainPage ? UI.Resources.Strings.MainPage.SignOutUser : null;
+        }
+
+        private static string GetVersion()
+        {
+            var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+            var assemblyVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+
+            if (assemblyVersionAttribute is not null)
+            {
+                return assemblyVersionAttribute.InformationalVersion;
+            }
+            return assembly.GetName().Version?.ToString() ?? string.Empty;
         }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)

@@ -34,6 +34,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="32"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Custom Title Bar -->
@@ -61,27 +62,27 @@
 
                 <!-- User Info -->
                 <StackPanel Grid.Column="1"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Margin="0,0,10,0">
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,10,0">
                     <Button x:Name="UserSignoutButton" 
-                        WindowChrome.IsHitTestVisibleInChrome="True"
-                        Click="UserSignoutButton_Click"
-                        Style="{StaticResource UserSignoutButtonStyle}"
-                        Visibility="Collapsed"
-                        Height="32"
-                        ToolTip="Sign Out User">
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Click="UserSignoutButton_Click"
+                            Style="{StaticResource UserSignoutButtonStyle}"
+                            Visibility="Collapsed"
+                            Height="32"
+                            ToolTip="{x:Static strings:MainPage.SignOutUser}">
                         <StackPanel Orientation="Horizontal">
                             <Path Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" 
-                              Fill="{DynamicResource SecondaryTextBrush}" 
-                              Width="18" 
-                              Height="18"
-                              Stretch="Uniform"
-                              Margin="0,0,8,0"/>
+                                  Fill="{DynamicResource SecondaryTextBrush}" 
+                                  Width="18" 
+                                  Height="18"
+                                  Stretch="Uniform"
+                                  Margin="0,0,8,0"/>
                             <TextBlock x:Name="UserDisplayText" 
-                                   Foreground="{DynamicResource SecondaryTextBrush}" 
-                                   FontSize="12" 
-                                   VerticalAlignment="Center"/>
+                                       Foreground="{DynamicResource SecondaryTextBrush}" 
+                                       FontSize="12" 
+                                       VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -89,50 +90,65 @@
                 <!-- Window Controls -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="MinimizeButton"
-                        Width="46" Height="32" 
-                        WindowChrome.IsHitTestVisibleInChrome="True"
-                        Click="MinimizeButton_Click"
-                        Style="{StaticResource WindowControlButtonStyle}"
-                        AutomationProperties.HelpText="Minimize the window">
+                            Width="46" Height="32" 
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Click="MinimizeButton_Click"
+                            Style="{StaticResource WindowControlButtonStyle}"
+                            AutomationProperties.HelpText="Minimize the window"
+                            ToolTip="{x:Static strings:MainPage.MinimizeWindow}">
                         <Path Data="M0,6 H10" 
-                          Stroke="{StaticResource SecondaryTextBrush}" 
-                          StrokeThickness="1" 
-                          Stretch="None" 
-                          VerticalAlignment="Center" 
-                          HorizontalAlignment="Center"/>
+                              Stroke="{StaticResource SecondaryTextBrush}" 
+                              StrokeThickness="1" 
+                              Stretch="None" 
+                              VerticalAlignment="Center" 
+                              HorizontalAlignment="Center"/>
                     </Button>
                     <Button x:Name="MaximizeButton" 
-                        Width="46" Height="32" 
-                        WindowChrome.IsHitTestVisibleInChrome="True"
-                        Click="MaximizeButton_Click"
-                        Style="{StaticResource WindowControlButtonStyle}"
-                        AutomationProperties.HelpText="Maximize the window">
+                            Width="46" Height="32" 
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Click="MaximizeButton_Click"
+                            Style="{StaticResource WindowControlButtonStyle}"
+                            AutomationProperties.HelpText="Maximize the window"
+                            ToolTip="{x:Static strings:MainPage.MaximizeWindow}">
                         <Path x:Name="MaximizeIcon" 
-                          Data="M0,0 H10 V10 H0 V0" 
-                          Stroke="{StaticResource SecondaryTextBrush}" 
-                          StrokeThickness="1" 
-                          Stretch="None" 
-                          VerticalAlignment="Center" 
-                          HorizontalAlignment="Center"/>
+                              Data="M0,0 H10 V10 H0 V0" 
+                              Stroke="{StaticResource SecondaryTextBrush}" 
+                              StrokeThickness="1" 
+                              Stretch="None" 
+                              VerticalAlignment="Center" 
+                              HorizontalAlignment="Center"/>
                     </Button>
                     <Button x:Name="CloseButton" 
-                        Width="46" Height="32" 
-                        WindowChrome.IsHitTestVisibleInChrome="True"
-                        Click="CloseButton_Click"
-                        Style="{StaticResource WindowCloseButtonStyle}"
-                        AutomationProperties.HelpText="Close the application">
+                            Width="46" Height="32" 
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Click="CloseButton_Click"
+                            Style="{StaticResource WindowCloseButtonStyle}"
+                            AutomationProperties.HelpText="Close the application"
+                            ToolTip="{x:Static strings:MainPage.CloseWindow}">
                         <Path Data="M0,0 L10,10 M0,10 L10,0" 
-                          Stroke="{StaticResource SecondaryTextBrush}" 
-                          StrokeThickness="1" 
-                          Stretch="None" 
-                          VerticalAlignment="Center" 
-                          HorizontalAlignment="Center"/>
+                              Stroke="{StaticResource SecondaryTextBrush}" 
+                              StrokeThickness="1" 
+                              Stretch="None" 
+                              VerticalAlignment="Center" 
+                              HorizontalAlignment="Center"/>
                     </Button>
                 </StackPanel>
             </Grid>
 
             <!-- Main Content Area -->
             <ContentControl Grid.Row="1" x:Name="ContentArea"/>
+            
+            <!-- Version Information -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource AppBackgroundBrush}"
+                    BorderThickness="0">
+                <TextBlock x:Name="VersionText" 
+                           Foreground="{DynamicResource SecondaryTextBrush}" 
+                           FontSize="11" 
+                           Margin="10,4"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"/>
+            </Border>
         </Grid>
     </Border>
 </Window>
