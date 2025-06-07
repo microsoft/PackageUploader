@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.UI.Utility;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.Utility;
 
 [TestClass]
 public class BinaryReaderUtilityTest

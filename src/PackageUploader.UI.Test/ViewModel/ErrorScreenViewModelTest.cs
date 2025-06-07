@@ -9,7 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.ViewModel;
 
 [TestClass]
 public class ErrorScreenViewModelTest

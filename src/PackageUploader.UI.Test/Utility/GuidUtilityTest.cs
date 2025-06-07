@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.UI.Utility;
 using System;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.Utility;
 
 [TestClass]
 public class GuidUtilityTest

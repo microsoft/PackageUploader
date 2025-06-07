@@ -6,7 +6,7 @@ using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using PackageUploader.UI.ViewModel;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.ViewModel;
 
 [TestClass]
 public class MainPageViewModelTest

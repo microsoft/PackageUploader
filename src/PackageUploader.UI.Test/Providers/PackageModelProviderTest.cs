@@ -5,7 +5,7 @@ using PackageUploader.UI.Providers;
 using System;
 using System.IO;
 
-namespace PackageUploader.UI.Test
+namespace PackageUploader.UI.Test.Providers
 {
     [TestClass]
     public class PackageModelProviderTest

@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.UI.ViewModel;
 using System;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.ViewModel;
 
 [TestClass]
 public class RelayCommandTest

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.Utility;
 
 [TestClass]
 public class DragDropHelperTest

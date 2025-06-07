@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.ClientApi.Models;
 using PackageUploader.UI.Providers;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.Providers;
 
 [TestClass]
 public class UploadingProgressPercentageProviderTest

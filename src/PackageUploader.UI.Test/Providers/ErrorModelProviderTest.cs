@@ -4,7 +4,7 @@ using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using System;
 
-namespace PackageUploader.UI.Test
+namespace PackageUploader.UI.Test.Providers
 {
     [TestClass]
     public class ErrorModelProviderTest

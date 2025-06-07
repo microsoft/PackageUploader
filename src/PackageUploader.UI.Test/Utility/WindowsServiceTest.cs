@@ -6,7 +6,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace PackageUploader.UI.Test
+namespace PackageUploader.UI.Test.Utility
 {
     [TestClass]
     public class WindowServiceTest

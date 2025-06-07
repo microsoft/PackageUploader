@@ -3,7 +3,7 @@ using System;
 using PackageUploader.UI.Utility;
 using System.Numerics;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.Utility;
 
 [TestClass]
 public class OneTimeHolderTest

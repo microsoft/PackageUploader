@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PackageUploader.UI.Providers;
 
-namespace PackageUploader.UI.Test;
+namespace PackageUploader.UI.Test.Providers;
 
 [TestClass]
 public class PackingProgressPercentageProviderTest

@@ -11,7 +11,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PackageUploader.UI.Test
+namespace PackageUploader.UI.Test.Utility
 {
     [TestClass]
     public class AuthenticationServiceTest
@@ -20,6 +20,7 @@ namespace PackageUploader.UI.Test
         private Mock<IAccessTokenProvider> _mockAccessTokenProvider;
         private Mock<IAuthenticationResetService> _mockTokenResetService;
         private Mock<ILogger<AuthenticationService>> _mockLogger;
+        private Mock<ILogger<AuthenticationResetService>> _mockTokenResetLogger;
         private Mock<AuthenticationResetService> _mockAuthResetService;
         private AuthenticationService _authService;
 
@@ -30,7 +31,8 @@ namespace PackageUploader.UI.Test
             _mockAccessTokenProvider = new Mock<IAccessTokenProvider>();
             _mockTokenResetService = new Mock<IAuthenticationResetService>();
             _mockLogger = new Mock<ILogger<AuthenticationService>>();
-            _mockAuthResetService = new Mock<AuthenticationResetService>();
+            _mockTokenResetLogger = new Mock<ILogger<AuthenticationResetService>>();
+            _mockAuthResetService = new Mock<AuthenticationResetService>(_mockTokenResetLogger.Object);
 
             _authService = new AuthenticationService(
                 _userLoggedInProvider,
