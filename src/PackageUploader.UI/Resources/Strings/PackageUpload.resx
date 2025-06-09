@@ -127,7 +127,7 @@
     <value>Browse to the package file.</value>
   </data>
   <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
-    <value>There is a BuildId mismatch in the Submission Validator log file.</value>
+    <value>There is a BuildId mismatch in the Submission Validator log file. Expected: {0} Found: {1}</value>
   </data>
   <data name="CancelButtonHelpText" xml:space="preserve">
     <value>Cancel the operation.</value>
@@ -142,7 +142,7 @@
     <value>Destination</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
-    <value>The directory wasn't found.</value>
+    <value>The directory wasn't found: {0}</value>
   </data>
   <data name="ErrorExtractingInfoErrMsg" xml:space="preserve">
     <value>An error occurred while extracting the package information.</value>
@@ -162,17 +162,11 @@
   <data name="ErrUploadPackageErrMsg" xml:space="preserve">
     <value>An error occurred while uploading the package.</value>
   </data>
-  <data name="ExpectedText" xml:space="preserve">
-    <value>Expected</value>
-  </data>
   <data name="FamilyTitleText" xml:space="preserve">
     <value>Family</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
     <value>File name</value>
-  </data>
-  <data name="FoundText" xml:space="preserve">
-    <value>Found</value>
   </data>
   <data name="InvalidFilePathErrMsg" xml:space="preserve">
     <value>The file path is invalid.</value>
@@ -226,7 +220,7 @@
     <value>StoreId</value>
   </data>
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
-    <value>The Submission Validator log wasn't found.</value>
+    <value>The Submission Validator log wasn't found: {0}</value>
   </data>
   <data name="UploadButtonContentText" xml:space="preserve">
     <value>Upload package</value>
