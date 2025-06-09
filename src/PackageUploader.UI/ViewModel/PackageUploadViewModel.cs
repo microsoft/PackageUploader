@@ -156,7 +156,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            MarketGroupErrorMessage = $"{Resources.Strings.PackageUpload.ErrorGettingMarketGroupsErrMsg}: {ex.Message}"; //$"Error getting market groups: {ex.Message}";
+            MarketGroupErrorMessage = $"{Resources.Strings.PackageUpload.ErrorGettingMarketGroupsErrMsg} {ex.Message}"; //$"Error getting market groups. {ex.Message}";
         }
         finally
         {
@@ -478,7 +478,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorSelectingFileErrMsg}: {ex.Message}"; //$"Error selecting file: {ex.Message}";
+            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorSelectingFileErrMsg} {ex.Message}"; //$"Error selecting file. {ex.Message}";
         }
     }
 
@@ -518,7 +518,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorProcessingPackageErrMsg}: {ex.Message}"; // "Error processing package: {ex.Message}";
+            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorProcessingPackageErrMsg} {ex.Message}"; // "Error processing package. {ex.Message}";
         }
     }
 
@@ -571,7 +571,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
             if (!Directory.Exists(baseFolder))
             {
-                throw new DirectoryNotFoundException($"{Resources.Strings.PackageUpload.DirectoryNotFoundErrMsg}: {baseFolder}"); // "Directory not found: {baseFolder}"
+                throw new DirectoryNotFoundException(string.Format(Resources.Strings.PackageUpload.DirectoryNotFoundErrMsg, baseFolder)); // "The directory wasn't found: {baseFolder}"
             }
             string fileName = Path.GetFileNameWithoutExtension(packagePath);
 
@@ -660,7 +660,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         // Read the XML file and extract the TitleId and StoreId
         if (!File.Exists(SubValFilePath))
         {
-            throw new FileNotFoundException($"{Resources.Strings.PackageUpload.SubValLogNotFoundErrMsg}: {SubValFilePath}");//$"Submission Validator log not found: {SubValFilePath}");
+            throw new FileNotFoundException(string.Format(Resources.Strings.PackageUpload.SubValLogNotFoundErrMsg, SubValFilePath));//$"Submission Validator log not found: {SubValFilePath}");
         }
 
         using FileStream stream = File.OpenRead(SubValFilePath);
@@ -676,11 +676,9 @@ public partial class PackageUploadViewModel : BaseViewModel
 
             if (buildId != expectedBuildId)
             {
-                string expectedMsg = Resources.Strings.PackageUpload.ExpectedText;
-                string foundMsg = Resources.Strings.PackageUpload.FoundText;
-                string mainMsg = Resources.Strings.PackageUpload.BuildIdMismatchSubValErrMsg;
-                //throw new Exception($"BuildId mismatch in the Submission Validator log file. Expected: {expectedBuildId}, Found: {buildId}");
-                throw new Exception($"{mainMsg}. {expectedMsg}: {expectedBuildId}, {foundMsg}: {buildId}");
+                string formatString = Resources.Strings.PackageUpload.BuildIdMismatchSubValErrMsg;
+                // There is a BuildId mismatch in the Submission Validator log file. Expected: {0} Found: {1}
+                throw new Exception(string.Format(formatString, expectedBuildId, buildId));
             }
         }
 
@@ -752,7 +750,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            BranchOrFlightErrorMessage = $"{Resources.Strings.PackageUpload.ErrorGettingProdInfo}: {ex.Message}"; //$"Error getting product information: {ex.Message}";
+            BranchOrFlightErrorMessage = $"{Resources.Strings.PackageUpload.ErrorGettingProdInfo} {ex.Message}"; //$"Error getting product information. {ex.Message}";
         }
         finally
         {
@@ -842,7 +840,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         catch (Exception ex)
         {
             SetErrorAndGoToErrorPage(nameof(Exception), ex.ToString());
-            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrUploadPackageErrMsg}: {ex.Message}"; // "Error uploading package: {ex.Message}";
+            PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrUploadPackageErrMsg} {ex.Message}"; // "Error uploading package. {ex.Message}";
         }
         finally
         {

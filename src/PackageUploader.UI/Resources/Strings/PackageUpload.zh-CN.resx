@@ -24,7 +24,8 @@
     </data>
     <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment></data>
+        <comment>This is a comment</comment>
+    </data>
                 
     There are any number of "resheader" rows that contain simple 
     name/value pairs.
@@ -126,7 +127,7 @@
     <value>浏览到包文件。</value>
   </data>
   <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
-    <value>Submission Validator 日志文件中的 BuildId 不匹配。</value>
+    <value>Submission Validator 日志文件中的 BuildId 不匹配。预期: {0} 发现: {1}</value>
   </data>
   <data name="CancelButtonHelpText" xml:space="preserve">
     <value>取消操作。</value>
@@ -141,7 +142,7 @@
     <value>目标位置</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
-    <value>目录未找到。</value>
+    <value>未找到目录: {0}</value>
   </data>
   <data name="ErrorExtractingInfoErrMsg" xml:space="preserve">
     <value>提取包信息时出错。</value>
@@ -161,17 +162,11 @@
   <data name="ErrUploadPackageErrMsg" xml:space="preserve">
     <value>上传包时出错。</value>
   </data>
-  <data name="ExpectedText" xml:space="preserve">
-    <value>预期</value>
-  </data>
   <data name="FamilyTitleText" xml:space="preserve">
     <value>系列</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
     <value>文件名</value>
-  </data>
-  <data name="FoundText" xml:space="preserve">
-    <value>找到</value>
   </data>
   <data name="InvalidFilePathErrMsg" xml:space="preserve">
     <value>文件路径无效。</value>
@@ -225,7 +220,7 @@
     <value>StoreId</value>
   </data>
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
-    <value>未找到 Submission Validator 日志。</value>
+    <value>未找到 Submission Validator 日志: {0}</value>
   </data>
   <data name="UploadButtonContentText" xml:space="preserve">
     <value>上传包</value>

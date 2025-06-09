@@ -127,7 +127,7 @@
     <value>パッケージファイルを参照してください。</value>
   </data>
   <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
-    <value>Submission Validator ログファイルの BuildId が一致しません。</value>
+    <value>Submission Validator ログファイルの BuildId が一致しません。期待値: {0} 実際の値: {1}</value>
   </data>
   <data name="CancelButtonHelpText" xml:space="preserve">
     <value>操作をキャンセルします。</value>
@@ -142,7 +142,7 @@
     <value>送信先</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
-    <value>ディレクトリが見つかりませんでした。</value>
+    <value>ディレクトリが見つかりませんでした: {0}</value>
   </data>
   <data name="ErrorExtractingInfoErrMsg" xml:space="preserve">
     <value>パッケージ情報の抽出中にエラーが発生しました。</value>
@@ -162,17 +162,11 @@
   <data name="ErrUploadPackageErrMsg" xml:space="preserve">
     <value>パッケージのアップロード中にエラーが発生しました。</value>
   </data>
-  <data name="ExpectedText" xml:space="preserve">
-    <value>期待値</value>
-  </data>
   <data name="FamilyTitleText" xml:space="preserve">
     <value>ファミリー</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
     <value>ファイル名</value>
-  </data>
-  <data name="FoundText" xml:space="preserve">
-    <value>検出値</value>
   </data>
   <data name="InvalidFilePathErrMsg" xml:space="preserve">
     <value>ファイルパスが無効です。</value>
@@ -226,7 +220,7 @@
     <value>StoreId</value>
   </data>
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
-    <value>Submission Validator ログが見つかりませんでした。</value>
+    <value>Submission Validator ログが見つかりませんでした: {0}</value>
   </data>
   <data name="UploadButtonContentText" xml:space="preserve">
     <value>パッケージをアップロード</value>

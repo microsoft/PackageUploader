@@ -88,7 +88,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There is a BuildId mismatch in the Submission Validator log file..
+        ///   Looks up a localized string similar to There is a BuildId mismatch in the Submission Validator log file. Expected: {0} Found: {1}.
         /// </summary>
         public static string BuildIdMismatchSubValErrMsg {
             get {
@@ -133,7 +133,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The directory wasn&apos;t found..
+        ///   Looks up a localized string similar to The directory wasn&apos;t found: {0}.
         /// </summary>
         public static string DirectoryNotFoundErrMsg {
             get {
@@ -196,15 +196,6 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Expected.
-        /// </summary>
-        public static string ExpectedText {
-            get {
-                return ResourceManager.GetString("ExpectedText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Family.
         /// </summary>
         public static string FamilyTitleText {
@@ -219,15 +210,6 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string FileNameTitleText {
             get {
                 return ResourceManager.GetString("FileNameTitleText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Found.
-        /// </summary>
-        public static string FoundText {
-            get {
-                return ResourceManager.GetString("FoundText", resourceCulture);
             }
         }
         
@@ -394,7 +376,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Submission Validator log wasn&apos;t found..
+        ///   Looks up a localized string similar to The Submission Validator log wasn&apos;t found: {0}.
         /// </summary>
         public static string SubValLogNotFoundErrMsg {
             get {
