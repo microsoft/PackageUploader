@@ -138,4 +138,7 @@
   <data name="UploadingPackageText" xml:space="preserve">
     <value>上传包中...</value>
   </data>
+  <data name="UploadingText" xml:space="preserve">
+    <value>正在上传</value>
+  </data>
 </root>

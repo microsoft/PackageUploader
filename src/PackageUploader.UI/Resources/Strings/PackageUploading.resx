@@ -138,4 +138,7 @@
   <data name="UploadingPackageText" xml:space="preserve">
     <value>Uploading package...</value>
   </data>
+  <data name="UploadingText" xml:space="preserve">
+    <value>Uploading</value>
+  </data>
 </root>

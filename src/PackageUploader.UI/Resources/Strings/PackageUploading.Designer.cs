@@ -122,5 +122,14 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("UploadingPackageText", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uploading.
+        /// </summary>
+        public static string UploadingText {
+            get {
+                return ResourceManager.GetString("UploadingText", resourceCulture);
+            }
+        }
     }
 }

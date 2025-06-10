@@ -12,7 +12,9 @@
     <Grid Background="{DynamicResource AppBackgroundBrush}">
         <StackPanel Margin="32">
             <!-- Add Back Arrow Icon -->
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" >
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Top"
+                        Margin="0, 0, 0, 15">
                 <Button Width="16"
                         Height="16"
                         Command="{Binding CancelButtonCommand}"

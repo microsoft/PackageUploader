@@ -61,7 +61,8 @@
             <TextBlock Grid.Row="0"
                        Grid.Column="0"
                        Margin="0, 0, 0, 10"
-                       Text="Uploading"
+                       Text="{x:Static strings:PackageUploading.UploadingText}"
+                       d:Text="Uploading"
                        Foreground="{DynamicResource PrimaryTextBrush}" 
                        HorizontalAlignment="Left"/>
             <StackPanel Grid.Row="0"

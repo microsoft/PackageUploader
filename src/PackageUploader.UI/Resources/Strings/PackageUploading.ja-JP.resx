@@ -138,4 +138,7 @@
   <data name="UploadingPackageText" xml:space="preserve">
     <value>パッケージをアップロード中...</value>
   </data>
+  <data name="UploadingText" xml:space="preserve">
+    <value>アップロード中</value>
+  </data>
 </root>
