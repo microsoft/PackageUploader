@@ -82,8 +82,6 @@ public class PartialGameConfigModelTest
             """;
 
         File.WriteAllText(_goodConfigPath, _goodConfigContent);
-
-        File.WriteAllText(_badConfigPath, "This is not a valid MicrosoftGame.config file");
     }
 
     [TestMethod]
@@ -96,13 +94,137 @@ public class PartialGameConfigModelTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(XmlException))]
     public void TestInvalidConfigFile()
     {
-        _ = new PartialGameConfigModel(_badConfigPath);
+        try
+        {
+            // Assemble
+            File.WriteAllText(_badConfigPath, "This is not a valid MicrosoftGame.config file");
+            // Act
+            _ = new PartialGameConfigModel(_badConfigPath);
+            // Assert
+            Assert.Fail("Expected Exception to be thrown");
+        }
+        catch (XmlException e)
+        {
+            // good
+        }
+        finally
+        {
+            File.Delete(_badConfigPath);
+        }
+
+        try
+        {
+            // Assemble
+            File.WriteAllText(_badConfigPath, "<Game> <Hello> </Game>");
+            // Act
+            _ = new PartialGameConfigModel(_badConfigPath);
+            // Assert
+            Assert.Fail("Expected Exception to be thrown");
+        }
+        catch (XmlException e)
+        {
+            // good
+        }
+        finally
+        {
+            File.Delete(_badConfigPath);
+        }
+
+        try
+        {
+            // Assemble
+            File.WriteAllText(_badConfigPath, "<Game> <Identity& /> </Game>");
+            // Act
+            _ = new PartialGameConfigModel(_badConfigPath);
+            // Assert
+            Assert.Fail("Expected Exception to be thrown");
+        }
+        catch (XmlException e)
+        {
+            // good
+        }
+        finally
+        {
+            File.Delete(_badConfigPath);
+        }
+
+        try
+        {
+            // Assemble
+            File.WriteAllText(_badConfigPath, "<Game> <<Identity /> </Game>");
+            // Act
+            _ = new PartialGameConfigModel(_badConfigPath);
+            // Assert
+            Assert.Fail("Expected Exception to be thrown");
+        }
+        catch (XmlException e)
+        {
+            // good
+        }
+        finally
+        {
+            File.Delete(_badConfigPath);
+        }
+
+        try
+        {
+            // Assemble
+            File.WriteAllText(_badConfigPath, "<Game> <Identity ' /> </Game>");
+            // Act
+            _ = new PartialGameConfigModel(_badConfigPath);
+            // Assert
+            Assert.Fail("Expected Exception to be thrown");
+        }
+        catch (XmlException e)
+        {
+            // good
+        }
+        finally
+        {
+            File.Delete(_badConfigPath);
+        }
+
+        try
+        {
+            // Assemble
+            File.WriteAllText(_badConfigPath, "<Game> <Identity Hello=\"yes\"\"/>  </Game>");
+            // Act
+            _ = new PartialGameConfigModel(_badConfigPath);
+            // Assert
+            Assert.Fail("Expected Exception to be thrown");
+        }
+        catch (XmlException e)
+        {
+            // good
+        }
+                finally
+        {
+            File.Delete(_badConfigPath);
+        }
+
+        try
+        {
+            // Assemble
+            File.WriteAllText(_badConfigPath, "<Game> <Identity > />  </Game>");
+            // Act
+            _ = new PartialGameConfigModel(_badConfigPath);
+            // Assert
+            Assert.Fail("Expected Exception to be thrown");
+        }
+        catch (XmlException e)
+        {
+            // good
+        }
+        finally
+        {
+            File.Delete(_badConfigPath);
+        }
     }
 
-    [TestMethod]
+
+        [TestMethod]
     public void TestGoodConfig()
     {
         var model = new PartialGameConfigModel(_goodConfigPath);
