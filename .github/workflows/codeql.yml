@@ -75,10 +75,10 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore src/PackageUploader.sln
+      run: dotnet restore src/PackageUploader.sln /p:EnableWindowsTargeting=true
 
     - name: Build solution
-      run: dotnet build src/PackageUploader.sln --configuration Release --no-restore
+      run: dotnet build src/PackageUploader.sln --configuration Release --no-restore /p:EnableWindowsTargeting=true
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
