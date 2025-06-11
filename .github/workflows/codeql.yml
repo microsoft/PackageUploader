@@ -72,6 +72,7 @@ jobs:
 
     - run: |
         echo "Building the application manually"
+        cd src
         dotnet restore
         dotnet build --no-incremental --configuration Debug
 
