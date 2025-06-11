@@ -423,7 +423,7 @@ public class PackageUploaderService : IPackageUploaderService
                     if (gameConfiguration.AvailabilityDate.IsEnabled)
                     {
                         marketGroupPackage.PackageAvailabilityDates ??= [];
-                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = gameConfiguration.AvailabilityDate.GetEffectiveDate();
+                        marketGroupPackage.PackageAvailabilityDates[gamePackage.Id] = gameConfiguration.AvailabilityDate.EffectiveDate;
                     }
                     else if (marketGroupPackage.PackageAvailabilityDates is not null)
                     {
@@ -466,7 +466,7 @@ public class PackageUploaderService : IPackageUploaderService
                     if (gameConfiguration.AvailabilityDate is not null)
                     {
                         marketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
-                            ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
+                            ? gameConfiguration.AvailabilityDate.EffectiveDate
                             : null;
                     }
 
@@ -476,7 +476,7 @@ public class PackageUploaderService : IPackageUploaderService
                         marketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                         {
                             IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                            EffectiveDate = gameConfiguration.MandatoryDate.GetEffectiveDate(),
+                            EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
                         };
                     }
                 }
@@ -561,7 +561,7 @@ public class PackageUploaderService : IPackageUploaderService
                                     if (gameConfiguration?.AvailabilityDate is not null)
                                     {
                                         destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
-                                            ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
+                                            ? gameConfiguration.AvailabilityDate.EffectiveDate
                                             : null;
                                     }
                                     else
@@ -588,7 +588,7 @@ public class PackageUploaderService : IPackageUploaderService
                                     if (gameConfiguration?.AvailabilityDate is not null)
                                     {
                                         destinationMarketGroupPackage.PackageAvailabilityDates[packageId] = gameConfiguration.AvailabilityDate.IsEnabled
-                                            ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
+                                            ? gameConfiguration.AvailabilityDate.EffectiveDate
                                             : null;
                                     }
                                     else
@@ -613,7 +613,7 @@ public class PackageUploaderService : IPackageUploaderService
                             if (gameConfiguration.AvailabilityDate is not null)
                             {
                                 destinationMarketGroupPackage.AvailabilityDate = gameConfiguration.AvailabilityDate.IsEnabled
-                                    ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
+                                    ? gameConfiguration.AvailabilityDate.EffectiveDate
                                     : null;
                             }
                             if (gameConfiguration.MandatoryDate is not null)
@@ -621,7 +621,7 @@ public class PackageUploaderService : IPackageUploaderService
                                 destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                                 {
                                     IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                                    EffectiveDate = gameConfiguration.MandatoryDate.GetEffectiveDate(),
+                                    EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
                                 };
                             }
                         }
@@ -632,7 +632,7 @@ public class PackageUploaderService : IPackageUploaderService
                             {
                                 destinationMarketGroupPackage.AvailabilityDate =
                                     gameConfiguration.AvailabilityDate.IsEnabled
-                                        ? gameConfiguration.AvailabilityDate.GetEffectiveDate()
+                                        ? gameConfiguration.AvailabilityDate.EffectiveDate
                                         : null;
                             }
 
@@ -643,7 +643,7 @@ public class PackageUploaderService : IPackageUploaderService
                                 destinationMarketGroupPackage.MandatoryUpdateInfo = new GameMandatoryUpdateInfo
                                 {
                                     IsEnabled = gameConfiguration.MandatoryDate.IsEnabled,
-                                    EffectiveDate = gameConfiguration.MandatoryDate.GetEffectiveDate(),
+                                    EffectiveDate = gameConfiguration.MandatoryDate.EffectiveDate,
                                 };
                             }
                         }
@@ -827,7 +827,7 @@ public class PackageUploaderService : IPackageUploaderService
     {
         return new GameMarketGroupPackageMetadata
         {
-            PreDownloadDate = preDownloadDate?.IsEnabled == true ? preDownloadDate.GetEffectiveDate() : null,
+            PreDownloadDate = preDownloadDate?.IsEnabled == true ? preDownloadDate.EffectiveDate : null,
         };
     }
 
