@@ -5,6 +5,7 @@
 	  <IsPackable>false</IsPackable>
 	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -15,9 +16,10 @@
 		</PackageReference>
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\PackageUploader.UI\PackageUploader.UI.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PackageUploader.ClientApi\PackageUploader.ClientApi.csproj" />
+    <ProjectReference Include="..\PackageUploader.UI\PackageUploader.UI.csproj" />
+  </ItemGroup>
 
 
 
