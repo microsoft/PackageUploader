@@ -89,7 +89,12 @@ namespace PackageUploader.UI
 
             if (assemblyVersionAttribute is not null)
             {
-                return assemblyVersionAttribute.InformationalVersion.Split('+')[0];
+                string version = assemblyVersionAttribute.InformationalVersion.Split('+')[0];
+                if (version.Equals("1.0.0"))
+                {
+                    return assemblyVersionAttribute.InformationalVersion; // Return full version if it's the default 1.0.0
+                }
+                return version;
             }
             return assembly.GetName().Version?.ToString() ?? string.Empty;
         }
