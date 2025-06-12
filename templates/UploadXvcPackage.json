@@ -46,6 +46,7 @@
     "maxParallelism": 24,
     "defaultConnectionLimit": -1,
     "expect100Continue": false,
-    "useNagleAlgorithm": false
+    "useNagleAlgorithm": false,
+    "retryCount": 3
   }
 }
