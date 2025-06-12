@@ -16,6 +16,8 @@ public class ErrorScreenViewModelTest
 {
     private Mock<IWindowService> _windowService;
     private ErrorModelProvider _errorModelProvider;
+    private Mock<IClipboardService> _clipboardService;
+    private Mock<IProcessStarterService> _processStarterService;
 
     private ErrorScreenViewModel _errorScreenViewModel;
 
@@ -24,6 +26,9 @@ public class ErrorScreenViewModelTest
     {
         _windowService = new Mock<IWindowService>();
         
+        _clipboardService = new Mock<IClipboardService>();
+        _processStarterService = new Mock<IProcessStarterService>();
+
         _errorModelProvider = new ErrorModelProvider();
         _errorModelProvider.Error.MainMessage = "TestMainMessage";
         _errorModelProvider.Error.DetailMessage = "TestDetailMessage";
@@ -32,7 +37,9 @@ public class ErrorScreenViewModelTest
 
         _errorScreenViewModel = new ErrorScreenViewModel(
             _windowService.Object,
-            _errorModelProvider
+            _errorModelProvider,
+            _clipboardService.Object,
+            _processStarterService.Object
         );
     }
 
@@ -46,14 +53,9 @@ public class ErrorScreenViewModelTest
     [TestMethod]
     public void CopyErrorCommandTest()
     {
-        /*_errorScreenViewModel.CopyErrorCommand.Execute(null);
-        Assert.IsTrue(Clipboard.ContainsText());
-        
-        var copiedText = Clipboard.GetText();
-        var expectedText = _errorModelProvider.Error.MainMessage + Environment.NewLine + _errorModelProvider.Error.DetailMessage;
-        Assert.AreEqual(expectedText, copiedText);*/
+        _errorScreenViewModel.CopyErrorCommand.Execute(null);
 
-        // would need to refactor CopyError to take dependency injection for Clipboard.SetData...
+        _clipboardService.Verify(x => x.SetData(DataFormats.Text, _errorModelProvider.Error.MainMessage + Environment.NewLine + _errorModelProvider.Error.DetailMessage), Times.Once);
     }
 
     [TestMethod]
@@ -67,8 +69,7 @@ public class ErrorScreenViewModelTest
     [TestMethod]
     public void ViewLogsCommandTest()
     {
-        //_errorScreenViewModel.ViewLogsCommand.Execute(null);
-        // would need to refactor ViewLogs to accept some kind of dependency injection
-        //so we can mock up Process.Start
+        _errorScreenViewModel.ViewLogsCommand.Execute(null);
+        _processStarterService.Verify(x => x.Start("explorer.exe", $"/select, \"{_errorModelProvider.Error.LogsPath}\""), Times.Once);
     }
 }

@@ -84,6 +84,11 @@ public class PartialGameConfigModelTest
         File.WriteAllText(_goodConfigPath, _goodConfigContent);
     }
 
+    public string getGoodConfigPath()
+    {
+        return _goodConfigPath;
+    }
+
     [TestMethod]
     [ExpectedException(typeof(InvalidDataException))]
     public void TestInvalidConstructor()

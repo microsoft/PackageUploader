@@ -15,6 +15,7 @@ namespace PackageUploader.UI.ViewModel
         public readonly PackageModelProvider _packageModelProvider;
         public readonly PackingProgressPercentageProvider _packingProgressPercentageProvider;
         private readonly IWindowService _windowService;
+        private readonly IProcessStarterService _processStarterService;
 
         public int PackingProgressPercentage
         {
@@ -33,12 +34,13 @@ namespace PackageUploader.UI.ViewModel
         public ICommand CancelCreationCommand { get; }
 
 
-        public PackagingProgressViewModel(PackingProgressPercentageProvider packingProgressPercentageProvider, PackageModelProvider packageModelProvider, IWindowService windowService)
+        public PackagingProgressViewModel(PackingProgressPercentageProvider packingProgressPercentageProvider, PackageModelProvider packageModelProvider, IWindowService windowService, IProcessStarterService processStarterService)
         {
             _packingProgressPercentageProvider = packingProgressPercentageProvider;
             _packingProgressPercentageProvider.PropertyChanged += PackagingProgressUpdate;
             _packageModelProvider = packageModelProvider;
             _windowService = windowService;
+            _processStarterService = processStarterService;
 
             ViewLogsCommand = new RelayCommand(ViewLogs);
             CancelCreationCommand = new RelayCommand(CancelCreation);
@@ -56,16 +58,16 @@ namespace PackageUploader.UI.ViewModel
         {
             _packingProgressPercentageProvider.PackingCancelled = true;
 
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
+            //System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            //{
                 _windowService.NavigateTo(typeof(PackageCreationView));
-            });
+            //});
         }
 
         private void ViewLogs()
         {
             string logPath = _packageModelProvider.PackagingLogFilepath;
-            Process.Start("explorer.exe", $"/select, \"{logPath}\"");
+            _processStarterService.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
     }
 }

@@ -18,6 +18,7 @@ namespace PackageUploader.UI.ViewModel
         private readonly PackageModelProvider _packageModelProvider;
         private readonly PathConfigurationProvider _pathConfigurationService;
         private readonly ILogger<PackagingFinishedViewModel> _logger;
+        private readonly IProcessStarterService _processStarterService;
 
         private BitmapImage? _packagePreviewImage = null;
         public BitmapImage? PackagePreviewImage
@@ -69,13 +70,15 @@ namespace PackageUploader.UI.ViewModel
             IWindowService windowService,
             PackageModelProvider packageModelProvider,
             PathConfigurationProvider pathConfigurationService,
-            ILogger<PackagingFinishedViewModel> logger)
+            ILogger<PackagingFinishedViewModel> logger,
+            IProcessStarterService processStarterService)
         {
             _windowService = windowService;
             _packageModelProvider = packageModelProvider;
             _pathConfigurationService = pathConfigurationService;
             _logger = logger;
-            
+            _processStarterService = processStarterService;
+
             HomeCommand = new RelayCommand(OnHome);
             ViewLogsCommand = new RelayCommand(OnViewLogs);
             ViewInPartnerCenterCommand = new RelayCommand(OnViewInPartnerCenter);
@@ -95,23 +98,23 @@ namespace PackageUploader.UI.ViewModel
 
         public void OnHome()
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-           {
+           //System.Windows.Application.Current.Dispatcher.Invoke(() =>
+           //{
                _windowService.NavigateTo(typeof(MainPageView));
-           });
+           //});
         }
 
-        public static void OnViewLogs()
+        public void OnViewLogs()
         {
             string logPath = App.GetLogFilePath();
-            Process.Start("explorer.exe", $"/select, \"{logPath}\"");
+            _processStarterService.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
 
         public void OnViewInPartnerCenter()
         {
             string branchId = _packageModelProvider.Package.BranchId;
             string partnerCenterUrl = $"https://partner.microsoft.com/en-us/dashboard/products/{StoreId}/packages/{branchId}";
-            Process.Start(new ProcessStartInfo(partnerCenterUrl) { UseShellExecute = true });
+            _processStarterService.Start(new ProcessStartInfo(partnerCenterUrl) { UseShellExecute = true });
         }
 
         private static string TranslateFileSize(long size)
