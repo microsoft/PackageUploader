@@ -14,6 +14,11 @@ internal sealed class Block
     public long Id { get; set; }
 
     /// <summary>
+    /// Block ID in Base64 format
+    /// </summary>
+    public string BlockIdBase64 { get; set; }
+
+    /// <summary>
     /// The byte offset location of this block
     /// </summary>
     public long Offset { get; set; }
