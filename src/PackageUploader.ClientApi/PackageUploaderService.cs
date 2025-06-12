@@ -175,14 +175,6 @@ public class PackageUploaderService : IPackageUploaderService
 
             if (gameAssets is not null)
             {
-                //var uploadTasks = new List<Task>
-                //{ 
-                //    UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct),
-                //    UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct),
-                //    UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct),
-                //};
-
-                //await Task.WhenAll(uploadTasks).ConfigureAwait(false);
                 await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct);
                 await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct);
                 await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct);
