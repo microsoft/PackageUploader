@@ -15,6 +15,7 @@ This article covers the following:
 * [Example GetProduct operation](#example-getproduct-operation)
 * [Example UploadXvcPackage operation](#example-uploadxvcpackage-operation)
 * [Example PublishPackages operation](#example-publishpackages-operation)
+* [Using the Xbox Game Package Manager (UI tool over the Package Uploader)](#using-the-xbox-game-package-manager-ui-tool-over-the-package-uploader)
 * [Troubleshooting](#troubleshooting)
 * [Q &amp; A](#q-and-a)
 
@@ -50,6 +51,13 @@ Programmatic manipulation of packages for a particular product requires the foll
 
 ## Service creation and authentication for Azure AD applications
 
+### Recommendation: Use Browser based authentication if not in a headless scenario
+
+You can avoid service creation, secrets, and authentication when using the Package Uploader by using the 'Browser' authentication option.
+
+1. Specify the '-a Browser' authentication method when running the Package Uploader.
+2. Use '-t <TenantId>' if your account has access to multiple tenants. This will ensure that the correct tenant is used for authentication.
+
 ### Create an Azure AD application for authentication
 
 1. Sign in to your company's [Azure portal](https://portal.azure.com) and select **Azure Active Directory**.<br>**NOTE:** Ensure that this is the same Azure AD that's linked to your Partner Center account.
@@ -69,7 +77,7 @@ For more information, see [Quickstart: Register an app in the Microsoft identity
 
 ### Setup authorization 
 
-The tool supports app secrets or certificates. Perform one of the following procedures to setup authorization.
+For headless scenarios, the tool supports app secrets or certificates. Perform one of the following procedures to setup authorization.
 
 #### Create a secret key
 
@@ -142,6 +150,7 @@ For more information on operation parameters, see [Operations](https://github.co
 | **-f, --ConfigFileFormat <Ini\|Json\|Xml>** | The format of the configuration file (default: Json) |
 | **-s, --ClientSecret <ClientSecret>** | The client secret of the Azure AD application (only for AppSecret) |
 | **-a, --Authentication <[Authentication method](#available-authentication-methods)>** | The authentication method (default: AppSecret) |
+| **-t, --TenantId <TenantId>** | The tenant ID of the Azure AD application (only for Browser or CacheableBrowser authentication) |
 | **-v, --Verbose** | Log verbose messages, such as HTTP calls |
 | **-d, --Data** | Do not log on console and only return data (only for Get operations) |
 | **-l, --LogFile <LogFile>** | The location of the log file |
@@ -157,6 +166,7 @@ For more information on operation parameters, see [Operations](https://github.co
 | AppCert | Uses a confidential client application to authenticate with Microsoft Entra using a client certificate. |
 | Default | Uses the Azure Identity DefaultAzureCredential method to authenticate with Microsoft Entra. Simplifies authentication by combining credentials. See Usage guidance for [DefaultAzureCredential](https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication/credential-chains?tabs=dac#defaultazurecredential-overview). |
 | Browser | Uses the Azure Identity InteractiveBrowserCredential method to authenticate with Microsoft Entra. A TokenCredential implementation which launches the system default browser to interactively authenticate a user, and obtain an access token. The browser will only be launched to authenticate the user once, then will silently acquire access tokens through the users refresh token as long as it's valid. |
+| CacheableBrowser | Uses the Azure Identity InteractiveBrowserCredential method to authenticate with Microsoft Entra. A TokenCredential implementation which launches the system default browser to interactively authenticate a user, and obtain an access token. The browser will only be launched to authenticate the user once, then will silently acquire access tokens through the users refresh token as long as it's valid. This authentication method caches the access token for later use. |
 | AzureCli | Uses the Azure Identity AzureCliCredential method to authenticate with Microsoft Entra. If the user is authenticated to Azure using Azure CLI's az login command, authenticate the app to Azure using that same account. |
 | ManagedIdentity | Uses the Azure Identity ManagedIdentityCredential method to authenticate with Microsoft Entra. Attempts authentication using a managed identity that has been assigned to the deployment environment. This authentication type works for all Azure-hosted environments that support managed identity. More information about configuring managed identities can be found [here](https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview). |
 | Environment | Uses the Azure Identity EnvironmentCredential method to authenticate with Microsoft Entra. Enables authentication to Microsoft Entra ID using a client secret or certificate, or as a user with a username and password, using environment variables. Order and environment variables can be found [here](https://learn.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential). |
@@ -332,6 +342,34 @@ Example PublishPackages operation output
 2021-10-22 17:39:14.187 info: PackageUploader.ClientApi.PackageUploaderService[0] Game published.
 2021-10-22 17:39:14.188 info: PackageUploader.Application.Operations.PublishPackagesOperation[0] PackageUploader has finished running.
 ```
+<a id="example-publishpackages-operation"></a>
+
+## Using the Xbox Game Package Manager (UI tool over the Package Uploader)
+
+The Xbox Game Package Manager is a Windows desktop application that provides a user-friendly graphical interface for the Package Uploader functionality. This tool simplifies both package creation and upload operations with the following key features:
+
+### Package Creation
+- **GDK Integration**: Leverages your installed Xbox Game Development Kit (GDK) to create game packages directly from loose game files
+- **Simple Configuration**: Point to the folder containing your MicrosoftGame.config file and configure optional settings
+- **Custom Layout Support**: Option to specify a custom layout XML file for advanced packaging scenarios
+- **Output Directory Selection**: Choose where the packaged files will be saved
+
+### Package Upload
+- **Streamlined Workflow**: Select your package, branch, and market group in a simple interface
+- **Status Monitoring**: Track upload progress in real-time with visual indicators
+- **Browser-based Authentication**: Authenticate seamlessly through your default browser without managing service credentials
+- **Multi-tenant Support**: Advanced option to specify a tenant ID if your account has access to multiple tenants
+
+### Benefits
+- **No Configuration Files**: Create and upload packages without writing JSON configuration files
+- **Visual Progress**: Monitor packaging and upload progress through a visual interface
+- **Simplified Authentication**: Uses browser-based authentication to eliminate the need for client secrets or certificates
+- **Error Handling**: Provides clear error messages and troubleshooting guidance through the UI
+
+To use the Xbox Game Package Manager, download the latest version from the [Releases page](https://github.com/microsoft/PackageUploader/releases/latest) and run the XboxGamePackageManager.exe application.
+
+
+
 <a id="troubleshooting"></a>
 
 ## Troubleshooting

@@ -110,7 +110,7 @@ public class PartialGameConfigModelTest
             // Assert
             Assert.Fail("Expected Exception to be thrown");
         }
-        catch (XmlException e)
+        catch (XmlException)
         {
             // good
         }
@@ -128,7 +128,7 @@ public class PartialGameConfigModelTest
             // Assert
             Assert.Fail("Expected Exception to be thrown");
         }
-        catch (XmlException e)
+        catch (XmlException)
         {
             // good
         }
@@ -146,7 +146,7 @@ public class PartialGameConfigModelTest
             // Assert
             Assert.Fail("Expected Exception to be thrown");
         }
-        catch (XmlException e)
+        catch (XmlException)
         {
             // good
         }
@@ -164,7 +164,7 @@ public class PartialGameConfigModelTest
             // Assert
             Assert.Fail("Expected Exception to be thrown");
         }
-        catch (XmlException e)
+        catch (XmlException)
         {
             // good
         }
@@ -182,7 +182,7 @@ public class PartialGameConfigModelTest
             // Assert
             Assert.Fail("Expected Exception to be thrown");
         }
-        catch (XmlException e)
+        catch (XmlException)
         {
             // good
         }
@@ -200,7 +200,7 @@ public class PartialGameConfigModelTest
             // Assert
             Assert.Fail("Expected Exception to be thrown");
         }
-        catch (XmlException e)
+        catch (XmlException)
         {
             // good
         }
@@ -218,7 +218,7 @@ public class PartialGameConfigModelTest
             // Assert
             Assert.Fail("Expected Exception to be thrown");
         }
-        catch (XmlException e)
+        catch (XmlException)
         {
             // good
         }

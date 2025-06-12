@@ -91,9 +91,6 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="28" />
@@ -129,11 +126,18 @@
             <TextBlock Grid.Row="0"
                        Grid.Column="1"
                        HorizontalAlignment="Left"
-                       VerticalAlignment="Top"
+                       VerticalAlignment="Bottom"
                        Text="{x:Static strings:PackagingProgress.ValidatingFilesText}"
                        d:Text="Validating files..."
                        Foreground="{DynamicResource PrimaryTextBrush}"/>
             <!-- Row 2 -->
+            <ContentControl Grid.Row="1"
+                           Grid.Column="0"
+                           Template="{StaticResource ClockFaceWaitingTemplate}"
+                           Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-5}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           Margin="0, 30, 0, 0"/>
             <Grid Grid.Row="1"
                   Grid.Column="0"
                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-93}"
@@ -167,9 +171,16 @@
                        d:Text="Copying and encrypting data..."
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
-                       VerticalAlignment="Top"
+                       VerticalAlignment="Bottom"
                        Margin="0, 30, 0, 0"/>
             <!-- Row 3 -->
+            <ContentControl Grid.Row="2"
+                           Grid.Column="0"
+                           Template="{StaticResource ClockFaceWaitingTemplate}"
+                           Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-94}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           Margin="0, 30, 0, 0"/>
             <Grid Grid.Row="2"
                   Grid.Column="0"
                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=95-99}"
@@ -204,7 +215,7 @@
                        d:Text="Verifying package contents..."
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
-                       VerticalAlignment="Top"
+                       VerticalAlignment="Bottom"
                        Margin="0, 30, 0, 0"/>
         </Grid>
         <StackPanel Grid.Row="4"
@@ -221,5 +232,4 @@
                     VerticalAlignment="Bottom"/>
         </StackPanel>
     </Grid>
-
 </UserControl>
