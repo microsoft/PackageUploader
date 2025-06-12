@@ -15,7 +15,7 @@ This article covers the following:
 * [Example GetProduct operation](#example-getproduct-operation)
 * [Example UploadXvcPackage operation](#example-uploadxvcpackage-operation)
 * [Example PublishPackages operation](#example-publishpackages-operation)
-* [Using the Xbox Game Package Manager (UI tool over the Package Uploader)](#using-the-xbox-game-package-manager-ui-tool-over-the-package-uploader)
+* [Xbox Game Package Manager](#xbox-game-package-manager)
 * [Troubleshooting](#troubleshooting)
 * [Q &amp; A](#q-and-a)
 
@@ -342,33 +342,32 @@ Example PublishPackages operation output
 2021-10-22 17:39:14.187 info: PackageUploader.ClientApi.PackageUploaderService[0] Game published.
 2021-10-22 17:39:14.188 info: PackageUploader.Application.Operations.PublishPackagesOperation[0] PackageUploader has finished running.
 ```
-<a id="example-publishpackages-operation"></a>
+<a id="xbox-game-package-manager"></a>
 
-## Using the Xbox Game Package Manager (UI tool over the Package Uploader)
+## Xbox Game Package Manager
 
-The Xbox Game Package Manager is a Windows desktop application that provides a user-friendly graphical interface for the Package Uploader functionality. This tool simplifies both package creation and upload operations with the following key features:
+The Xbox Game Package Manager is a Windows desktop application that provides a user-friendly graphical interface for Package Uploader and MakePkg. This tool simplifies both package creation and upload operations with the following key features:
 
 ### Package Creation
 - **GDK Integration**: Leverages your installed Xbox Game Development Kit (GDK) to create game packages directly from loose game files
-- **Simple Configuration**: Point to the folder containing your MicrosoftGame.config file and configure optional settings
+- **Simple Configuration**: Point to the folder containing your MicrosoftGame.config file and configure settings
 - **Custom Layout Support**: Option to specify a custom layout XML file for advanced packaging scenarios
 - **Output Directory Selection**: Choose where the packaged files will be saved
 
 ### Package Upload
 - **Streamlined Workflow**: Select your package, branch, and market group in a simple interface
 - **Status Monitoring**: Track upload progress in real-time with visual indicators
-- **Browser-based Authentication**: Authenticate seamlessly through your default browser without managing service credentials
+- **Browser-based Authentication**: Authenticate seamlessly through your default browser
 - **Multi-tenant Support**: Advanced option to specify a tenant ID if your account has access to multiple tenants
 
 ### Benefits
+- **Smart Packaging**: Automatically analyzes your config and loose files to optimize packaging, with manual override options when needed.
 - **No Configuration Files**: Create and upload packages without writing JSON configuration files
 - **Visual Progress**: Monitor packaging and upload progress through a visual interface
 - **Simplified Authentication**: Uses browser-based authentication to eliminate the need for client secrets or certificates
 - **Error Handling**: Provides clear error messages and troubleshooting guidance through the UI
 
 To use the Xbox Game Package Manager, download the latest version from the [Releases page](https://github.com/microsoft/PackageUploader/releases/latest) and run the XboxGamePackageManager.exe application.
-
-
 
 <a id="troubleshooting"></a>
 
