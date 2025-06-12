@@ -27,7 +27,9 @@ Package Uploader is a .NET 8.0-based cross-platform application and library that
 
 Package Uploader has a command-line tool and a dynamic linked library (DLL) that you can integrate into your build pipelines or other development workflows.
 
-The initial 1.0 release of Package Uploader provides the following functionality.
+There is also a Windows desktop application called the Xbox Game Package Manager that provides a user-friendly graphical interface for Package Uploader and MakePkg. This tool simplifies both package creation and upload operations.
+
+The current release of Package Uploader provides the following functionality.
 
 * Retrieves metadata about a particular product
 * Uploads a new Xbox XVC, UWP, or MSIXVC package
