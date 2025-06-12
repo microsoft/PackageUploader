@@ -434,4 +434,32 @@
         </Setter>
     </Style>
 
+    <!-- Clock Face Waiting Indicator Control Template -->
+    <ControlTemplate x:Key="ClockFaceWaitingTemplate">
+        <Grid Width="16" Height="16">
+            <!-- Clock face -->
+            <Ellipse Stroke="{DynamicResource SecondaryTextBrush}" 
+                     StrokeThickness="1" 
+                     Fill="Transparent"/>
+            <!-- Clock center dot -->
+            <Ellipse Width="2" 
+                     Height="2" 
+                     Fill="{DynamicResource SecondaryTextBrush}"/>
+            <!-- Hour hand (pointing at 9) -->
+            <Line X1="8" 
+                  Y1="8" 
+                  X2="4" 
+                  Y2="8" 
+                  Stroke="{DynamicResource SecondaryTextBrush}" 
+                  StrokeThickness="1"/>
+            <!-- Minute hand (pointing at 12) -->
+            <Line X1="8" 
+                  Y1="8" 
+                  X2="8" 
+                  Y2="3" 
+                  Stroke="{DynamicResource SecondaryTextBrush}" 
+                  StrokeThickness="1"/>
+        </Grid>
+    </ControlTemplate>
+
 </ResourceDictionary>

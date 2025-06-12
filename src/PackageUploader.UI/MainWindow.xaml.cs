@@ -34,7 +34,7 @@ namespace PackageUploader.UI
             UpdateUsernameDisplay();
 
             // Set version display
-            VersionText.Text = string.Format(UI.Resources.Strings.MainPage.VersionLabel, GetVersion());
+            VersionText.Text = string.Format(UI.Resources.Strings.MainPage.VersionLabel, GetSimpleVersion());
         }
 
         private void RegisterContentAreaChangeHandler()
@@ -82,14 +82,14 @@ namespace PackageUploader.UI
             UserSignoutButton.ToolTip = isOnMainPage ? UI.Resources.Strings.MainPage.SignOutUser : null;
         }
 
-        private static string GetVersion()
+        private static string GetSimpleVersion()
         {
             var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
             var assemblyVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
 
             if (assemblyVersionAttribute is not null)
             {
-                return assemblyVersionAttribute.InformationalVersion;
+                return assemblyVersionAttribute.InformationalVersion.Split('+')[0];
             }
             return assembly.GetName().Version?.ToString() ?? string.Empty;
         }

@@ -132,6 +132,14 @@
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"/>
             <!-- Row 2 -->
+            <ContentControl Grid.Row="1"
+                            Grid.Column="0"
+                            Template="{StaticResource ClockFaceWaitingTemplate}"
+                            Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ComputingDeltas}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Height="16"
+                            Width="16" />
             <Image Grid.Row="1"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Settings.png"
@@ -164,6 +172,14 @@
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"/>
             <!-- Row 3 -->
+            <ContentControl Grid.Row="2"
+                            Grid.Column="0"
+                            Template="{StaticResource ClockFaceWaitingTemplate}"
+                            Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ComputingDeltas-UploadingPackage}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Height="16"
+                            Width="16" />
             <Image Grid.Row="2"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Settings.png"
@@ -197,6 +213,14 @@
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center" />
             <!-- Row 4 -->
+            <ContentControl Grid.Row="3"
+                            Grid.Column="0"
+                            Template="{StaticResource ClockFaceWaitingTemplate}"
+                            Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ComputingDeltas-ProcessingPackage}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Height="16"
+                            Width="16" />
             <Image Grid.Row="3"
                    Grid.Column="0"
                    Source="/Resources/AppIcon/Settings.png"
