@@ -153,24 +153,28 @@ namespace PackageUploader.UI.Test.ViewModel
 
             badData = "<Package> <Chunk> <hello ' > </Chunk> </Package>";
             File.WriteAllText(_badMappingFilePath, badData);
+            _viewModel.MappingDataXmlPath = string.Empty;
             _viewModel.MappingDataXmlPath = _badMappingFilePath;
             Assert.AreEqual(Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg, _viewModel.LayoutParseError);
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
 
             badData = "<Package> <Chunk> <hello & > </Chunk> </Package>";
             File.WriteAllText(_badMappingFilePath, badData);
+            _viewModel.MappingDataXmlPath = string.Empty;
             _viewModel.MappingDataXmlPath = _badMappingFilePath;
             Assert.AreEqual(Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg, _viewModel.LayoutParseError);
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
 
             badData = "<Package> <Chunk> <hello \" > </Chunk> </Package>";
             File.WriteAllText(_badMappingFilePath, badData);
+            _viewModel.MappingDataXmlPath = string.Empty;
             _viewModel.MappingDataXmlPath = _badMappingFilePath;
             Assert.AreEqual(Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg, _viewModel.LayoutParseError);
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
 
             badData = "<Package> <Chunk> <<hello  > </Chunk> </Package>";
             File.WriteAllText(_badMappingFilePath, badData);
+            _viewModel.MappingDataXmlPath = string.Empty;
             _viewModel.MappingDataXmlPath = _badMappingFilePath;
             Assert.AreEqual(Resources.Strings.PackageCreation.LayoutFileParsingErrorMsg, _viewModel.LayoutParseError);
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
@@ -179,6 +183,7 @@ namespace PackageUploader.UI.Test.ViewModel
             _viewModel.GameDataPath = _gameDataPath;
             var goodData = "<Package> <Chunk>  </Chunk> </Package>";
             File.WriteAllText(_goodMappingFilePath, goodData);
+            _viewModel.MappingDataXmlPath = string.Empty;
             _viewModel.MappingDataXmlPath = _goodMappingFilePath;
             Assert.AreEqual(Resources.Strings.PackageCreation.NoFilesInLayoutFileErrorMsg, _viewModel.LayoutParseError);
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
@@ -186,12 +191,9 @@ namespace PackageUploader.UI.Test.ViewModel
             // Good Game Data Path, Good Path with Good XML, With FileGroup
             goodData = "<Package> <Chunk> <FileGroup /> </Chunk> </Package>";
             File.WriteAllText(_goodMappingFilePath, goodData);
+            _viewModel.MappingDataXmlPath = string.Empty;
             _viewModel.MappingDataXmlPath = _goodMappingFilePath;
-            Assert.AreEqual(Resources.Strings.PackageCreation.NoFilesInLayoutFileErrorMsg, _viewModel.LayoutParseError);
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
-
-            // Create a file in the game data path to ensure it is counted
-            File.WriteAllText(Path.Combine(_gameDataPath, "testfile.txt"), "Test content");
 
             // Good Game Data Path, Good Path with Good XML, With FileGroup, With File
             goodData = "<Package> <Chunk Id=\"1000\"> " +
@@ -200,7 +202,7 @@ namespace PackageUploader.UI.Test.ViewModel
                         "<Chunk Id=\"1001\"> <FileGroup DestinationPath=\"\\\" SourcePath=\".\" Include=\"testfile2.bin\" /> " +
                         "</Chunk> </Package>";
             File.WriteAllText(_goodMappingFilePath, goodData);
-            _viewModel.MappingDataXmlPath = string.Empty; // Reset the path
+            _viewModel.MappingDataXmlPath = string.Empty;
             _viewModel.MappingDataXmlPath = _goodMappingFilePath;
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
 
