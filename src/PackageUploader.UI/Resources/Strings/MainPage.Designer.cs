@@ -124,7 +124,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create a package.
+        ///   Looks up a localized string similar to Make a package.
         /// </summary>
         public static string MakeAPackageButtonText {
             get {

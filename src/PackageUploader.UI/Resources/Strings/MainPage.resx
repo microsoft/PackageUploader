@@ -137,7 +137,7 @@
     <value>(learn more)</value>
   </data>
   <data name="MakeAPackageButtonText" xml:space="preserve">
-    <value>Create a package</value>
+    <value>Make a package</value>
   </data>
   <data name="MakeAPackageTextBlockTitle" xml:space="preserve">
     <value>Make a package</value>

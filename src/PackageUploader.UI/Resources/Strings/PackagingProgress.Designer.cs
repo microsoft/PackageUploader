@@ -88,7 +88,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packing....
+        ///   Looks up a localized string similar to Packaging....
         /// </summary>
         public static string PackingText {
             get {

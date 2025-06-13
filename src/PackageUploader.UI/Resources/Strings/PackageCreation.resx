@@ -136,7 +136,7 @@
     <value>Select or enter the content map location</value>
   </data>
   <data name="CreatePackageButtonText" xml:space="preserve">
-    <value>Create package</value>
+    <value>Make package</value>
   </data>
   <data name="ErrorCreatingPackageErrorMsg" xml:space="preserve">
     <value>Error creating package.</value>

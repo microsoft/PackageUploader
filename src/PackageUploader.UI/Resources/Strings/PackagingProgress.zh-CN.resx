@@ -127,7 +127,7 @@
     <value>正在准备您的包...</value>
   </data>
   <data name="PackingText" xml:space="preserve">
-    <value>正在打包...</value>
+    <value>正在打包中...</value>
   </data>
   <data name="PercentComplete" xml:space="preserve">
     <value>% 已完成</value>

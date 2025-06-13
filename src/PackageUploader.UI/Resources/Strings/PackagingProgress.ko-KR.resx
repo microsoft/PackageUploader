@@ -126,7 +126,7 @@
     <value>패키지 준비 중...</value>
   </data>
   <data name="PackingText" xml:space="preserve">
-    <value>패킹 중...</value>
+    <value>패키징 중...</value>
   </data>
   <data name="PercentComplete" xml:space="preserve">
     <value>% 완료</value>

@@ -119,6 +119,7 @@
   </resheader>
   <data name="CopyError" xml:space="preserve">
     <value>Copy error</value>
+    <comment>Button text for copying the error message for easy pasting into another tool.</comment>
   </data>
   <data name="ErrorTitleString" xml:space="preserve">
     <value>We've run into an issue, please try again.</value>
