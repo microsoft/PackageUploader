@@ -71,10 +71,10 @@ namespace PackageUploader.UI.ViewModel
         {
             _uploadingProgressPercentageProvider.UploadingCancelled = true;
 
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
+            //System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            //{
                 _windowService.NavigateTo(typeof(PackageUploadView));
-            });
+            //});
         }
     }
 }

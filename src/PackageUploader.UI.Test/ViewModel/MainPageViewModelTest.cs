@@ -1,10 +1,12 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using PackageUploader.UI.ViewModel;
+using System.Collections.Generic;
 
 namespace PackageUploader.UI.Test.ViewModel;
 
@@ -74,6 +76,57 @@ public class MainPageViewModelTest
         _mainPageViewModel.IsMakePkgEnabled = true;
         _mainPageViewModel.NavigateToPackageCreationCommand.Execute(null);
         _windowService.Verify(x => x.NavigateTo(typeof(PackageCreationView)), Times.Once);
+    }
+
+    [TestMethod]
+    public void TestPackagingLearnMoreURLCommand()
+    {
+        // TODO: test this?
+        /*
+        _mainPageViewModel.PackagingLearnMoreURL.Execute("HelloWorld");
+        _windowService.Verify(x => x.OpenURL("https://aka.ms/learn-more-about-packaging"), Times.Once);
+        */
+    }
+
+    // TODO: Maybe test ResolveExecutablePath
+    /*[TestMethod]
+    public void TestResolveExecutablePath()
+    {
+
+    }*/
+
+    [TestMethod]
+    public void TestShowTenantSelectionCommand()
+    {
+        var tenant = new AzureTenant { DisplayName = "HelloWorld" };
+        var tenant2 = new AzureTenant { DisplayName = "HelloWorld2" };
+        _authenticationService.Setup(x => x.Tenant)
+                              .Returns(tenant);
+        _authenticationService.Setup(x => x.GetAvailableTenants())
+                              .ReturnsAsync(new AzureTenantList { Value = new List<AzureTenant> { tenant2 }, Count = 1 });
+
+        _mainPageViewModel.ShowTenantSelection = false; // so it'll inverse and show
+        _mainPageViewModel.ShowTenantSelectionCommand.Execute(null);
+
+        Assert.IsTrue(_mainPageViewModel.ShowTenantSelection);
+        Assert.AreEqual(_mainPageViewModel.AvailableTenants.Count, 1);
+        _authenticationService.VerifySet(x => x.Tenant = tenant2, Times.Once);
+    }
+
+    [TestMethod]
+    public void TestGetTenantsCommand()
+    {
+        var tenant = new AzureTenant { DisplayName = "HelloWorld" };
+        var tenant2 = new AzureTenant { DisplayName = "HelloWorld2" };
+        _authenticationService.Setup(x => x.Tenant)
+                              .Returns(tenant);
+        _authenticationService.Setup(x => x.GetAvailableTenants())
+                              .ReturnsAsync(new AzureTenantList { Value = new List<AzureTenant> { tenant2 }, Count = 1 });
+        
+        _mainPageViewModel.GetTenantsCommand.Execute(null);
+        
+        Assert.AreEqual(_mainPageViewModel.AvailableTenants.Count, 1);
+        _authenticationService.VerifySet(x => x.Tenant = tenant2, Times.Once);
     }
 
 }

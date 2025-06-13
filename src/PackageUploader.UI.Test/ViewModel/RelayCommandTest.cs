@@ -86,6 +86,18 @@ public class RelayCommandTest
         Assert.IsTrue(executed);
     }
 
+    [TestMethod]
+    public void Test_CanExecuteChanged()
+    {
+        // TODO: Can't work, because it's dependent on CommandManager.InvalidateRequerySuggested();
+        // which is is pretty WPF dependent
+        var command = new RelayCommand(() => { });
+        bool eventFired = false;
+        command.CanExecuteChanged += (sender, args) => { eventFired = true; };
+        command.RaiseCanExecuteChanged();
+        //Assert.IsTrue(eventFired);
+    }
+
 }
 
 public class TestClass

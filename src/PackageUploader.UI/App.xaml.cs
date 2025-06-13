@@ -42,7 +42,9 @@ public partial class App : System.Windows.Application
                 // Register services
                 services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.CacheableBrowser);
                 services.AddSingleton<IAuthenticationService, AuthenticationService>();
-                
+                services.AddSingleton<IClipboardService, ClipboardService>();
+                services.AddSingleton<IProcessStarterService, ProcessStarterService>();
+
                 // Register providers
                 services.AddSingleton<PackageModelProvider>();
                 services.AddSingleton<PathConfigurationProvider>();

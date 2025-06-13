@@ -440,7 +440,8 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private bool IsUploadReady()
     {
-        return _gameProduct != null &&
+        return File.Exists(PackageFilePath) && 
+            _gameProduct != null &&
             !string.IsNullOrEmpty(MarketGroupName) &&
             !IsLoadingBranchesAndFlights &&
             !IsLoadingMarkets;
@@ -484,7 +485,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private void ProcessDroppedFile(string filePath)
     {
-        if (string.IsNullOrEmpty(filePath))
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
         {
             PackageErrorMessage = $"{Resources.Strings.PackageUpload.InvalidFilePathErrMsg}"; // "Invalid file path."
             return;

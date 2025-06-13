@@ -12,6 +12,8 @@ namespace PackageUploader.UI.ViewModel
     {
         private readonly IWindowService _windowService;
         private readonly ErrorModelProvider _errorModelProvider;
+        private readonly IClipboardService _clipboardService;
+        private readonly IProcessStarterService _processStarterService;
 
         public string ErrorTitle => _errorModelProvider.Error.MainMessage;
         public string ErrorDescription => _errorModelProvider.Error.DetailMessage;
@@ -20,10 +22,15 @@ namespace PackageUploader.UI.ViewModel
         public ICommand GoBackAndFixCommand { get; }
         public ICommand ViewLogsCommand { get; }
 
-        public ErrorScreenViewModel(IWindowService windowService, ErrorModelProvider errorModelProvider)
+        public ErrorScreenViewModel(IWindowService windowService, 
+                                    ErrorModelProvider errorModelProvider, 
+                                    IClipboardService clipboardService,
+                                    IProcessStarterService processStarterService)
         {
             _windowService = windowService;
             _errorModelProvider = errorModelProvider;
+            _clipboardService = clipboardService;
+            _processStarterService = processStarterService;
 
             CopyErrorCommand = new RelayCommand(CopyError);
             GoBackAndFixCommand = new RelayCommand(GoBackAndFix);
@@ -32,7 +39,7 @@ namespace PackageUploader.UI.ViewModel
 
         public void CopyError()
         {
-            Clipboard.SetData(DataFormats.Text, ErrorTitle + Environment.NewLine + ErrorDescription);
+            _clipboardService.SetData(DataFormats.Text, ErrorTitle + Environment.NewLine + ErrorDescription);
         }
         public void GoBackAndFix()
         {
@@ -50,7 +57,7 @@ namespace PackageUploader.UI.ViewModel
         public void ViewLogs()
         {
             string logPath = _errorModelProvider.Error.LogsPath;
-            Process.Start("explorer.exe", $"/select, \"{logPath}\"");
+            _processStarterService.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
     }
 }

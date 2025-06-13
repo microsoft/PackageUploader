@@ -19,6 +19,7 @@ namespace PackageUploader.UI.ViewModel
         private readonly PackageModelProvider _packageModelProvider;
         private readonly PathConfigurationProvider _pathConfigurationService;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IProcessStarterService _processStarterService;
         private readonly ILogger<PackagingFinishedViewModel> _logger;
 
         private readonly string _wdAppPath = string.Empty;
@@ -79,7 +80,7 @@ namespace PackageUploader.UI.ViewModel
         public ICommand ViewLogsCommand { get; }
         public ICommand GoHomeCommand { get; }
 
-        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService, IAuthenticationService authenticationService, ILogger<PackagingFinishedViewModel> logger)
+        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService, IAuthenticationService authenticationService, ILogger<PackagingFinishedViewModel> logger, IProcessStarterService processStarterService)
         {
             _windowService = windowService;
             _packageModelProvider = packageModelProvider;
@@ -97,6 +98,7 @@ namespace PackageUploader.UI.ViewModel
             GoHomeCommand = new RelayCommand(GoHome);
 
             _gameConfigModel = new PartialGameConfigModel(_packageModelProvider.Package.GameConfigFilePath);
+            _processStarterService = processStarterService;
         }
 
         public void OnAppearing()
@@ -139,13 +141,19 @@ namespace PackageUploader.UI.ViewModel
                 // Create a temporary batch file to run the command and pause
                 string batchFilePath = Path.Combine(Path.GetTempPath(), "InstallGame.bat");
 
+                if(!File.Exists(_packageModelProvider.Package.PackageFilePath))
+                {
+                    throw new FileNotFoundException("PackageFilePath doesn't exist", 
+                                                    _packageModelProvider.Package.PackageFilePath);
+                }
+
                 File.WriteAllText(batchFilePath,
                                   @"@echo off
                                   echo """ + _wdAppPath + @""" install """ + _packageModelProvider.Package.PackageFilePath + @"""
                                   """ + _wdAppPath + @""" install """ + _packageModelProvider.Package.PackageFilePath + @"""
                                   pause");
 
-                _installGameProcess = Process.Start(new ProcessStartInfo
+                _installGameProcess = _processStarterService.Start(new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
                     Arguments = $"/c \"{batchFilePath}\"",
@@ -184,13 +192,13 @@ namespace PackageUploader.UI.ViewModel
 
         public void ViewPackage()
         {
-            Process.Start("explorer.exe", $"/select, \"{_packageModelProvider.Package.PackageFilePath}\"");
+            _processStarterService.Start("explorer.exe", $"/select, \"{_packageModelProvider.Package.PackageFilePath}\"");
         }
 
         private void ViewLogs()
         {
             string logPath = _packageModelProvider.PackagingLogFilepath;
-            Process.Start("explorer.exe", $"/select, \"{logPath}\"");
+            _processStarterService.Start("explorer.exe", $"/select, \"{logPath}\"");
         }
 
         public async void ConfigureUpload()
@@ -208,18 +216,18 @@ namespace PackageUploader.UI.ViewModel
                 }
             }
 
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
+            //System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            //{
                 _windowService.NavigateTo(typeof(PackageUploadView));
-            });
+            //});
         }
 
         public void GoHome()
         {
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-            {
+            //System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            //{
                 _windowService.NavigateTo(typeof(MainPageView));
-            });
+            //});
         }
 
         private static string TranslateFileSize(long size)
