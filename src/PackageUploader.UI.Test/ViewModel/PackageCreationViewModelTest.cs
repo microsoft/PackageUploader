@@ -190,13 +190,17 @@ namespace PackageUploader.UI.Test.ViewModel
             Assert.AreEqual(Resources.Strings.PackageCreation.NoFilesInLayoutFileErrorMsg, _viewModel.LayoutParseError);
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
 
+            // Create a file in the game data path to ensure it is counted
+            File.WriteAllText(Path.Combine(_gameDataPath, "testfile.txt"), "Test content");
+
             // Good Game Data Path, Good Path with Good XML, With FileGroup, With File
             goodData = "<Package> <Chunk Id=\"1000\"> " +
-                        "<FileGroup DestinationPath=\"\\\" SourcePath=\".\" Include=\"*.txt\"> " +
+                        "<FileGroup DestinationPath=\"\\\" SourcePath=\".\" Include=\"*.txt\" /> " +
                         "</Chunk> " +
                         "<Chunk Id=\"1001\"> <FileGroup DestinationPath=\"\\\" SourcePath=\".\" Include=\"testfile2.bin\" /> " +
                         "</Chunk> </Package>";
             File.WriteAllText(_goodMappingFilePath, goodData);
+            _viewModel.MappingDataXmlPath = string.Empty; // Reset the path
             _viewModel.MappingDataXmlPath = _goodMappingFilePath;
             Assert.AreEqual("< 1 GB", _viewModel.PackageSize);
 
