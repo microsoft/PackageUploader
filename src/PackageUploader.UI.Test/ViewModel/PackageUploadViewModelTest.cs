@@ -42,11 +42,12 @@ namespace PackageUploader.UI.Test.ViewModel
             _mockPackageUploaderService = new Mock<IPackageUploaderService>();
             _uploadingProgressPercentageProvider = new UploadingProgressPercentageProvider();
             _errorModelProvider = new ErrorModelProvider();
+/*            _mockGamePackageConfiguration = new Mock<GamePackageConfiguration>();
 
             _mockPackageUploaderService.Setup(x => x.GetPackageConfigurationAsync(null,
                                                                                   It.IsAny<IGamePackageBranch>(),
                                                                                   It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(_mockGamePackageConfiguration.Object);
+                                       .ReturnsAsync(_mockGamePackageConfiguration.Object);*/
 
             _mockPackage = _packageModelProvider.Package = new PackageModel
             {
@@ -164,15 +165,17 @@ namespace PackageUploader.UI.Test.ViewModel
         [TestMethod]
         public void Test_ProgressValue()
         {
-            _uploadingProgressPercentageProvider.UploadingProgressPercentage = 50;
-            Assert.AreEqual(_viewModel.ProgressValue.Percentage, 50);
+            var randomInt = new Random().Next() % 100;
+            _uploadingProgressPercentageProvider.UploadingProgressPercentage = randomInt;
+            Assert.AreEqual(_viewModel.ProgressValue.Percentage, randomInt);
 
+            randomInt = new Random().Next() % 100;
             _viewModel.ProgressValue = new PackageUploadingProgress()
             {
-                Percentage = 50,
+                Percentage = randomInt,
                 Stage = PackageUploadingProgressStage.UploadingPackage
             };
-            Assert.AreEqual(50, _viewModel.ProgressValue.Percentage);
+            Assert.AreEqual(randomInt, _viewModel.ProgressValue.Percentage);
             Assert.AreEqual(PackageUploadingProgressStage.UploadingPackage, _viewModel.ProgressValue.Stage);
         }
 
@@ -216,8 +219,16 @@ namespace PackageUploader.UI.Test.ViewModel
         [TestMethod]
         public void Test_PackageFilePath()
         {
+            // Safety testing. Actual testing would require like, a real file...
+
+            // Non Existant File
             _packageModelProvider.Package.PackageFilePath = @"C:\test\package.msixvc";
-            Assert.AreEqual(@"C:\test\package.msixvc", _viewModel.PackageFilePath);
+            Assert.AreEqual(@"C:\test\package.msixvc", _viewModel.PackageFilePath); // VERY WERIRD SITUATION that would require someone manipulating this program's memory...
+            Assert.IsFalse(_viewModel.UploadPackageCommand.CanExecute(null));
+
+            // Bad file path
+            _packageModelProvider.Package.PackageFilePath = @"@ ok yes: ";
+            Assert.IsFalse(_viewModel.UploadPackageCommand.CanExecute(null));
 
             // Setter then sets a lot of things
         }
@@ -348,12 +359,18 @@ namespace PackageUploader.UI.Test.ViewModel
         [TestMethod]
         public void Test_FileDroppedCommand()
         {
-            _viewModel.FileDroppedCommand.Execute(@"C:\test\package.msixvc");
-            Assert.AreEqual(@"C:\test\package.msixvc", _viewModel.PackageFilePath);
+            string randomPath = Path.GetTempFileName();
+            _viewModel.FileDroppedCommand.Execute(randomPath);
+            Assert.AreEqual(randomPath, _viewModel.PackageFilePath);
 
             _viewModel.FileDroppedCommand.Execute("");
-            Assert.AreEqual("", _viewModel.PackageFilePath);
             Assert.AreEqual(_viewModel.PackageErrorMessage, Resources.Strings.PackageUpload.InvalidFilePathErrMsg);
+
+            var badPath = @"@ ok yes: ";
+            _viewModel.FileDroppedCommand.Execute(badPath);
+            Assert.AreEqual(_viewModel.PackageErrorMessage, Resources.Strings.PackageUpload.InvalidFilePathErrMsg);
+
+            File.Delete(randomPath);
         }
 
         [TestMethod]

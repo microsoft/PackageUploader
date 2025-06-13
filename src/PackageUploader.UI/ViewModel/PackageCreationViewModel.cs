@@ -139,7 +139,17 @@ public partial class PackageCreationViewModel : BaseViewModel
     public string SubValPath
     {
         get => _subValPath;
-        set => SetProperty(ref _subValPath, value);
+        set
+        {
+            if (Directory.Exists(value))
+            {
+                SetProperty(ref _subValPath, value);
+            }
+            else
+            {
+                SubValDllError = Resources.Strings.PackageCreation.SubValDllNotFoundErrorMsg;
+            }
+        }
     }
 
     public string PackageType
@@ -354,7 +364,9 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     private bool CanCreatePackage()
     {
-        return HasValidGameConfig && string.IsNullOrEmpty(LayoutParseError) && (string.IsNullOrEmpty(MappingDataXmlPath) || File.Exists(MappingDataXmlPath));
+        return HasValidGameConfig 
+            && string.IsNullOrEmpty(LayoutParseError) 
+            && (string.IsNullOrEmpty(MappingDataXmlPath) || File.Exists(MappingDataXmlPath));
     }
 
     private void EstimatePackageSize()
@@ -569,6 +581,11 @@ public partial class PackageCreationViewModel : BaseViewModel
             GameConfigLoadError = Resources.Strings.PackageCreation.ProvideGameDataPathErrorMsg; //"Please provide the game data path";
             return;
         }
+        if(!Directory.Exists(GameDataPath))
+        {
+            GameConfigLoadError = Resources.Strings.PackageCreation.ProvideGameDataPathErrorMsg; //"Game data path does not exist";
+            return;
+        }
 
         OutputDirectoryError = string.Empty;
         LayoutParseError = string.Empty;
@@ -610,7 +627,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         SubValDllError = string.Empty;
         if (!string.IsNullOrEmpty(SubValPath))
         {
-            if (File.Exists(Path.Combine(SubValPath, "SubmissionValidator.dll")))
+            if (Directory.Exists(SubValPath) && File.Exists(Path.Combine(SubValPath, "SubmissionValidator.dll")))
             {
                 arguments += $" /validationpath \"{SubValPath}\"";
             }

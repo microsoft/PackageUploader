@@ -34,6 +34,7 @@ namespace PackageUploader.UI.Providers
                 if (_uploadStage != value)
                 {
                     _uploadStage = value;
+                    _uploadProgress.Stage = value;
                     OnPropertyChanged(nameof(UploadStage));
                 }
             }
@@ -48,6 +49,7 @@ namespace PackageUploader.UI.Providers
                 if (_uploadingProgresPercentage != value)
                 {
                     _uploadingProgresPercentage = value;
+                    _uploadProgress.Percentage = value;
                     OnPropertyChanged(nameof(UploadingProgressPercentage));
                 }
             }
