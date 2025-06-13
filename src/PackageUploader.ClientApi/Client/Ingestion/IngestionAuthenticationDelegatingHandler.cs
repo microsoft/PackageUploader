@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 
 namespace PackageUploader.ClientApi.Client.Ingestion;
 
-internal class IngestionAuthenticationDelegatingHandler : DelegatingHandler
+// Need public accessibility for DI injection in AuthenticationResetService
+public class IngestionAuthenticationDelegatingHandler : DelegatingHandler
 {
     private readonly IAccessTokenProvider _accessTokenProvider;
     private readonly ILogger<IngestionAuthenticationDelegatingHandler> _logger;
@@ -22,6 +23,9 @@ internal class IngestionAuthenticationDelegatingHandler : DelegatingHandler
     {
         _accessTokenProvider = accessTokenProvider;
         _logger = logger;
+        
+        // Register with the token manager so we can be reset when needed
+        AuthenticationTokenManager.RegisterHandler(this);
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
@@ -43,5 +47,15 @@ internal class IngestionAuthenticationDelegatingHandler : DelegatingHandler
     {
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.AccessToken);
         return await base.SendAsync(request, ct).ConfigureAwait(false);
+    }
+    
+    /// <summary>
+    /// Resets the token cache, forcing a new token to be obtained on the next request.
+    /// This should be called when a user signs out to ensure the next sign-in uses fresh credentials.
+    /// </summary>
+    public void ResetToken()
+    {
+        _logger.LogInformation("Resetting cached authentication token");
+        _token = null;
     }
 }

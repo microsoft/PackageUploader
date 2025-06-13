@@ -13,7 +13,7 @@ public partial class UploadConfigValidator : IValidateOptions<UploadConfig>
 public class UploadConfig
 {
     [Required]
-    public int HttpTimeoutMs { get; set; } = 10000;
+    public int HttpTimeoutMs { get; set; } = 300000;
 
     [Required]
     public int HttpUploadTimeoutMs { get; set; } = 300000;

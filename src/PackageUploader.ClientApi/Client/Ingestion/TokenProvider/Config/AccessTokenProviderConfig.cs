@@ -17,4 +17,7 @@ public class AccessTokenProviderConfig
 
     [Required]
     public string AadResourceForCaller { get; set; } = "https://api.partner.microsoft.com";
+
+    [Required]
+    public string AzureManagementBaseUrl { get; set; } = "https://management.azure.com/";
 }

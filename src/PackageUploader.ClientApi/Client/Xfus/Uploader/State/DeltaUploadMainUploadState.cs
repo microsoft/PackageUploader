@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Xfus.Models;
 using PackageUploader.ClientApi.Client.Xfus.Models.Internal;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,14 +22,25 @@ internal class DeltaUploadMainUploadState : XfusUploaderState
         _totalBytesUploaded = bytesSoFar;
     }
 
-    internal override async Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, CancellationToken ct)
+    internal override async Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, IProgress<ulong> bytesProgress, CancellationToken ct)
     {
         var uploadProgress = _uploadProgress;
         _logger.LogInformation("XFUS Delta Upload Plan calculated. Will upload {totalBlockBytes} across {pendingBlocks} blocks.", new ByteSize(_xfusBlockProgressReporter.TotalBlockBytes), uploadProgress.PendingBlocks.Length);
 
-        await FullUploadAsync(uploadProgress, xfusUploadInfo, uploadFile, true, httpTimeoutMs, ct).ConfigureAwait(false);
+        await FullUploadAsync(uploadProgress, xfusUploadInfo, uploadFile, true, httpTimeoutMs, bytesProgress, ct).ConfigureAwait(false);
 
-        _logger.LogTrace("Upload complete. Total Uploaded: {totalBytesUploaded} (Saving you in total {totalBytesSaved} in upload bandwidth!)", new ByteSize(_totalBytesUploaded), new ByteSize(uploadFile.Length - _totalBytesUploaded));
+        if (uploadFile.Length > _totalBytesUploaded)
+        {
+            ulong bytesSaved = (ulong)(uploadFile.Length - _totalBytesUploaded);
+            _logger.LogTrace("Upload complete. Total Uploaded: {totalBytesUploaded} (Saving you in total {totalBytesSaved} in upload bandwidth!)", new ByteSize(_totalBytesUploaded), new ByteSize(bytesSaved));
+
+            // Update progress to account for the bytes we saved.
+            bytesProgress.Report(bytesSaved);
+        }
+        else
+        {
+            _logger.LogTrace("Upload complete. Total Uploaded: {totalBytesUploaded}", new ByteSize(_totalBytesUploaded));
+        }
         return null;
     }
 }

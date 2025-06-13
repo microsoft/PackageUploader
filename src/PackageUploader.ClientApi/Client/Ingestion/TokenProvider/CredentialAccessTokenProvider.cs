@@ -16,12 +16,12 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 public abstract class CredentialAccessTokenProvider
 {
     private readonly AccessTokenProviderConfig _config;
-    private readonly ILogger _logger;
+    protected readonly ILogger Logger;
 
     protected CredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, ILogger logger)
     {
         _config = config.Value;
-        _logger = logger;
+        Logger = logger;
     }
 
     protected T SetTokenCredentialOptions<T>(T tokenCredentialOptions) where T : TokenCredentialOptions
@@ -32,7 +32,7 @@ public abstract class CredentialAccessTokenProvider
 
     protected async Task<IngestionAccessToken> GetIngestionAccessTokenAsync(TokenCredential tokenCredential, CancellationToken ct)
     {
-        _logger.LogDebug("Requesting authentication token");
+        Logger.LogDebug("Requesting authentication token");
         var scopes = new[] { $"{_config.AadResourceForCaller}/.default" };
         var requestContext = new TokenRequestContext(scopes);
         var token = await tokenCredential.GetTokenAsync(requestContext, ct).ConfigureAwait(false);

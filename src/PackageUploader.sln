@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31409.214
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageUploader.Application", "PackageUploader.Application\PackageUploader.Application.csproj", "{30F60E9E-6744-45F3-A9CD-5E19D6E121E8}"
 EndProject
@@ -10,6 +10,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageUploader.ClientApi.Test", "PackageUploader.ClientApi.Test\PackageUploader.ClientApi.Test.csproj", "{D3198C39-7AAB-49B1-A170-361CED05E127}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageUploader.FileLogger", "PackageUploader.FileLogger\PackageUploader.FileLogger.csproj", "{4E104E86-EFAE-48B8-8CF5-6537A551C177}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageUploader.UI", "PackageUploader.UI\PackageUploader.UI.csproj", "{05F4C384-719C-4A94-8D0F-5C05541A64B9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0769F5CA-C2ED-4B31-BB8C-73E5180CF679} = {0769F5CA-C2ED-4B31-BB8C-73E5180CF679}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageUploader.UI.Test", "PackageUploader.UI.Test\PackageUploader.UI.Test.csproj", "{277ECCBD-8147-4960-B82D-E2232485DF56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +40,15 @@ Global
 		{4E104E86-EFAE-48B8-8CF5-6537A551C177}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E104E86-EFAE-48B8-8CF5-6537A551C177}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E104E86-EFAE-48B8-8CF5-6537A551C177}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05F4C384-719C-4A94-8D0F-5C05541A64B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05F4C384-719C-4A94-8D0F-5C05541A64B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05F4C384-719C-4A94-8D0F-5C05541A64B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05F4C384-719C-4A94-8D0F-5C05541A64B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05F4C384-719C-4A94-8D0F-5C05541A64B9}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{277ECCBD-8147-4960-B82D-E2232485DF56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{277ECCBD-8147-4960-B82D-E2232485DF56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{277ECCBD-8147-4960-B82D-E2232485DF56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{277ECCBD-8147-4960-B82D-E2232485DF56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

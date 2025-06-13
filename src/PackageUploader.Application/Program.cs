@@ -11,6 +11,7 @@ using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using PackageUploader.FileLogger;
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
@@ -30,6 +31,7 @@ internal class Program
     private static readonly Option<bool> VerboseOption = new (["-v", "--Verbose"], "Log verbose messages such as http calls");
     private static readonly Option<FileInfo> LogFileOption = new(["-l", "--LogFile"], "The location of the log file");
     private static readonly Option<string> ClientSecretOption = new (["-s", "--ClientSecret"], "The client secret of the AAD app (only for AppSecret)");
+    private static readonly Option<string> TenantIdOption = new (["-t", "--TenantId"], "The Azure tenant ID to use for authentication (primarily for Browser authentication)");
     private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(["-c", "--ConfigFile"], "The location of the config file").Required();
     private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(["-a", "--Authentication"], () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
     public static readonly Option<string> ProductIdOption = new(["-p", "--ProductId"], "Product ID, replaces config value productId if present");
@@ -105,9 +107,31 @@ internal class Program
         }
 
         var authenticationMethod = invocationContext.GetOptionValue(AuthenticationMethodOption);
+        
+        // Configure auth options based on the authentication method
+        var switchMappings = new Dictionary<string, string>();
+        
         if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
         {
-            var switchMappings = ClientSecretOption.Aliases.ToDictionary(s => s, _ => $"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}");
+            // Add client secret mapping for AppSecret auth
+            foreach (var alias in ClientSecretOption.Aliases)
+            {
+                switchMappings.Add(alias, $"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}");
+            }
+        }
+        
+        // Add tenant ID mapping for browser authentication methods
+        if (authenticationMethod is IngestionExtensions.AuthenticationMethod.Browser or 
+                                    IngestionExtensions.AuthenticationMethod.CacheableBrowser)
+        {
+            foreach (var alias in TenantIdOption.Aliases)
+            {
+                switchMappings.Add(alias, $"{nameof(BrowserAuthInfo)}:{nameof(BrowserAuthInfo.TenantId)}");
+            }
+        }
+
+        if (switchMappings.Count > 0)
+        {
             builder.AddCommandLine(args, switchMappings);
         }
     }
@@ -118,31 +142,31 @@ internal class Program
         {
             new Command("GetProduct", "Gets metadata of the product")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, DataOption, ProductIdOption, BigIdOption
+                ConfigFileOption, ClientSecretOption, TenantIdOption, AuthenticationMethodOption, DataOption, ProductIdOption, BigIdOption
             }.AddOperationHandler<GetProductOperation>(),
             new Command("UploadUwpPackage", "Uploads Uwp game package")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
+                ConfigFileOption, ClientSecretOption, TenantIdOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<UploadUwpPackageOperation>(),
             new Command("UploadXvcPackage", "Uploads Xvc game package and assets")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
+                ConfigFileOption, ClientSecretOption, TenantIdOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<UploadXvcPackageOperation>(),
             new Command("RemovePackages", "Removes all game packages and assets from a branch")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
+                ConfigFileOption, ClientSecretOption, TenantIdOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<RemovePackagesOperation>(),
             new Command("ImportPackages", "Imports all game packages from a branch to a destination branch")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
+                ConfigFileOption, ClientSecretOption, TenantIdOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<ImportPackagesOperation>(),
             new Command("PublishPackages", "Publishes all game packages from a branch or flight to a destination sandbox or flight")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, DestinationSandboxName // take a look at conditions
+                ConfigFileOption, ClientSecretOption, TenantIdOption, AuthenticationMethodOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, DestinationSandboxName // take a look at conditions
             }.AddOperationHandler<PublishPackagesOperation>(),
             new Command("GetPackages", "Gets the list of packages from a branch or flight")
             {
-                ConfigFileOption, ClientSecretOption, AuthenticationMethodOption, DataOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
+                ConfigFileOption, ClientSecretOption, TenantIdOption, AuthenticationMethodOption, DataOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
             }.AddOperationHandler<GetPackagesOperation>(),
         };
         rootCommand.AddGlobalOption(VerboseOption);

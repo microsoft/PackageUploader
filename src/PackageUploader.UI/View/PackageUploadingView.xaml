@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="PackageUploader.UI.View.PackageUploadingView"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewmodel:PackageUploadingViewModel}"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <UserControl.Resources>
+        <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
+        <Storyboard x:Key="RotateAnimation">
+            <DoubleAnimation
+                Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                From="0"
+                To="360"
+                Duration="0:0:5"
+                RepeatBehavior="Forever" />
+        </Storyboard>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- picture -->
+            <RowDefinition Height="Auto"/>
+            <!-- heading -->
+            <RowDefinition Height="Auto"/>
+            <!-- progress bars bundle-->
+            <RowDefinition Height="Auto"/>
+            <!-- updating labels -->
+            <RowDefinition Height="Auto"/>
+            <!-- cancel button? -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Image Grid.Row="0"
+               Margin="0, 100, 0, 23"
+               Source="/Resources/Images/InProgress.png"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               Height="130"
+               Width="130" />
+        <TextBlock Grid.Row="1"
+                   Margin="0, 0, 0, 23"
+                   Style="{StaticResource SubHeadline}"
+                   Text="{x:Static strings:PackageUploading.TitleText}"
+                   d:Text="Uploading package to partner center"
+                   Foreground="{DynamicResource PrimaryTextBrush}" />
+        <!-- Loading Bar -->
+        <Grid Grid.Row="2"
+              Margin="300, 0, 300, 23">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="0, 0, 0, 10"
+                       Text="{x:Static strings:PackageUploading.UploadingText}"
+                       d:Text="Uploading"
+                       Foreground="{DynamicResource PrimaryTextBrush}" 
+                       HorizontalAlignment="Left"/>
+            <StackPanel Grid.Row="0"
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <TextBlock Text="{Binding PackageUploadPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                           Foreground="{DynamicResource PrimaryTextBrush}"/>
+                <TextBlock Text="{x:Static strings:PackageUploading.PercentCompleteText}"
+                           d:Text="% complete"
+                           Foreground="{DynamicResource PrimaryTextBrush}" />
+            </StackPanel>
+            <ProgressBar Grid.Row="1"
+                         Grid.ColumnSpan="2"
+                         Margin="0, 0, 0, 23"
+                         Minimum="0"
+                         Maximum="100"
+                         Value="{Binding PackageUploadPercentage}"
+                         Visibility="Visible"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Stretch"
+                         Height="3"/>
+        </Grid>
+        <!-- updating labels -->
+        <Grid Grid.Row="3" Margin="500, 0, 0, 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="28" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <!-- Row 1 -->
+            <Image Grid.Row="0"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Settings.png"
+                   Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ComputingDeltas}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16">
+                <Image.RenderTransform>
+                    <RotateTransform CenterX="8" CenterY="8" />
+                </Image.RenderTransform>
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+            <Image Grid.Row="0"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Accept.png"
+                   Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=UploadingPackage-Done}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16" />
+            <TextBlock Grid.Row="0"
+                       Grid.Column="1"
+                       Text="{x:Static strings:PackageUploading.ComputingDeltasText}"
+                       d:Text="Computing deltas..."
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"/>
+            <!-- Row 2 -->
+            <ContentControl Grid.Row="1"
+                            Grid.Column="0"
+                            Template="{StaticResource ClockFaceWaitingTemplate}"
+                            Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ComputingDeltas}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Height="16"
+                            Width="16" />
+            <Image Grid.Row="1"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Settings.png"
+                   Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=UploadingPackage}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16">
+                <Image.RenderTransform>
+                    <RotateTransform CenterX="8" CenterY="8" />
+                </Image.RenderTransform>
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+            <Image Grid.Row="1"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Accept.png"
+                   Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ProcessingPackage-Done}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16" />
+            <TextBlock Grid.Row="1" Grid.Column="1"
+                       Text="{x:Static strings:PackageUploading.UploadingPackageText}"
+                       d:Text="Uploading package..."
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"/>
+            <!-- Row 3 -->
+            <ContentControl Grid.Row="2"
+                            Grid.Column="0"
+                            Template="{StaticResource ClockFaceWaitingTemplate}"
+                            Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ComputingDeltas-UploadingPackage}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Height="16"
+                            Width="16" />
+            <Image Grid.Row="2"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Settings.png"
+                   Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ProcessingPackage}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16">
+                <Image.RenderTransform>
+                    <RotateTransform CenterX="8" CenterY="8" />
+                </Image.RenderTransform>
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+            <Image Grid.Row="2"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Accept.png"
+                   Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=UploadingSupplementalFiles-Done}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16" />
+            <TextBlock Grid.Row="2"
+                       Grid.Column="1"
+                       Text="{x:Static strings:PackageUploading.ProcessingPackageText}"
+                       d:Text="Processing package..."
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center" />
+            <!-- Row 4 -->
+            <ContentControl Grid.Row="3"
+                            Grid.Column="0"
+                            Template="{StaticResource ClockFaceWaitingTemplate}"
+                            Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=ComputingDeltas-ProcessingPackage}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Height="16"
+                            Width="16" />
+            <Image Grid.Row="3"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Settings.png"
+                   Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=UploadingSupplementalFiles}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16">
+                <Image.RenderTransform>
+                    <RotateTransform CenterX="8" CenterY="8" />
+                </Image.RenderTransform>
+                <Image.Triggers>
+                    <EventTrigger RoutedEvent="Image.Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                    </EventTrigger>
+                </Image.Triggers>
+            </Image>
+            <Image Grid.Row="3"
+                   Grid.Column="0"
+                   Source="/Resources/AppIcon/Accept.png"
+                   Visibility="{Binding UploadStage, Converter={StaticResource PackageUploadingProgressStageToVisibilityConverter}, ConverterParameter=Done}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="16"
+                   Width="16" />
+            <TextBlock Grid.Row="3"
+                       Grid.Column="1"
+                       Text="{x:Static strings:PackageUploading.UploadingExtraFilesText}"
+                       d:Text="Uploading supplemental files..."
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center" />
+        </Grid>
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Content="{x:Static strings:PackageUploading.CancelUploadButtonText}"
+                    d:Content="Cancel upload"
+                    Command="{Binding CancelUploadCommand}"
+                    IsEnabled="True"
+                    Margin="0, 0, 50, 50"
+                    Width="150"
+                    Height="30"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

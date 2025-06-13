@@ -14,33 +14,35 @@ namespace PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 
 public class ClientSecretCredentialAccessTokenProvider : CredentialAccessTokenProvider, IAccessTokenProvider
 {
-    private readonly AzureApplicationSecretAuthInfo _aadAuthInfo;
+    private readonly ClientSecretAuthInfo _clientSecretAuthInfo;
 
-    public ClientSecretCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, IOptions<AzureApplicationSecretAuthInfo> aadAuthInfo, 
-        ILogger<ClientSecretCredentialAccessTokenProvider> logger) : base(config, logger)
+    public ClientSecretCredentialAccessTokenProvider(IOptions<AccessTokenProviderConfig> config, 
+        ILogger<ClientSecretCredentialAccessTokenProvider> logger,
+        IOptions<ClientSecretAuthInfo> clientSecretAuthInfo) : base(config, logger)
     {
-        _aadAuthInfo = aadAuthInfo?.Value ?? throw new ArgumentNullException(nameof(aadAuthInfo), $"{nameof(aadAuthInfo)} cannot be null.");
+        _clientSecretAuthInfo = clientSecretAuthInfo?.Value ?? throw new ArgumentNullException(nameof(clientSecretAuthInfo), $"{nameof(clientSecretAuthInfo)} cannot be null.");
 
-        if (string.IsNullOrWhiteSpace(_aadAuthInfo.TenantId))
+        if (string.IsNullOrWhiteSpace(_clientSecretAuthInfo.TenantId))
         {
-            throw new ArgumentException($"TenantId not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
+            throw new ArgumentException($"TenantId not provided in {ClientSecretAuthInfo.ConfigName}.", nameof(clientSecretAuthInfo));
         }
 
-        if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientId))
+        if (string.IsNullOrWhiteSpace(_clientSecretAuthInfo.ClientId))
         {
-            throw new ArgumentException($"ClientId not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
+            throw new ArgumentException($"ClientId not provided in {ClientSecretAuthInfo.ConfigName}.", nameof(clientSecretAuthInfo));
         }
 
-        if (string.IsNullOrWhiteSpace(_aadAuthInfo.ClientSecret))
+        if (string.IsNullOrWhiteSpace(_clientSecretAuthInfo.ClientSecret))
         {
-            throw new ArgumentException($"ClientSecret not provided in {AadAuthInfo.ConfigName}.", nameof(aadAuthInfo));
+            throw new ArgumentException($"ClientSecret not provided in {ClientSecretAuthInfo.ConfigName}.", nameof(clientSecretAuthInfo));
         }
     }
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
         var azureCredentialOptions = SetTokenCredentialOptions(new ClientSecretCredentialOptions());
-        var azureCredential = new ClientSecretCredential(_aadAuthInfo.TenantId, _aadAuthInfo.ClientId, _aadAuthInfo.ClientSecret, azureCredentialOptions);
+        var azureCredential = new ClientSecretCredential(_clientSecretAuthInfo.TenantId, 
+            _clientSecretAuthInfo.ClientId, _clientSecretAuthInfo.ClientSecret, azureCredentialOptions);
 
         return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
     }
