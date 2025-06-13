@@ -24,4 +24,9 @@ internal sealed class UploadProgress
     /// Delay to wait before retrying API call
     /// </summary>
     public TimeSpan RequestDelay { get; set; }
+
+    /// <summary>
+    /// Direct upload parameters
+    /// </summary>
+    public DirectUploadParameters DirectUploadParameters { get; set; }
 }

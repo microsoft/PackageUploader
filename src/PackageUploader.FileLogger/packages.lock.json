@@ -31,9 +31,9 @@
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[8.0.16, )",
-        "resolved": "8.0.16",
-        "contentHash": "0H1QaKpVibe++Zx6EYJQGhrpfz2bBPGiQ7Rpsmx8I3+oKv+ZRRIfVfmcj50KuZlhhRE6V02y5bUjP+V2oPM2ng=="
+        "requested": "[8.0.17, )",
+        "resolved": "8.0.17",
+        "contentHash": "x5/y4l8AtshpBOrCZdlE4txw8K3e3s9meBFeZeR3l8hbbku2V7kK6ojhXvrbjg1rk3G+JqL1BI26gtgc1ZrdUw=="
       },
       "System.Text.Json": {
         "type": "Direct",
@@ -128,6 +128,13 @@
         "resolved": "9.0.5",
         "contentHash": "5WXo+3MGcnYn54+1ojf+kRzKq1Q6sDUnovujNJ2ky1nl1/kP3+PMil9LPbFvZ2mkhvAGmQcY07G2sfHat/v0Fw=="
       },
+      "System.Text.Encodings.Web": {
+        "type": "Transitive",
+        "resolved": "9.0.5",
+        "contentHash": "HJPmqP2FsE+WVUUlTsZ4IFRSyzw40yz0ubiTnsaqm+Xo5fFZhVRvx6Zn8tLXj92/6pbre6OA4QL2A2vnCSKxJA=="
+      }
+    },
+    "net8.0/win-x64": {
       "System.Text.Encodings.Web": {
         "type": "Transitive",
         "resolved": "9.0.5",

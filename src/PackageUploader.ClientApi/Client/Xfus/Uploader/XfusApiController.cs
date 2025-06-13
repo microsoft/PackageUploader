@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Azure.Storage.Blobs.Specialized;
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Xfus.Config;
 using PackageUploader.ClientApi.Client.Xfus.Exceptions;
@@ -33,12 +34,12 @@ internal class XfusApiController
         _httpClient = httpClient;
     }
 
-    internal async Task UploadBlocksAsync(Block[] blockToBeUploaded, FileInfo uploadFile, Guid assetId, XfusBlockProgressReporter blockProgressReporter, CancellationToken ct)
+    internal async Task UploadBlocksAsync(UploadProgress uploadProgress, FileInfo uploadFile, Guid assetId, XfusBlockProgressReporter blockProgressReporter, CancellationToken ct)
     {
         // We want to use the biggest block size because it is most likely to be the most frequent block size
         // among different upload scenarios. In addition, by over-allocating memory, we minimize potential
         // memory usage spikes during the middle of an upload as blocks are created and reused.
-        var maximumBlockSize = (int)blockToBeUploaded.Max(x => x.Size);
+        var maximumBlockSize = (int)uploadProgress.PendingBlocks.Max(x => x.Size);
 
         var bufferPool = new BufferPool(maximumBlockSize);
         var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _uploadConfig.MaxParallelism };
@@ -60,7 +61,14 @@ internal class XfusApiController
                 // when trying to send http request.
                 Array.Resize(ref buffer, bytesRead);
 
-                await UploadBlockFromPayloadAsync(block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
+                if (uploadProgress.DirectUploadParameters != null && uploadProgress.DirectUploadParameters.SasUri != null)
+                {
+                    await UploadBlockFromPayloadAsync(assetId, block, buffer, uploadProgress.DirectUploadParameters.SasUri, bytesRead, ct).ConfigureAwait(false);
+                }
+                else
+                {
+                    await UploadBlockFromPayloadAsync(bytesRead, assetId, block.Id, buffer, ct).ConfigureAwait(false);
+                }
 
                 blockProgressReporter.BlocksLeftToUpload--;
                 blockProgressReporter.BytesUploaded += bytesRead;
@@ -80,7 +88,7 @@ internal class XfusApiController
         },
             actionBlockOptions);
 
-        foreach (var block in blockToBeUploaded)
+        foreach (var block in uploadProgress.PendingBlocks)
         {
             await uploadBlock.SendAsync(block, ct).ConfigureAwait(false);
         }
@@ -105,6 +113,22 @@ internal class XfusApiController
         catch (Exception exception)
         {
             LogXfusExceptionDetails(exception, "XFUS block payload upload", assetId, blockId);
+            throw;
+        }
+    }
+
+    internal async Task UploadBlockFromPayloadAsync(Guid assetId, Block block, byte[] payload, string sasUri, int bytesRead, CancellationToken ct)
+    {
+        try
+        {
+            BlockBlobClient blobClient = new(new Uri(sasUri));
+            using var chunkStream = new MemoryStream(payload, 0, bytesRead);
+
+            await blobClient.StageBlockAsync(block.BlockIdBase64, chunkStream, null, ct);
+        }
+        catch (Exception exception)
+        {
+            LogXfusExceptionDetails(exception, "XFUS block payload upload", assetId, block.Id);
             throw;
         }
     }
@@ -134,6 +158,8 @@ internal class XfusApiController
             }
 
             var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
+
+            _logger.LogInformation("Asset initialized as {} upload", uploadProgress.DirectUploadParameters != null ? "direct" : "proxy");
             return uploadProgress;
         }
         catch (Exception exception) {
