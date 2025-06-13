@@ -8,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace PackageUploader.Application.Operations;
 
-internal abstract class Operation
+internal abstract class Operation(ILogger logger)
 {
-    private readonly ILogger _logger;
-
-    protected Operation(ILogger logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger _logger = logger;
 
     public async Task<int> RunAsync(CancellationToken ct)
     {
