@@ -408,6 +408,34 @@ namespace PackageUploader.UI.Test.ViewModel
         }
 
         [TestMethod]
+        public void ProcessMakePackageOutput_HandlesPathsWithSpaces()
+        {
+            string output = "Successfully created package 'C:\\Users\\Test User\\Documents\\My Games\\package.xvc'";
+
+            var processMakePackageOutputMethod = typeof(PackageCreationViewModel).GetMethod(
+                "ProcessMakePackageOutput",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+
+            processMakePackageOutputMethod.Invoke(_viewModel, new object[] { output });
+
+            Assert.AreEqual("C:\\Users\\Test User\\Documents\\My Games\\package.xvc", _packageModelProvider.Package.PackageFilePath);
+        }
+
+        [TestMethod]
+        public void ProcessMakePackageOutput_HandlesPathsWithSpecialCharacters()
+        {
+            string output = "Successfully created package 'C:\\Games (2023)\\Test-Game_v1.0.1\\package.xvc'";
+
+            var processMakePackageOutputMethod = typeof(PackageCreationViewModel).GetMethod(
+                "ProcessMakePackageOutput",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+
+            processMakePackageOutputMethod.Invoke(_viewModel, new object[] { output });
+
+            Assert.AreEqual("C:\\Games (2023)\\Test-Game_v1.0.1\\package.xvc", _packageModelProvider.Package.PackageFilePath);
+        }
+
+        [TestMethod]
         public void EstimatePackageSize_WithoutGameDataPath_SetsUnknownSize()
         {
             // Arrange
