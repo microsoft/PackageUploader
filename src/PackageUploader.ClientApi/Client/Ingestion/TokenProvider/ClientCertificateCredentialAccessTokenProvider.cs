@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+using System;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -23,6 +24,18 @@ public class ClientCertificateCredentialAccessTokenProvider : CredentialAccessTo
         IOptions<ClientCertificateAuthInfo> clientCertificateAuthInfo) : base(config, logger)
     {
         _clientCertificateAuthInfo = clientCertificateAuthInfo.Value;
+        if (string.IsNullOrEmpty(_clientCertificateAuthInfo.TenantId))
+        {
+            throw new ArgumentException("TenantId cannot be null or empty.", nameof(_clientCertificateAuthInfo.TenantId));
+        }
+        if (string.IsNullOrEmpty(_clientCertificateAuthInfo.ClientId))
+        {
+            throw new ArgumentException("ClientId cannot be null or empty.", nameof(_clientCertificateAuthInfo.ClientId));
+        }
+        if (string.IsNullOrEmpty(_clientCertificateAuthInfo.CertificatePath))
+        {
+            throw new ArgumentException("CertificatePath cannot be null or empty.", nameof(_clientCertificateAuthInfo.CertificatePath));
+        }
     }
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)

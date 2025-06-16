@@ -243,7 +243,6 @@ namespace PackageUploader.UI.Test.ViewModel
 
             // Mocking a file info for package
             var packageInfo = new FileInfo(_mockPackage.PackageFilePath);
-            var fileSize = 1024 * 1024 * 10; // 10 MB
             var img = new BitmapImage();
 
             // TODO: Using reflection to set private fields for testing

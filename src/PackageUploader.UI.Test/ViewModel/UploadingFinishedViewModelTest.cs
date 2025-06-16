@@ -25,7 +25,6 @@ namespace PackageUploader.UI.Test.ViewModel
         private Mock<IProcessStarterService> _mockProcessStarterService;
         private PackageModel _mockPackage;
         private UploadingFinishedViewModel _viewModel;
-        private Mock<Application> _mockApplication;
 
         [TestInitialize]
         public void Setup()

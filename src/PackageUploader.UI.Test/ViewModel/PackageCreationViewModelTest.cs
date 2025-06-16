@@ -106,12 +106,12 @@ namespace PackageUploader.UI.Test.ViewModel
         {
             // Arrange
             string newPath = @"C:\TestData\mapping.xml";
-            bool canExecuteChangedFired = false;
+            /*bool canExecuteChangedFired = false;
 
             if (_viewModel.MakePackageCommand is RelayCommand command)
             {
                 command.CanExecuteChanged += (s, e) => canExecuteChangedFired = true;
-            }
+            }*/
 
             // Act
             _viewModel.MappingDataXmlPath = newPath;
@@ -212,7 +212,7 @@ namespace PackageUploader.UI.Test.ViewModel
         public void HasValidGameConfig_WhenChanged_UpdatesCanExecuteStatus()
         {
             // Arrange
-            bool canExecuteChangedFired = false;
+            /*bool canExecuteChangedFired = false;
 
             if (_viewModel.MakePackageCommand is RelayCommand command)
             {
@@ -220,7 +220,7 @@ namespace PackageUploader.UI.Test.ViewModel
                 { 
                     canExecuteChangedFired = true; 
                 };
-            }
+            }*/
             _viewModel.LayoutParseError = string.Empty;
             _viewModel.MappingDataXmlPath = string.Empty;
 
@@ -389,7 +389,7 @@ namespace PackageUploader.UI.Test.ViewModel
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Act
-            processMakePackageOutputMethod.Invoke(_viewModel, new object[] { output });
+            processMakePackageOutputMethod.Invoke(_viewModel, [output]);
 
             // Assert
             Assert.AreEqual("C:\\path\\package.xvc", _packageModelProvider.Package.PackageFilePath);
@@ -407,7 +407,7 @@ namespace PackageUploader.UI.Test.ViewModel
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
             // Act
-            processMakePackageOutputMethod.Invoke(_viewModel, new object[] { output });
+            processMakePackageOutputMethod.Invoke(_viewModel, [output]);
 
             // Assert
             Assert.AreEqual("C:\\path\\package.msixvc", _packageModelProvider.Package.PackageFilePath);
@@ -422,7 +422,7 @@ namespace PackageUploader.UI.Test.ViewModel
                 "ProcessMakePackageOutput",
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
-            processMakePackageOutputMethod.Invoke(_viewModel, new object[] { output });
+            processMakePackageOutputMethod.Invoke(_viewModel, [output]);
 
             Assert.AreEqual("C:\\Users\\Test User\\Documents\\My Games\\package.xvc", _packageModelProvider.Package.PackageFilePath);
         }
@@ -436,7 +436,7 @@ namespace PackageUploader.UI.Test.ViewModel
                 "ProcessMakePackageOutput",
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
-            processMakePackageOutputMethod.Invoke(_viewModel, new object[] { output });
+            processMakePackageOutputMethod.Invoke(_viewModel, [output]);
 
             Assert.AreEqual("C:\\Games (2023)\\Test-Game_v1.0.1\\package.xvc", _packageModelProvider.Package.PackageFilePath);
         }
@@ -463,12 +463,12 @@ namespace PackageUploader.UI.Test.ViewModel
         public void LayoutParseError_WhenChanged_UpdatesCanExecuteStatus()
         {
             // Arrange
-            bool canExecuteChangedFired = false;
+            /*bool canExecuteChangedFired = false;
 
             if (_viewModel.MakePackageCommand is RelayCommand command)
             {
                 command.CanExecuteChanged += (s, e) => canExecuteChangedFired = true;
-            }
+            }*/
 
             // Act
             _viewModel.LayoutParseError = "Some error";

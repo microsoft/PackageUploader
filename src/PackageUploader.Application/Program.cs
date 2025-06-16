@@ -116,7 +116,7 @@ internal class Program
             // Add client secret mapping for AppSecret auth
             foreach (var alias in ClientSecretOption.Aliases)
             {
-                switchMappings.Add(alias, $"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}");
+                switchMappings.Add(alias, $"{ClientSecretAuthInfo.ConfigName}:{nameof(ClientSecretAuthInfo.ClientSecret)}");
             }
         }
         
@@ -126,7 +126,7 @@ internal class Program
         {
             foreach (var alias in TenantIdOption.Aliases)
             {
-                switchMappings.Add(alias, $"{nameof(BrowserAuthInfo)}:{nameof(BrowserAuthInfo.TenantId)}");
+                switchMappings.Add(alias, $"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}");
             }
         }
 

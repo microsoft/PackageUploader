@@ -27,8 +27,6 @@ namespace PackageUploader.UI.Test.ViewModel
         private UploadingProgressPercentageProvider _uploadingProgressPercentageProvider;
         private ErrorModelProvider _errorModelProvider;
         private PackageModel _mockPackage;
-        private GameProduct _gameProduct;
-        private Mock<GamePackageConfiguration> _mockGamePackageConfiguration;
 
         private PackageUploadViewModel _viewModel;
 

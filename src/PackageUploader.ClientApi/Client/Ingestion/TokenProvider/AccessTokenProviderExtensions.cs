@@ -123,7 +123,6 @@ internal static class AccessTokenProviderExtensions
     public static IServiceCollection AddAzureTenantServices(this IServiceCollection services)
     {
         services.AddHttpClient<IAzureTenantService, AzureTenantService>();
-        services.AddScoped<IAzureTenantService, AzureTenantService>();
         return services;
     }
 

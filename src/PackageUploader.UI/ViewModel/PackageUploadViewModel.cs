@@ -166,7 +166,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         CheckCanExecuteUploadCommand();
     }
 
-    private IGamePackageBranch? GetBranchOrFlightFromUISelection()
+    protected virtual IGamePackageBranch? GetBranchOrFlightFromUISelection()
     {
         if (_branchesAndFlights == null || string.IsNullOrEmpty(BranchOrFlightDisplayName))
         {
@@ -565,7 +565,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     {
         try
         {
-            XvcFile.GetBuildAndKeyId(packagePath, out Guid buildId, out Guid keyId);
+            GetBuildAndKeyId(packagePath, out Guid buildId, out Guid keyId);
 
             // Get just the filename without extension to build up other file paths
             string? baseFolder = Path.GetDirectoryName(packagePath);
@@ -592,7 +592,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                 symbolBundleFilePath = Path.Combine(baseFolder, $"{fileName}.zip");
             }
 
-            if (File.Exists(symbolBundleFilePath))
+            if (FileExists(symbolBundleFilePath))
             {
                 SymbolBundleFilePath = symbolBundleFilePath;
             }
@@ -615,24 +615,26 @@ public partial class PackageUploadViewModel : BaseViewModel
 
             // Update package preview information
             PackageId = fileName;
-            FileInfo fileInfo = new(packagePath);
+            
+            // Get the file size
+            long fileLength = GetFileSize(packagePath);
 
             double bytesInMB = 1024.0 * 1024.0;
             double bytesInGB = bytesInMB * 1024.0;
-            if (fileInfo.Length > bytesInGB)
+            if (fileLength > bytesInGB)
             {
-                PackageSize = string.Format("{0:0.##} GB", fileInfo.Length / bytesInGB);
+                PackageSize = string.Format("{0:0.##} GB", fileLength / bytesInGB);
             }
             else
             {
-                PackageSize = string.Format("{0:0.##} MB", fileInfo.Length / bytesInMB);
+                PackageSize = string.Format("{0:0.##} MB", fileLength / bytesInMB);
             }
 
             PackageType = type == "MSIXVC" ? "PC" : "Console";
 
             if (!string.IsNullOrEmpty(logoFilename))
             {
-                XvcFile.ExtractFile(packagePath, logoFilename, out byte[]? fileContents);
+                ExtractFile(packagePath, logoFilename, out byte[]? fileContents);
                 PackagePreviewImage = fileContents != null ? LoadBitmapImage(fileContents) : null;
             }
         }
@@ -642,21 +644,20 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
     }
 
-    private static BitmapImage? LoadBitmapImage(byte[] fileContents)
+    // Virtual methods to make the class more testable
+    
+    /// <summary>
+    /// Virtual wrapper for XvcFile.GetBuildAndKeyId to make it testable
+    /// </summary>
+    protected virtual void GetBuildAndKeyId(string packagePath, out Guid buildId, out Guid keyId)
     {
-        BitmapImage bitmapImage = new();
-        using (MemoryStream stream = new(fileContents))
-        {
-            bitmapImage.BeginInit();
-            bitmapImage.StreamSource = stream;
-            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-            bitmapImage.EndInit();
-            bitmapImage.Freeze();
-        }
-        return bitmapImage;
+        XvcFile.GetBuildAndKeyId(packagePath, out buildId, out keyId);
     }
 
-    private void ExtractIdInformationFromValidatorLog(Guid expectedBuildId, out string? type, out string? titleId, out string storeId, out string logoFilename)
+    /// <summary>
+    /// Virtual wrapper for ExtractIdInformationFromValidatorLog to make it testable
+    /// </summary>
+    protected virtual void ExtractIdInformationFromValidatorLog(Guid expectedBuildId, out string type, out string titleId, out string storeId, out string logoFilename)
     {
         // Read the XML file and extract the TitleId and StoreId
         if (!File.Exists(SubValFilePath))
@@ -694,6 +695,53 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         node = xmlDoc.SelectSingleNode("//GameConfig/Game/ShellVisuals");
         logoFilename = node?.Attributes?.GetNamedItem("Square150x150Logo")?.InnerText ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Virtual wrapper for XvcFile.ExtractFile to make it testable
+    /// </summary>
+    protected virtual void ExtractFile(string packagePath, string fileName, out byte[]? fileContents)
+    {
+        XvcFile.ExtractFile(packagePath, fileName, out fileContents);
+    }
+
+    /// <summary>
+    /// Virtual wrapper for File.Exists to make it testable
+    /// </summary>
+    protected virtual bool FileExists(string path)
+    {
+        return File.Exists(path);
+    }
+
+    /// <summary>
+    /// Virtual wrapper for getting file size to make it testable
+    /// </summary>
+    protected virtual long GetFileSize(string path)
+    {
+        FileInfo fileInfo = new(path);
+        return fileInfo.Length;
+    }
+    
+    /// <summary>
+    /// Virtual wrapper for File.WriteAllText to make it testable
+    /// </summary>
+    protected virtual void WriteAllText(string path, string contents)
+    {
+        File.WriteAllText(path, contents);
+    }
+
+    private static BitmapImage? LoadBitmapImage(byte[] fileContents)
+    {
+        BitmapImage bitmapImage = new();
+        using (MemoryStream stream = new(fileContents))
+        {
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = stream;
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.EndInit();
+            bitmapImage.Freeze();
+        }
+        return bitmapImage;
     }
 
     private async void GetProductInfoAsync()
@@ -857,7 +905,8 @@ public partial class PackageUploadViewModel : BaseViewModel
         _uploadCancellationTokenSource?.Cancel();
     }
 
-    private void GenerateUploaderConfig()
+    // Modified to protected virtual for testing
+    protected virtual void GenerateUploaderConfig()
     {
         IGamePackageBranch? branchOrFlight = GetBranchOrFlightFromUISelection();
 
@@ -880,8 +929,14 @@ public partial class PackageUploadViewModel : BaseViewModel
             }
         };
 
+        // Add symbols path if it exists
+        if (!string.IsNullOrEmpty(SymbolBundleFilePath))
+        {
+            config.gameAssets.symbolsFilePath = SymbolBundleFilePath;
+        }
+
         string configFileText = JsonSerializer.Serialize(config, HumanReadableJson);
-        File.WriteAllText(ConfileFilePath, configFileText);
+        WriteAllText(ConfileFilePath, configFileText);
     }
 
     private void OnCancelButton()

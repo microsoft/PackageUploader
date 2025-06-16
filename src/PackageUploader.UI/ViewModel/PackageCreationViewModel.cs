@@ -372,7 +372,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     private void EstimatePackageSize()
     {
         LayoutParseError = string.Empty;
-        string sizeInBytes = "Unknown";
+        string sizeInBytes;
         if (string.IsNullOrEmpty(GameDataPath) || !Directory.Exists(GameDataPath))
         {
             PackageSize = "Unknown";
