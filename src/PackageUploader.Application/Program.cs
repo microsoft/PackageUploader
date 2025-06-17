@@ -117,8 +117,6 @@ internal class Program
         var authenticationMethod = invocationContext.GetOptionValue(AuthenticationMethodOption);
         
         // Configure auth options based on the authentication method
-        var switchMappings = new Dictionary<string, string>();
-        
         if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
         {
             // Add client secret mapping for AppSecret auth
@@ -142,8 +140,6 @@ internal class Program
         {
             builder.AddCommandLine(args, switchMappings);
         }
-
-        builder.AddCommandLine(args, switchMappings);        
     }
 
     private static CommandLineBuilder BuildCommandLine()
