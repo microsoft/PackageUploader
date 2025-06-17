@@ -124,16 +124,16 @@
     <value>参照</value>
   </data>
   <data name="BuildLocationText" xml:space="preserve">
-    <value>パッケージ化するゲームファイルを探してください。追加詳細情報でレイアウトファイルを追加してください。詳細はドキュメントを参照してください。</value>
+    <value>パッケージ化するゲーム ファイルを探してください。追加詳細情報でレイアウト ファイルを追加してください。詳細はドキュメントを参照してください。</value>
   </data>
   <data name="BuildLocationTitle" xml:space="preserve">
-    <value>ビルド場所</value>
+    <value>ビルドの場所</value>
   </data>
   <data name="CancelButtonText" xml:space="preserve">
     <value>キャンセル</value>
   </data>
   <data name="ContentMapPathBoxDefaultText" xml:space="preserve">
-    <value>コンテンツマップの場所を選択または入力してください</value>
+    <value>コンテンツ マップの場所を選択または入力してください</value>
   </data>
   <data name="CreatePackageButtonText" xml:space="preserve">
     <value>パッケージを作成</value>
@@ -145,7 +145,7 @@
     <value>出力ディレクトリの作成に失敗しました</value>
   </data>
   <data name="FailedToGenerateLayoutFileErrorMsg" xml:space="preserve">
-    <value>レイアウトファイルが生成されませんでした。</value>
+    <value>レイアウト ファイルが生成されませんでした。</value>
   </data>
   <data name="FolderDoesNotContainConfigErrMsg" xml:space="preserve">
     <value>指定されたフォルダには MicrosoftGame.config ファイルが含まれていません。</value>
@@ -154,16 +154,16 @@
     <value>ゲームの場所を選択または入力してください</value>
   </data>
   <data name="GamePathTitleText" xml:space="preserve">
-    <value>ゲームパス</value>
+    <value>ゲーム パス</value>
   </data>
   <data name="GeneratingLayoutFileErrorMsg" xml:space="preserve">
-    <value>レイアウトファイルの生成中にエラーが発生しました。</value>
+    <value>レイアウト ファイルの生成中にエラーが発生しました。</value>
   </data>
   <data name="LayoutFileMapTitle" xml:space="preserve">
-    <value>レイアウトファイル/コンテンツマップ</value>
+    <value>レイアウト ファイル/コンテンツ マップ</value>
   </data>
   <data name="LayoutFileParsingErrorMsg" xml:space="preserve">
-    <value>レイアウトファイルの解析中にエラーが発生しました。</value>
+    <value>レイアウト ファイルの解析中にエラーが発生しました。</value>
   </data>
   <data name="MicrosoftGameConfigInvalidErrMsg" xml:space="preserve">
     <value>指定されたフォルダ内の MicrosoftGame.config ファイルは有効ではありません。</value>
@@ -172,13 +172,13 @@
     <value>MicrosoftGame.config ファイルに有効な Identity ノードがありません。</value>
   </data>
   <data name="MsftGameConfigLogoFileNotExistErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config ファイルで指定されたロゴファイルが存在しません。</value>
+    <value>MicrosoftGame.config ファイルで指定されたロゴ ファイルが存在しません。</value>
   </data>
   <data name="MsftGameConfigMissingLogoFilesErrMsg" xml:space="preserve">
-    <value>MicrosoftGame.config ファイルの ShellVisuals に必要なロゴファイルがありません。</value>
+    <value>MicrosoftGame.config ファイルの ShellVisuals に必要なロゴ ファイルがありません。</value>
   </data>
   <data name="NoFilesInLayoutFileErrorMsg" xml:space="preserve">
-    <value>レイアウトファイル内にファイルが見つかりませんでした。</value>
+    <value>レイアウト ファイル内にファイルが見つかりませんでした。</value>
   </data>
   <data name="OptionalText" xml:space="preserve">
     <value>任意</value>
@@ -187,10 +187,10 @@
     <value>パッケージの出力場所を選択または入力してください</value>
   </data>
   <data name="PackageOutputTitleText" xml:space="preserve">
-    <value>パッケージ出力場所</value>
+    <value>パッケージの出力場所</value>
   </data>
   <data name="PackagePathTitleText" xml:space="preserve">
-    <value>パッケージパス</value>
+    <value>パッケージ パス</value>
   </data>
   <data name="PackagePreviewFamilyText" xml:space="preserve">
     <value>ファミリー</value>
@@ -202,7 +202,7 @@
     <value>パッケージ ID 名</value>
   </data>
   <data name="PackagePreviewSizeEstimate" xml:space="preserve">
-    <value>サイズ推定</value>
+    <value>予想サイズ</value>
   </data>
   <data name="PackagePreviewStoreIdText" xml:space="preserve">
     <value>StoreId</value>
@@ -217,7 +217,7 @@
     <value>必須</value>
   </data>
   <data name="SelectMapXmlTitleText" xml:space="preserve">
-    <value>マッピングデータ XML ファイルを選択</value>
+    <value>マッピング データ XML ファイルを選択</value>
   </data>
   <data name="SubTitleText" xml:space="preserve">
     <value>パッケージを作成するためにゲームのビルドを探してください。Xbox Game Package Manager は将来より簡単にアクセスできるようにこれらのパスを記憶します。</value>
@@ -226,15 +226,15 @@
     <value>指定されたパスに SubmissionValidator.dll が見つかりませんでした。</value>
   </data>
   <data name="TitleString" xml:space="preserve">
-    <value>ゲームパッケージを作成</value>
+    <value>ゲーム パッケージを作成</value>
   </data>
   <data name="UnknownText" xml:space="preserve">
     <value>不明</value>
   </data>
   <data name="ValidatorPathBoxDefaultText" xml:space="preserve">
-    <value>SubmissionValidator.dll のフォルダパスを選択または入力してください</value>
+    <value>SubmissionValidator.dll のフォルダ パスを選択または入力してください</value>
   </data>
   <data name="ValidatorPathTitleText" xml:space="preserve">
-    <value>SubmissionValidator.dll のフォルダパス</value>
+    <value>SubmissionValidator.dll のフォルダ パス</value>
   </data>
 </root>

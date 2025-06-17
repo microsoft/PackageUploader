@@ -130,7 +130,7 @@
     <value>サイズ</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>ストア ID</value>
+    <value>StoreId</value>
   </data>
   <data name="UploadCompleteTitleText" xml:space="preserve">
     <value>アップロード完了</value>
@@ -139,6 +139,6 @@
     <value>ログを表示</value>
   </data>
   <data name="ViewPartnerCenterButtonContent" xml:space="preserve">
-    <value>パートナーセンターで表示</value>
+    <value>パートナー センターで表示</value>
   </data>
 </root>

@@ -130,7 +130,7 @@
     <value>パッケージを処理中...</value>
   </data>
   <data name="TitleText" xml:space="preserve">
-    <value>パートナーセンターにパッケージをアップロード中</value>
+    <value>パートナー センターにパッケージをアップロード中</value>
   </data>
   <data name="UploadingExtraFilesText" xml:space="preserve">
     <value>補足ファイルをアップロード中...</value>
