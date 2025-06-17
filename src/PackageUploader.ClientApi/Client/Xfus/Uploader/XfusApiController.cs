@@ -158,8 +158,6 @@ internal class XfusApiController
             }
 
             var uploadProgress = await response.Content.ReadFromJsonAsync(XfusJsonSerializerContext.Default.UploadProgress, ct).ConfigureAwait(false);
-
-            _logger.LogInformation("Asset initialized as {} upload", uploadProgress.DirectUploadParameters != null ? "direct" : "proxy");
             return uploadProgress;
         }
         catch (Exception exception) {
