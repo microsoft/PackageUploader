@@ -67,6 +67,23 @@
           "System.Memory": "4.5.5"
         }
       },
+      "Azure.Storage.Blobs": {
+        "type": "Transitive",
+        "resolved": "12.24.1",
+        "contentHash": "479Z9ps9yl9XyhU45bbU2CU4e2B23S6FJiSiL9LpfZHU6eNXXD9Jb6rYdwY+qqmm852RhqICXBpX3Sql4DLBew==",
+        "dependencies": {
+          "Azure.Storage.Common": "12.23.0"
+        }
+      },
+      "Azure.Storage.Common": {
+        "type": "Transitive",
+        "resolved": "12.23.0",
+        "contentHash": "X/pe1LS3lC6s6MSL7A6FzRfnB6P72rNBt5oSuyan6Q4Jxr+KiN9Ufwqo32YLHOVfPcB8ESZZ4rBDketn+J37Rw==",
+        "dependencies": {
+          "Azure.Core": "1.44.1",
+          "System.IO.Hashing": "6.0.0"
+        }
+      },
       "Castle.Core": {
         "type": "Transitive",
         "resolved": "5.1.1",
@@ -367,6 +384,11 @@
         "resolved": "6.0.0",
         "contentHash": "lcyUiXTsETK2ALsZrX+nWuHSIQeazhqPphLfaRxzdGaG93+0kELqpgEHtwWOlQe7+jSFnKwaCAgL4kjeZCQJnw=="
       },
+      "System.IO.Hashing": {
+        "type": "Transitive",
+        "resolved": "6.0.0",
+        "contentHash": "Rfm2jYCaUeGysFEZjDe7j1R4x6Z6BzumS/vUT5a1AA/AWJuGX71PoGB0RmpyX3VmrGqVnAwtfMn39OHR8Y/5+g=="
+      },
       "System.IO.Pipelines": {
         "type": "Transitive",
         "resolved": "9.0.5",
@@ -422,6 +444,7 @@
         "dependencies": {
           "Azure.Core": "[1.46.1, )",
           "Azure.Identity": "[1.14.0, )",
+          "Azure.Storage.Blobs": "[12.24.1, )",
           "Microsoft.Extensions.Configuration.Binder": "[9.0.5, )",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "[9.0.5, )",
           "Microsoft.Extensions.Http": "[9.0.5, )",
