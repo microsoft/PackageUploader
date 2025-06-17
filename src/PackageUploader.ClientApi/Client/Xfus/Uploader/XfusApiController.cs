@@ -53,8 +53,6 @@ internal class XfusApiController
                 stream.Seek(block.Offset, SeekOrigin.Begin);
                 var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, (int)block.Size), ct).ConfigureAwait(false);
 
-                _logger.LogTrace("Uploading block {blockId} with payload: {bytesRead}.", block.Id, new ByteSize(bytesRead));
-
                 // In certain scenarios like delta uploads, or the last chunk in an upload,
                 // the actual chunk size could be less than the largest chunk size.
                 // We need to make sure buffer size matches chunk size otherwise we will get an error
@@ -63,10 +61,12 @@ internal class XfusApiController
 
                 if (uploadProgress.DirectUploadParameters != null && uploadProgress.DirectUploadParameters.SasUri != null)
                 {
+                    _logger.LogTrace("Uploading block {blockId} with payload: {bytesRead} using direct upload.", block.Id, new ByteSize(bytesRead));
                     await UploadBlockFromPayloadAsync(assetId, block, buffer, uploadProgress.DirectUploadParameters.SasUri, bytesRead, ct).ConfigureAwait(false);
                 }
                 else
                 {
+                    _logger.LogTrace("Uploading block {blockId} with payload: {bytesRead} using proxy upload.", block.Id, new ByteSize(bytesRead));
                     await UploadBlockFromPayloadAsync(bytesRead, assetId, block.Id, buffer, ct).ConfigureAwait(false);
                 }
 
