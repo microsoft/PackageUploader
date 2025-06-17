@@ -295,11 +295,9 @@ public class PackageUploaderService : IPackageUploaderService
                 progress?.Report(currentProgress);
 
                 // Upload the remaining assets
-                await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, bytesProgress, ct).ConfigureAwait(false);
-            
-                await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, bytesProgress, ct).ConfigureAwait(false);
-            
-                await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, bytesProgress, ct).ConfigureAwait(false);
+                await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, bytesProgress, ct);
+                await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, bytesProgress, ct);
+                await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, bytesProgress, ct);
             }
 
             // Set progress to 100% when complete

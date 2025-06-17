@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using PackageUploader.Application.Config;
 using PackageUploader.Application.Operations;
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.NamingConventionBinder;
@@ -57,6 +58,14 @@ internal static class ProgramExtensions
     public static T GetOptionValue<T>(this InvocationContext invocationContext, Option<T> option)
     {
         return invocationContext.ParseResult.GetValueForOption(option);
+    }
+
+    public static void AddAliasesToSwitchMappings(this Option option, Dictionary<string, string> switchMappings, string configPath)
+    {
+        foreach (var alias in option.Aliases)
+        {
+            switchMappings[alias] = configPath;
+        }
     }
 
     public static Option<T> Required<T>(this Option<T> option, bool required = true)

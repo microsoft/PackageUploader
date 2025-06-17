@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PackageUploader.Application.Config;
 using PackageUploader.Application.Extensions;
 using PackageUploader.Application.Operations;
 using PackageUploader.ClientApi;
@@ -17,7 +18,6 @@ using System.CommandLine.Builder;
 using System.CommandLine.Hosting;
 using System.CommandLine.Parsing;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PackageUploader.Application;
@@ -34,12 +34,12 @@ internal class Program
     private static readonly Option<string> TenantIdOption = new (["-t", "--TenantId"], "The Azure tenant ID to use for authentication (primarily for Browser authentication)");
     private static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(["-c", "--ConfigFile"], "The location of the config file").Required();
     private static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(["-a", "--Authentication"], () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
-    public static readonly Option<string> ProductIdOption = new(["-p", "--ProductId"], "Product ID, replaces config value productId if present");
-    public static readonly Option<string> BigIdOption = new(["-b", "--BigId"], "Big ID, replaces config value bigId if present");
-    public static readonly Option<string> BranchFriendlyNameOption = new(["-bf", "--BranchFriendlyName"], "Branch Friendly Name, replaces config value branchFriendlyName if present");
-    public static readonly Option<string> FlightNameOption = new(["-f", "--FlightName"], "Flight Name, replaces config value flightName if present");
-    public static readonly Option<string> MarketGroupNameOption = new(["-m", "--MarketGroupName"], "Market Group Name, replaces config value marketGroupName if present");
-    public static readonly Option<string> DestinationSandboxName = new(["-ds", "--DestinationSandboxName"], "Destination Sandbox Name, replaces config value destinationSandboxName if present");
+    private static readonly Option<string> ProductIdOption = new(["-p", "--ProductId"], "Product ID, replaces config value productId if present");
+    private static readonly Option<string> BigIdOption = new(["-b", "--BigId"], "Big ID, replaces config value bigId if present");
+    private static readonly Option<string> BranchFriendlyNameOption = new(["-bf", "--BranchFriendlyName"], "Branch Friendly Name, replaces config value branchFriendlyName if present");
+    private static readonly Option<string> FlightNameOption = new(["-f", "--FlightName"], "Flight Name, replaces config value flightName if present");
+    private static readonly Option<string> MarketGroupNameOption = new(["-m", "--MarketGroupName"], "Market Group Name, replaces config value marketGroupName if present");
+    private static readonly Option<string> DestinationSandboxName = new(["-ds", "--DestinationSandboxName"], "Destination Sandbox Name, replaces config value destinationSandboxName if present");
 
 
     private static async Task<int> Main(string[] args)
@@ -106,6 +106,14 @@ internal class Program
             builder.AddJsonFile(configFile.FullName, false, false);
         }
 
+        var switchMappings = new Dictionary<string, string>();
+        ProductIdOption.AddAliasesToSwitchMappings(switchMappings, $"{nameof(BaseOperationConfig.ProductId)}");
+        BigIdOption.AddAliasesToSwitchMappings(switchMappings, $"{nameof(BaseOperationConfig.BigId)}");
+        BranchFriendlyNameOption.AddAliasesToSwitchMappings(switchMappings, $"{nameof(PackageBranchOperationConfig.BranchFriendlyName)}");
+        FlightNameOption.AddAliasesToSwitchMappings(switchMappings, $"{nameof(PackageBranchOperationConfig.FlightName)}");
+        MarketGroupNameOption.AddAliasesToSwitchMappings(switchMappings, "MarketGroupName");
+        DestinationSandboxName.AddAliasesToSwitchMappings(switchMappings, "DestinationSandboxName");
+
         var authenticationMethod = invocationContext.GetOptionValue(AuthenticationMethodOption);
         
         // Configure auth options based on the authentication method
@@ -134,6 +142,8 @@ internal class Program
         {
             builder.AddCommandLine(args, switchMappings);
         }
+
+        builder.AddCommandLine(args, switchMappings);        
     }
 
     private static CommandLineBuilder BuildCommandLine()

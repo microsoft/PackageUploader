@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Azure.Storage.Blobs.Specialized;
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Xfus.Config;
 using PackageUploader.ClientApi.Client.Xfus.Exceptions;
@@ -33,12 +34,12 @@ internal class XfusApiController
         _httpClient = httpClient;
     }
 
-    internal async Task UploadBlocksAsync(Block[] blockToBeUploaded, FileInfo uploadFile, Guid assetId, XfusBlockProgressReporter blockProgressReporter, IProgress<ulong> bytesProgress, CancellationToken ct)
+    internal async Task UploadBlocksAsync(UploadProgress uploadProgress, FileInfo uploadFile, Guid assetId, XfusBlockProgressReporter blockProgressReporter, IProgress<ulong> bytesProgress, CancellationToken ct)
     {
         // We want to use the biggest block size because it is most likely to be the most frequent block size
         // among different upload scenarios. In addition, by over-allocating memory, we minimize potential
         // memory usage spikes during the middle of an upload as blocks are created and reused.
-        var maximumBlockSize = (int)blockToBeUploaded.Max(x => x.Size);
+        var maximumBlockSize = (int)uploadProgress.PendingBlocks.Max(x => x.Size);
 
         var bufferPool = new BufferPool(maximumBlockSize);
         var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _uploadConfig.MaxParallelism };
@@ -59,15 +60,22 @@ internal class XfusApiController
                 stream.Seek(block.Offset, SeekOrigin.Begin);
                 var bytesRead = await stream.ReadAsync(buffer.AsMemory(0, (int)block.Size), ct).ConfigureAwait(false);
 
-                _logger.LogTrace("Uploading block {blockId} with payload: {bytesRead}.", block.Id, new ByteSize(bytesRead));
-
                 // In certain scenarios like delta uploads, or the last chunk in an upload,
                 // the actual chunk size could be less than the largest chunk size.
                 // We need to make sure buffer size matches chunk size otherwise we will get an error
                 // when trying to send http request.
                 Array.Resize(ref buffer, bytesRead);
 
-                await UploadBlockFromPayloadAsync(block.Size, assetId, block.Id, buffer, ct).ConfigureAwait(false);
+                if (uploadProgress.DirectUploadParameters != null && uploadProgress.DirectUploadParameters.SasUri != null)
+                {
+                    _logger.LogTrace("Uploading block {blockId} with payload: {bytesRead} using direct upload.", block.Id, new ByteSize(bytesRead));
+                    await UploadBlockFromPayloadAsync(assetId, block, buffer, uploadProgress.DirectUploadParameters.SasUri, bytesRead, ct).ConfigureAwait(false);
+                }
+                else
+                {
+                    _logger.LogTrace("Uploading block {blockId} with payload: {bytesRead} using proxy upload.", block.Id, new ByteSize(bytesRead));
+                    await UploadBlockFromPayloadAsync(bytesRead, assetId, block.Id, buffer, ct).ConfigureAwait(false);
+                }
 
                 lock (blockProgressReporter)
                 {
@@ -91,7 +99,7 @@ internal class XfusApiController
         },
             actionBlockOptions);
 
-        foreach (var block in blockToBeUploaded)
+        foreach (var block in uploadProgress.PendingBlocks)
         {
             await uploadBlock.SendAsync(block, ct).ConfigureAwait(false);
         }
@@ -116,6 +124,22 @@ internal class XfusApiController
         catch (Exception exception)
         {
             LogXfusExceptionDetails(exception, "XFUS block payload upload", assetId, blockId);
+            throw;
+        }
+    }
+
+    internal async Task UploadBlockFromPayloadAsync(Guid assetId, Block block, byte[] payload, string sasUri, int bytesRead, CancellationToken ct)
+    {
+        try
+        {
+            BlockBlobClient blobClient = new(new Uri(sasUri));
+            using var chunkStream = new MemoryStream(payload, 0, bytesRead);
+
+            await blobClient.StageBlockAsync(block.BlockIdBase64, chunkStream, null, ct);
+        }
+        catch (Exception exception)
+        {
+            LogXfusExceptionDetails(exception, "XFUS block payload upload", assetId, block.Id);
             throw;
         }
     }
@@ -198,6 +222,7 @@ internal class XfusApiController
         if (deltaUpload)
         {
             request.Headers.Add("X-MS-EnableDeltaUploads", "True");
+            request.Headers.Add("UploadMethod", "2"); // 2 indicates delta upload using direct upload method
         }
 
         return request;

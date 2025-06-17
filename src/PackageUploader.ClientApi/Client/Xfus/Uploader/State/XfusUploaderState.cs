@@ -78,7 +78,7 @@ internal abstract class XfusUploaderState
         var validBlocks = uploadProgress is { PendingBlocks.Length: > 0 };
         if (validBlocks && uploadProgress.Status == UploadStatus.ReceivingBlocks)
         {
-            await _xfusApiController.UploadBlocksAsync(uploadProgress.PendingBlocks, uploadFile, xfusUploadInfo.XfusId, _xfusBlockProgressReporter, bytesProgress, ct).ConfigureAwait(false);
+            await _xfusApiController.UploadBlocksAsync(uploadProgress, uploadFile, xfusUploadInfo.XfusId, _xfusBlockProgressReporter, bytesProgress, ct).ConfigureAwait(false);
         }
     }
 
