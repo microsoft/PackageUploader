@@ -121,7 +121,7 @@
     <value>エラーをコピー</value>
   </data>
   <data name="ErrorTitleString" xml:space="preserve">
-    <value>問題が発生しました。戻って修正してください</value>
+    <value>問題が発生しました。戻って修正してください。</value>
   </data>
   <data name="GoBackAndFix" xml:space="preserve">
     <value>戻って修正</value>
