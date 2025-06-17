@@ -213,6 +213,7 @@ internal class XfusApiController
         if (deltaUpload)
         {
             request.Headers.Add("X-MS-EnableDeltaUploads", "True");
+            request.Headers.Add("UploadMethod", "2"); // 2 indicates delta upload using direct upload method
         }
 
         return request;
