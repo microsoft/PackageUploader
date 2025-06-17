@@ -120,26 +120,17 @@ internal class Program
         if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
         {
             // Add client secret mapping for AppSecret auth
-            foreach (var alias in ClientSecretOption.Aliases)
-            {
-                switchMappings.Add(alias, $"{ClientSecretAuthInfo.ConfigName}:{nameof(ClientSecretAuthInfo.ClientSecret)}");
-            }
+            ClientSecretOption.AddAliasesToSwitchMappings(switchMappings, $"{ClientSecretAuthInfo.ConfigName}:{nameof(ClientSecretAuthInfo.ClientSecret)}");
         }
         
         // Add tenant ID mapping for browser authentication methods
         if (authenticationMethod is IngestionExtensions.AuthenticationMethod.Browser or 
                                     IngestionExtensions.AuthenticationMethod.CacheableBrowser)
         {
-            foreach (var alias in TenantIdOption.Aliases)
-            {
-                switchMappings.Add(alias, $"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}");
-            }
+            TenantIdOption.AddAliasesToSwitchMappings(switchMappings, $"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}");
         }
 
-        if (switchMappings.Count > 0)
-        {
-            builder.AddCommandLine(args, switchMappings);
-        }
+        builder.AddCommandLine(args, switchMappings);
     }
 
     private static CommandLineBuilder BuildCommandLine()
