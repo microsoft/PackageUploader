@@ -124,7 +124,7 @@ namespace PackageUploader.UI.ViewModel
 
         private bool CanInstallGame()
         {
-            return File.Exists(_wdAppPath) && !_isInstallingGame;
+            return string.Equals(PackageType, "PC") && File.Exists(_wdAppPath) && !_isInstallingGame;
         }
 
         public void InstallGame()
