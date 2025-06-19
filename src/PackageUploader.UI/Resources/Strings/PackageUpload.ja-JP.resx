@@ -124,10 +124,10 @@
     <value>ブランチ {0} が見つかりませんでした。</value>
   </data>
   <data name="BrowsePackagePathHelpText" xml:space="preserve">
-    <value>パッケージファイルを参照してください。</value>
+    <value>パッケージ ファイルを参照してください。</value>
   </data>
   <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
-    <value>Submission Validator ログファイルの BuildId が一致しません。期待値: {0} 実際の値: {1}</value>
+    <value>サブミッション バリデーターのログ ファイルの BuildId が一致しません。期待値: {0} 実際の値: {1}</value>
   </data>
   <data name="CancelButtonHelpText" xml:space="preserve">
     <value>操作をキャンセルします。</value>
@@ -148,7 +148,7 @@
     <value>パッケージ情報の抽出中にエラーが発生しました。</value>
   </data>
   <data name="ErrorGettingMarketGroupsErrMsg" xml:space="preserve">
-    <value>マーケットグループの取得中にエラーが発生しました。</value>
+    <value>マーケット グループの取得中にエラーが発生しました。</value>
   </data>
   <data name="ErrorGettingProdInfo" xml:space="preserve">
     <value>製品情報の取得中にエラーが発生しました。</value>
@@ -169,7 +169,7 @@
     <value>ファイル名</value>
   </data>
   <data name="InvalidFilePathErrMsg" xml:space="preserve">
-    <value>ファイルパスが無効です。</value>
+    <value>ファイル パスが無効です。</value>
   </data>
   <data name="MarketTitleText" xml:space="preserve">
     <value>マーケット</value>
@@ -184,13 +184,13 @@
     <value>ブランチ/フライトが null です</value>
   </data>
   <data name="PackageHasNoBigIdConfigureMsftGameCfgErrMsg" xml:space="preserve">
-    <value>パッケージに StoreId がありません。パッケージをビルドする前に MicrosoftGame.config ファイルで StoreId を設定するか、追加詳細情報で手動で入力してください。</value>
+    <value>パッケージに StoreId がありません。パッケージをビルドする前に MicrosoftGame.config ファイルで StoreId を構成するか、追加詳細情報で手動で入力してください。</value>
   </data>
   <data name="PackageLocationTitleText" xml:space="preserve">
     <value>パッケージの場所</value>
   </data>
   <data name="PackagePathHelpText" xml:space="preserve">
-    <value>パッケージファイルへのパス。</value>
+    <value>パッケージ ファイルへのパス。</value>
   </data>
   <data name="PackagePathText" xml:space="preserve">
     <value>パッケージパス</value>
@@ -205,13 +205,13 @@
     <value>必須</value>
   </data>
   <data name="SelectDestinationText" xml:space="preserve">
-    <value>パッケージアップロードの送信先とマーケットを選択してください</value>
+    <value>パッケージ アップロードの送信先とマーケットを選択してください</value>
   </data>
   <data name="SelectEnterPackagePathText" xml:space="preserve">
-    <value>パッケージパスを選択または入力してください</value>
+    <value>パッケージ パスを選択または入力してください</value>
   </data>
   <data name="SelectPackageFileText" xml:space="preserve">
-    <value>パッケージファイルを選択</value>
+    <value>パッケージ ファイルを選択</value>
   </data>
   <data name="SizeTitleText" xml:space="preserve">
     <value>サイズ</value>
@@ -220,7 +220,7 @@
     <value>StoreId</value>
   </data>
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
-    <value>Submission Validator ログが見つかりませんでした: {0}</value>
+    <value>サブミッション バリデーターのログが見つかりませんでした: {0}</value>
   </data>
   <data name="UploadButtonContentText" xml:space="preserve">
     <value>パッケージをアップロード</value>

@@ -124,7 +124,7 @@
     <value>サイズ</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>ストア ID</value>
+    <value>StoreId</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
     <value>ファイル名</value>
