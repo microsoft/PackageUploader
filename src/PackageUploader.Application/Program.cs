@@ -115,14 +115,14 @@ internal class Program
         DestinationSandboxName.AddAliasesToSwitchMappings(switchMappings, "DestinationSandboxName");
 
         var authenticationMethod = invocationContext.GetOptionValue(AuthenticationMethodOption);
-        
+
         // Configure auth options based on the authentication method
         if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
         {
-            // Add client secret mapping for AppSecret auth
-            ClientSecretOption.AddAliasesToSwitchMappings(switchMappings, $"{ClientSecretAuthInfo.ConfigName}:{nameof(ClientSecretAuthInfo.ClientSecret)}");
+            // Add client secret mapping for AppSecret auth (AadAuthInfo, NOT ClientSecretAuthInfo)
+            ClientSecretOption.AddAliasesToSwitchMappings(switchMappings, $"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}");
         }
-        
+
         // Add tenant ID mapping for browser authentication methods
         if (authenticationMethod is IngestionExtensions.AuthenticationMethod.Browser or 
                                     IngestionExtensions.AuthenticationMethod.CacheableBrowser)
