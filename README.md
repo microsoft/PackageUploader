@@ -187,6 +187,19 @@ For more information on operation parameters, see [Operations](https://github.co
 | **-l, --LogFile <LogFile>** | The location of the log file |
 | **-?, -h, --help** | Show Help and usage information |
 
+### Override parameters
+
+The following parameters can be used to override values in the configuration file. This is useful for CI/CD pipelines or when you want to use the same configuration file for different operations.
+
+| Parameter | Description |
+| --- | ---|
+| **-p, --ProductId <ProductId>** | Overrides the productId value in the configuration file |
+| **-b, --BigId <BigId>** | Overrides the bigId value in the configuration file |
+| **-bf, --BranchFriendlyName <BranchFriendlyName>** | Overrides the branchFriendlyName value in the configuration file |
+| **-f, --FlightName <FlightName>** | Overrides the flightName value in the configuration file |
+| **-m, --MarketGroupName <MarketGroupName>** | Overrides the marketGroupName value in the configuration file |
+| **-ds, --DestinationSandboxName <DestinationSandboxName>** | Overrides the destinationSandboxName value in the configuration file |
+
 <a id="available-authentication-methods"></a>
 
 ### Available Authentication methods
