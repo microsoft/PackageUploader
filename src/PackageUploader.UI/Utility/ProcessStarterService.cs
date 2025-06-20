@@ -9,17 +9,17 @@ namespace PackageUploader.UI.Utility
 {
     public interface IProcessStarterService
     {
-        Process Start(string fileName, string arguments);
-        Process Start(ProcessStartInfo processStartInfo);
+        Process? Start(string fileName, string arguments);
+        Process? Start(ProcessStartInfo processStartInfo);
     }
     public class ProcessStarterService : IProcessStarterService
     {
-        public Process Start(string fileName, string arguments)
+        public Process? Start(string fileName, string arguments)
         {
             return Process.Start(fileName, arguments);
         }
 
-        public Process Start(ProcessStartInfo processStartInfo)
+        public Process? Start(ProcessStartInfo processStartInfo)
         {
             return Process.Start(processStartInfo);
         }

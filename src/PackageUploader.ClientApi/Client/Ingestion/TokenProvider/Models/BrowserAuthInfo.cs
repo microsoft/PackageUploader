@@ -10,5 +10,5 @@ public class BrowserAuthInfo
     /// <summary>
     /// Optional tenant ID to use for browser authentication
     /// </summary>
-    public string TenantId { get; set; }
+    public string TenantId { get; set; } = string.Empty;
 }
