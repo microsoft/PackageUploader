@@ -6,6 +6,7 @@ using PackageUploader.ClientApi.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System;
 
 namespace PackageUploader.ClientApi;
 
@@ -20,6 +21,7 @@ public interface IPackageUploaderService
     IAsyncEnumerable<GamePackage> GetGamePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, CancellationToken ct);
     Task<GamePackageConfiguration> UpdatePackageConfigurationAsync(GameProduct product, GamePackageConfiguration packageConfiguration, CancellationToken ct);
     Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, bool isXvc, CancellationToken ct);
+    Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, bool isXvc, IProgress<PackageUploadingProgress> progress, CancellationToken ct);
     Task<GamePackageConfiguration> RemovePackagesAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupName, string packageFileName, CancellationToken ct);
     Task<GamePackageConfiguration> SetXvcConfigurationAsync(GameProduct product, IGamePackageBranch packageBranch, GamePackage gamePackage, string marketGroupName, IXvcGameConfiguration gameConfiguration, CancellationToken ct);
     Task<GamePackageConfiguration> SetUwpConfigurationAsync(GameProduct product, IGamePackageBranch packageBranch, string marketGroupId, IUwpGameConfiguration gameConfiguration, CancellationToken ct);

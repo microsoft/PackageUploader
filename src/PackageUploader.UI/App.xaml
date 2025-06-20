@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:PackageUploader.UI"
+             xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
+             x:Class="PackageUploader.UI.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Default to Colors.Dark.xaml, will be swapped at runtime -->
+                <ResourceDictionary Source="Resources/Styles/Colors.Dark.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+                <ResourceDictionary Source="Resources/Styles/WindowStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Value Converters -->
+            <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
+            <converters:PackageUploadingProgressStageToVisibilityConverter x:Key="PackageUploadingProgressStageToVisibilityConverter" />
+            <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+            <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
+            <converters:BooleanAndConverter x:Key="BooleanAndConverter"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

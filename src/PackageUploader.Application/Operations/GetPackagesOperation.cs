@@ -21,7 +21,7 @@ internal class GetPackagesOperation(IPackageUploaderService storeBrokerService, 
 {
     private readonly IPackageUploaderService _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
     private readonly ILogger<GetPackagesOperation> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly bool _isData = invocationContext.GetOptionValue(Program.DataOption);
+    private readonly bool _isData = invocationContext.GetOptionValue(ParameterHelper.DataOption);
     private readonly GetPackagesOperationConfig _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
 
     protected override async Task ProcessAsync(CancellationToken ct)

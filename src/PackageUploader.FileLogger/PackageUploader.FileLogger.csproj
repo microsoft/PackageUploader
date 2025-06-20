@@ -6,6 +6,9 @@
     <IsAotCompatible>true</IsAotCompatible>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    
+    <!-- Security settings -->
+    <HighEntropyVA>true</HighEntropyVA>
   </PropertyGroup>
 
   <ItemGroup>

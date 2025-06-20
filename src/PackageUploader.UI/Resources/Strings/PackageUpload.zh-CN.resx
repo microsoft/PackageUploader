@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AditionalDetailsText" xml:space="preserve">
+    <value>附加详情</value>
+  </data>
+  <data name="BranchNotFoundErrMsg" xml:space="preserve">
+    <value>未找到分支 {0}。</value>
+  </data>
+  <data name="BrowsePackagePathHelpText" xml:space="preserve">
+    <value>浏览到包文件。</value>
+  </data>
+  <data name="BuildIdMismatchSubValErrMsg" xml:space="preserve">
+    <value>Submission Validator 日志文件中的 BuildId 不匹配。预期: {0} 发现: {1}</value>
+  </data>
+  <data name="CancelButtonHelpText" xml:space="preserve">
+    <value>取消操作。</value>
+  </data>
+  <data name="CancelContentText" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="ConfirmLocationSubtitleText" xml:space="preserve">
+    <value>确认包的位置</value>
+  </data>
+  <data name="DestinationTitleText" xml:space="preserve">
+    <value>目标位置</value>
+  </data>
+  <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
+    <value>未找到目录: {0}</value>
+  </data>
+  <data name="ErrorExtractingInfoErrMsg" xml:space="preserve">
+    <value>提取包信息时出错。</value>
+  </data>
+  <data name="ErrorGettingMarketGroupsErrMsg" xml:space="preserve">
+    <value>获取市场组时出错。</value>
+  </data>
+  <data name="ErrorGettingProdInfo" xml:space="preserve">
+    <value>获取产品信息时出错。</value>
+  </data>
+  <data name="ErrorProcessingPackageErrMsg" xml:space="preserve">
+    <value>处理包时出错。</value>
+  </data>
+  <data name="ErrorSelectingFileErrMsg" xml:space="preserve">
+    <value>选择文件时出错。</value>
+  </data>
+  <data name="ErrUploadPackageErrMsg" xml:space="preserve">
+    <value>上传包时出错。</value>
+  </data>
+  <data name="FamilyTitleText" xml:space="preserve">
+    <value>系列</value>
+  </data>
+  <data name="FileNameTitleText" xml:space="preserve">
+    <value>文件名</value>
+  </data>
+  <data name="InvalidFilePathErrMsg" xml:space="preserve">
+    <value>文件路径无效。</value>
+  </data>
+  <data name="MarketTitleText" xml:space="preserve">
+    <value>市场</value>
+  </data>
+  <data name="NoBranchesFoundErrMsg" xml:space="preserve">
+    <value>没有找到此产品的分支。</value>
+  </data>
+  <data name="NoProdInfoTitleText" xml:space="preserve">
+    <value>没有产品信息</value>
+  </data>
+  <data name="NullBranchFlightErrTitleText" xml:space="preserve">
+    <value>空分支/航班</value>
+  </data>
+  <data name="PackageHasNoBigIdConfigureMsftGameCfgErrMsg" xml:space="preserve">
+    <value>包没有 StoreId。在构建包之前在 MicrosoftGame.config 文件中配置您的 StoreId，或在附加详情中手动输入。</value>
+  </data>
+  <data name="PackageLocationTitleText" xml:space="preserve">
+    <value>包位置</value>
+  </data>
+  <data name="PackagePathHelpText" xml:space="preserve">
+    <value>包文件的路径。</value>
+  </data>
+  <data name="PackagePathText" xml:space="preserve">
+    <value>包路径</value>
+  </data>
+  <data name="ProductInfoNotAvailableErrMsg" xml:space="preserve">
+    <value>产品信息不可用。请输入有效的 StoreId 并重试。</value>
+  </data>
+  <data name="ProductNameText" xml:space="preserve">
+    <value>产品名称</value>
+  </data>
+  <data name="RequiredText" xml:space="preserve">
+    <value>必需</value>
+  </data>
+  <data name="SelectDestinationText" xml:space="preserve">
+    <value>为包上传选择目标位置和市场</value>
+  </data>
+  <data name="SelectEnterPackagePathText" xml:space="preserve">
+    <value>选择或输入包路径</value>
+  </data>
+  <data name="SelectPackageFileText" xml:space="preserve">
+    <value>选择包文件</value>
+  </data>
+  <data name="SizeTitleText" xml:space="preserve">
+    <value>大小</value>
+  </data>
+  <data name="StoreIdTitleText" xml:space="preserve">
+    <value>StoreId</value>
+  </data>
+  <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
+    <value>未找到 Submission Validator 日志: {0}</value>
+  </data>
+  <data name="UploadButtonContentText" xml:space="preserve">
+    <value>上传包</value>
+  </data>
+  <data name="UploadButtonHelpText" xml:space="preserve">
+    <value>开始上传包。</value>
+  </data>
+  <data name="UploadCancelledErrMsg" xml:space="preserve">
+    <value>上传已取消。</value>
+  </data>
+  <data name="UploadPackageSubtitleText" xml:space="preserve">
+    <value>定位要上传的包。Xbox Game Package Manager 会记住这些路径，以便将来更轻松地访问。</value>
+  </data>
+  <data name="UploadPackageTitleText" xml:space="preserve">
+    <value>上传包</value>
+  </data>
+  <data name="UploadPreviewTitleText" xml:space="preserve">
+    <value>预览</value>
+  </data>
+  <data name="ProductWithStoreIdNotFoundConfigHereErrMsg" xml:space="preserve">
+    <value>未找到 StoreId 为 {0} 的产品。请在 https://aka.ms/mpc-ag 配置您的产品。</value>
+  </data>
+</root>

@@ -1,0 +1,139 @@
+﻿<UserControl x:Class="PackageUploader.UI.View.UploadingFinishedView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PackageUploader.UI.View"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=viewmodel:UploadingFinishedViewModel}"
+             Background="{DynamicResource AppBackgroundBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <!-- check -->
+            <RowDefinition Height="auto"/>
+            <!-- title -->
+            <RowDefinition Height="auto"/>
+            <!-- Main Box -->
+            <RowDefinition />
+            <!-- buttons row -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Image Grid.Row="0"
+               Margin="0, 175, 0, 30"
+               Source="/Resources/Images/Complete.png"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               Height="130"
+               Width="130" />
+        <TextBlock Grid.Row="1"
+           Margin="0, 0, 0, 23"
+           Style="{StaticResource SubHeadline}"
+           Text="{x:Static strings:UploadingFinished.UploadCompleteTitleText}"
+           d:Text="Upload complete"
+           Foreground="{DynamicResource PrimaryTextBrush}" />
+        <Border Grid.Row="2"
+                Margin="100, 0, 100, 0"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                Height="100"
+                Padding="6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <!-- image -->
+                    <ColumnDefinition />
+                    <!-- text -->
+                    <ColumnDefinition Width="auto"/>
+                    <!-- button -->
+                </Grid.ColumnDefinitions>
+                <Image Grid.Row="0"
+                       Grid.Column="0"
+                       Grid.RowSpan="4"
+                       Source="{Binding PackagePreviewImage}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Height="80"
+                       Width="80"
+                       Margin="10,0,15,0"/>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                    <TextBlock HorizontalAlignment="Left"
+                               Text="{x:Static strings:UploadingFinished.FileNameTitleText}"
+                               d:Text="File name" 
+                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                    <TextBlock HorizontalAlignment="Left"
+                               Text="{Binding PackageFileName}" 
+                               Foreground="{DynamicResource PrimaryTextBrush}"/>
+                </StackPanel>
+                <Grid Margin="0, 10, 0, 0" Grid.Row="1" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0"
+                                Orientation="Vertical"
+                                HorizontalAlignment="Left"
+                                Margin="0, 0, 50, 0">
+                        <TextBlock HorizontalAlignment="Left"
+                                   Text="{x:Static strings:UploadingFinished.StoreIdTitleText}"
+                                   d:Text="Store ID" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding StoreId}"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.SizeTitleText}"
+                                   d:Text="Size" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding PackageSize}" 
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.FamilyTitleText}"
+                                   d:Text="Family" 
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding PackageType}" 
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </StackPanel>
+                </Grid>
+                <Button Grid.RowSpan="4" Grid.Column="2"
+                        Content="{x:Static strings:UploadingFinished.ViewPartnerCenterButtonContent}"
+                        d:Content="View in Partner Center"
+                        Command="{Binding ViewInPartnerCenterCommand}"
+                        IsEnabled="True"
+                        Width="150"
+                        Height="30"
+                        Margin="10, 0, 10, 0"/>
+            </Grid>
+        </Border>
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom">
+            <Button Content="{x:Static strings:UploadingFinished.ViewLogsButtonContent}"
+                    d:Content="View logs"
+                    Command="{Binding ViewLogsCommand}"
+                    Style="{StaticResource HyperlinkButtonStyle}"
+                    Margin="0, 0, 20, 20" />
+            <Button Content="{x:Static strings:UploadingFinished.GoHomeButtonContent}"
+                    d:Content="Go Home"
+                    Command="{Binding HomeCommand}"
+                    IsEnabled="True"
+                    Margin="0, 0, 20, 20"
+                    Width="150"
+                    Height="30"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

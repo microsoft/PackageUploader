@@ -1,0 +1,26 @@
+﻿<Project Sdk="MSTest.Sdk/3.6.4">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+	  <IsPackable>false</IsPackable>
+	  <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Moq" Version="4.20.72" />
+		<PackageReference Include="coverlet.collector" Version="6.0.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PackageUploader.ClientApi\PackageUploader.ClientApi.csproj" />
+    <ProjectReference Include="..\PackageUploader.UI\PackageUploader.UI.csproj" />
+  </ItemGroup>
+
+
+
+</Project>
