@@ -19,7 +19,7 @@ public class DefaultAzureCredentialAccessTokenProvider : CredentialAccessTokenPr
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
         var azureCredentialOptions = SetTokenCredentialOptions(new DefaultAzureCredentialOptions());
-        var azureCredential = new DefaultAzureCredential(azureCredentialOptions);
+        var azureCredential = new DefaultAzureCredential(azureCredentialOptions);   // CodeQL [SM05137] Intentially using default Azure credentials as provider implementation.
 
         return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
     }
