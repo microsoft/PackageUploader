@@ -32,14 +32,14 @@ internal class DeltaUploadMainUploadState : XfusUploaderState
         if (uploadFile.Length > _totalBytesUploaded)
         {
             ulong bytesSaved = (ulong)(uploadFile.Length - _totalBytesUploaded);
-            _logger.LogTrace("Upload complete. Total Uploaded: {totalBytesUploaded} (Saving you in total {totalBytesSaved} in upload bandwidth!)", new ByteSize(_totalBytesUploaded), new ByteSize(bytesSaved));
+            _logger.LogInformation("Upload complete. Total Uploaded: {totalBytesUploaded} (Saving you in total {totalBytesSaved} in upload bandwidth!)", new ByteSize(_totalBytesUploaded), new ByteSize(bytesSaved));
 
             // Update progress to account for the bytes we saved.
             bytesProgress.Report(bytesSaved);
         }
         else
         {
-            _logger.LogTrace("Upload complete. Total Uploaded: {totalBytesUploaded}", new ByteSize(_totalBytesUploaded));
+            _logger.LogInformation("Upload complete. Total Uploaded: {totalBytesUploaded}", new ByteSize(_totalBytesUploaded));
         }
         return null;
     }

@@ -88,7 +88,18 @@ public partial class App : System.Windows.Application
             .ConfigureLogging((context, logging) => 
             {
                 logging.AddDebug();
-                
+
+                // If an environment variable XBOX_PACKAGE_TOOL_LOG_LEVEL_VERBOSE is set to "1" or "true", enable verbose logging
+                if (Environment.GetEnvironmentVariable("XBOX_PACKAGE_TOOL_LOG_LEVEL_VERBOSE") is string verbose && 
+                    (verbose.Equals("1", StringComparison.OrdinalIgnoreCase) || verbose.Equals("true", StringComparison.OrdinalIgnoreCase)))
+                {
+                    logging.SetMinimumLevel(LogLevel.Trace);
+                }
+                else
+                {
+                    logging.SetMinimumLevel(LogLevel.Information);
+                }
+
                 // Use SimpleFile formatter with a custom log path
                 logging.AddSimpleFile(options => {
                     // Configure formatter options if needed

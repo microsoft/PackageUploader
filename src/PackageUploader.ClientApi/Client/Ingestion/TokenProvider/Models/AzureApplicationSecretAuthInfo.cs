@@ -13,5 +13,5 @@ internal partial class AzureApplicationSecretAuthInfoValidator : IValidateOption
 public sealed class AzureApplicationSecretAuthInfo : AadAuthInfo
 {
     [Required]
-    public string ClientSecret { get; set; } = string.Empty;
+    public string ClientSecret { get; set; }
 }
