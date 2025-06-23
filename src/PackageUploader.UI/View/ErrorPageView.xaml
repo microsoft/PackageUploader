@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="PackageUploader.UI.View.ErrorPageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PackageUploader.UI.View"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=viewmodel:ErrorScreenViewModel}"
+             Background="{DynamicResource ErrorScreenBackgroundBrush}">
+    <Border HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="{DynamicResource AppBackgroundBrush}"
+            BorderBrush="{DynamicResource AppBackgroundBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+        <StackPanel Orientation="Vertical" Margin="20">
+            <Image Source="/Resources/Images/ErrorImage.png"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="130"
+                   Width="130" />
+            <TextBlock Style="{StaticResource SubHeadline}" 
+                       Text="{x:Static strings:ErrorPage.ErrorTitleString}"
+                       d:Text="We've run into an issue, go back to fix"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       HorizontalAlignment="Center"
+                       Margin="0, 0, 0, 23" />
+            <Border Background="{DynamicResource ErrorRedTransluscentBrush}"
+                    Margin="40,10,40,10"
+                    CornerRadius="6"
+                    BorderBrush="{DynamicResource ErrorRedTransluscentBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Row="0"
+                           Grid.Column="0"
+                           Source="/Resources/AppIcon/ErrorIcon.png" 
+                           HorizontalAlignment="Right"
+                           Margin="10,10,0,0"/>
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="1"
+                               Style="{StaticResource SubHeadline}"
+                               Text="{Binding ErrorTitle, Mode=OneWay}"
+                               Foreground="{DynamicResource ErrorRedBrush}"
+                               HorizontalAlignment="Left"
+                               Margin="10, 10, 0, 0" />
+                    <TextBlock Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Text="{Binding ErrorDescription, Mode=OneWay}"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Margin="10, 10, 20, 20"
+                               MaxHeight="300"/>
+                    <Button Grid.Row="2"
+                            Grid.Column="1"
+                            Content="{x:Static strings:ErrorPage.ViewLogs}"
+                            d:Content="View logs"
+                            HorizontalAlignment="Right"
+                            Command="{Binding ViewLogsCommand}"
+                            Style="{StaticResource HyperlinkButtonStyle}"
+                            Margin="0, 0, 20, 20" />
+                </Grid>
+            </Border>
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                <Button Content="{x:Static strings:ErrorPage.CopyError}"
+                        d:Content="Copy error"
+                        Command="{Binding CopyErrorCommand}"
+                        HorizontalAlignment="Center"
+                        Width="101"
+                        Height="32"
+                        Margin="0, 0, 10, 0" />
+                <Button Content="{x:Static strings:ErrorPage.GoBackAndFix}"
+                        d:Content="Go back and fix"
+                        Command="{Binding GoBackAndFixCommand}"
+                        HorizontalAlignment="Center"
+                        Width="132"
+                        Height="32"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Margin="0, 0, 10, 0" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

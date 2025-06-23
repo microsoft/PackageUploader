@@ -11,6 +11,12 @@
     <DebugType>none</DebugType>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    
+    <!-- Security settings -->
+    <HighEntropyVA>true</HighEntropyVA>
+    
+    <!-- Test settings -->
+    <InternalsVisibleTo>PackageUploader.Application.Test</InternalsVisibleTo>
   </PropertyGroup>
 
   <ItemGroup>

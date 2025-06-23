@@ -22,12 +22,14 @@ public static class IngestionExtensions
         AzurePipelines,
         ClientSecret,
         ClientCertificate,
+        CacheableBrowser,
     }
 
     public static IServiceCollection AddPackageUploaderService(this IServiceCollection services,
         AuthenticationMethod authenticationMethod = AuthenticationMethod.Default) =>
         services
             .AddScoped<IPackageUploaderService, PackageUploaderService>()
+            .AddScoped<IAuthenticationResetService, AuthenticationResetService>()
             .AddIngestionService()
             .AddIngestionAuthentication(authenticationMethod)
             .AddXfusService();
@@ -46,6 +48,7 @@ public static class IngestionExtensions
             AuthenticationMethod.AzurePipelines => services.AddAzurePipelinesCredentialAccessTokenProvider(),
             AuthenticationMethod.ClientSecret => services.AddClientSecretCredentialAccessTokenProvider(),
             AuthenticationMethod.ClientCertificate => services.AddClientCertificateCredentialAccessTokenProvider(),
+            AuthenticationMethod.CacheableBrowser => services.AddCacheableInteractiveBrowserCredentialAccessTokenProvider(),
             _ => services.AddAzureApplicationSecretAccessTokenProvider(),
         };
 }

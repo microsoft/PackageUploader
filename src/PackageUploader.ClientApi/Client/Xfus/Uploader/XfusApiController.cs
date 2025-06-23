@@ -34,7 +34,7 @@ internal class XfusApiController
         _httpClient = httpClient;
     }
 
-    internal async Task UploadBlocksAsync(UploadProgress uploadProgress, FileInfo uploadFile, Guid assetId, XfusBlockProgressReporter blockProgressReporter, CancellationToken ct)
+    internal async Task UploadBlocksAsync(UploadProgress uploadProgress, FileInfo uploadFile, Guid assetId, XfusBlockProgressReporter blockProgressReporter, IProgress<ulong> bytesProgress, CancellationToken ct)
     {
         // We want to use the biggest block size because it is most likely to be the most frequent block size
         // among different upload scenarios. In addition, by over-allocating memory, we minimize potential
@@ -45,6 +45,13 @@ internal class XfusApiController
         var actionBlockOptions = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = _uploadConfig.MaxParallelism };
         var uploadBlock = new ActionBlock<Block>(async block =>
         {
+            // Avoid a cancellation requiring reading ALL pending blocks from
+            // the package before the cancellation can be completed.
+            if (ct.IsCancellationRequested)
+            {
+                return;
+            }
+
             byte[] buffer;
             try
             {
@@ -70,10 +77,14 @@ internal class XfusApiController
                     await UploadBlockFromPayloadAsync(bytesRead, assetId, block.Id, buffer, ct).ConfigureAwait(false);
                 }
 
-                blockProgressReporter.BlocksLeftToUpload--;
-                blockProgressReporter.BytesUploaded += bytesRead;
-                _logger.LogTrace("Uploaded block {blockId}. Total uploaded: {bytesUploaded} / {totalBlockBytes}.", block.Id, new ByteSize(blockProgressReporter.BytesUploaded), new ByteSize(blockProgressReporter.TotalBlockBytes));
-                blockProgressReporter.ReportProgress();
+                lock (blockProgressReporter)
+                {
+                    blockProgressReporter.BlocksLeftToUpload--;
+                    blockProgressReporter.BytesUploaded += bytesRead;
+                    _logger.LogTrace("Uploaded block {blockId}. Total uploaded: {bytesUploaded} / {totalBlockBytes}.", block.Id, new ByteSize(blockProgressReporter.BytesUploaded), new ByteSize(blockProgressReporter.TotalBlockBytes));
+                    blockProgressReporter.ReportProgress();
+                }
+                bytesProgress?.Report((ulong)bytesRead);
             }
             // Swallow exceptions so other chunk upload can proceed without ActionBlock terminating
             // from a midway-failed chunk upload. We'll re-upload failed chunks later on so this is ok.

@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
+             x:Class="PackageUploader.UI.View.MainPageView"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewmodel:MainPageViewModel}"
+             Background="{DynamicResource AppBackgroundBrush}">
+
+    <StackPanel Orientation="Vertical" Margin="30,0" >
+        <TextBlock 
+               Text="{x:Static strings:MainPage.TitleTextBlock}"
+               d:Text="Make a package and upload it to Microsoft Partner Center" 
+               Style="{StaticResource Headline}"
+               HorizontalAlignment="Left"
+               Margin="0,25,0,25"/>
+        
+        <TextBlock 
+               Text="{x:Static strings:MainPage.SubTitleTextBlock}"
+               d:Text="The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload."  
+               HorizontalAlignment="Left"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               TextWrapping="Wrap"/>
+
+        <TextBlock Text="{Binding MakePkgUnavailableErrorMessage}"
+               Foreground="{DynamicResource ErrorRedBrush}"
+               Visibility="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" 
+               Margin="0,0,0,25"/>
+               
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="0.2*"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="0.05*"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            
+            <Border Grid.Row="0" 
+                    Grid.ColumnSpan="3"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    Background="{DynamicResource AppBackgroundBrush}"
+                    Margin="0, 0, 0, 20"
+                    Padding="10" 
+                    CornerRadius="5"
+                    Visibility="{Binding IsUserLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                <StackPanel HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                    <TextBlock 
+                       Text="{x:Static strings:MainPage.SignInTextBlockTitle}"
+                       d:Text="Sign in"
+                       Style="{StaticResource SubHeadline}"
+                       HorizontalAlignment="Left" />
+
+                    <TextBlock Margin="0, 10, 0, 0"
+                               Text="{x:Static strings:MainPage.SignInPreLoginText}"
+                               d:Text="For seamless access to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files."
+                               HorizontalAlignment="Left" 
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+
+                    <TextBlock Margin="0, 10, 0, 0" 
+                               Text="{x:Static strings:MainPage.SignInLogginInText}"
+                               d:Text="We are attempting to retrieve your sign-in information. If a browser page does not open within a few seconds, please click the sign-in button again to retry."
+                               HorizontalAlignment="Left"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                    <Grid Margin="0,15,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="{x:Static strings:MainPage.SignInButtonContent}"
+                                d:Content="Sign In"
+                                Command="{Binding SignInCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                HorizontalAlignment="Left"
+                                Width="90"
+                                Height="32"/>
+
+                        <Button Grid.Column="2"
+                                Content="{x:Static strings:MainPage.ChooseTenantButtonText}"
+                                d:Content="Advanced: Choose Entra Tenant"
+                                Command="{Binding ShowTenantSelectionCommand}"
+                                Visibility="{Binding ShowTenantSelection, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
+                                HorizontalAlignment="Left"
+                                Height="32"/>
+
+                        <ComboBox Grid.Column="3"
+                                  Margin="20, 0, 0, 0"
+                                  ItemsSource="{Binding AvailableTenants}"
+                                  SelectedItem="{Binding SelectedTenant}"
+                                  DisplayMemberPath="DisplayName"
+                                  Visibility="{Binding ShowTenantSelection, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                  MinWidth="150"
+                                  Style="{StaticResource CustomComboBoxStyle}"
+                                  HorizontalAlignment="Stretch"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="0"
+                    Grid.Row="2"
+                    Background="{DynamicResource AppBackgroundBrush}"
+                    Padding="10"
+                    CornerRadius="5">
+                <StackPanel HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                    <TextBlock 
+                       Text="{x:Static strings:MainPage.MakeAPackageTextBlockTitle}"
+                       d:Text="Make a package"
+                       Style="{StaticResource SubHeadline}"
+                       HorizontalAlignment="Left" 
+                       Foreground="{DynamicResource PrimaryTextBrush}" />
+                       
+                    <TextBlock Margin="0, 10, 0, 0"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource SecondaryTextBrush}">
+                        <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextOne}"
+                            d:Text="Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file "/>
+                        <Hyperlink Command="{Binding PackagingLearnMoreURL}"
+                                   CommandParameter="https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/packaging/gc-packaging-toc">
+                            <TextBlock Text="{x:Static strings:MainPage.MakeAPackageBodyURLText}"
+                                       d:Text="(learn more)"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       TextDecorations="Underline"/>
+                        </Hyperlink>
+                        <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextTwo}"
+                             d:Text=", then upload."/>
+                    </TextBlock>
+
+                    <Button Content="{x:Static strings:MainPage.MakeAPackageButtonText}"
+                            d:Content="Create package"
+                            Command="{Binding NavigateToPackageCreationCommand}"
+                            IsEnabled="{Binding IsMakePkgEnabled}"
+                            HorizontalAlignment="Left"
+                            Margin="0,15,0,10"
+                            Width="128" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2"
+                    Grid.Row="2"
+                    Background="{DynamicResource AppBackgroundBrush}"
+                    Padding="10"
+                    CornerRadius="5">
+                <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static strings:MainPage.UploadPackageBlockTitle}"
+                        d:Text="Upload a package (sign in required)"
+                       Style="{StaticResource SubHeadline}"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       HorizontalAlignment="Left" />
+
+                    <TextBlock Margin="0, 10, 0, 0" TextWrapping="Wrap"
+                       Text="{x:Static strings:MainPage.UploadPackageBlockBody}"
+                       d:Text="Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account."
+                       HorizontalAlignment="Left"
+                       Foreground="{DynamicResource SecondaryTextBrush}" />
+
+                    <Button Content="{x:Static strings:MainPage.UploadPackageBlockButtonText}"
+                        d:Content="Upload package"
+                        Command="{Binding NavigateToPackageUploadCommand}"
+                        HorizontalAlignment="Left"
+                        Margin="0,15,0,10"
+                        Width="133" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </StackPanel>
+</UserControl>

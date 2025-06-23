@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Client.Xfus.Models.Internal;
 using PackageUploader.ClientApi.Client.Xfus.Uploader;
 using PackageUploader.ClientApi.Models;
 using System;
@@ -139,12 +140,117 @@ public class PackageUploaderService : IPackageUploaderService
         }
     }
 
-    public async Task<GamePackage> UploadGamePackageAsync(GameProduct product, IGamePackageBranch packageBranch, GameMarketGroupPackage marketGroupPackage, string packageFilePath, GameAssets gameAssets, int minutesToWaitForProcessing, bool deltaUpload, bool isXvc, CancellationToken ct)
+    public Task<GamePackage> UploadGamePackageAsync(
+        GameProduct product, 
+        IGamePackageBranch packageBranch, 
+        GameMarketGroupPackage marketGroupPackage, 
+        string packageFilePath, 
+        GameAssets gameAssets, 
+        int minutesToWaitForProcessing, 
+        bool deltaUpload, 
+        bool isXvc, 
+        CancellationToken ct)
     {
+        return UploadGamePackageAsync(
+            product, 
+            packageBranch, 
+            marketGroupPackage, 
+            packageFilePath, 
+            gameAssets, 
+            minutesToWaitForProcessing, 
+            deltaUpload, 
+            isXvc, 
+            null, 
+            ct);
+    }
+
+    public async Task<GamePackage> UploadGamePackageAsync(
+        GameProduct product, 
+        IGamePackageBranch packageBranch, 
+        GameMarketGroupPackage marketGroupPackage, 
+        string packageFilePath, 
+        GameAssets gameAssets, 
+        int minutesToWaitForProcessing, 
+        bool deltaUpload, 
+        bool isXvc, 
+        IProgress<PackageUploadingProgress> progress,
+        CancellationToken ct)
+    {
+        PackageUploadingProgress currentProgress = new()
+        {
+            Stage = PackageUploadingProgressStage.NotStarted,
+            Percentage = 0,
+        };
+        progress?.Report(currentProgress);
+
         ArgumentNullException.ThrowIfNull(product);
         ArgumentNullException.ThrowIfNull(packageBranch);
         ArgumentNullException.ThrowIfNull(marketGroupPackage);
         StringArgumentException.ThrowIfNullOrWhiteSpace(packageFilePath);
+
+        // Calculate total size of all files to be uploaded
+        var files = new List<FileInfo> { new(packageFilePath) };
+        if (gameAssets is not null)
+        {
+            if (!string.IsNullOrEmpty(gameAssets.EkbFilePath) && File.Exists(gameAssets.EkbFilePath))
+            {
+                files.Add(new FileInfo(gameAssets.EkbFilePath));
+            }
+            if (!string.IsNullOrEmpty(gameAssets.SymbolsFilePath) && File.Exists(gameAssets.SymbolsFilePath))
+            {
+                files.Add(new FileInfo(gameAssets.SymbolsFilePath));
+            }
+            if (!string.IsNullOrEmpty(gameAssets.SubValFilePath) && File.Exists(gameAssets.SubValFilePath))
+            {
+                files.Add(new FileInfo(gameAssets.SubValFilePath));
+            }
+            if (!string.IsNullOrEmpty(gameAssets.DiscLayoutFilePath) && File.Exists(gameAssets.DiscLayoutFilePath))
+            {
+                files.Add(new FileInfo(gameAssets.DiscLayoutFilePath));
+            }
+        }
+        currentProgress.Stage = PackageUploadingProgressStage.ComputingDeltas;
+        progress?.Report(currentProgress);
+
+        ulong totalSizeInBytes = (ulong)files.Sum(file => file.Length);
+        ulong totalBytesUploaded = 0;
+
+
+        if (deltaUpload)
+        {
+            // In order to do delta calculations, we read about 20 MB extra from the package file.
+            // If the delta upload saves us bytes, the progress bar will jump at the end of the
+            // package upload instead of being smooth, but we don't know how many bytes it will
+            // save us ahead of time so this seems acceptable.
+            totalSizeInBytes += 20 * 1024 * 1024;
+        }
+
+        // Progress reporting helper function
+        void ReportProgress(ulong bytesUploaded)
+        {
+            totalBytesUploaded += bytesUploaded;
+            double overallProgress = (double)totalBytesUploaded / totalSizeInBytes;
+
+            if (totalBytesUploaded > totalSizeInBytes)
+            {
+                // Just in case our calculation of extra bytes is wrong,
+                // ensure the progress is never more than 100%
+                overallProgress = 1.0;
+            }
+
+            if (currentProgress.Stage <= PackageUploadingProgressStage.ProcessingPackage)
+            {
+                // Processing the package takes a good long while, so let's scale this number
+                // to be 0-85% and leave the last 15% for processing.
+                overallProgress *= 0.85;
+            }
+
+            currentProgress.Percentage = (int)(overallProgress * 100);
+            progress?.Report(currentProgress);
+        }
+
+        // Create a progress handler for the current number of bytes being uploaded (populated as each file uploads).
+        IProgress<ulong> bytesProgress = progress == null ? null : new Progress<ulong>(ReportProgress);
 
         var packageFile = new FileInfo(packageFilePath);
         if (!packageFile.Exists)
@@ -159,14 +265,24 @@ public class PackageUploaderService : IPackageUploaderService
             _logger.LogDebug("Creating game package for file '{fileName}', product id '{productId}' and draft id '{currentDraftInstanceID}'.", packageFile.Name, product.ProductId, packageBranch.CurrentDraftInstanceId);
             var package = await _ingestionHttpClient.CreatePackageRequestAsync(product.ProductId, packageBranch.CurrentDraftInstanceId, packageFile.Name, marketGroupPackage.MarketGroupId, isXvc, xvcTargetPlatform, ct).ConfigureAwait(false);
 
+            currentProgress.Stage = PackageUploadingProgressStage.UploadingPackage;
+            progress?.Report(currentProgress);
+
             if (gameAssets is not null)
             {
-                await UploadAssetAsync(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, ct).ConfigureAwait(false);
+                // Upload EKB file if exists
+                if (!string.IsNullOrEmpty(gameAssets.EkbFilePath))
+                {
+                    await UploadAssetAsync(product, package, gameAssets.EkbFilePath, GamePackageAssetType.EkbFile, bytesProgress, ct).ConfigureAwait(false);
+                }
             }
 
             _logger.LogDebug("Uploading file '{fileName}'.", packageFile.Name);
-            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, deltaUpload, ct).ConfigureAwait(false);
+            await _xfusUploader.UploadFileToXfusAsync(packageFile, package.UploadInfo, deltaUpload, bytesProgress, ct).ConfigureAwait(false);
             _logger.LogDebug("Package file '{fileName}' uploaded.", packageFile.Name);
+
+            currentProgress.Stage = PackageUploadingProgressStage.ProcessingPackage;
+            progress?.Report(currentProgress);
 
             package = await _ingestionHttpClient.ProcessPackageRequestAsync(product.ProductId, package, ct).ConfigureAwait(false);
             _logger.LogInformation("Package is uploaded and is in processing.");
@@ -175,10 +291,19 @@ public class PackageUploaderService : IPackageUploaderService
 
             if (gameAssets is not null)
             {
-                await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, ct);
-                await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, ct);
-                await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, ct);
+                currentProgress.Stage = PackageUploadingProgressStage.UploadingSupplementalFiles;
+                progress?.Report(currentProgress);
+
+                // Upload the remaining assets
+                await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, bytesProgress, ct);
+                await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, bytesProgress, ct);
+                await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, bytesProgress, ct);
             }
+
+            // Set progress to 100% when complete
+            currentProgress.Stage = PackageUploadingProgressStage.Done;
+            currentProgress.Percentage = 100;
+            progress?.Report(currentProgress);
 
             return package;
         }
@@ -571,7 +696,13 @@ public class PackageUploaderService : IPackageUploaderService
         return gameSubmission;
     }
 
-    private async Task UploadAssetAsync(GameProduct product, GamePackage processingPackage, string assetFilePath, GamePackageAssetType assetType, CancellationToken ct)
+    private async Task UploadAssetAsync(
+        GameProduct product, 
+        GamePackage processingPackage, 
+        string assetFilePath, 
+        GamePackageAssetType assetType, 
+        IProgress<ulong> bytesProgress,
+        CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(assetFilePath))
         {
@@ -584,7 +715,7 @@ public class PackageUploaderService : IPackageUploaderService
             {
                 var packageAsset = await _ingestionHttpClient.CreatePackageAssetRequestAsync(product.ProductId, processingPackage.Id, assetFile, assetType, ct).ConfigureAwait(false);
                 const bool delta = false; // Assets do not need delta upload.
-                await _xfusUploader.UploadFileToXfusAsync(assetFile, packageAsset.UploadInfo, delta, ct).ConfigureAwait(false);
+                await _xfusUploader.UploadFileToXfusAsync(assetFile, packageAsset.UploadInfo, delta, bytesProgress, ct).ConfigureAwait(false);
                 await _ingestionHttpClient.CommitPackageAssetAsync(product.ProductId, processingPackage.Id, packageAsset.Id, ct).ConfigureAwait(false);
             }
             else
@@ -592,6 +723,16 @@ public class PackageUploaderService : IPackageUploaderService
                 throw new FileNotFoundException("Package asset file not found.", assetFile.FullName);
             }
         }
+    }
+
+    private Task UploadAssetAsync(
+        GameProduct product, 
+        GamePackage processingPackage, 
+        string assetFilePath, 
+        GamePackageAssetType assetType, 
+        CancellationToken ct)
+    {
+        return UploadAssetAsync(product, processingPackage, assetFilePath, assetType, null, ct);
     }
 
     private async Task<GamePackage> WaitForPackageProcessingAsync(GameProduct product, GamePackage processingPackage, int minutesToWait, int checkIntervalMinutes, CancellationToken ct)

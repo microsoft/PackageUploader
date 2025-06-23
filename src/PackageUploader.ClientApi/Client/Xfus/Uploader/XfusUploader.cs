@@ -31,7 +31,12 @@ internal class XfusUploader : IXfusUploader
         _uploadConfig = uploadConfig?.Value ?? throw new ArgumentNullException(nameof(uploadConfig));
     }
 
-    public async Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, bool deltaUpload, CancellationToken ct)
+    public Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, bool deltaUpload, CancellationToken ct)
+    {
+        return UploadFileToXfusAsync(uploadFile, xfusUploadInfo, deltaUpload, null, ct);
+    }
+
+    public async Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, bool deltaUpload, IProgress<ulong> bytesProgress, CancellationToken ct)
     {
         if (!uploadFile.Exists)
         {
@@ -44,11 +49,13 @@ internal class XfusUploader : IXfusUploader
         var httpClient = SetupHttpClient(xfusUploadInfo);
         var xfusApiController = new XfusApiController(_logger, httpClient, _uploadConfig);
 
-        XfusUploaderState xfusUploaderState = deltaUpload ? new DeltaUploadInitializeState(xfusApiController, _logger) : new NoDeltaUploadState(xfusApiController, _logger);
+        XfusUploaderState xfusUploaderState = deltaUpload 
+            ? new DeltaUploadInitializeState(xfusApiController, _logger) 
+            : new NoDeltaUploadState(xfusApiController, _logger);
 
         while (xfusUploaderState != null)
         {
-            xfusUploaderState = await xfusUploaderState.UploadAsync(xfusUploadInfo, uploadFile, _uploadConfig.HttpTimeoutMs, ct).ConfigureAwait(false);
+            xfusUploaderState = await xfusUploaderState.UploadAsync(xfusUploadInfo, uploadFile, _uploadConfig.HttpTimeoutMs, bytesProgress, ct).ConfigureAwait(false);
         }
 
         timer.Stop();

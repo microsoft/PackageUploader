@@ -16,7 +16,7 @@ namespace PackageUploader.ClientApi.Client.Xfus.Uploader.State;
 
 internal abstract class XfusUploaderState
 {
-    internal abstract Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, CancellationToken ct);
+    internal abstract Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, IProgress<ulong> bytesProgress, CancellationToken ct);
 
     protected readonly XfusApiController _xfusApiController;
     protected readonly ILogger _logger;
@@ -41,12 +41,12 @@ internal abstract class XfusUploaderState
         return uploadProgress;
     }
 
-    protected async Task FullUploadAsync(UploadProgress uploadProgress, XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, bool deltaUpload, int httpTimeoutMs, CancellationToken ct)
+    protected async Task FullUploadAsync(UploadProgress uploadProgress, XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, bool deltaUpload, int httpTimeoutMs, IProgress<ulong> bytesProgress, CancellationToken ct)
     {
         var firstRun = true;
         while (uploadProgress.Status != UploadStatus.Completed)
         {
-            await UploadBlocksAsync(uploadProgress, xfusUploadInfo, uploadFile, ct).ConfigureAwait(false);
+            await UploadBlocksAsync(uploadProgress, xfusUploadInfo, uploadFile, bytesProgress, ct).ConfigureAwait(false);
             uploadProgress = await CheckContinuationAsync(xfusUploadInfo, deltaUpload, httpTimeoutMs, ct).ConfigureAwait(false);
 
             if (!firstRun)
@@ -58,12 +58,12 @@ internal abstract class XfusUploaderState
         }
     }
 
-    protected async Task<UploadProgress> StepUploadAsync(UploadProgress uploadProgress, XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, bool deltaUpload, int httpTimeoutMs, CancellationToken ct)
+    protected async Task<UploadProgress> StepUploadAsync(UploadProgress uploadProgress, XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, bool deltaUpload, int httpTimeoutMs, IProgress<ulong> bytesProgress, CancellationToken ct)
     {
         var continuationBlockComplete = false;
         while (!continuationBlockComplete || uploadProgress == null)
         {
-            await UploadBlocksAsync(uploadProgress, xfusUploadInfo, uploadFile, ct).ConfigureAwait(false);
+            await UploadBlocksAsync(uploadProgress, xfusUploadInfo, uploadFile, bytesProgress, ct).ConfigureAwait(false);
             if (_xfusBlockProgressReporter.BlocksLeftToUpload <= 0)
             {
                 continuationBlockComplete = true;
@@ -73,12 +73,12 @@ internal abstract class XfusUploaderState
         return uploadProgress;
     }
 
-    private async Task UploadBlocksAsync(UploadProgress uploadProgress, XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, CancellationToken ct)
+    private async Task UploadBlocksAsync(UploadProgress uploadProgress, XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, IProgress<ulong> bytesProgress, CancellationToken ct)
     {
         var validBlocks = uploadProgress is { PendingBlocks.Length: > 0 };
         if (validBlocks && uploadProgress.Status == UploadStatus.ReceivingBlocks)
         {
-            await _xfusApiController.UploadBlocksAsync(uploadProgress, uploadFile, xfusUploadInfo.XfusId, _xfusBlockProgressReporter, ct).ConfigureAwait(false);
+            await _xfusApiController.UploadBlocksAsync(uploadProgress, uploadFile, xfusUploadInfo.XfusId, _xfusBlockProgressReporter, bytesProgress, ct).ConfigureAwait(false);
         }
     }
 

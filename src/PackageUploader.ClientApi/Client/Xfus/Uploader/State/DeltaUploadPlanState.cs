@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Xfus.Models;
 using PackageUploader.ClientApi.Client.Xfus.Models.Internal;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ internal class DeltaUploadPlanState : XfusUploaderState
         _totalBytesUploaded = bytesSoFar;
     }
 
-    internal override async Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, CancellationToken ct)
+    internal override async Task<XfusUploaderState> UploadAsync(XfusUploadInfo xfusUploadInfo, FileInfo uploadFile, int httpTimeoutMs, IProgress<ulong> bytesProgress, CancellationToken ct)
     {
         var uploadProgress = _uploadProgress;
         _logger.LogInformation("XFUS Asset Header uploaded. Please wait while the API calculates the Delta Upload Plan.");
@@ -29,7 +30,7 @@ internal class DeltaUploadPlanState : XfusUploaderState
         while (uploadProgress.Status == UploadStatus.Busy)
         {
             _logger.LogInformation("XFUS Asset Header uploaded. Delta Upload Plan still calculating, retrying in (HH:MM:SS) {requestDelay}.", uploadProgress.RequestDelay.ToString(@"hh\:mm\:ss"));
-            uploadProgress = await StepUploadAsync(uploadProgress, xfusUploadInfo, uploadFile, true, httpTimeoutMs, ct).ConfigureAwait(false);
+            uploadProgress = await StepUploadAsync(uploadProgress, xfusUploadInfo, uploadFile, true, httpTimeoutMs, bytesProgress, ct).ConfigureAwait(false);
         }
 
         return new DeltaUploadMainUploadState(_xfusApiController, _logger, uploadProgress, _xfusBlockProgressReporter, _totalBytesUploaded);
