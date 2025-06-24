@@ -173,6 +173,14 @@ namespace PackageUploader.UI.Model
                             failureResult.Id = reader.GetAttribute("Id");
                             component.Items.Add(failureResult);
                         }
+                        else if(String.Equals(reader.Name, "warning", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
+                        {
+                            
+                            ValidatorTestResult warningResult = new ValidatorTestResult();
+                            warningResult.Type = ValidatorTestResultType.Warning;
+                            warningResult.Id = reader.GetAttribute("Id");
+                            component.Items.Add(warningResult);
+                        }
                         break;
                     case XmlNodeType.EndElement:
                         if (String.Equals(reader.Name, "testresult", StringComparison.OrdinalIgnoreCase))
@@ -262,6 +270,11 @@ namespace PackageUploader.UI.Model
         public string Id { get; set; } = string.Empty;
         public ValidatorTestResultType Type { get; set; } = ValidatorTestResultType.None;
         public string Message { get; set; } = string.Empty;
+
+        public override string ToString()
+        {
+            return $"{Id}: {Message}";
+        }
     }
 
     public enum ValidatorTestResultType
