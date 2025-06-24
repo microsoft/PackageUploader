@@ -162,7 +162,7 @@ namespace PackageUploader.UI.Model
                         {
                             ValidatorTestResult result = new ValidatorTestResult();
                             result.Type = ValidatorTestResultType.Info;
-                            result.Id = reader.GetAttribute("Id");
+                            result.Id = reader.GetAttribute("Id") ?? String.Empty;
                             component.Items.Add(result);
                         }
                         else if (String.Equals(reader.Name, "failure", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
@@ -170,7 +170,7 @@ namespace PackageUploader.UI.Model
                             
                             ValidatorTestResult failureResult = new ValidatorTestResult();
                             failureResult.Type = ValidatorTestResultType.Failure;
-                            failureResult.Id = reader.GetAttribute("Id");
+                            failureResult.Id = reader.GetAttribute("Id") ?? String.Empty;
                             component.Items.Add(failureResult);
                         }
                         else if(String.Equals(reader.Name, "warning", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
@@ -178,7 +178,7 @@ namespace PackageUploader.UI.Model
                             
                             ValidatorTestResult warningResult = new ValidatorTestResult();
                             warningResult.Type = ValidatorTestResultType.Warning;
-                            warningResult.Id = reader.GetAttribute("Id");
+                            warningResult.Id = reader.GetAttribute("Id") ?? String.Empty;
                             component.Items.Add(warningResult);
                         }
                         break;
