@@ -14,6 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/> <!-- check -->
             <RowDefinition Height="auto"/> <!-- title -->
+            <RowDefinition Height="auto"/> <!-- Error Box -->
             <RowDefinition Height="auto"/> <!-- Main Box -->
             <RowDefinition /> <!-- buttons row -->
         </Grid.RowDefinitions>
@@ -34,7 +35,27 @@
                    Text="{x:Static strings:PackagingFinished.PackagingCompletedTitleText}"
                    d:Text="Packaging completed"
                    Foreground="{DynamicResource PrimaryTextBrush}" />
-        <Border Grid.Row="2"
+        <Border Grid.Row="2" Visibility="{Binding ValidatorFailuresExist}"
+                Background="{DynamicResource ErrorRedTransluscentBrush}"
+                    Margin="40,10,40,10"
+                    CornerRadius="6"
+                    BorderBrush="{DynamicResource ErrorRedTransluscentBrush}">
+            <StackPanel>
+                <TextBlock Text="{x:Static strings:PackagingFinished.ValidatorFailuresTitleText}"
+                       d:Text="Validator failures"
+                       Style="{StaticResource SubHeadline}"
+                       Foreground="{DynamicResource ErrorRedBrush}"
+                       HorizontalAlignment="Left"
+                       Margin="10, 10, 0, 0" />
+                <TextBlock Text="{Binding ValidatorFailuresText, Mode=OneWay}"
+                       Foreground="{DynamicResource ErrorRedBrush}" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="5" />
+            </StackPanel>
+        </Border>
+        <Border Grid.Row="3"
                 Margin="100, 0, 100, 0"
                 BorderBrush="#6B7584"
                 BorderThickness="1"
@@ -119,7 +140,7 @@
                         Margin="0, 0, 10, 0"/>
             </Grid>
         </Border>
-        <StackPanel Grid.Row="3"
+        <StackPanel Grid.Row="4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom">

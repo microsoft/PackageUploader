@@ -39,6 +39,23 @@ namespace PackageUploader.UI.Model
             Name = string.Empty; 
         }
 
+        public string ErrorToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            int ErrorCount = 0;
+            foreach (var component in Components)
+            {
+                foreach (var item in component.Items)
+                {
+                    if(item.Type == ValidatorTestResultType.Failure)
+                    {
+                        sb.AppendLine($"{++ErrorCount}. {item}");
+                    }
+                }
+            }
+            return sb.ToString();
+        }
+
         public void Parse(string inputFile)
         {
             this.reset();

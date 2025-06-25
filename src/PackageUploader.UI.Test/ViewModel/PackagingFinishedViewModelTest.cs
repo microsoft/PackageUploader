@@ -23,6 +23,7 @@ namespace PackageUploader.UI.Test.ViewModel
         private Mock<IWindowService> _mockWindowService;
         private PackageModelProvider _packageModelProvider;
         private PathConfigurationProvider _pathConfigurationService;
+        private ValidatorResultsProvider _validatorResultsProvider;
         private Mock<IAuthenticationService> _mockAuthenticationService;
         private Mock<IProcessStarterService> _mockProcessStarterService;
         private Mock<ILogger<PackagingFinishedViewModel>> _mockLogger;
@@ -37,6 +38,7 @@ namespace PackageUploader.UI.Test.ViewModel
             _mockWindowService = new Mock<IWindowService>();
             _packageModelProvider = new PackageModelProvider();
             _pathConfigurationService = new ();
+            _validatorResultsProvider = new ValidatorResultsProvider();
             _mockAuthenticationService = new Mock<IAuthenticationService>();
             _mockProcessStarterService = new Mock<IProcessStarterService>();
             _mockLogger = new Mock<ILogger<PackagingFinishedViewModel>>();
@@ -63,7 +65,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _pathConfigurationService,
                 _mockAuthenticationService.Object,
                 _mockLogger.Object,
-                _mockProcessStarterService.Object);
+                _mockProcessStarterService.Object,
+                _validatorResultsProvider);
         }
 
         [TestMethod]

@@ -133,6 +133,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Submission Validator Errors.
+        /// </summary>
+        public static string ValidatorFailuresTitleText {
+            get {
+                return ResourceManager.GetString("ValidatorFailuresTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View logs.
         /// </summary>
         public static string ViewLogsButtonContent {
