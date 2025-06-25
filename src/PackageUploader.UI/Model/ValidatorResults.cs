@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace PackageUploader.UI.Model
 {
-    class ValidatorResults
+    public class ValidatorResults
     {
         public Guid ProductId { get; set; } = Guid.Empty;
         public Guid ContentId { get; set; } = Guid.Empty;
@@ -121,7 +121,7 @@ namespace PackageUploader.UI.Model
                         {
                             this.TotalWarnings = reader.ReadElementContentAsInt();
                         }
-                        else if (String.Equals(reader.Name, "TotalErrors", StringComparison.OrdinalIgnoreCase))
+                        else if (String.Equals(reader.Name, "TotalFailures", StringComparison.OrdinalIgnoreCase))
                         {
                             this.TotalErrors = reader.ReadElementContentAsInt();
                         }
@@ -147,51 +147,60 @@ namespace PackageUploader.UI.Model
                 switch (reader.NodeType)
                 {
                     case XmlNodeType.Element:
-                        if (String.Equals(reader.Name, "component", StringComparison.OrdinalIgnoreCase))
                         {
-                            component.Component = reader.ReadElementContentAsString();
-                            if(String.Equals(component.Component, "Tools Check", StringComparison.OrdinalIgnoreCase))
+                            if (String.Equals(reader.Name, "component", StringComparison.OrdinalIgnoreCase))
                             {
-                                component = new ValidatorComponentToolsCheck();
-                                component.Component = "Tools Check";
-                                this.ParseComponentToolsCheck(reader, (ValidatorComponentToolsCheck)component);
-                                break;
+                                // First, determine if this is a specialized component
+                                component.Component = reader.ReadElementContentAsString();
+                                if (String.Equals(component.Component, "Tools Check", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    component = new ValidatorComponentToolsCheck();
+                                    component.Component = "Tools Check";
+                                    break;
+                                }
                             }
+                            // Next, parse these known results type and put the into the component
+                            else if (String.Equals(reader.Name, "info", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
+                            {
+                                ValidatorTestResult result = new ValidatorTestResult();
+                                result.Type = ValidatorTestResultType.Info;
+                                result.Id = reader.GetAttribute("Id") ?? String.Empty;
+                                result.Message = reader.ReadElementContentAsString();
+                                component.Items.Add(result);
+                            }
+                            else if (String.Equals(reader.Name, "failure", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
+                            {
+
+                                ValidatorTestResult failureResult = new ValidatorTestResult();
+                                failureResult.Type = ValidatorTestResultType.Failure;
+                                failureResult.Id = reader.GetAttribute("Id") ?? String.Empty;
+                                failureResult.Message = reader.ReadElementContentAsString();
+                                component.Items.Add(failureResult);
+                            }
+                            else if (String.Equals(reader.Name, "warning", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
+                            {
+
+                                ValidatorTestResult warningResult = new ValidatorTestResult();
+                                warningResult.Type = ValidatorTestResultType.Warning;
+                                warningResult.Id = reader.GetAttribute("Id") ?? String.Empty;
+                                warningResult.Message = reader.ReadElementContentAsString();
+                                component.Items.Add(warningResult);
+                            }
+                            // finally, give the conponent itself a chance to read this node
+                            component.ParseResultTag(reader);
+                            break;
                         }
-                        else if (String.Equals(reader.Name, "info", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
-                        {
-                            ValidatorTestResult result = new ValidatorTestResult();
-                            result.Type = ValidatorTestResultType.Info;
-                            result.Id = reader.GetAttribute("Id") ?? String.Empty;
-                            component.Items.Add(result);
-                        }
-                        else if (String.Equals(reader.Name, "failure", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
-                        {
-                            
-                            ValidatorTestResult failureResult = new ValidatorTestResult();
-                            failureResult.Type = ValidatorTestResultType.Failure;
-                            failureResult.Id = reader.GetAttribute("Id") ?? String.Empty;
-                            component.Items.Add(failureResult);
-                        }
-                        else if(String.Equals(reader.Name, "warning", StringComparison.OrdinalIgnoreCase) && reader.HasAttributes)
-                        {
-                            
-                            ValidatorTestResult warningResult = new ValidatorTestResult();
-                            warningResult.Type = ValidatorTestResultType.Warning;
-                            warningResult.Id = reader.GetAttribute("Id") ?? String.Empty;
-                            component.Items.Add(warningResult);
-                        }
-                        break;
                     case XmlNodeType.EndElement:
                         if (String.Equals(reader.Name, "testresult", StringComparison.OrdinalIgnoreCase))
                         {
+                            this.Components.Add(component);
                             return;
                         }
                         break;
                 }
             }
-            this.Components.Add(component);
         }
+
         /// <summary>
         /// Fills out the component with the tools check information, but does not add given component to the components list
         /// </summary>
@@ -250,6 +259,8 @@ namespace PackageUploader.UI.Model
     {
         public string Component { get; set; } = string.Empty;
         public List<ValidatorTestResult> Items { get; set; } = new List<ValidatorTestResult>();
+
+        public virtual void ParseResultTag(XmlReader reader) { }
     }
 
     public class ValidatorComponentToolsCheck : ValidatorComponent
@@ -263,6 +274,51 @@ namespace PackageUploader.UI.Model
         public string Windows_10_SDK { get; set; } = string.Empty;
         public string GRTS_Version { get; set; } = string.Empty;
         public string XCAPI_Version { get; set; } = string.Empty;
+
+        public override void ParseResultTag(XmlReader reader)
+        {
+            switch (reader.NodeType)
+            {
+                case XmlNodeType.Element:
+                    if (String.Equals(reader.Name, "MakePkg_Version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.MakePkg_Version = reader.ReadElementContentAsString();
+                    }
+                    else if (String.Equals(reader.Name, "PackagingServices_Version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.PackagingServices_Version = reader.ReadElementContentAsString();
+                    }
+                    else if (String.Equals(reader.Name, "XSAPI_Version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.XSAPI_Version = reader.ReadElementContentAsString();
+                    }
+                    else if (String.Equals(reader.Name, "XCRDAPI_Version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.XCRDAPI_Version = reader.ReadElementContentAsString();
+                    }
+                    else if (String.Equals(reader.Name, "XCITREE_Version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.XCITREE_Version = reader.ReadElementContentAsString();
+                    }
+                    else if (String.Equals(reader.Name, "Windows_Version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.Windows_Version = reader.ReadElementContentAsString();
+                    }
+                    else if (String.Equals(reader.Name, "Windows_10_SDK", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.Windows_10_SDK = reader.ReadElementContentAsString();
+                    }
+                    else if (String.Equals(reader.Name, "GRTS_Version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.GRTS_Version = reader.ReadElementContentAsString();
+                    }
+                    else if (String.Equals(reader.Name, "XCAPI_Version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        this.XCAPI_Version = reader.ReadElementContentAsString();
+                    }
+                    break;
+            }
+        }
     }
 
     public class ValidatorTestResult

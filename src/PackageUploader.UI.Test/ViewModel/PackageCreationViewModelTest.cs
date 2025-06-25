@@ -24,8 +24,9 @@ namespace PackageUploader.UI.Test.ViewModel
         private PackingProgressPercentageProvider _progressProvider;
         private Mock<ILogger<PackageCreationViewModel>> _mockLogger;
         private ErrorModelProvider _errorModelProvider;
-/*        private ErrorModel _errorModel;
-        private PackageModel _packageModel;*/
+        private ValidatorResultsProvider _validatorResultsProvider;
+        /*        private ErrorModel _errorModel;
+                private PackageModel _packageModel;*/
         private PackageCreationViewModel _viewModel;
 
         private string _goodMappingFilePath; 
@@ -41,6 +42,7 @@ namespace PackageUploader.UI.Test.ViewModel
             _mockWindowService = new Mock<IWindowService>();
             _progressProvider = new PackingProgressPercentageProvider();
             _mockLogger = new Mock<ILogger<PackageCreationViewModel>>();
+            _validatorResultsProvider = new ValidatorResultsProvider();
             _errorModelProvider = new ErrorModelProvider();
 
             // Setup common behaviors
@@ -60,7 +62,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockWindowService.Object,
                 _progressProvider,
                 _mockLogger.Object,
-                _errorModelProvider
+                _errorModelProvider,
+                _validatorResultsProvider
             );
 
             // mock files
