@@ -147,4 +147,7 @@
   <data name="ConfigureUploadButtonContent" xml:space="preserve">
     <value>업로드 구성</value>
   </data>
+  <data name="ValidatorFailuresTitleText" xml:space="preserve">
+    <value>제출 검증기 오류</value>
+  </data>
 </root>

@@ -24,6 +24,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly PackingProgressPercentageProvider _packingProgressPercentageProvider;
     private readonly ErrorModelProvider _errorModelProvider;
+    private readonly ValidatorResultsProvider _validatorResultsProvider;
     private readonly IWindowService _windowService;
     private readonly ILogger<PackageCreationViewModel> _logger;
 
@@ -320,7 +321,8 @@ public partial class PackageCreationViewModel : BaseViewModel
                                     IWindowService windowService,
                                     PackingProgressPercentageProvider packingProgressPercentageProvider,
                                     ILogger<PackageCreationViewModel> logger,
-                                    ErrorModelProvider errorModelProvider)
+                                    ErrorModelProvider errorModelProvider,
+                                    ValidatorResultsProvider validatorResultsProvider)
     {
         _packageModelService = packageModelService;
         _pathConfigurationService = pathConfigurationService;
@@ -328,6 +330,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         _packingProgressPercentageProvider = packingProgressPercentageProvider;
         _logger = logger;
         _errorModelProvider = errorModelProvider;
+        _validatorResultsProvider = validatorResultsProvider;
 
         // Ensure our version of MakePkg supports custom SubVal paths before allowing that option.
         var mkgPkgpath = _pathConfigurationService.MakePkgPath;
@@ -885,6 +888,9 @@ public partial class PackageCreationViewModel : BaseViewModel
     [GeneratedRegex(@"Encrypted (\d+) %")]
     private static partial Regex EncryptionProgressRegex();
 
+    [GeneratedRegex(@"See the Submission Validator log file at '(?<PackagePath>.*?Validator.*?\.xml)'")]
+    private static partial Regex ValidatorResultsPathRegex();
+
     private void ProcessMakePackageOutput(string outputString)
     {
         // Package Path for XVC
@@ -913,6 +919,18 @@ public partial class PackageCreationViewModel : BaseViewModel
             }
         }
         Package.GameConfigFilePath = Path.Combine(GameDataPath, "MicrosoftGame.config");
+
+        // Validator Results Path
+        MatchCollection validatorResultsPathMatchCollection = ValidatorResultsPathRegex().Matches(outputString);
+        for (int i = 0; i < validatorResultsPathMatchCollection.Count; i++)
+        {
+            string validatorResultsPathValue = validatorResultsPathMatchCollection[i].Groups["PackagePath"].Value;
+            if (validatorResultsPathValue != null)
+            {
+                _validatorResultsProvider.Results.Parse(validatorResultsPathValue);
+                break;
+            }
+        }
     }
 
     public void OnAppearing()

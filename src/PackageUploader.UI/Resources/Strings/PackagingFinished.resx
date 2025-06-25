@@ -147,4 +147,7 @@
   <data name="ConfigureUploadButtonContent" xml:space="preserve">
     <value>Configure upload</value>
   </data>
+  <data name="ValidatorFailuresTitleText" xml:space="preserve">
+    <value>Submission Validator Errors</value>
+  </data>
 </root>

@@ -147,4 +147,7 @@
   <data name="ConfigureUploadButtonContent" xml:space="preserve">
     <value>配置上传</value>
   </data>
+  <data name="ValidatorFailuresTitleText" xml:space="preserve">
+    <value>提交验证器错误</value>
+  </data>
 </root>
