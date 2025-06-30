@@ -641,6 +641,12 @@ public partial class PackageCreationViewModel : BaseViewModel
             }
         }
 
+        var currentLanguage = Thread.CurrentThread.CurrentUICulture.Name;
+        if (!currentLanguage.Contains("en", StringComparison.OrdinalIgnoreCase))
+        {
+            arguments += $" /validationlanguage \"{currentLanguage}\"";
+        }
+
         SetConsoleCtrlHandler(null, false);
 
         _makePackageProcess = new Process();
@@ -927,6 +933,12 @@ public partial class PackageCreationViewModel : BaseViewModel
             string validatorResultsPathValue = validatorResultsPathMatchCollection[i].Groups["PackagePath"].Value;
             if (validatorResultsPathValue != null)
             {
+                var currentLanguage = Thread.CurrentThread.CurrentUICulture.Name;
+                if (!currentLanguage.Contains("en", StringComparison.OrdinalIgnoreCase))
+                {
+                    var root = validatorResultsPathValue.Split(".xml")[0];
+                    validatorResultsPathValue = $"{root}_{currentLanguage}.xml";
+                }
                 _validatorResultsProvider.Results.Parse(validatorResultsPathValue);
                 break;
             }
