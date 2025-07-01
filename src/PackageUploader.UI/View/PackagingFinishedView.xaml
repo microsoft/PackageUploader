@@ -122,7 +122,7 @@
         </Border>
         <Border Grid.Row="3" Visibility="{Binding ValidatorFailuresExist}"
                 Background="{DynamicResource ErrorRedTransluscentBrush}"
-                Margin="100, 0, 100, 0"
+                Margin="100, 10, 100, 0"
                 CornerRadius="6"
                 BorderBrush="{DynamicResource ErrorRedTransluscentBrush}">
             <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled">
@@ -130,7 +130,7 @@
                     <TextBlock Text="{x:Static strings:PackagingFinished.ValidatorFailuresTitleText}"
                                d:Text="Validator failures"
                                Style="{StaticResource SubHeadline}"
-                               Foreground="{DynamicResource ErrorRedBrush}"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                HorizontalAlignment="Left"
                                Margin="10, 10, 0, 0" />
                     <TextBlock Text="{Binding ValidatorFailuresText, Mode=OneWay}"
