@@ -391,5 +391,8 @@ public class ValidatorResultsTest
         Assert.AreEqual(windows10Sdk, ((ValidatorComponentToolsCheck)_validator.Components[3]).Windows_10_SDK);
         Assert.AreEqual(grtsVersion, ((ValidatorComponentToolsCheck)_validator.Components[3]).GRTS_Version);
         Assert.AreEqual(xcapiVersion, ((ValidatorComponentToolsCheck)_validator.Components[3]).XCAPI_Version);
+
+        // cleanup
+        File.Delete(tempFile);
     }
 }
