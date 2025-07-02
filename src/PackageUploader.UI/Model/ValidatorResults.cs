@@ -23,10 +23,10 @@ namespace PackageUploader.UI.Model
 
         public ValidatorResults()
         {
-            this.reset();
+            this.Reset();
         }
 
-        public void reset()
+        public void Reset()
         {
             ProductId = Guid.Empty;
             ContentId = Guid.Empty;
@@ -36,7 +36,7 @@ namespace PackageUploader.UI.Model
             Succeeded = false;
             Components.Clear();
             Type = string.Empty;
-            Name = string.Empty; 
+            Name = string.Empty;
         }
 
         public string ErrorToString()
@@ -47,7 +47,7 @@ namespace PackageUploader.UI.Model
             {
                 foreach (var item in component.Items)
                 {
-                    if(item.Type == ValidatorTestResultType.Failure)
+                    if (item.Type == ValidatorTestResultType.Failure)
                     {
                         sb.AppendLine($"{++ErrorCount}. {item}");
                     }
@@ -58,7 +58,7 @@ namespace PackageUploader.UI.Model
 
         public void Parse(string inputFile)
         {
-            this.reset();
+            this.Reset();
             if (String.IsNullOrEmpty(inputFile) || !File.Exists(inputFile))
             {
                 throw new InvalidDataException("Validator result file does not exist");
@@ -69,18 +69,18 @@ namespace PackageUploader.UI.Model
             {
                 while (reader.Read())
                 {
-                    switch(reader.NodeType)
+                    switch (reader.NodeType)
                     {
                         case XmlNodeType.Element:
                             if (String.Equals(reader.Name, "project", StringComparison.OrdinalIgnoreCase))
                             {
                                 this.ParseProjectTag(reader.ReadSubtree());
                             }
-                            if(String.Equals(reader.Name, "ValidationSummary", StringComparison.OrdinalIgnoreCase))
+                            if (String.Equals(reader.Name, "ValidationSummary", StringComparison.OrdinalIgnoreCase))
                             {
                                 this.ParseValidationSummary(reader.ReadSubtree());
                             }
-                            if(String.Equals(reader.Name, "testresult", StringComparison.OrdinalIgnoreCase))
+                            if (String.Equals(reader.Name, "testresult", StringComparison.OrdinalIgnoreCase))
                             {
                                 this.ParseTestResult(reader.ReadSubtree());
                             }
@@ -105,11 +105,11 @@ namespace PackageUploader.UI.Model
                         {
                             this.Type = reader.ReadElementContentAsString();
                         }
-                        else if(String.Equals(reader.Name, "ProductId", StringComparison.OrdinalIgnoreCase))
+                        else if (String.Equals(reader.Name, "ProductId", StringComparison.OrdinalIgnoreCase))
                         {
                             this.ProductId = Guid.Parse(reader.ReadElementContentAsString());
                         }
-                        else if(String.Equals(reader.Name, "ContentId", StringComparison.OrdinalIgnoreCase))
+                        else if (String.Equals(reader.Name, "ContentId", StringComparison.OrdinalIgnoreCase))
                         {
                             this.ContentId = Guid.Parse(reader.ReadElementContentAsString());
                         }
@@ -212,59 +212,6 @@ namespace PackageUploader.UI.Model
                         {
                             this.Components.Add(component);
                             return;
-                        }
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Fills out the component with the tools check information, but does not add given component to the components list
-        /// </summary>
-        /// <param name="reader">Xml tree reader that has the outer "testresult" tree </param>
-        /// <param name="component">Item to be filled out with the content</param>
-        private void ParseComponentToolsCheck(XmlReader reader, ValidatorComponentToolsCheck component)
-        {
-            while (reader.Read())
-            {
-                switch (reader.NodeType)
-                {
-                    case XmlNodeType.Element:
-                        if (String.Equals(reader.Name, "MakePkg_Version", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.MakePkg_Version = reader.ReadElementContentAsString();
-                        }
-                        else if (String.Equals(reader.Name, "PackagingServices_Version", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.PackagingServices_Version = reader.ReadElementContentAsString();
-                        }
-                        else if (String.Equals(reader.Name, "XSAPI_Version", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.XSAPI_Version = reader.ReadElementContentAsString();
-                        }
-                        else if (String.Equals(reader.Name, "XCRDAPI_Version", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.XCRDAPI_Version = reader.ReadElementContentAsString();
-                        }
-                        else if (String.Equals(reader.Name, "XCITREE_Version", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.XCITREE_Version = reader.ReadElementContentAsString();
-                        }
-                        else if (String.Equals(reader.Name, "Windows_Version", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.Windows_Version = reader.ReadElementContentAsString();
-                        }
-                        else if (String.Equals(reader.Name, "Windows_10_SDK", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.Windows_10_SDK = reader.ReadElementContentAsString();
-                        }
-                        else if (String.Equals(reader.Name, "GRTS_Version", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.GRTS_Version = reader.ReadElementContentAsString();
-                        }
-                        else if (String.Equals(reader.Name, "XCAPI_Version", StringComparison.OrdinalIgnoreCase))
-                        {
-                            component.XCAPI_Version = reader.ReadElementContentAsString();
                         }
                         break;
                 }
