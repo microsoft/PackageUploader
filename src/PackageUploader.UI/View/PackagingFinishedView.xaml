@@ -126,20 +126,39 @@
                 CornerRadius="6"
                 BorderBrush="{DynamicResource ErrorRedTransluscentBrush}">
             <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel>
-                    <TextBlock Text="{x:Static strings:PackagingFinished.ValidatorFailuresTitleText}"
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Image Grid.Row="0"
+                           Grid.Column="0"
+                           Source="/Resources/AppIcon/ErrorIcon.png" 
+                           HorizontalAlignment="Right"
+                           Margin="10,10,0,0"/>
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="1"
+                               Text="{x:Static strings:PackagingFinished.ValidatorFailuresTitleText}"
                                d:Text="Validator failures"
                                Style="{StaticResource SubHeadline}"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               Foreground="{DynamicResource ErrorRedBrush}"
                                HorizontalAlignment="Left"
                                Margin="10, 10, 0, 0" />
-                    <TextBlock Text="{Binding ValidatorFailuresText, Mode=OneWay}"
-                            Foreground="{DynamicResource ErrorRedBrush}" 
-                            HorizontalAlignment="Center" 
-                            VerticalAlignment="Center"
-                            TextWrapping="Wrap"
-                            Margin="5" />
-                </StackPanel>
+                    <TextBlock Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Text="{Binding ValidatorFailuresText, Mode=OneWay}"
+                               Foreground="{DynamicResource PrimaryTextBrush}" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"
+                               Margin="10, 10, 20, 20"
+                               MaxHeight="300"/>
+                </Grid>
             </ScrollViewer>
         </Border>
         <StackPanel Grid.Row="4"
