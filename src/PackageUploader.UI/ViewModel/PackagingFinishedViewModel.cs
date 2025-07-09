@@ -18,6 +18,7 @@ namespace PackageUploader.UI.ViewModel
         private readonly IWindowService _windowService;
         private readonly PackageModelProvider _packageModelProvider;
         private readonly PathConfigurationProvider _pathConfigurationService;
+        private readonly ValidatorResultsProvider _validatorResultsProvider;
         private readonly IAuthenticationService _authenticationService;
         private readonly IProcessStarterService _processStarterService;
         private readonly ILogger<PackagingFinishedViewModel> _logger;
@@ -71,6 +72,9 @@ namespace PackageUploader.UI.ViewModel
             set => SetProperty(ref _isSigningIn, value);
         }
 
+        public bool ValidatorFailuresExist => !_validatorResultsProvider.Results.Succeeded;
+        public string ValidatorFailuresText => _validatorResultsProvider.Results.ErrorToString();
+
         private Process? _installGameProcess = null;
         private bool _isInstallingGame = false;
 
@@ -80,12 +84,13 @@ namespace PackageUploader.UI.ViewModel
         public ICommand ViewLogsCommand { get; }
         public ICommand GoHomeCommand { get; }
 
-        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService, IAuthenticationService authenticationService, ILogger<PackagingFinishedViewModel> logger, IProcessStarterService processStarterService)
+        public PackagingFinishedViewModel(IWindowService windowService, PackageModelProvider packageModelProvider, PathConfigurationProvider pathConfigurationService, IAuthenticationService authenticationService, ILogger<PackagingFinishedViewModel> logger, IProcessStarterService processStarterService, ValidatorResultsProvider validatorResultsProvider)
         {
             _windowService = windowService;
             _packageModelProvider = packageModelProvider;
             _pathConfigurationService = pathConfigurationService;
             _authenticationService = authenticationService;
+            _validatorResultsProvider = validatorResultsProvider;
             _logger = logger;
 
             _wdAppPath = Path.GetDirectoryName(_pathConfigurationService.MakePkgPath) ?? string.Empty;

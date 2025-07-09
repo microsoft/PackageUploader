@@ -53,6 +53,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<UploadingProgressPercentageProvider>();
                 services.AddSingleton<ErrorModelProvider>();
                 services.AddSingleton<LanguageProvider>(); // Add the LanguageProvider
+                services.AddSingleton<ValidatorResultsProvider>(); 
 
                 // Register ViewModels
                 services.AddSingleton<MainPageViewModel>();
