@@ -120,7 +120,7 @@
                         Margin="0, 0, 10, 0"/>
             </Grid>
         </Border>
-        <Border Grid.Row="3" Visibility="{Binding ValidatorFailuresExist}"
+        <Border Grid.Row="3" Visibility="{Binding ValidatorFailuresExist, Converter={StaticResource BooleanToVisibilityConverter}}"
                 Background="{DynamicResource ErrorRedTransluscentBrush}"
                 Margin="100, 10, 100, 0"
                 CornerRadius="6"

@@ -192,7 +192,7 @@ public partial class MainPageViewModel : BaseViewModel
 
         IsUserLoggedIn = false;
 
-        string makePkgPath = ResolveExecutablePath("MakePkg.exe");
+        string makePkgPath = ResolveFilePath("MakePkg.exe");
 
         if (File.Exists(makePkgPath))
         {
@@ -204,6 +204,13 @@ public partial class MainPageViewModel : BaseViewModel
             IsMakePkgEnabled = false;
             //MakePkgUnavailableErrorMessage = "MakePkg.exe was not found. Please install the GDK in order to package game contents.";
             MakePkgUnavailableErrorMessage = PackageUploader.UI.Resources.Strings.MainPage.MakePackageNotFoundErrorMsg;
+        }
+
+        string subValPath = ResolveFilePath("SubmissionValidator.dll");
+
+        if (File.Exists(subValPath))
+        {
+            _pathConfigurationService.BaseSubValPath = subValPath;
         }
 
         // Log version of the tool
@@ -279,7 +286,7 @@ public partial class MainPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsUserLoggedIn));
     }
 
-    private static string ResolveExecutablePath(string exeName)
+    private static string ResolveFilePath(string fileName)
     {
         // We search in several locations in priority order:
         // 1. Next to our current executable
@@ -292,7 +299,7 @@ public partial class MainPageViewModel : BaseViewModel
 
         if (Directory.Exists(assemblyDirectory))
         {
-            var nextToExePath = Path.Combine(assemblyDirectory, exeName);
+            var nextToExePath = Path.Combine(assemblyDirectory, fileName);
 
             if (File.Exists(nextToExePath))
             {
@@ -302,7 +309,7 @@ public partial class MainPageViewModel : BaseViewModel
 
         var currentDirectory = Directory.GetCurrentDirectory();
 
-        var currentDirectoryPath = Path.Combine(currentDirectory, exeName);
+        var currentDirectoryPath = Path.Combine(currentDirectory, fileName);
 
         if (File.Exists(currentDirectoryPath))
         {
@@ -314,24 +321,36 @@ public partial class MainPageViewModel : BaseViewModel
 
         if (!string.IsNullOrEmpty(gdkPath))
         {
-            var gdkExePath = Path.Combine(gdkPath, "bin", exeName);
-            if (File.Exists(gdkExePath))
+            var gdkFilePath = Path.Combine(gdkPath, "bin", fileName);
+            if (File.Exists(gdkFilePath))
             {
-                return gdkExePath;
+                return gdkFilePath;
             }
         }
 
-        string? exePath = FindExecutableInPath(exeName);
+        string GdkAltRegistryPath = @"SOFTWARE\WOW6432Node\Microsoft\GDK\Installed Roots";
+        string? gdkAltPath = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{GdkAltRegistryPath}", "GDKInstallPath", null) as string;
 
-        if (File.Exists(exePath))
+        if (!string.IsNullOrEmpty(gdkAltPath))
         {
-            return exePath;
+            var gdkFilePath = Path.Combine(gdkAltPath, "bin", fileName);
+            if (File.Exists(gdkFilePath))
+            {
+                return gdkFilePath;
+            }
+        }
+
+        string? filePath = FindFileInPath(fileName);
+
+        if (File.Exists(filePath))
+        {
+            return filePath;
         }
 
         return string.Empty;
     }
 
-    private static string? FindExecutableInPath(string exeName)
+    private static string? FindFileInPath(string fileName)
     {
         var pathValue = Environment.GetEnvironmentVariable("PATH");
 
@@ -343,10 +362,10 @@ public partial class MainPageViewModel : BaseViewModel
         var paths = pathValue.Split(Path.PathSeparator);
         foreach (var path in paths)
         {
-            var exePath = Path.Combine(path, exeName);
-            if (File.Exists(exePath))
+            var filePath = Path.Combine(path, fileName);
+            if (File.Exists(filePath))
             {
-                return exePath;
+                return filePath;
             }
         }
         return null;
