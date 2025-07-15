@@ -188,6 +188,31 @@ public class PackageUploaderService : IPackageUploaderService
         ArgumentNullException.ThrowIfNull(marketGroupPackage);
         StringArgumentException.ThrowIfNullOrWhiteSpace(packageFilePath);
 
+        // Up-front validate any specified files exist
+        if (!File.Exists(packageFilePath))
+        {
+            throw new FileNotFoundException("Package file not found.", packageFilePath);
+        }
+        if (gameAssets is not null)
+        {
+            if (!string.IsNullOrEmpty(gameAssets.EkbFilePath) && !File.Exists(gameAssets.EkbFilePath))
+            {
+                throw new FileNotFoundException("EKB file not found.", gameAssets.EkbFilePath);
+            }
+            if (!string.IsNullOrEmpty(gameAssets.SymbolsFilePath) && !File.Exists(gameAssets.SymbolsFilePath))
+            {
+                throw new FileNotFoundException("Symbols file not found.", gameAssets.SymbolsFilePath);
+            }
+            if (!string.IsNullOrEmpty(gameAssets.SubValFilePath) && !File.Exists(gameAssets.SubValFilePath))
+            {
+                throw new FileNotFoundException("SubmissionValidator log file not found.", gameAssets.SubValFilePath);
+            }
+            if (!string.IsNullOrEmpty(gameAssets.DiscLayoutFilePath) && !File.Exists(gameAssets.DiscLayoutFilePath))
+            {
+                throw new FileNotFoundException("Disc Layout file not found.", gameAssets.DiscLayoutFilePath);
+            }
+        }
+
         // Calculate total size of all files to be uploaded
         var files = new List<FileInfo> { new(packageFilePath) };
         if (gameAssets is not null)
