@@ -10,7 +10,7 @@ namespace PackageUploader.UI.ViewModel;
 
 public partial class BaseViewModel : INotifyPropertyChanged
 {
-    private static readonly string _settingsFolder = Path.Combine(
+    protected static readonly string _settingsFolder = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "XboxPackageTool");
     

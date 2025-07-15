@@ -308,6 +308,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
+    private bool _supportsSubValAutoUpdate = false;
+    public bool SupportsSubValAutoUpdate
+    {
+        get => _supportsSubValAutoUpdate;
+        set
+        {
+            if (_supportsSubValAutoUpdate != value)
+            {
+                _supportsSubValAutoUpdate = value;
+                OnPropertyChanged(nameof(SupportsSubValAutoUpdate));
+            }
+        }
+    }
+
     public ICommand MakePackageCommand { get; }
     public ICommand GameDataPathDroppedCommand { get; }
     public ICommand BrowseGameDataPathCommand { get; }
@@ -339,8 +353,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         if (!string.IsNullOrEmpty(mkgPkgVersionString.ProductVersion))
         {
             Version makePkgVersion = new(mkgPkgVersionString.ProductVersion);
-            Version firstSupportedVersion = new("10.0.22621.4272"); // June 2023 GDK
-            _supportsCustomSubValPath = makePkgVersion >= firstSupportedVersion;
+
+            Version lastVersionBeforeSubValAutoUpdate = new("10.0.26100.4046"); // April 2025 GDK Update 1
+            _supportsSubValAutoUpdate = makePkgVersion > lastVersionBeforeSubValAutoUpdate;
+
+            // Only allow custom SubVal paths if we aren't doing SubVal auto-update.
+            if (!_supportsSubValAutoUpdate)
+            {
+                Version firstSupportedVersionForCustomSubValPath = new("10.0.22621.4272"); // June 2023 GDK
+                _supportsCustomSubValPath = makePkgVersion >= firstSupportedVersionForCustomSubValPath;
+            }
+            else
+            {
+                _supportsCustomSubValPath = false;
+            }
 
             // Future options can also be checked here to enable new features.
         }
@@ -570,7 +596,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     }
 
     private async void StartMakePackageProcess()
-    { 
+    {
         if (IsCreationInProgress)
         {
             return;
@@ -584,7 +610,7 @@ public partial class PackageCreationViewModel : BaseViewModel
             GameConfigLoadError = Resources.Strings.PackageCreation.ProvideGameDataPathErrorMsg; //"Please provide the game data path";
             return;
         }
-        if(!Directory.Exists(GameDataPath))
+        if (!Directory.Exists(GameDataPath))
         {
             GameConfigLoadError = Resources.Strings.PackageCreation.ProvideGameDataPathErrorMsg; //"Game data path does not exist";
             return;
@@ -598,13 +624,13 @@ public partial class PackageCreationViewModel : BaseViewModel
         ArrayList processErrorOutput = [];
         string tempBuildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         string buildPath = String.IsNullOrEmpty(PackageFilePath) ? tempBuildPath : PackageFilePath;
-        if(!Directory.Exists(buildPath))
+        if (!Directory.Exists(buildPath))
         {
             try
             {
                 Directory.CreateDirectory(buildPath);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 OutputDirectoryError = Resources.Strings.PackageCreation.FailedToCreateOutputDirectoryErrorMsg; //"Failed to create output directory";
                 return;
@@ -627,24 +653,10 @@ public partial class PackageCreationViewModel : BaseViewModel
         string cmdFormat = "pack /v /f \"{0}\" /d \"{1}\" /pd \"{2}\"";
         string arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, buildPath);
 
-        SubValDllError = string.Empty;
-        if (!string.IsNullOrEmpty(SubValPath))
+        // Populate our arguments for SubVal validation.
+        if (!PopulateSubValArgs(_settingsFolder, ref arguments))
         {
-            if (Directory.Exists(SubValPath) && File.Exists(Path.Combine(SubValPath, "SubmissionValidator.dll")))
-            {
-                arguments += $" /validationpath \"{SubValPath}\"";
-            }
-            else
-            {
-                SubValDllError = Resources.Strings.PackageCreation.SubValDllNotFoundErrorMsg; //"SubmissionValidator.dll not found in the specified path.";
-                return;
-            }
-        }
-
-        var currentLanguage = Thread.CurrentThread.CurrentUICulture.Name;
-        if (!currentLanguage.Contains("en", StringComparison.OrdinalIgnoreCase))
-        {
-            arguments += $" /validationlanguage \"{currentLanguage}\"";
+            return;
         }
 
         SetConsoleCtrlHandler(null, false);
@@ -673,7 +685,7 @@ public partial class PackageCreationViewModel : BaseViewModel
                 }
             }
         };
-        
+
         _makePackageProcess.ErrorDataReceived += (sender, args) =>
         {
             if (!String.IsNullOrEmpty(args.Data))
@@ -681,7 +693,7 @@ public partial class PackageCreationViewModel : BaseViewModel
                 processErrorOutput.Add(args.Data);
             }
         };
-        
+
         _makePackageProcess.Exited += (sender, args) =>
         {
             string outputString = string.Join("\n", processOutput.ToArray());
@@ -764,6 +776,89 @@ public partial class PackageCreationViewModel : BaseViewModel
         {
             _windowService.NavigateTo(typeof(PackagingProgressView));
         });
+    }
+
+    private bool PopulateSubValArgs(string settingsFolder, ref string arguments)
+    {
+        SubValDllError = string.Empty;
+        if (SupportsSubValAutoUpdate)
+        {
+            // If we support SubVal auto-update, we'll pass a flag to MakePkg indicating to do auto-update.
+            arguments += " /updatesubval";
+
+            // We also use our settings directory for our SubVal DLL so we know we have write access. If the
+            // Base SubVal path is a newer version than our current version, copy it into the settings
+            // directory to save us a download if possible.
+            SubValPath = settingsFolder;
+
+            arguments += $" /validationpath \"{SubValPath}\"";
+
+            if (File.Exists(_pathConfigurationService.BaseSubValPath))
+            {
+                bool shouldCopyBaseSubVal = false;
+
+                string fullSubValPath = Path.Combine(SubValPath, "SubmissionValidator.dll");
+                if (!File.Exists(fullSubValPath))
+                {
+                    shouldCopyBaseSubVal = true;
+                }
+                else
+                {
+                    var baseSubValVersionString = FileVersionInfo.GetVersionInfo(_pathConfigurationService.BaseSubValPath);
+                    var subValVersionString = FileVersionInfo.GetVersionInfo(fullSubValPath);
+
+                    if (!string.IsNullOrEmpty(baseSubValVersionString.ProductVersion) &&
+                        !string.IsNullOrEmpty(subValVersionString.ProductVersion))
+                    {
+                        Version baseSubValVersion = new(baseSubValVersionString.ProductVersion);
+                        Version subValVersion = new(subValVersionString.ProductVersion);
+
+                        // Only copy the base SubVal if it is newer than the current version.
+                        if (baseSubValVersion > subValVersion)
+                        {
+                            shouldCopyBaseSubVal = true;
+                        }
+                    }
+                }
+
+                if (shouldCopyBaseSubVal)
+                {
+                    try
+                    {
+                        File.Copy(_pathConfigurationService.BaseSubValPath, fullSubValPath, true);
+                        _logger.LogInformation("Copied SubmissionValidator.dll to settings folder.");
+                    }
+                    catch (Exception)
+                    {
+                        // Best effort (saves us a file download if it's current).
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Non-auto update path can only use the directory if SubmissionValidator.dll actually exists there.
+            if (!string.IsNullOrEmpty(SubValPath))
+            {
+                if (Directory.Exists(SubValPath) && File.Exists(Path.Combine(SubValPath, "SubmissionValidator.dll")))
+                {
+                    arguments += $" /validationpath \"{SubValPath}\"";
+                }
+                else
+                {
+                    SubValDllError = Resources.Strings.PackageCreation.SubValDllNotFoundErrorMsg; //"SubmissionValidator.dll not found in the specified path.";
+                    return false;
+                }
+            }
+        }
+
+        var currentLanguage = Thread.CurrentThread.CurrentUICulture.Name;
+        if (!currentLanguage.Contains("en", StringComparison.OrdinalIgnoreCase))
+        {
+            arguments += $" /validationlanguage \"{currentLanguage}\"";
+        }
+
+        return true;
     }
 
     private async Task GenerateMappingFile(string tempBuildPath)

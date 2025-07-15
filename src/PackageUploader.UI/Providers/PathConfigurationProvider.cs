@@ -22,6 +22,20 @@ public partial class PathConfigurationProvider : INotifyPropertyChanged
         }
     }
 
+    private string _baseSubValPath = string.Empty;
+    public string BaseSubValPath
+    {
+        get => _baseSubValPath;
+        set
+        {
+            if (_baseSubValPath != value)
+            {
+                _baseSubValPath = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     private string _packageUploaderPath = string.Empty;
     public string PackageUploaderPath
     {

@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -601,6 +602,232 @@ namespace PackageUploader.UI.Test.ViewModel
             Assert.AreEqual(_viewModel.SubValDllError, Resources.Strings.PackageCreation.SubValDllNotFoundErrorMsg);
         }
 
+        [TestMethod]
+        public void PopulateSubValArgs_WithSubValAutoUpdateEnabled_AddsUpdateSubvalFlag()
+        {
+            // Arrange
+            string settingsFolder = Path.GetTempPath();
+            string arguments = string.Empty;
+            object[] args = [settingsFolder, arguments];
+            
+            // Use reflection to access and set private property
+            PropertyInfo supportsSubValAutoUpdateProperty = typeof(PackageCreationViewModel)
+                .GetProperty("SupportsSubValAutoUpdate", BindingFlags.Instance | BindingFlags.Public);
+            supportsSubValAutoUpdateProperty.SetValue(_viewModel, true);
+
+            // Get method via reflection
+            MethodInfo populateSubValArgsMethod = typeof(PackageCreationViewModel)
+                .GetMethod("PopulateSubValArgs", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            // Act - Need to pass args by reference for the string ref parameter
+            bool result = (bool)populateSubValArgsMethod.Invoke(_viewModel, args);
+            string updatedArguments = (string)args[1];
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsTrue(updatedArguments.Contains("/updatesubval"));
+            Assert.IsTrue(updatedArguments.Contains("/validationpath"));
+            Assert.AreEqual(settingsFolder, _viewModel.SubValPath);
+            Assert.AreEqual(string.Empty, _viewModel.SubValDllError);
+        }
+
+        [TestMethod]
+        public void PopulateSubValArgs_WithNonEnglishLanguage_AddsValidationLanguageFlag()
+        {
+            // Arrange
+            string settingsFolder = Path.GetTempPath();
+            string arguments = string.Empty;
+            object[] args = [settingsFolder, arguments];
+
+            // Save current culture and set to non-English
+            var currentCulture = Thread.CurrentThread.CurrentUICulture;
+            Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("fr-FR");
+
+            try
+            {
+                // Use reflection to access and set private property
+                PropertyInfo supportsSubValAutoUpdateProperty = typeof(PackageCreationViewModel)
+                    .GetProperty("SupportsSubValAutoUpdate", BindingFlags.Instance | BindingFlags.Public);
+                supportsSubValAutoUpdateProperty.SetValue(_viewModel, true);
+
+                // Get method via reflection
+                MethodInfo populateSubValArgsMethod = typeof(PackageCreationViewModel)
+                    .GetMethod("PopulateSubValArgs", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                // Act - Need to pass args by reference for the string ref parameter
+                bool result = (bool)populateSubValArgsMethod.Invoke(_viewModel, args);
+                string updatedArguments = (string)args[1];
+
+                // Assert
+                Assert.IsTrue(result);
+                Assert.IsTrue(updatedArguments.Contains("/validationlanguage"));
+                Assert.IsTrue(updatedArguments.Contains("fr-FR"));
+            }
+            finally
+            {
+                // Restore culture
+                Thread.CurrentThread.CurrentUICulture = currentCulture;
+            }
+        }
+
+        [TestMethod]
+        public void PopulateSubValArgs_WithEnglishLanguage_DoesNotAddValidationLanguageFlag()
+        {
+            // Arrange
+            string settingsFolder = Path.GetTempPath();
+            string arguments = string.Empty;
+            object[] args = [settingsFolder, arguments];
+
+            // Save current culture and set to English
+            var currentCulture = Thread.CurrentThread.CurrentUICulture;
+            Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
+
+            try
+            {
+                // Use reflection to access and set private property
+                PropertyInfo supportsSubValAutoUpdateProperty = typeof(PackageCreationViewModel)
+                    .GetProperty("SupportsSubValAutoUpdate", BindingFlags.Instance | BindingFlags.Public);
+                supportsSubValAutoUpdateProperty.SetValue(_viewModel, true);
+
+                // Get method via reflection
+                MethodInfo populateSubValArgsMethod = typeof(PackageCreationViewModel)
+                    .GetMethod("PopulateSubValArgs", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                // Act - Need to pass args by reference for the string ref parameter
+                bool result = (bool)populateSubValArgsMethod.Invoke(_viewModel, args);
+                string updatedArguments = (string)args[1];
+
+                // Assert
+                Assert.IsTrue(result);
+                Assert.IsFalse(updatedArguments.Contains("/validationlanguage"));
+            }
+            finally
+            {
+                // Restore culture
+                Thread.CurrentThread.CurrentUICulture = currentCulture;
+            }
+        }
+
+        [TestMethod]
+        public void PopulateSubValArgs_NoAutoUpdateWithValidSubValPath_AddsValidationPathFlag()
+        {
+            // Arrange
+            string settingsFolder = Path.GetTempPath();
+            string arguments = string.Empty;
+            object[] args = [settingsFolder, arguments];
+            string validSubValPath = Path.Combine(Path.GetTempPath(), "SubValTest");
+            
+            try
+            {
+                // Create directory and dummy SubmissionValidator.dll file
+                Directory.CreateDirectory(validSubValPath);
+                File.WriteAllText(Path.Combine(validSubValPath, "SubmissionValidator.dll"), "dummy content");
+
+                // Use reflection to access and set properties
+                PropertyInfo supportsSubValAutoUpdateProperty = typeof(PackageCreationViewModel)
+                    .GetProperty("SupportsSubValAutoUpdate", BindingFlags.Instance | BindingFlags.Public);
+                supportsSubValAutoUpdateProperty.SetValue(_viewModel, false);
+
+                // Set SubValPath
+                _viewModel.SubValPath = validSubValPath;
+
+                // Get method via reflection
+                MethodInfo populateSubValArgsMethod = typeof(PackageCreationViewModel)
+                    .GetMethod("PopulateSubValArgs", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                // Act - Need to pass args by reference for the string ref parameter
+                bool result = (bool)populateSubValArgsMethod.Invoke(_viewModel, args);
+                string updatedArguments = (string)args[1];
+
+                // Assert
+                Assert.IsTrue(result);
+                Assert.IsTrue(updatedArguments.Contains("/validationpath"));
+                Assert.IsTrue(updatedArguments.Contains(validSubValPath));
+                Assert.AreEqual(string.Empty, _viewModel.SubValDllError);
+            }
+            finally
+            {
+                // Clean up
+                if (Directory.Exists(validSubValPath))
+                {
+                    Directory.Delete(validSubValPath, true);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void PopulateSubValArgs_NoAutoUpdateWithInvalidSubValPath_ReturnsFalse()
+        {
+            // Arrange
+            string settingsFolder = Path.GetTempPath();
+            string arguments = string.Empty;
+            object[] args = [settingsFolder, arguments];
+            string invalidSubValPath = Path.Combine(Path.GetTempPath(), "InvalidSubValPath");
+            
+            try
+            {
+                // Create directory but no SubmissionValidator.dll file
+                Directory.CreateDirectory(invalidSubValPath);
+
+                // Use reflection to access and set properties
+                PropertyInfo supportsSubValAutoUpdateProperty = typeof(PackageCreationViewModel)
+                    .GetProperty("SupportsSubValAutoUpdate", BindingFlags.Instance | BindingFlags.Public);
+                supportsSubValAutoUpdateProperty.SetValue(_viewModel, false);
+
+                // Set SubValPath
+                _viewModel.SubValPath = invalidSubValPath;
+
+                // Get method via reflection
+                MethodInfo populateSubValArgsMethod = typeof(PackageCreationViewModel)
+                    .GetMethod("PopulateSubValArgs", BindingFlags.Instance | BindingFlags.NonPublic);
+
+                // Act - Need to pass args by reference for the string ref parameter
+                bool result = (bool)populateSubValArgsMethod.Invoke(_viewModel, args);
+                string updatedArguments = (string)args[1];
+
+                // Assert
+                Assert.IsFalse(result);
+                Assert.AreEqual(Resources.Strings.PackageCreation.SubValDllNotFoundErrorMsg, _viewModel.SubValDllError);
+            }
+            finally
+            {
+                // Clean up
+                if (Directory.Exists(invalidSubValPath))
+                {
+                    Directory.Delete(invalidSubValPath, true);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void PopulateSubValArgs_NoAutoUpdateWithEmptySubValPath_ReturnsTrue()
+        {
+            // Arrange
+            string settingsFolder = Path.GetTempPath();
+            string arguments = string.Empty;
+            object[] args = [settingsFolder, arguments];
+
+            // Use reflection to access and set properties
+            PropertyInfo supportsSubValAutoUpdateProperty = typeof(PackageCreationViewModel)
+                .GetProperty("SupportsSubValAutoUpdate", BindingFlags.Instance | BindingFlags.Public);
+            supportsSubValAutoUpdateProperty.SetValue(_viewModel, false);
+
+            // Set SubValPath to empty
+            _viewModel.SubValPath = string.Empty;
+
+            // Get method via reflection
+            MethodInfo populateSubValArgsMethod = typeof(PackageCreationViewModel)
+                .GetMethod("PopulateSubValArgs", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            // Act - Need to pass args by reference for the string ref parameter
+            bool result = (bool)populateSubValArgsMethod.Invoke(_viewModel, args);
+            string updatedArguments = (string)args[1];
+
+            // Assert
+            Assert.IsTrue(result);
+            Assert.IsFalse(updatedArguments.Contains("/validationpath"));
+            Assert.AreEqual(string.Empty, _viewModel.SubValDllError);
+        }
 
         [TestCleanup]
         public void Cleanup()
