@@ -35,7 +35,7 @@ internal class DeltaUploadMainUploadState : XfusUploaderState
             _logger.LogInformation("Upload complete. Total Uploaded: {totalBytesUploaded} (Saving you in total {totalBytesSaved} in upload bandwidth!)", new ByteSize(_totalBytesUploaded), new ByteSize(bytesSaved));
 
             // Update progress to account for the bytes we saved.
-            bytesProgress.Report(bytesSaved);
+            bytesProgress?.Report(bytesSaved);
         }
         else
         {
