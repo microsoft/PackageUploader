@@ -382,16 +382,24 @@ public class PackageUploaderService : IPackageUploaderService
                             var packageIdsToRemove = new List<string>();
                             foreach (var packageId in marketGroupPackage.PackageIds)
                             {
-                                if (!packages.TryGetValue(packageId, out var package))
+                                try
                                 {
-                                    package = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, packageId, ct).ConfigureAwait(false);
-                                    packages.Add(packageId, package);
-                                }
+                                    if (!packages.TryGetValue(packageId, out var package))
+                                    {
+                                        package = await _ingestionHttpClient.GetPackageByIdAsync(product.ProductId, packageId, ct).ConfigureAwait(false);
+                                        packages.Add(packageId, package);
+                                    }
 
-                                if (regex.IsMatch(package.FileName))
+                                    if (regex.IsMatch(package.FileName))
+                                    {
+                                        _logger.LogDebug("Removing Package with id '{gamePackageId}', File name '{packageFileName}' from Market Group '{marketGroupName}'.", packageId, package.FileName, marketGroupName);
+                                        packageIdsToRemove.Add(packageId);
+                                    }
+                                }
+                                catch (Exception)
                                 {
-                                    _logger.LogDebug("Removing Package with id '{gamePackageId}', File name '{packageFileName}' from Market Group '{marketGroupName}'.", packageId, package.FileName, marketGroupName);
-                                    packageIdsToRemove.Add(packageId);
+                                    // If the package cannot be retrieved, we assume it has already been removed or is otherwise stuck, and skip deleting it.
+                                    _logger.LogWarning("Failed to retrieve package with id '{gamePackageId}' in product '{productId}'. It may still be processing or may have been deleted.", packageId, product.ProductId);
                                 }
                             }
 
