@@ -14,7 +14,7 @@
     
     <!-- Security settings -->
     <HighEntropyVA>true</HighEntropyVA>
-    <EnableControlFlowGuard>true</EnableControlFlowGuard>
+    <ControlFlowGuard>Guard</ControlFlowGuard>
     
     <!-- Test settings -->
     <InternalsVisibleTo>PackageUploader.Application.Test</InternalsVisibleTo>
