@@ -37,8 +37,8 @@ public partial class PackageUploadViewModel : BaseViewModel
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
     private GamePackageConfiguration? _gamePackageConfiguration = null;
 
-    private readonly OneTimeHolder<String>? _savedBranchOrFlightMemory = null;
-    private readonly OneTimeHolder<String>? _savedMarketGroupMemory = null;
+    private OneTimeHolder<String>? _savedBranchOrFlightMemory = null;
+    private OneTimeHolder<String>? _savedMarketGroupMemory = null;
 
     private bool _isUploadInProgress = false;
     public bool IsUploadInProgress
@@ -53,7 +53,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         get => _branchOrFlightDisplayName;
         set
         {
-            if (SetProperty(ref _branchOrFlightDisplayName, value))
+            if (SetProperty(ref _branchOrFlightDisplayName, value) && value != null)
             {
                 _hasMarketGroups = false;
                 UpdateMarketGroups();
@@ -530,6 +530,8 @@ public partial class PackageUploadViewModel : BaseViewModel
         EkbFilePath = string.Empty;
         SubValFilePath = string.Empty;
         SymbolBundleFilePath = string.Empty;
+        BranchOrFlightDisplayName = string.Empty;
+        MarketGroupName = string.Empty;
 
         PackageErrorMessage = string.Empty;
 
@@ -558,6 +560,13 @@ public partial class PackageUploadViewModel : BaseViewModel
             _uploadingProgressPercentageProvider.UploadingCancelled = false;
             CancelUpload();
         }
+        // need to recall some saved preferences here
+        // some saved preferences to restore:
+        string priorMarketGroup = GetPropertyFromApplicationPreferences(nameof(MarketGroupName));
+        string priorBranchOrFlight = GetPropertyFromApplicationPreferences(nameof(BranchOrFlightDisplayName));
+        _savedMarketGroupMemory = new OneTimeHolder<string>(priorMarketGroup);
+        _savedBranchOrFlightMemory = new OneTimeHolder<String>(priorBranchOrFlight);
+        // now process the selected package
         ProcessSelectedPackage();
     }
 
