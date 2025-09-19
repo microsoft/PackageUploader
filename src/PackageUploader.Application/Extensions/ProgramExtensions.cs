@@ -32,7 +32,7 @@ internal static class ProgramExtensions
         try
         {
             var version = GetVersion();
-            logger.LogDebug("PackageUploader v.{version} is starting.", version);
+            logger.LogInformation("PackageUploader v.{version} is starting.", version);
             return await host.Services.GetRequiredService<T>().RunAsync(ct).ConfigureAwait(false);
         }
         catch (Exception e)
