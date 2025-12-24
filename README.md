@@ -142,7 +142,11 @@ For headless scenarios, the tool supports app secrets or certificates. Use one o
 
 To use Package Uploader, you can download the latest executable from the [Releases page](https://github.com/microsoft/PackageUploader/releases/latest).<br>**NOTE:** No need to install the .NET runtime to run the tool because it's included inside the binary.
 
-Alternatively, you can also build it.
+Alternately, the executables (both the GUI and CMD tools) are also available from Winget, though there are no guarantees that the versions offered directly through Winget are always the latest ones:
+
+     > winget install Microsoft.Gaming.GDK.XboxGamePackageManager
+
+Furthermore, you can also build it.
 
 1. [Download the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
 2. Open PowerShell, and then browse to the folder where you downloaded Package Uploader.
