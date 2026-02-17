@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>4b063ae7-ea96-40e3-89c6-c517fd6e229d</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>a1b2c3d4-e5f6-7890-abcd-ef1234567890</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="StepTimer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="DeviceResources.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ModMusic.h" />
+    <ClInclude Include="AnsiArtPS.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="AnsiArtVS.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="DeviceResources.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ModMusic.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AnsiArtPS.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="AnsiArtVS.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <MGCCompile Include="MicrosoftGameConfig.mgc" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="GraphicsLogo.png" />
+    <CopyFileToFolders Include="LargeLogo.png" />
+    <CopyFileToFolders Include="SmallLogo.png" />
+    <CopyFileToFolders Include="SplashScreen.png" />
+    <CopyFileToFolders Include="StoreLogo.png" />
+  </ItemGroup>
+</Project>
