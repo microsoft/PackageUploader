@@ -1,5 +1,21 @@
 # GDKStubExe Changelog
 
+## "Living Our Values" Instrumental Reconstruction v7 (D Major, 120 BPM)
+
+- **New reference track**: "Living Our Values" full instrumental mix (253s, 48kHz stereo)
+- Demucs htdemucs source separation into drums/bass/other/vocals stems (vocals ~silent - instrumental track)
+- Basic Pitch MIDI transcription: bass (738 notes), other (7,382 notes split into piano/lead/pad by pitch range)
+- Spectral-band drum onset detection: kick (<200Hz, 404 hits), snare (200-5kHz, 803 hits), hat (>5kHz, 969 hits)
+- 127 bars at 120 BPM, 7,363 total note events (avg 58.0 per bar)
+- 8 instruments: kick, snare, hi-hat, bass, piano, pad, lead, strings
+- Piano split across 2 tracks for polyphony; lead notes (C5+) on dedicated track
+
+## Spectral-Band Drum Fix v6 ("떠나고 싶은 날" F# Major)
+
+- Replaced BasicPitch drum classification with frequency-band onset detection
+- Kick (<200Hz, 663 hits), snare (200-5kHz, 636 hits), hat (>5kHz, 781 hits)
+- Improved drum synthesis: deeper kick with click, snare with wire rattle, metallic hat
+
 ## Demucs+BasicPitch Transcription v5 ("떠나고 싶은 날" F# Major)
 
 - **Completely new approach**: AI source separation (Demucs htdemucs) splits audio into 4 isolated stems: drums, bass, vocals, other

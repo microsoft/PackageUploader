@@ -92,172 +92,202 @@ void ModMusic::Initialize()
     SynthesizeInstruments();
     BuildSong();
 }
-
 // ============================================================
-// Instrument synthesis — all procedural, no external data
+// Instrument synthesis — Demucs stems + spectral drum analysis
+// Source-separated: bass/piano via BasicPitch MIDI,
+// drums via frequency-band onset detection (kick<200Hz,
+// snare 200-5kHz, hat>5kHz)
+// Key: F# major, 80 BPM, 68 bars (~204s)
 // ============================================================
 void ModMusic::SynthesizeInstruments()
 {
-    // --- 0: Kick drum (150→50Hz sine sweep, exponential decay) ---
+    // --- 0: Kick (deep punch with sub) ---
     {
-        const int len = static_cast<int>(SR * 0.25f);
+        const int len = static_cast<int>(SR * 0.35f);
         auto& inst = m_instruments[0];
-        inst.baseFreq = 100.0f;
+        inst.baseFreq = 55.0f;
         inst.pcm.resize(len);
         float phase = 0.0f;
         for (int i = 0; i < len; i++)
         {
             float t = static_cast<float>(i) / SR;
-            float env = std::exp(-t * 12.0f);
-            float freq = 150.0f * std::exp(-t * 8.0f) + 50.0f;
+            float env = std::exp(-t * 6.0f);
+            float click = std::exp(-t * 80.0f) * 0.4f;
+            float freq = 160.0f * std::exp(-t * 18.0f) + 38.0f;
             phase += freq / SR;
-            float sample = std::sin(TWO_PI * phase) * env * 0.9f;
-            // Add a click transient
-            if (t < 0.005f)
-                sample += std::sin(TWO_PI * 1000.0f * t) * (1.0f - t / 0.005f) * 0.3f;
-            inst.pcm[i] = ToS16(sample);
+            float sample = std::sin(TWO_PI * phase) * env * 0.65f;
+            sample += std::sin(TWO_PI * phase * 0.5f) * env * 0.35f;
+            sample += click * (std::sin(TWO_PI * 4000.0f * t) * 0.6f + Noise() * 0.4f);
+            inst.pcm[i] = ToS16(sample * 0.9f);
         }
     }
-
-    // --- 1: Clap/snap (layered soft noise bursts, no harsh transient) ---
+    // --- 1: Snare (full body with wire rattle) ---
     {
-        const int len = static_cast<int>(SR * 0.15f);
+        const int len = static_cast<int>(SR * 0.20f);
         auto& inst = m_instruments[1];
-        inst.baseFreq = 400.0f;
+        inst.baseFreq = 600.0f;
         inst.pcm.resize(len);
         float lp = 0.0f;
         for (int i = 0; i < len; i++)
         {
             float t = static_cast<float>(i) / SR;
-            // 3 layered micro-bursts for clap texture
-            float burst1 = (t < 0.008f) ? 1.0f : 0.0f;
-            float burst2 = (t > 0.012f && t < 0.020f) ? 0.7f : 0.0f;
-            float burst3 = (t > 0.024f && t < 0.035f) ? 0.5f : 0.0f;
-            float burstEnv = burst1 + burst2 + burst3;
-            // Smooth tail
-            float tailEnv = std::exp(-t * 25.0f);
-            float env = (burstEnv > 0.01f) ? burstEnv : tailEnv * 0.4f;
-            // Soft filtered noise (lowpass)
-            float n = Noise() * env;
-            lp += 0.15f * (n - lp);
-            // Gentle tonal body
-            float tone = std::sin(TWO_PI * 400.0f * t) * std::exp(-t * 30.0f) * 0.15f;
-            inst.pcm[i] = ToS16((lp + tone) * 0.7f);
+            float envBody = std::exp(-t * 20.0f);
+            float envNoise = std::exp(-t * 18.0f);
+            float n = Noise() * envNoise * 0.5f;
+            lp += 0.25f * (n - lp);
+            float body = std::sin(TWO_PI * 240.0f * t) * envBody * 0.5f;
+            body += std::sin(TWO_PI * 180.0f * t) * envBody * 0.3f;
+            float click = std::sin(TWO_PI * 1800.0f * t) * std::exp(-t * 60.0f) * 0.15f;
+            float wire = Noise() * std::exp(-t * 12.0f) * 0.2f;
+            inst.pcm[i] = ToS16((lp + body + click + wire) * 0.6f);
         }
     }
-
-    // --- 2: Hihat (soft metallic tick, gentle) ---
+    // --- 2: Hi-hat (closed, metallic shimmer) ---
     {
         const int len = static_cast<int>(SR * 0.06f);
         auto& inst = m_instruments[2];
-        inst.baseFreq = 8000.0f;
+        inst.baseFreq = 10000.0f;
         inst.pcm.resize(len);
-        float lp = 0.0f;
         for (int i = 0; i < len; i++)
         {
             float t = static_cast<float>(i) / SR;
-            float env = std::exp(-t * 55.0f);
-            // Mix of metallic tones instead of raw noise
-            float metal = std::sin(TWO_PI * 6500.0f * t) * 0.3f
-                        + std::sin(TWO_PI * 8200.0f * t) * 0.25f
-                        + std::sin(TWO_PI * 11700.0f * t) * 0.15f;
-            // Tiny bit of filtered noise for texture
+            float env = std::exp(-t * 70.0f);
+            float metal = std::sin(TWO_PI * 6100.0f * t) * 0.2f
+                        + std::sin(TWO_PI * 8300.0f * t) * 0.2f
+                        + std::sin(TWO_PI * 11700.0f * t) * 0.15f
+                        + std::sin(TWO_PI * 14200.0f * t) * 0.1f;
             float n = Noise() * 0.15f;
-            lp += 0.3f * (n - lp);
-            inst.pcm[i] = ToS16((metal + lp) * env * 0.35f);
+            inst.pcm[i] = ToS16((metal + n) * env * 0.35f);
         }
     }
-
-    // --- 3: Bass synth (warm sine + sub, round and bouncy) ---
+    // --- 3: Bass ---
     {
-        const int len = static_cast<int>(SR * 0.3f);
+        const int len = static_cast<int>(SR * 0.4f);
         auto& inst = m_instruments[3];
-        inst.baseFreq = NoteToFreq(36); // C2
+        inst.baseFreq = NoteToFreq(42);
         inst.pcm.resize(len);
         float phase = 0.0f;
         for (int i = 0; i < len; i++)
         {
             float t = static_cast<float>(i) / SR;
-            // Snappy pluck envelope for bounce
             float env;
             if (t < 0.003f) env = t / 0.003f;
-            else if (t < 0.04f) env = 1.0f - (t - 0.003f) / 0.037f * 0.3f; // quick drop to 0.7
-            else if (t < 0.2f) env = 0.7f;
-            else env = 0.7f * (1.0f - (t - 0.2f) / 0.1f);
+            else if (t < 0.25f) env = 1.0f;
+            else env = 1.0f - (t - 0.25f) / 0.15f;
             if (env < 0.0f) env = 0.0f;
-
             phase += inst.baseFreq / SR;
             if (phase >= 1.0f) phase -= 1.0f;
-            // Warm sine + pitched-down sub
-            float sine = std::sin(TWO_PI * phase) * 0.7f;
-            float sub = std::sin(TWO_PI * phase * 0.5f) * 0.4f;
-            inst.pcm[i] = ToS16((sine + sub) * env * 0.6f);
+            float sine = std::sin(TWO_PI * phase) * 0.55f;
+            float sub = std::sin(TWO_PI * phase * 0.5f) * 0.25f;
+            float harm2 = std::sin(TWO_PI * phase * 2.0f) * std::exp(-t * 6.0f) * 0.15f;
+            float harm3 = std::sin(TWO_PI * phase * 3.0f) * std::exp(-t * 10.0f) * 0.05f;
+            inst.pcm[i] = ToS16((sine + sub + harm2 + harm3) * env * 0.7f);
         }
     }
-
-    // --- 4: Lead synth (bubbly pluck — sine + triangle, snappy) ---
+    // --- 4: Piano ---
     {
-        const int len = static_cast<int>(SR * 0.2f);
+        const int len = static_cast<int>(SR * 0.65f);
         auto& inst = m_instruments[4];
-        inst.baseFreq = NoteToFreq(60); // C4
+        inst.baseFreq = NoteToFreq(60);
         inst.pcm.resize(len);
-        float phase1 = 0.0f, phase2 = 0.0f;
+        float phases[6] = { 0.0f };
         float freq = inst.baseFreq;
         for (int i = 0; i < len; i++)
         {
             float t = static_cast<float>(i) / SR;
-            // Plucky envelope: instant attack, quick decay, short sustain
             float env;
             if (t < 0.002f) env = t / 0.002f;
-            else if (t < 0.03f) env = 1.0f - (t - 0.002f) / 0.028f * 0.5f;
-            else if (t < 0.12f) env = 0.5f;
-            else env = 0.5f * (1.0f - (t - 0.12f) / 0.08f);
+            else if (t < 0.035f) env = 1.0f - (t - 0.002f) / 0.033f * 0.2f;
+            else if (t < 0.35f) env = 0.8f - (t - 0.035f) / 0.315f * 0.3f;
+            else env = 0.5f * std::exp(-(t - 0.35f) * 4.0f);
             if (env < 0.0f) env = 0.0f;
-
-            phase1 += freq / SR;
-            phase2 += (freq * 2.0f) / SR; // octave harmonic
-            if (phase1 >= 1.0f) phase1 -= 1.0f;
-            if (phase2 >= 1.0f) phase2 -= 1.0f;
-            // Triangle wave (softer than saw)
-            float tri = (phase1 < 0.5f) ? (phase1 * 4.0f - 1.0f) : (3.0f - phase1 * 4.0f);
-            // Sine octave for sparkle
-            float oct = std::sin(TWO_PI * phase2) * 0.25f;
-            // Pitch bend down slightly at start for "bubble pop" feel
-            float bendAmt = (t < 0.015f) ? (1.0f - t / 0.015f) * 0.08f : 0.0f;
-            float bent = std::sin(TWO_PI * phase1 * (1.0f + bendAmt));
-            inst.pcm[i] = ToS16((tri * 0.4f + bent * 0.3f + oct) * env * 0.65f);
+            for (int h = 0; h < 6; h++)
+            {
+                float mult = static_cast<float>(h + 1);
+                phases[h] += freq * mult / SR;
+                if (phases[h] >= 1.0f) phases[h] -= 1.0f;
+            }
+            float harm1 = std::sin(TWO_PI * phases[0]) * 1.0f;
+            float harm2 = std::sin(TWO_PI * phases[1]) * 0.5f;
+            float harm3 = std::sin(TWO_PI * phases[2]) * 0.28f;
+            float harm4 = std::sin(TWO_PI * phases[3]) * 0.14f;
+            float harm5 = std::sin(TWO_PI * phases[4]) * 0.07f;
+            float harm6 = std::sin(TWO_PI * phases[5]) * 0.035f;
+            float hDecay = std::exp(-t * 2.5f);
+            float sample = harm1 + (harm2 + harm3 + harm4 + harm5 + harm6) * hDecay;
+            inst.pcm[i] = ToS16(sample / 2.0f * env * 0.6f);
         }
     }
-
-    // --- 5: Chord pad (3-voice detuned sines, slow attack/release) ---
+    // --- 5: Pad ---
     {
-        const int len = static_cast<int>(SR * 0.5f);
+        const int len = static_cast<int>(SR * 1.0f);
         auto& inst = m_instruments[5];
-        inst.baseFreq = NoteToFreq(60); // C4
+        inst.baseFreq = NoteToFreq(60);
         inst.pcm.resize(len);
-        float p1 = 0.0f, p2 = 0.0f, p3 = 0.0f;
+        float phases[5] = { 0.0f };
+        const float detunes[5] = { 0.994f, 0.997f, 1.0f, 1.003f, 1.006f };
         float freq = inst.baseFreq;
         for (int i = 0; i < len; i++)
         {
             float t = static_cast<float>(i) / SR;
             float env;
-            if (t < 0.05f) env = t / 0.05f;
-            else if (t < 0.35f) env = 1.0f;
-            else env = 1.0f - (t - 0.35f) / 0.15f;
+            if (t < 0.06f) env = t / 0.06f;
+            else if (t < 0.7f) env = 1.0f;
+            else env = 1.0f - (t - 0.7f) / 0.3f;
             if (env < 0.0f) env = 0.0f;
-
+            float sum = 0.0f;
+            for (int v = 0; v < 5; v++)
+            {
+                phases[v] += freq * detunes[v] / SR;
+                if (phases[v] >= 1.0f) phases[v] -= 1.0f;
+                sum += phases[v] * 2.0f - 1.0f;
+            }
+            inst.pcm[i] = ToS16(sum / 5.0f * env * 0.38f);
+        }
+    }
+    // --- 6: Bell (melody) ---
+    {
+        const int len = static_cast<int>(SR * 0.45f);
+        auto& inst = m_instruments[6];
+        inst.baseFreq = NoteToFreq(60);
+        inst.pcm.resize(len);
+        float p1 = 0.0f, p2 = 0.0f;
+        float freq = inst.baseFreq;
+        for (int i = 0; i < len; i++)
+        {
+            float t = static_cast<float>(i) / SR;
+            float env;
+            if (t < 0.008f) env = t / 0.008f;
+            else if (t < 0.25f) env = 0.85f;
+            else env = 0.85f * std::exp(-(t - 0.25f) * 5.0f);
+            if (env < 0.0f) env = 0.0f;
             p1 += freq / SR;
-            p2 += (freq * 1.003f) / SR;
-            p3 += (freq * 0.997f) / SR;
+            p2 += (freq * 2.0f) / SR;
             if (p1 >= 1.0f) p1 -= 1.0f;
             if (p2 >= 1.0f) p2 -= 1.0f;
-            if (p3 >= 1.0f) p3 -= 1.0f;
-            float v = std::sin(TWO_PI * p1) + std::sin(TWO_PI * p2) + std::sin(TWO_PI * p3);
-            inst.pcm[i] = ToS16(v / 3.0f * env * 0.5f);
+            float v = std::sin(TWO_PI * p1) * 0.7f + std::sin(TWO_PI * p2) * 0.2f;
+            inst.pcm[i] = ToS16(v * env * 0.45f);
+        }
+    }
+    // --- 7: Arp ---
+    {
+        const int len = static_cast<int>(SR * 0.10f);
+        auto& inst = m_instruments[7];
+        inst.baseFreq = NoteToFreq(72);
+        inst.pcm.resize(len);
+        float phase = 0.0f;
+        for (int i = 0; i < len; i++)
+        {
+            float t = static_cast<float>(i) / SR;
+            float env = std::exp(-t * 35.0f);
+            phase += inst.baseFreq / SR;
+            if (phase >= 1.0f) phase -= 1.0f;
+            float v = std::sin(TWO_PI * phase) * 0.7f
+                    + std::sin(TWO_PI * phase * 3.0f) * 0.15f;
+            inst.pcm[i] = ToS16(v * env * 0.3f);
         }
     }
 
-    // Build XAUDIO2_BUFFER descriptors for each instrument
     for (int i = 0; i < NUM_INSTRUMENTS; i++)
     {
         auto& buf = m_xaBuffers[i];
@@ -268,432 +298,5547 @@ void ModMusic::SynthesizeInstruments()
 }
 
 // ============================================================
-// Song data — K-pop inspired dance beat, 128 BPM, ~64s loop
-// Structured as: Intro(2) Verse(4) Chorus(4) Verse(4) Chorus(4)
-//                Bridge(4) Chorus(4) Outro(4) → 30 bars, pad to 32
+// Song data — Demucs stems: bass/piano via BasicPitch MIDI,
+// drums via spectral-band onset detection
+// Tracks: 0=kick 1=snare 2=hat 3=bass 4=piano-lo 5=piano-hi 6=melody 7=arp
 // ============================================================
 void ModMusic::BuildSong()
 {
-    // MIDI note numbers:
-    // C2=36 E2=40 F2=41 G2=43 A2=45 B2=47
-    // C3=48 E3=52 F3=53 G3=55 A3=57 B3=59
-    // C4=60 D4=62 E4=64 F4=65 G4=67 A4=69 B4=71
-    // C5=72 D5=74 E5=76 F5=77 G5=79 A5=81 B5=83
-    // C6=84
-
-    const uint8_t V_HI = 220;
-    const uint8_t V_MD = 170;
-    const uint8_t V_LO = 120;
-    const uint8_t V_GH = 90;
-
-    // Instruments: 0=kick, 1=clap, 2=hihat, 3=bass, 4=lead, 5=pad
-
-    auto emptyPattern = []() -> Pattern {
+    // Bar 1
+    {
         Pattern p;
         for (int r = 0; r < 16; r++)
-            for (int t = 0; t < 6; t++)
+            for (int t = 0; t < 8; t++)
                 p.notes[r][t] = { 0xFF, 0, 0 };
-        return p;
-    };
-
-    // Helper: standard verse drum pattern
-    auto verseDrums = [&](Pattern& p) {
-        // Kick: 4otf + offbeat bounce
-        p.notes[0][0]  = { 0, 48, V_HI };
-        p.notes[4][0]  = { 0, 48, V_HI };
-        p.notes[8][0]  = { 0, 48, V_HI };
-        p.notes[12][0] = { 0, 48, V_HI };
-        // Clap on 2 and 4
-        p.notes[4][1]  = { 1, 60, V_MD };
-        p.notes[12][1] = { 1, 60, V_MD };
-        // Hihat 8ths
-        for (int r = 0; r < 16; r += 2)
-            p.notes[r][2] = { 2, 80, V_MD };
-    };
-
-    // Helper: chorus drum pattern (busier, more energy)
-    auto chorusDrums = [&](Pattern& p) {
-        // Kick: bouncy pattern
-        p.notes[0][0]  = { 0, 48, V_HI };
-        p.notes[3][0]  = { 0, 48, V_MD };
-        p.notes[4][0]  = { 0, 48, V_HI };
-        p.notes[7][0]  = { 0, 48, V_MD };
-        p.notes[8][0]  = { 0, 48, V_HI };
-        p.notes[11][0] = { 0, 48, V_MD };
-        p.notes[12][0] = { 0, 48, V_HI };
-        // Clap on 2 and 4 + offbeat accents
-        p.notes[4][1]  = { 1, 60, V_HI };
-        p.notes[12][1] = { 1, 60, V_HI };
-        p.notes[14][1] = { 1, 60, V_GH };
-        // Hihat 16ths (driving)
+        p.notes[2][3] = { 3, 47, 160 };
+        p.notes[2][4] = { 4, 47, 172 };
+        p.notes[2][5] = { 4, 66, 66 };
+        p.notes[2][6] = { 6, 75, 82 };
+        p.notes[2][7] = { 7, 87, 48 };
+        p.notes[3][3] = { 3, 54, 102 };
+        p.notes[3][4] = { 4, 47, 176 };
+        p.notes[3][5] = { 4, 66, 96 };
+        p.notes[4][4] = { 4, 47, 160 };
+        p.notes[4][5] = { 4, 66, 63 };
+        p.notes[4][6] = { 6, 82, 78 };
+        p.notes[5][3] = { 3, 54, 78 };
+        p.notes[5][4] = { 4, 47, 136 };
+        p.notes[5][5] = { 4, 66, 66 };
+        p.notes[5][6] = { 6, 78, 91 };
+        p.notes[5][7] = { 7, 75, 40 };
+        p.notes[6][3] = { 3, 54, 90 };
+        p.notes[7][4] = { 4, 47, 86 };
+        p.notes[7][5] = { 4, 66, 90 };
+        p.notes[7][6] = { 6, 73, 87 };
+        p.notes[7][7] = { 7, 78, 48 };
+        p.notes[8][3] = { 3, 54, 112 };
+        p.notes[8][4] = { 4, 42, 57 };
+        p.notes[8][5] = { 4, 66, 114 };
+        p.notes[8][6] = { 6, 78, 87 };
+        p.notes[11][4] = { 4, 51, 142 };
+        p.notes[11][5] = { 4, 66, 138 };
+        p.notes[12][4] = { 4, 51, 113 };
+        p.notes[12][5] = { 4, 68, 138 };
+        p.notes[12][6] = { 6, 78, 75 };
+        p.notes[12][7] = { 7, 73, 46 };
+        p.notes[13][4] = { 4, 42, 57 };
+        p.notes[13][5] = { 4, 68, 111 };
+        p.notes[13][6] = { 6, 78, 87 };
+        p.notes[14][3] = { 3, 30, 80 };
+        p.notes[14][4] = { 4, 39, 57 };
+        p.notes[14][5] = { 4, 68, 91 };
+        p.notes[15][3] = { 3, 42, 150 };
+        p.notes[15][4] = { 4, 42, 142 };
+        p.notes[15][5] = { 4, 66, 49 };
+        p.notes[15][6] = { 6, 78, 145 };
+        p.notes[15][7] = { 7, 78, 74 };
+        m_patterns.push_back(p);
+    }
+    // Bar 2
+    {
+        Pattern p;
         for (int r = 0; r < 16; r++)
-            p.notes[r][2] = { 2, 80, (r % 2 == 0) ? V_MD : V_GH };
-    };
-
-    // ================================================================
-    // P0: Intro bar 1 — kick + hihat + hook tease
-    // ================================================================
-    {
-        Pattern p = emptyPattern();
-        p.notes[0][0]  = { 0, 48, V_HI };
-        p.notes[4][0]  = { 0, 48, V_HI };
-        p.notes[8][0]  = { 0, 48, V_HI };
-        p.notes[12][0] = { 0, 48, V_HI };
-        for (int r = 0; r < 16; r += 2)
-            p.notes[r][2] = { 2, 80, V_MD };
-        // Tease: just the chorus hook rhythm, no resolution
-        p.notes[0][4]  = { 4, 79, V_MD };  // G5
-        p.notes[3][4]  = { 4, 79, V_MD };  // G5
-        p.notes[6][4]  = { 4, 84, V_HI };  // C6 (the hook jump)
-        // Pad
-        p.notes[0][5]  = { 5, 60, V_LO };  // C4
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][3] = { 3, 30, 86 };
+        p.notes[0][4] = { 4, 30, 64 };
+        p.notes[0][5] = { 4, 68, 73 };
+        p.notes[0][6] = { 6, 80, 82 };
+        p.notes[1][4] = { 4, 49, 117 };
+        p.notes[1][5] = { 4, 66, 82 };
+        p.notes[1][6] = { 6, 85, 109 };
+        p.notes[1][7] = { 7, 73, 40 };
+        p.notes[2][3] = { 3, 42, 128 };
+        p.notes[2][4] = { 4, 42, 99 };
+        p.notes[2][5] = { 4, 68, 78 };
+        p.notes[2][6] = { 6, 82, 81 };
+        p.notes[2][7] = { 7, 80, 55 };
+        p.notes[3][4] = { 4, 49, 192 };
+        p.notes[3][5] = { 4, 56, 85 };
+        p.notes[4][4] = { 4, 49, 153 };
+        p.notes[4][5] = { 4, 68, 64 };
+        p.notes[4][6] = { 6, 80, 63 };
+        p.notes[5][4] = { 4, 49, 140 };
+        p.notes[5][5] = { 4, 61, 75 };
+        p.notes[5][6] = { 6, 78, 112 };
+        p.notes[6][4] = { 4, 49, 151 };
+        p.notes[6][5] = { 4, 56, 117 };
+        p.notes[6][6] = { 6, 77, 102 };
+        p.notes[7][4] = { 4, 51, 162 };
+        p.notes[7][5] = { 4, 70, 88 };
+        p.notes[7][6] = { 6, 78, 52 };
+        p.notes[10][4] = { 4, 51, 147 };
+        p.notes[10][5] = { 4, 66, 96 };
+        p.notes[11][4] = { 4, 51, 133 };
+        p.notes[11][5] = { 4, 68, 133 };
+        p.notes[12][4] = { 4, 51, 115 };
+        p.notes[12][6] = { 6, 96, 61 };
+        p.notes[13][1] = { 1, 60, 56 };
+        p.notes[13][2] = { 2, 80, 108 };
+        p.notes[13][4] = { 4, 46, 82 };
+        p.notes[13][5] = { 4, 68, 91 };
+        p.notes[14][2] = { 2, 80, 61 };
+        p.notes[14][3] = { 3, 46, 110 };
+        p.notes[14][4] = { 4, 46, 153 };
+        p.notes[14][5] = { 4, 58, 64 };
+        p.notes[15][4] = { 4, 46, 117 };
+        p.notes[15][5] = { 4, 65, 64 };
+        p.notes[15][6] = { 6, 73, 73 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P1: Intro bar 2 — beat drop + answer
-    // ================================================================
+    // Bar 3
     {
-        Pattern p = emptyPattern();
-        verseDrums(p);
-        // Bass enters
-        p.notes[0][3]  = { 3, 36, V_HI };  // C2
-        p.notes[3][3]  = { 3, 48, V_MD };  // C3
-        p.notes[8][3]  = { 3, 43, V_HI };  // G2
-        p.notes[11][3] = { 3, 55, V_MD };  // G3
-        // Descending answer from the tease
-        p.notes[0][4]  = { 4, 84, V_HI };  // C6
-        p.notes[2][4]  = { 4, 81, V_MD };  // A5
-        p.notes[4][4]  = { 4, 79, V_HI };  // G5
-        p.notes[6][4]  = { 4, 76, V_MD };  // E5
-        p.notes[8][4]  = { 4, 72, V_MD };  // C5
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[1][0] = { 0, 48, 123 };
+        p.notes[1][1] = { 1, 60, 144 };
+        p.notes[1][2] = { 2, 80, 182 };
+        p.notes[1][3] = { 3, 35, 140 };
+        p.notes[1][4] = { 4, 47, 68 };
+        p.notes[1][5] = { 4, 68, 63 };
+        p.notes[2][0] = { 0, 48, 75 };
+        p.notes[2][1] = { 1, 60, 30 };
+        p.notes[2][2] = { 2, 80, 51 };
+        p.notes[2][3] = { 3, 35, 174 };
+        p.notes[2][4] = { 4, 54, 142 };
+        p.notes[2][5] = { 4, 63, 78 };
+        p.notes[3][2] = { 2, 80, 38 };
+        p.notes[3][4] = { 4, 54, 131 };
+        p.notes[3][5] = { 4, 59, 49 };
+        p.notes[3][6] = { 6, 92, 52 };
+        p.notes[4][2] = { 2, 80, 38 };
+        p.notes[4][4] = { 4, 47, 72 };
+        p.notes[4][5] = { 4, 66, 67 };
+        p.notes[5][3] = { 3, 47, 90 };
+        p.notes[5][4] = { 4, 54, 106 };
+        p.notes[5][5] = { 4, 59, 45 };
+        p.notes[5][6] = { 6, 73, 61 };
+        p.notes[6][1] = { 1, 60, 39 };
+        p.notes[6][2] = { 2, 80, 52 };
+        p.notes[6][4] = { 4, 58, 127 };
+        p.notes[6][5] = { 4, 63, 48 };
+        p.notes[7][2] = { 2, 80, 31 };
+        p.notes[7][3] = { 3, 39, 102 };
+        p.notes[7][4] = { 4, 46, 59 };
+        p.notes[7][5] = { 4, 70, 63 };
+        p.notes[7][6] = { 6, 73, 60 };
+        p.notes[8][0] = { 0, 48, 204 };
+        p.notes[8][1] = { 1, 60, 102 };
+        p.notes[8][2] = { 2, 80, 100 };
+        p.notes[8][4] = { 4, 42, 68 };
+        p.notes[8][5] = { 4, 66, 64 };
+        p.notes[9][0] = { 0, 48, 46 };
+        p.notes[9][3] = { 3, 39, 192 };
+        p.notes[9][4] = { 4, 54, 97 };
+        p.notes[9][5] = { 4, 66, 82 };
+        p.notes[10][2] = { 2, 80, 40 };
+        p.notes[10][4] = { 4, 51, 99 };
+        p.notes[10][5] = { 4, 66, 81 };
+        p.notes[11][1] = { 1, 60, 34 };
+        p.notes[11][2] = { 2, 80, 44 };
+        p.notes[11][4] = { 4, 42, 75 };
+        p.notes[11][5] = { 4, 70, 64 };
+        p.notes[12][4] = { 4, 51, 61 };
+        p.notes[12][5] = { 4, 63, 84 };
+        p.notes[13][2] = { 2, 80, 28 };
+        p.notes[13][4] = { 4, 42, 79 };
+        p.notes[13][5] = { 4, 70, 48 };
+        p.notes[14][0] = { 0, 48, 125 };
+        p.notes[14][1] = { 1, 60, 78 };
+        p.notes[14][2] = { 2, 80, 87 };
+        p.notes[14][3] = { 3, 42, 160 };
+        p.notes[14][4] = { 4, 54, 57 };
+        p.notes[14][6] = { 6, 73, 60 };
+        p.notes[15][0] = { 0, 48, 54 };
+        p.notes[15][2] = { 2, 80, 31 };
+        p.notes[15][3] = { 3, 37, 156 };
+        p.notes[15][4] = { 4, 56, 68 };
+        p.notes[15][5] = { 4, 70, 58 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P2: Verse A1 — rhythmic "talk-sing" style, repeated notes + jumps
-    // Chords: C | Am
-    // ================================================================
+    // Bar 4
     {
-        Pattern p = emptyPattern();
-        verseDrums(p);
-        // Bass: C → Am
-        p.notes[0][3]  = { 3, 36, V_HI };  // C2
-        p.notes[3][3]  = { 3, 48, V_LO };  // C3
-        p.notes[6][3]  = { 3, 36, V_MD };
-        p.notes[8][3]  = { 3, 45, V_HI };  // A2
-        p.notes[11][3] = { 3, 57, V_LO };  // A3
-        p.notes[14][3] = { 3, 45, V_MD };
-        // Melody: K-pop verse — rhythmic, syncopated, centered on G, jumps to C
-        p.notes[0][4]  = { 4, 79, V_HI };  // G5
-        p.notes[2][4]  = { 4, 79, V_MD };  // G5 (rhythmic repeat)
-        p.notes[3][4]  = { 4, 76, V_HI };  // E5 (drop)
-        p.notes[5][4]  = { 4, 79, V_MD };  // G5
-        p.notes[8][4]  = { 4, 76, V_HI };  // E5
-        p.notes[10][4] = { 4, 76, V_MD };  // E5
-        p.notes[11][4] = { 4, 72, V_HI };  // C5 (drop)
-        p.notes[14][4] = { 4, 76, V_MD };  // E5
-        // Pad
-        p.notes[0][5]  = { 5, 60, V_LO };  // C4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 71 };
+        p.notes[0][1] = { 1, 60, 35 };
+        p.notes[0][2] = { 2, 80, 61 };
+        p.notes[0][3] = { 3, 37, 180 };
+        p.notes[0][4] = { 4, 49, 66 };
+        p.notes[0][5] = { 4, 68, 58 };
+        p.notes[0][6] = { 6, 73, 87 };
+        p.notes[1][2] = { 2, 80, 40 };
+        p.notes[1][6] = { 6, 75, 54 };
+        p.notes[2][2] = { 2, 80, 29 };
+        p.notes[2][4] = { 4, 56, 90 };
+        p.notes[2][6] = { 6, 73, 58 };
+        p.notes[3][3] = { 3, 49, 92 };
+        p.notes[3][4] = { 4, 37, 73 };
+        p.notes[3][5] = { 4, 65, 84 };
+        p.notes[4][1] = { 1, 60, 37 };
+        p.notes[4][2] = { 2, 80, 31 };
+        p.notes[4][4] = { 4, 49, 115 };
+        p.notes[4][5] = { 4, 61, 79 };
+        p.notes[5][3] = { 3, 49, 94 };
+        p.notes[5][4] = { 4, 49, 109 };
+        p.notes[5][5] = { 4, 70, 42 };
+        p.notes[5][6] = { 6, 73, 63 };
+        p.notes[6][1] = { 1, 60, 48 };
+        p.notes[6][2] = { 2, 80, 58 };
+        p.notes[6][3] = { 3, 39, 126 };
+        p.notes[6][4] = { 4, 37, 59 };
+        p.notes[6][5] = { 4, 61, 63 };
+        p.notes[6][6] = { 6, 73, 70 };
+        p.notes[6][7] = { 7, 73, 52 };
+        p.notes[7][0] = { 0, 48, 49 };
+        p.notes[7][2] = { 2, 80, 27 };
+        p.notes[7][3] = { 3, 39, 198 };
+        p.notes[7][4] = { 4, 39, 52 };
+        p.notes[7][5] = { 4, 68, 54 };
+        p.notes[8][0] = { 0, 48, 114 };
+        p.notes[8][1] = { 1, 60, 53 };
+        p.notes[8][2] = { 2, 80, 54 };
+        p.notes[8][4] = { 4, 51, 93 };
+        p.notes[8][5] = { 4, 63, 93 };
+        p.notes[9][2] = { 2, 80, 26 };
+        p.notes[9][4] = { 4, 51, 50 };
+        p.notes[9][5] = { 4, 68, 57 };
+        p.notes[10][3] = { 3, 39, 198 };
+        p.notes[10][4] = { 4, 39, 64 };
+        p.notes[10][5] = { 4, 66, 63 };
+        p.notes[10][6] = { 6, 73, 49 };
+        p.notes[11][0] = { 0, 48, 92 };
+        p.notes[11][1] = { 1, 60, 95 };
+        p.notes[11][2] = { 2, 80, 99 };
+        p.notes[11][3] = { 3, 39, 168 };
+        p.notes[11][4] = { 4, 39, 79 };
+        p.notes[11][5] = { 4, 63, 88 };
+        p.notes[12][0] = { 0, 48, 163 };
+        p.notes[12][1] = { 1, 60, 75 };
+        p.notes[12][2] = { 2, 80, 53 };
+        p.notes[12][3] = { 3, 41, 146 };
+        p.notes[12][4] = { 4, 49, 79 };
+        p.notes[12][5] = { 4, 68, 96 };
+        p.notes[12][6] = { 6, 73, 57 };
+        p.notes[12][7] = { 7, 73, 44 };
+        p.notes[13][1] = { 1, 60, 44 };
+        p.notes[13][2] = { 2, 80, 35 };
+        p.notes[13][3] = { 3, 41, 174 };
+        p.notes[13][4] = { 4, 61, 131 };
+        p.notes[13][5] = { 4, 68, 81 };
+        p.notes[14][4] = { 4, 53, 61 };
+        p.notes[14][5] = { 4, 68, 78 };
+        p.notes[15][2] = { 2, 80, 33 };
+        p.notes[15][4] = { 4, 49, 81 };
+        p.notes[15][5] = { 4, 68, 87 };
+        p.notes[15][6] = { 6, 73, 63 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P3: Verse A2 — response, pushes higher
-    // Chords: F | G
-    // ================================================================
+    // Bar 5
     {
-        Pattern p = emptyPattern();
-        verseDrums(p);
-        // Bass: F → G
-        p.notes[0][3]  = { 3, 41, V_HI };  // F2
-        p.notes[3][3]  = { 3, 53, V_LO };  // F3
-        p.notes[6][3]  = { 3, 41, V_MD };
-        p.notes[8][3]  = { 3, 43, V_HI };  // G2
-        p.notes[11][3] = { 3, 55, V_LO };  // G3
-        p.notes[14][3] = { 3, 43, V_MD };
-        // Melody: same rhythm but pitched up, ends on a question
-        p.notes[0][4]  = { 4, 81, V_HI };  // A5
-        p.notes[2][4]  = { 4, 81, V_MD };  // A5
-        p.notes[3][4]  = { 4, 79, V_HI };  // G5
-        p.notes[5][4]  = { 4, 81, V_MD };  // A5
-        p.notes[8][4]  = { 4, 84, V_HI };  // C6 (peak!)
-        p.notes[10][4] = { 4, 81, V_MD };  // A5
-        p.notes[12][4] = { 4, 79, V_HI };  // G5
-        p.notes[15][4] = { 4, 79, V_GH };  // G5 (pickup)
-        // Pad
-        p.notes[0][5]  = { 5, 65, V_LO };  // F4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 163 };
+        p.notes[0][1] = { 1, 60, 100 };
+        p.notes[0][2] = { 2, 80, 100 };
+        p.notes[0][3] = { 3, 35, 160 };
+        p.notes[0][4] = { 4, 47, 100 };
+        p.notes[0][5] = { 4, 68, 57 };
+        p.notes[0][6] = { 6, 73, 63 };
+        p.notes[0][7] = { 7, 75, 40 };
+        p.notes[1][0] = { 0, 48, 53 };
+        p.notes[1][2] = { 2, 80, 31 };
+        p.notes[1][4] = { 4, 47, 115 };
+        p.notes[1][5] = { 4, 63, 73 };
+        p.notes[2][0] = { 0, 48, 121 };
+        p.notes[2][1] = { 1, 60, 110 };
+        p.notes[2][2] = { 2, 80, 98 };
+        p.notes[2][3] = { 3, 35, 114 };
+        p.notes[2][4] = { 4, 47, 82 };
+        p.notes[2][5] = { 4, 71, 55 };
+        p.notes[3][4] = { 4, 54, 108 };
+        p.notes[3][5] = { 4, 66, 51 };
+        p.notes[4][0] = { 0, 48, 114 };
+        p.notes[4][1] = { 1, 60, 39 };
+        p.notes[4][2] = { 2, 80, 39 };
+        p.notes[4][3] = { 3, 35, 112 };
+        p.notes[4][4] = { 4, 54, 109 };
+        p.notes[4][5] = { 4, 59, 85 };
+        p.notes[5][0] = { 0, 48, 51 };
+        p.notes[5][1] = { 1, 60, 37 };
+        p.notes[5][3] = { 3, 35, 138 };
+        p.notes[5][4] = { 4, 54, 79 };
+        p.notes[6][0] = { 0, 48, 112 };
+        p.notes[6][1] = { 1, 60, 122 };
+        p.notes[6][2] = { 2, 80, 121 };
+        p.notes[6][3] = { 3, 39, 124 };
+        p.notes[6][4] = { 4, 63, 99 };
+        p.notes[7][3] = { 3, 39, 180 };
+        p.notes[7][4] = { 4, 39, 57 };
+        p.notes[7][5] = { 4, 66, 49 };
+        p.notes[7][6] = { 6, 73, 46 };
+        p.notes[8][0] = { 0, 48, 111 };
+        p.notes[8][1] = { 1, 60, 38 };
+        p.notes[8][2] = { 2, 80, 33 };
+        p.notes[8][4] = { 4, 54, 140 };
+        p.notes[8][5] = { 4, 63, 75 };
+        p.notes[8][6] = { 6, 75, 43 };
+        p.notes[9][0] = { 0, 48, 41 };
+        p.notes[9][1] = { 1, 60, 39 };
+        p.notes[9][3] = { 3, 39, 174 };
+        p.notes[9][4] = { 4, 54, 160 };
+        p.notes[10][0] = { 0, 48, 107 };
+        p.notes[10][1] = { 1, 60, 142 };
+        p.notes[10][2] = { 2, 80, 112 };
+        p.notes[10][3] = { 3, 39, 188 };
+        p.notes[10][4] = { 4, 54, 138 };
+        p.notes[11][0] = { 0, 48, 43 };
+        p.notes[11][3] = { 3, 39, 128 };
+        p.notes[11][4] = { 4, 54, 111 };
+        p.notes[11][5] = { 4, 66, 45 };
+        p.notes[11][6] = { 6, 73, 57 };
+        p.notes[11][7] = { 7, 73, 40 };
+        p.notes[12][0] = { 0, 48, 93 };
+        p.notes[12][3] = { 3, 42, 178 };
+        p.notes[12][4] = { 4, 42, 153 };
+        p.notes[12][5] = { 4, 70, 84 };
+        p.notes[13][1] = { 1, 60, 45 };
+        p.notes[13][2] = { 2, 80, 34 };
+        p.notes[13][3] = { 3, 42, 184 };
+        p.notes[13][4] = { 4, 68, 82 };
+        p.notes[13][5] = { 4, 70, 84 };
+        p.notes[13][6] = { 6, 85, 55 };
+        p.notes[14][0] = { 0, 48, 90 };
+        p.notes[14][1] = { 1, 60, 177 };
+        p.notes[14][2] = { 2, 80, 203 };
+        p.notes[14][3] = { 3, 42, 186 };
+        p.notes[14][4] = { 4, 42, 117 };
+        p.notes[14][5] = { 4, 66, 51 };
+        p.notes[15][1] = { 1, 60, 42 };
+        p.notes[15][2] = { 2, 80, 33 };
+        p.notes[15][3] = { 3, 42, 138 };
+        p.notes[15][4] = { 4, 56, 154 };
+        p.notes[15][5] = { 4, 65, 63 };
+        p.notes[15][6] = { 6, 74, 40 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P4: Verse B1 — pre-chorus energy, syncopated staccato
-    // Chords: Am | Em
-    // ================================================================
+    // Bar 6
     {
-        Pattern p = emptyPattern();
-        verseDrums(p);
-        // Extra clap for buildup
-        p.notes[14][1] = { 1, 60, V_GH };
-        // Bass: Am → Em
-        p.notes[0][3]  = { 3, 45, V_HI };  // A2
-        p.notes[3][3]  = { 3, 57, V_LO };
-        p.notes[6][3]  = { 3, 45, V_MD };
-        p.notes[8][3]  = { 3, 40, V_HI };  // E2
-        p.notes[11][3] = { 3, 52, V_LO };
-        p.notes[14][3] = { 3, 40, V_MD };
-        // Melody: punchy staccato, rhythmic chant feel
-        p.notes[0][4]  = { 4, 76, V_HI };  // E5
-        p.notes[1][4]  = { 4, 76, V_MD };  // E5
-        p.notes[3][4]  = { 4, 79, V_HI };  // G5
-        p.notes[4][4]  = { 4, 76, V_MD };  // E5
-        p.notes[6][4]  = { 4, 72, V_HI };  // C5
-        p.notes[8][4]  = { 4, 76, V_HI };  // E5
-        p.notes[9][4]  = { 4, 76, V_MD };  // E5
-        p.notes[11][4] = { 4, 79, V_HI };  // G5
-        p.notes[12][4] = { 4, 81, V_HI };  // A5
-        p.notes[14][4] = { 4, 79, V_MD };  // G5
-        // Pad
-        p.notes[0][5]  = { 5, 69, V_LO };  // A4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 108 };
+        p.notes[0][1] = { 1, 60, 88 };
+        p.notes[0][2] = { 2, 80, 86 };
+        p.notes[0][3] = { 3, 37, 160 };
+        p.notes[0][4] = { 4, 49, 84 };
+        p.notes[0][5] = { 4, 68, 48 };
+        p.notes[0][6] = { 6, 74, 66 };
+        p.notes[1][0] = { 0, 48, 102 };
+        p.notes[1][3] = { 3, 37, 150 };
+        p.notes[1][4] = { 4, 56, 151 };
+        p.notes[1][6] = { 6, 74, 67 };
+        p.notes[2][0] = { 0, 48, 58 };
+        p.notes[2][1] = { 1, 60, 71 };
+        p.notes[2][2] = { 2, 80, 51 };
+        p.notes[2][3] = { 3, 39, 152 };
+        p.notes[2][4] = { 4, 51, 113 };
+        p.notes[2][5] = { 4, 70, 57 };
+        p.notes[2][6] = { 6, 75, 60 };
+        p.notes[3][0] = { 0, 48, 83 };
+        p.notes[3][1] = { 1, 60, 95 };
+        p.notes[3][2] = { 2, 80, 113 };
+        p.notes[3][3] = { 3, 39, 180 };
+        p.notes[3][4] = { 4, 56, 66 };
+        p.notes[4][0] = { 0, 48, 83 };
+        p.notes[4][2] = { 2, 80, 29 };
+        p.notes[4][4] = { 4, 51, 108 };
+        p.notes[4][5] = { 4, 68, 93 };
+        p.notes[5][0] = { 0, 48, 73 };
+        p.notes[5][1] = { 1, 60, 48 };
+        p.notes[5][2] = { 2, 80, 37 };
+        p.notes[5][3] = { 3, 39, 114 };
+        p.notes[5][4] = { 4, 51, 84 };
+        p.notes[5][5] = { 4, 68, 84 };
+        p.notes[6][1] = { 1, 60, 60 };
+        p.notes[6][2] = { 2, 80, 72 };
+        p.notes[7][0] = { 0, 48, 54 };
+        p.notes[7][1] = { 1, 60, 32 };
+        p.notes[7][2] = { 2, 80, 34 };
+        p.notes[7][3] = { 3, 41, 140 };
+        p.notes[8][0] = { 0, 48, 69 };
+        p.notes[11][1] = { 1, 60, 41 };
+        p.notes[11][2] = { 2, 80, 81 };
+        p.notes[12][0] = { 0, 48, 237 };
+        p.notes[12][1] = { 1, 60, 212 };
+        p.notes[12][2] = { 2, 80, 204 };
+        p.notes[13][0] = { 0, 48, 110 };
+        p.notes[13][1] = { 1, 60, 68 };
+        p.notes[13][2] = { 2, 80, 69 };
+        p.notes[13][4] = { 4, 56, 95 };
+        p.notes[13][5] = { 4, 70, 63 };
+        p.notes[14][1] = { 1, 60, 31 };
+        p.notes[14][2] = { 2, 80, 35 };
+        p.notes[14][3] = { 3, 43, 84 };
+        p.notes[14][4] = { 4, 56, 140 };
+        p.notes[14][5] = { 4, 58, 64 };
+        p.notes[15][0] = { 0, 48, 168 };
+        p.notes[15][1] = { 1, 60, 66 };
+        p.notes[15][2] = { 2, 80, 53 };
+        p.notes[15][3] = { 3, 35, 118 };
+        p.notes[15][4] = { 4, 51, 106 };
+        p.notes[15][5] = { 4, 66, 54 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P5: Verse B2 — pre-chorus peak, launches into chorus
-    // Chords: F | G (→ chorus)
-    // ================================================================
+    // Bar 7
     {
-        Pattern p = emptyPattern();
-        verseDrums(p);
-        // Extra claps: buildup
-        p.notes[10][1] = { 1, 60, V_GH };
-        p.notes[14][1] = { 1, 60, V_MD };
-        p.notes[15][1] = { 1, 60, V_GH };
-        // Bass: F → G (dominant tension)
-        p.notes[0][3]  = { 3, 41, V_HI };  // F2
-        p.notes[4][3]  = { 3, 41, V_MD };
-        p.notes[8][3]  = { 3, 43, V_HI };  // G2
-        p.notes[12][3] = { 3, 43, V_HI };
-        p.notes[14][3] = { 3, 47, V_HI };  // B2 (leading tone!)
-        // Melody: "na na na" repeated note build → leap
-        p.notes[0][4]  = { 4, 79, V_HI };  // G5
-        p.notes[1][4]  = { 4, 79, V_MD };  // G5
-        p.notes[2][4]  = { 4, 79, V_HI };  // G5
-        p.notes[4][4]  = { 4, 81, V_HI };  // A5
-        p.notes[5][4]  = { 4, 81, V_MD };  // A5
-        p.notes[6][4]  = { 4, 81, V_HI };  // A5
-        p.notes[8][4]  = { 4, 83, V_HI };  // B5
-        p.notes[9][4]  = { 4, 83, V_MD };  // B5
-        p.notes[10][4] = { 4, 83, V_HI };  // B5
-        p.notes[12][4] = { 4, 84, V_HI };  // C6 ← launch!
-        p.notes[14][4] = { 4, 84, V_HI };  // C6
-        // Pad
-        p.notes[0][5]  = { 5, 65, V_LO };  // F4
-        p.notes[8][5]  = { 5, 67, V_LO };  // G4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 65 };
+        p.notes[0][1] = { 1, 60, 43 };
+        p.notes[0][2] = { 2, 80, 31 };
+        p.notes[0][3] = { 3, 35, 144 };
+        p.notes[0][4] = { 4, 54, 151 };
+        p.notes[0][5] = { 4, 58, 102 };
+        p.notes[0][6] = { 6, 73, 55 };
+        p.notes[1][0] = { 0, 48, 93 };
+        p.notes[1][1] = { 1, 60, 89 };
+        p.notes[1][2] = { 2, 80, 64 };
+        p.notes[1][3] = { 3, 35, 128 };
+        p.notes[1][4] = { 4, 47, 72 };
+        p.notes[1][5] = { 4, 66, 60 };
+        p.notes[2][3] = { 3, 35, 104 };
+        p.notes[2][4] = { 4, 51, 63 };
+        p.notes[3][0] = { 0, 48, 48 };
+        p.notes[3][2] = { 2, 80, 35 };
+        p.notes[3][3] = { 3, 35, 122 };
+        p.notes[3][4] = { 4, 47, 66 };
+        p.notes[3][5] = { 4, 63, 63 };
+        p.notes[4][0] = { 0, 48, 163 };
+        p.notes[4][1] = { 1, 60, 79 };
+        p.notes[4][2] = { 2, 80, 37 };
+        p.notes[4][3] = { 3, 35, 146 };
+        p.notes[4][4] = { 4, 47, 66 };
+        p.notes[4][5] = { 4, 66, 57 };
+        p.notes[5][0] = { 0, 48, 88 };
+        p.notes[5][1] = { 1, 60, 100 };
+        p.notes[5][2] = { 2, 80, 114 };
+        p.notes[5][3] = { 3, 35, 134 };
+        p.notes[5][4] = { 4, 54, 91 };
+        p.notes[5][5] = { 4, 61, 54 };
+        p.notes[6][0] = { 0, 48, 56 };
+        p.notes[6][3] = { 3, 37, 164 };
+        p.notes[6][4] = { 4, 49, 95 };
+        p.notes[6][5] = { 4, 65, 79 };
+        p.notes[7][0] = { 0, 48, 128 };
+        p.notes[7][1] = { 1, 60, 37 };
+        p.notes[7][2] = { 2, 80, 27 };
+        p.notes[7][4] = { 4, 49, 97 };
+        p.notes[7][5] = { 4, 65, 91 };
+        p.notes[7][6] = { 6, 73, 51 };
+        p.notes[8][0] = { 0, 48, 46 };
+        p.notes[8][1] = { 1, 60, 55 };
+        p.notes[8][2] = { 2, 80, 63 };
+        p.notes[8][3] = { 3, 37, 168 };
+        p.notes[8][4] = { 4, 49, 64 };
+        p.notes[9][0] = { 0, 48, 87 };
+        p.notes[9][1] = { 1, 60, 108 };
+        p.notes[9][2] = { 2, 80, 91 };
+        p.notes[9][3] = { 3, 37, 164 };
+        p.notes[9][4] = { 4, 56, 115 };
+        p.notes[9][5] = { 4, 65, 97 };
+        p.notes[10][3] = { 3, 37, 166 };
+        p.notes[10][4] = { 4, 65, 77 };
+        p.notes[11][0] = { 0, 48, 62 };
+        p.notes[11][3] = { 3, 37, 126 };
+        p.notes[11][4] = { 4, 49, 90 };
+        p.notes[11][5] = { 4, 56, 70 };
+        p.notes[12][0] = { 0, 48, 147 };
+        p.notes[12][1] = { 1, 60, 63 };
+        p.notes[12][2] = { 2, 80, 34 };
+        p.notes[12][3] = { 3, 37, 118 };
+        p.notes[12][4] = { 4, 49, 106 };
+        p.notes[12][5] = { 4, 68, 61 };
+        p.notes[13][0] = { 0, 48, 76 };
+        p.notes[13][1] = { 1, 60, 120 };
+        p.notes[13][2] = { 2, 80, 133 };
+        p.notes[13][3] = { 3, 37, 156 };
+        p.notes[13][4] = { 4, 49, 129 };
+        p.notes[13][5] = { 4, 65, 57 };
+        p.notes[14][0] = { 0, 48, 65 };
+        p.notes[14][3] = { 3, 37, 132 };
+        p.notes[14][4] = { 4, 42, 70 };
+        p.notes[14][5] = { 4, 70, 51 };
+        p.notes[14][6] = { 6, 73, 49 };
+        p.notes[15][0] = { 0, 48, 129 };
+        p.notes[15][1] = { 1, 60, 43 };
+        p.notes[15][2] = { 2, 80, 36 };
+        p.notes[15][3] = { 3, 30, 86 };
+        p.notes[15][4] = { 4, 42, 79 };
+        p.notes[15][5] = { 4, 68, 60 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P6: Chorus A — THE hook. Big jump, rhythmic, catchy.
-    // Chords: C | G  (I-V)
-    // ================================================================
+    // Bar 8
     {
-        Pattern p = emptyPattern();
-        chorusDrums(p);
-        // Bass: driving octave bounce C → G
-        p.notes[0][3]  = { 3, 36, V_HI };  // C2
-        p.notes[2][3]  = { 3, 48, V_MD };  // C3
-        p.notes[4][3]  = { 3, 36, V_HI };
-        p.notes[6][3]  = { 3, 48, V_MD };
-        p.notes[8][3]  = { 3, 43, V_HI };  // G2
-        p.notes[10][3] = { 3, 55, V_MD };  // G3
-        p.notes[12][3] = { 3, 43, V_HI };
-        p.notes[14][3] = { 3, 55, V_MD };
-        // Melody: THE K-pop hook — signature 5th jump, rhythmic
-        // G5 G5 — C6! — A5 G5 — E5 G5 —
-        p.notes[0][4]  = { 4, 79, V_HI };  // G5
-        p.notes[1][4]  = { 4, 79, V_MD };  // G5
-        p.notes[3][4]  = { 4, 84, V_HI };  // C6 ★ THE jump
-        p.notes[6][4]  = { 4, 81, V_MD };  // A5
-        p.notes[8][4]  = { 4, 79, V_HI };  // G5
-        p.notes[11][4] = { 4, 76, V_HI };  // E5
-        p.notes[13][4] = { 4, 79, V_MD };  // G5
-        // Pad: bright
-        p.notes[0][5]  = { 5, 64, V_MD };  // E4
-        p.notes[8][5]  = { 5, 67, V_MD };  // G4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 82 };
+        p.notes[0][1] = { 1, 60, 112 };
+        p.notes[0][2] = { 2, 80, 116 };
+        p.notes[0][3] = { 3, 42, 182 };
+        p.notes[0][4] = { 4, 49, 136 };
+        p.notes[0][5] = { 4, 56, 52 };
+        p.notes[1][1] = { 1, 60, 48 };
+        p.notes[1][2] = { 2, 80, 46 };
+        p.notes[1][3] = { 3, 42, 184 };
+        p.notes[1][4] = { 4, 49, 129 };
+        p.notes[2][3] = { 3, 42, 114 };
+        p.notes[2][4] = { 4, 49, 126 };
+        p.notes[2][5] = { 4, 68, 66 };
+        p.notes[3][0] = { 0, 48, 206 };
+        p.notes[3][1] = { 1, 60, 158 };
+        p.notes[3][2] = { 2, 80, 154 };
+        p.notes[3][3] = { 3, 42, 108 };
+        p.notes[3][4] = { 4, 49, 124 };
+        p.notes[3][5] = { 4, 61, 60 };
+        p.notes[4][0] = { 0, 48, 128 };
+        p.notes[4][1] = { 1, 60, 65 };
+        p.notes[4][2] = { 2, 80, 56 };
+        p.notes[4][3] = { 3, 42, 102 };
+        p.notes[4][4] = { 4, 54, 70 };
+        p.notes[5][1] = { 1, 60, 45 };
+        p.notes[5][2] = { 2, 80, 35 };
+        p.notes[5][3] = { 3, 39, 158 };
+        p.notes[5][4] = { 4, 51, 95 };
+        p.notes[5][5] = { 4, 61, 61 };
+        p.notes[5][6] = { 6, 75, 58 };
+        p.notes[6][0] = { 0, 48, 115 };
+        p.notes[6][1] = { 1, 60, 54 };
+        p.notes[6][2] = { 2, 80, 67 };
+        p.notes[6][4] = { 4, 54, 97 };
+        p.notes[6][5] = { 4, 58, 90 };
+        p.notes[7][0] = { 0, 48, 74 };
+        p.notes[7][1] = { 1, 60, 37 };
+        p.notes[7][3] = { 3, 39, 130 };
+        p.notes[7][4] = { 4, 51, 133 };
+        p.notes[8][0] = { 0, 48, 158 };
+        p.notes[8][1] = { 1, 60, 168 };
+        p.notes[8][2] = { 2, 80, 180 };
+        p.notes[8][3] = { 3, 39, 150 };
+        p.notes[8][4] = { 4, 51, 127 };
+        p.notes[8][5] = { 4, 63, 75 };
+        p.notes[9][3] = { 3, 39, 134 };
+        p.notes[9][4] = { 4, 46, 104 };
+        p.notes[10][1] = { 1, 60, 48 };
+        p.notes[10][2] = { 2, 80, 57 };
+        p.notes[10][3] = { 3, 39, 88 };
+        p.notes[10][4] = { 4, 46, 99 };
+        p.notes[10][5] = { 4, 63, 49 };
+        p.notes[11][0] = { 0, 48, 201 };
+        p.notes[11][1] = { 1, 60, 93 };
+        p.notes[11][2] = { 2, 80, 47 };
+        p.notes[11][4] = { 4, 49, 73 };
+        p.notes[11][5] = { 4, 61, 91 };
+        p.notes[12][0] = { 0, 48, 84 };
+        p.notes[12][1] = { 1, 60, 75 };
+        p.notes[12][2] = { 2, 80, 79 };
+        p.notes[12][3] = { 3, 39, 128 };
+        p.notes[12][4] = { 4, 51, 84 };
+        p.notes[12][5] = { 4, 54, 60 };
+        p.notes[12][6] = { 6, 75, 55 };
+        p.notes[13][0] = { 0, 48, 47 };
+        p.notes[13][3] = { 3, 39, 128 };
+        p.notes[13][4] = { 4, 49, 66 };
+        p.notes[13][5] = { 4, 66, 43 };
+        p.notes[13][6] = { 6, 79, 52 };
+        p.notes[14][0] = { 0, 48, 140 };
+        p.notes[14][1] = { 1, 60, 45 };
+        p.notes[14][2] = { 2, 80, 37 };
+        p.notes[14][3] = { 3, 35, 144 };
+        p.notes[14][4] = { 4, 47, 100 };
+        p.notes[14][5] = { 4, 71, 75 };
+        p.notes[15][0] = { 0, 48, 60 };
+        p.notes[15][1] = { 1, 60, 37 };
+        p.notes[15][3] = { 3, 35, 168 };
+        p.notes[15][4] = { 4, 47, 106 };
+        p.notes[15][5] = { 4, 59, 99 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P7: Chorus B — answer phrase, descends from peak
-    // Chords: Am | F
-    // ================================================================
+    // Bar 9
     {
-        Pattern p = emptyPattern();
-        chorusDrums(p);
-        // Bass: Am → F bounce
-        p.notes[0][3]  = { 3, 45, V_HI };  // A2
-        p.notes[2][3]  = { 3, 57, V_MD };  // A3
-        p.notes[4][3]  = { 3, 45, V_HI };
-        p.notes[6][3]  = { 3, 57, V_MD };
-        p.notes[8][3]  = { 3, 41, V_HI };  // F2
-        p.notes[10][3] = { 3, 53, V_MD };  // F3
-        p.notes[12][3] = { 3, 41, V_HI };
-        p.notes[14][3] = { 3, 53, V_MD };
-        // Melody: answer — mirror rhythm, descend
-        // C6 — A5 G5 — E5 — C5 E5 G5
-        p.notes[0][4]  = { 4, 84, V_HI };  // C6
-        p.notes[3][4]  = { 4, 81, V_HI };  // A5
-        p.notes[4][4]  = { 4, 79, V_MD };  // G5
-        p.notes[7][4]  = { 4, 76, V_HI };  // E5
-        p.notes[9][4]  = { 4, 72, V_MD };  // C5
-        p.notes[11][4] = { 4, 76, V_HI };  // E5
-        p.notes[13][4] = { 4, 79, V_HI };  // G5 (pickup for repeat)
-        // Pad
-        p.notes[0][5]  = { 5, 69, V_MD };  // A4
-        p.notes[8][5]  = { 5, 65, V_MD };  // F4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 65 };
+        p.notes[0][1] = { 1, 60, 98 };
+        p.notes[0][2] = { 2, 80, 100 };
+        p.notes[0][3] = { 3, 35, 134 };
+        p.notes[0][4] = { 4, 59, 97 };
+        p.notes[1][3] = { 3, 35, 96 };
+        p.notes[1][4] = { 4, 47, 91 };
+        p.notes[1][5] = { 4, 59, 81 };
+        p.notes[2][0] = { 0, 48, 55 };
+        p.notes[2][3] = { 3, 35, 144 };
+        p.notes[2][4] = { 4, 54, 68 };
+        p.notes[3][0] = { 0, 48, 160 };
+        p.notes[3][1] = { 1, 60, 85 };
+        p.notes[3][2] = { 2, 80, 51 };
+        p.notes[3][3] = { 3, 35, 128 };
+        p.notes[4][0] = { 0, 48, 68 };
+        p.notes[4][1] = { 1, 60, 78 };
+        p.notes[4][2] = { 2, 80, 76 };
+        p.notes[4][3] = { 3, 35, 126 };
+        p.notes[4][4] = { 4, 49, 75 };
+        p.notes[4][5] = { 4, 56, 78 };
+        p.notes[5][0] = { 0, 48, 52 };
+        p.notes[5][3] = { 3, 37, 158 };
+        p.notes[5][4] = { 4, 49, 122 };
+        p.notes[5][5] = { 4, 65, 97 };
+        p.notes[6][0] = { 0, 48, 103 };
+        p.notes[6][3] = { 3, 37, 154 };
+        p.notes[6][4] = { 4, 56, 171 };
+        p.notes[6][5] = { 4, 68, 63 };
+        p.notes[7][0] = { 0, 48, 39 };
+        p.notes[7][1] = { 1, 60, 48 };
+        p.notes[7][2] = { 2, 80, 36 };
+        p.notes[7][3] = { 3, 37, 176 };
+        p.notes[7][4] = { 4, 49, 50 };
+        p.notes[7][5] = { 4, 65, 81 };
+        p.notes[7][6] = { 6, 85, 57 };
+        p.notes[8][0] = { 0, 48, 76 };
+        p.notes[8][1] = { 1, 60, 119 };
+        p.notes[8][2] = { 2, 80, 97 };
+        p.notes[8][3] = { 3, 37, 150 };
+        p.notes[8][4] = { 4, 49, 68 };
+        p.notes[8][5] = { 4, 56, 136 };
+        p.notes[8][6] = { 6, 73, 52 };
+        p.notes[9][3] = { 3, 37, 156 };
+        p.notes[9][4] = { 4, 49, 140 };
+        p.notes[9][5] = { 4, 68, 55 };
+        p.notes[10][0] = { 0, 48, 72 };
+        p.notes[10][1] = { 1, 60, 54 };
+        p.notes[10][2] = { 2, 80, 55 };
+        p.notes[10][4] = { 4, 49, 104 };
+        p.notes[10][5] = { 4, 68, 76 };
+        p.notes[11][0] = { 0, 48, 203 };
+        p.notes[11][1] = { 1, 60, 120 };
+        p.notes[11][2] = { 2, 80, 97 };
+        p.notes[11][3] = { 3, 37, 102 };
+        p.notes[11][4] = { 4, 49, 108 };
+        p.notes[11][5] = { 4, 68, 63 };
+        p.notes[11][6] = { 6, 73, 96 };
+        p.notes[12][1] = { 1, 60, 52 };
+        p.notes[12][2] = { 2, 80, 42 };
+        p.notes[12][3] = { 3, 37, 152 };
+        p.notes[12][4] = { 4, 47, 64 };
+        p.notes[12][5] = { 4, 59, 60 };
+        p.notes[13][0] = { 0, 48, 114 };
+        p.notes[13][1] = { 1, 60, 59 };
+        p.notes[13][2] = { 2, 80, 66 };
+        p.notes[13][3] = { 3, 42, 88 };
+        p.notes[13][4] = { 4, 54, 109 };
+        p.notes[13][5] = { 4, 68, 61 };
+        p.notes[14][0] = { 0, 48, 82 };
+        p.notes[14][3] = { 3, 42, 132 };
+        p.notes[14][4] = { 4, 42, 63 };
+        p.notes[14][5] = { 4, 58, 58 };
+        p.notes[15][0] = { 0, 48, 152 };
+        p.notes[15][1] = { 1, 60, 182 };
+        p.notes[15][2] = { 2, 80, 204 };
+        p.notes[15][3] = { 3, 42, 120 };
+        p.notes[15][4] = { 4, 42, 91 };
+        p.notes[15][5] = { 4, 61, 72 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P8: Chorus C — ad-lib/flourish bar, runs + signature jump
-    // Chords: F | G
-    // ================================================================
+    // Bar 10
     {
-        Pattern p = emptyPattern();
-        chorusDrums(p);
-        // Bass: F → G
-        p.notes[0][3]  = { 3, 41, V_HI };  // F2
-        p.notes[2][3]  = { 3, 53, V_MD };
-        p.notes[4][3]  = { 3, 41, V_HI };
-        p.notes[6][3]  = { 3, 53, V_MD };
-        p.notes[8][3]  = { 3, 43, V_HI };  // G2
-        p.notes[10][3] = { 3, 55, V_MD };
-        p.notes[12][3] = { 3, 43, V_HI };
-        p.notes[14][3] = { 3, 55, V_MD };
-        // Melody: rapid descending run → big jump (K-pop ad-lib energy)
-        p.notes[0][4]  = { 4, 84, V_HI };  // C6
-        p.notes[1][4]  = { 4, 81, V_MD };  // A5
-        p.notes[2][4]  = { 4, 79, V_HI };  // G5
-        p.notes[3][4]  = { 4, 76, V_MD };  // E5
-        p.notes[4][4]  = { 4, 72, V_MD };  // C5
-        p.notes[6][4]  = { 4, 72, V_MD };  // C5
-        p.notes[7][4]  = { 4, 76, V_MD };  // E5
-        p.notes[8][4]  = { 4, 79, V_HI };  // G5
-        p.notes[9][4]  = { 4, 79, V_MD };  // G5
-        p.notes[11][4] = { 4, 84, V_HI };  // C6 ★ jump again!
-        p.notes[14][4] = { 4, 83, V_MD };  // B5 (leading tone)
-        // Pad
-        p.notes[0][5]  = { 5, 65, V_MD };  // F4
-        p.notes[8][5]  = { 5, 67, V_MD };  // G4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][1] = { 1, 60, 45 };
+        p.notes[0][2] = { 2, 80, 27 };
+        p.notes[0][3] = { 3, 49, 96 };
+        p.notes[1][2] = { 2, 80, 43 };
+        p.notes[1][3] = { 3, 42, 118 };
+        p.notes[1][4] = { 4, 54, 136 };
+        p.notes[2][0] = { 0, 48, 209 };
+        p.notes[2][1] = { 1, 60, 132 };
+        p.notes[2][2] = { 2, 80, 103 };
+        p.notes[2][4] = { 4, 49, 88 };
+        p.notes[2][5] = { 4, 70, 58 };
+        p.notes[3][0] = { 0, 48, 124 };
+        p.notes[3][1] = { 1, 60, 68 };
+        p.notes[3][2] = { 2, 80, 41 };
+        p.notes[3][3] = { 3, 42, 140 };
+        p.notes[3][4] = { 4, 49, 88 };
+        p.notes[3][5] = { 4, 61, 73 };
+        p.notes[4][0] = { 0, 48, 77 };
+        p.notes[4][1] = { 1, 60, 38 };
+        p.notes[4][2] = { 2, 80, 29 };
+        p.notes[4][4] = { 4, 49, 84 };
+        p.notes[4][5] = { 4, 61, 73 };
+        p.notes[5][0] = { 0, 48, 61 };
+        p.notes[6][0] = { 0, 48, 116 };
+        p.notes[6][1] = { 1, 60, 64 };
+        p.notes[6][2] = { 2, 80, 30 };
+        p.notes[6][3] = { 3, 42, 166 };
+        p.notes[6][4] = { 4, 42, 81 };
+        p.notes[6][5] = { 4, 61, 84 };
+        p.notes[6][6] = { 6, 78, 52 };
+        p.notes[6][7] = { 7, 78, 40 };
+        p.notes[7][0] = { 0, 48, 101 };
+        p.notes[7][1] = { 1, 60, 120 };
+        p.notes[7][2] = { 2, 80, 129 };
+        p.notes[8][0] = { 0, 48, 78 };
+        p.notes[8][1] = { 1, 60, 30 };
+        p.notes[8][3] = { 3, 42, 140 };
+        p.notes[8][4] = { 4, 42, 55 };
+        p.notes[8][5] = { 4, 70, 52 };
+        p.notes[9][0] = { 0, 48, 62 };
+        p.notes[10][0] = { 0, 48, 97 };
+        p.notes[10][1] = { 1, 60, 66 };
+        p.notes[10][2] = { 2, 80, 38 };
+        p.notes[10][3] = { 3, 42, 170 };
+        p.notes[10][4] = { 4, 49, 50 };
+        p.notes[10][5] = { 4, 61, 111 };
+        p.notes[11][0] = { 0, 48, 55 };
+        p.notes[11][1] = { 1, 60, 60 };
+        p.notes[11][2] = { 2, 80, 70 };
+        p.notes[11][3] = { 3, 37, 84 };
+        p.notes[11][4] = { 4, 47, 73 };
+        p.notes[11][5] = { 4, 54, 129 };
+        p.notes[12][0] = { 0, 48, 51 };
+        p.notes[12][3] = { 3, 42, 120 };
+        p.notes[12][4] = { 4, 47, 108 };
+        p.notes[12][5] = { 4, 59, 52 };
+        p.notes[13][0] = { 0, 48, 136 };
+        p.notes[13][1] = { 1, 60, 58 };
+        p.notes[13][2] = { 2, 80, 70 };
+        p.notes[13][3] = { 3, 35, 136 };
+        p.notes[13][4] = { 4, 59, 95 };
+        p.notes[14][0] = { 0, 48, 40 };
+        p.notes[14][1] = { 1, 60, 47 };
+        p.notes[14][2] = { 2, 80, 34 };
+        p.notes[14][3] = { 3, 35, 118 };
+        p.notes[14][4] = { 4, 47, 93 };
+        p.notes[14][5] = { 4, 59, 102 };
+        p.notes[15][0] = { 0, 48, 82 };
+        p.notes[15][1] = { 1, 60, 102 };
+        p.notes[15][2] = { 2, 80, 84 };
+        p.notes[15][3] = { 3, 47, 84 };
+        p.notes[15][4] = { 4, 47, 144 };
+        p.notes[15][5] = { 4, 59, 93 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P9: Bridge — contrast section, softer, Am key feel
-    // Chords: Am | F
-    // ================================================================
+    // Bar 11
     {
-        Pattern p = emptyPattern();
-        // Sparse kick (half time)
-        p.notes[0][0]  = { 0, 48, V_MD };
-        p.notes[8][0]  = { 0, 48, V_MD };
-        // Soft hihat
-        for (int r = 0; r < 16; r += 4)
-            p.notes[r][2] = { 2, 80, V_LO };
-        // Bass: sustained
-        p.notes[0][3]  = { 3, 45, V_MD };  // A2
-        p.notes[8][3]  = { 3, 41, V_MD };  // F2
-        // Melody: tender, legato feel
-        p.notes[0][4]  = { 4, 72, V_MD };  // C5
-        p.notes[4][4]  = { 4, 76, V_MD };  // E5
-        p.notes[6][4]  = { 4, 74, V_LO };  // D5
-        p.notes[8][4]  = { 4, 72, V_MD };  // C5
-        p.notes[12][4] = { 4, 69, V_MD };  // A4
-        // Pad: warm
-        p.notes[0][5]  = { 5, 69, V_MD };  // A4
-        p.notes[8][5]  = { 5, 65, V_MD };  // F4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][2] = { 2, 80, 25 };
+        p.notes[0][3] = { 3, 35, 140 };
+        p.notes[0][4] = { 4, 47, 154 };
+        p.notes[0][5] = { 4, 54, 108 };
+        p.notes[1][0] = { 0, 48, 58 };
+        p.notes[1][1] = { 1, 60, 35 };
+        p.notes[1][2] = { 2, 80, 54 };
+        p.notes[1][3] = { 3, 35, 168 };
+        p.notes[1][4] = { 4, 35, 66 };
+        p.notes[1][5] = { 4, 61, 49 };
+        p.notes[2][0] = { 0, 48, 119 };
+        p.notes[2][1] = { 1, 60, 60 };
+        p.notes[2][2] = { 2, 80, 36 };
+        p.notes[2][3] = { 3, 35, 130 };
+        p.notes[2][4] = { 4, 47, 77 };
+        p.notes[2][5] = { 4, 66, 72 };
+        p.notes[3][0] = { 0, 48, 62 };
+        p.notes[3][1] = { 1, 60, 63 };
+        p.notes[3][2] = { 2, 80, 60 };
+        p.notes[3][3] = { 3, 35, 112 };
+        p.notes[3][4] = { 4, 49, 126 };
+        p.notes[3][5] = { 4, 68, 49 };
+        p.notes[4][0] = { 0, 48, 50 };
+        p.notes[4][2] = { 2, 80, 27 };
+        p.notes[4][3] = { 3, 37, 166 };
+        p.notes[4][4] = { 4, 49, 106 };
+        p.notes[4][5] = { 4, 65, 52 };
+        p.notes[5][0] = { 0, 48, 104 };
+        p.notes[5][3] = { 3, 37, 152 };
+        p.notes[5][4] = { 4, 49, 131 };
+        p.notes[5][5] = { 4, 61, 76 };
+        p.notes[6][0] = { 0, 48, 96 };
+        p.notes[6][1] = { 1, 60, 101 };
+        p.notes[6][2] = { 2, 80, 82 };
+        p.notes[6][3] = { 3, 49, 82 };
+        p.notes[6][4] = { 4, 49, 140 };
+        p.notes[6][5] = { 4, 65, 75 };
+        p.notes[7][1] = { 1, 60, 49 };
+        p.notes[7][2] = { 2, 80, 37 };
+        p.notes[7][3] = { 3, 37, 130 };
+        p.notes[7][4] = { 4, 49, 156 };
+        p.notes[7][5] = { 4, 56, 52 };
+        p.notes[8][2] = { 2, 80, 27 };
+        p.notes[8][3] = { 3, 37, 162 };
+        p.notes[8][4] = { 4, 37, 73 };
+        p.notes[8][5] = { 4, 68, 61 };
+        p.notes[9][0] = { 0, 48, 184 };
+        p.notes[9][1] = { 1, 60, 109 };
+        p.notes[9][2] = { 2, 80, 115 };
+        p.notes[9][3] = { 3, 37, 114 };
+        p.notes[9][4] = { 4, 49, 122 };
+        p.notes[9][5] = { 4, 65, 52 };
+        p.notes[10][0] = { 0, 48, 122 };
+        p.notes[10][1] = { 1, 60, 60 };
+        p.notes[10][2] = { 2, 80, 42 };
+        p.notes[10][3] = { 3, 37, 134 };
+        p.notes[10][4] = { 4, 49, 102 };
+        p.notes[10][5] = { 4, 56, 61 };
+        p.notes[11][1] = { 1, 60, 41 };
+        p.notes[11][3] = { 3, 37, 110 };
+        p.notes[11][4] = { 4, 49, 102 };
+        p.notes[11][5] = { 4, 51, 51 };
+        p.notes[12][0] = { 0, 48, 140 };
+        p.notes[12][1] = { 1, 60, 113 };
+        p.notes[12][2] = { 2, 80, 132 };
+        p.notes[12][4] = { 4, 46, 77 };
+        p.notes[12][5] = { 4, 49, 90 };
+        p.notes[13][0] = { 0, 48, 67 };
+        p.notes[13][1] = { 1, 60, 38 };
+        p.notes[13][4] = { 4, 46, 149 };
+        p.notes[13][5] = { 4, 68, 67 };
+        p.notes[14][0] = { 0, 48, 151 };
+        p.notes[14][1] = { 1, 60, 142 };
+        p.notes[14][2] = { 2, 80, 127 };
+        p.notes[15][0] = { 0, 48, 91 };
+        p.notes[15][1] = { 1, 60, 38 };
+        p.notes[15][2] = { 2, 80, 38 };
+        p.notes[15][3] = { 3, 38, 174 };
+        p.notes[15][4] = { 4, 46, 145 };
+        p.notes[15][5] = { 4, 58, 49 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P10: Bridge 2 — builds back toward chorus
-    // Chords: Dm | G
-    // ================================================================
+    // Bar 12
     {
-        Pattern p = emptyPattern();
-        // Building drums
-        p.notes[0][0]  = { 0, 48, V_MD };
-        p.notes[4][0]  = { 0, 48, V_MD };
-        p.notes[8][0]  = { 0, 48, V_HI };
-        p.notes[12][0] = { 0, 48, V_HI };
-        p.notes[12][1] = { 1, 60, V_MD };
-        p.notes[14][1] = { 1, 60, V_GH };
-        p.notes[15][1] = { 1, 60, V_MD };
-        for (int r = 0; r < 16; r += 2)
-            p.notes[r][2] = { 2, 80, (r >= 8) ? V_MD : V_LO };
-        // Bass: Dm → G (tension)
-        p.notes[0][3]  = { 3, 38, V_MD };  // D2
-        p.notes[4][3]  = { 3, 38, V_MD };
-        p.notes[8][3]  = { 3, 43, V_HI };  // G2
-        p.notes[12][3] = { 3, 43, V_HI };
-        p.notes[14][3] = { 3, 47, V_HI };  // B2 (leading tone)
-        // Melody: rising tension
-        p.notes[0][4]  = { 4, 74, V_MD };  // D5
-        p.notes[2][4]  = { 4, 77, V_MD };  // F5
-        p.notes[4][4]  = { 4, 74, V_MD };  // D5
-        p.notes[8][4]  = { 4, 79, V_HI };  // G5
-        p.notes[10][4] = { 4, 81, V_HI };  // A5
-        p.notes[12][4] = { 4, 83, V_HI };  // B5
-        p.notes[14][4] = { 4, 84, V_HI };  // C6 → back to chorus!
-        // Pad
-        p.notes[0][5]  = { 5, 62, V_MD };  // D4
-        p.notes[8][5]  = { 5, 67, V_MD };  // G4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 52 };
+        p.notes[0][3] = { 3, 38, 190 };
+        p.notes[0][4] = { 4, 46, 138 };
+        p.notes[0][5] = { 4, 70, 46 };
+        p.notes[1][1] = { 1, 60, 39 };
+        p.notes[1][2] = { 2, 80, 26 };
+        p.notes[1][4] = { 4, 53, 77 };
+        p.notes[1][5] = { 4, 70, 79 };
+        p.notes[2][0] = { 0, 48, 118 };
+        p.notes[2][1] = { 1, 60, 108 };
+        p.notes[2][2] = { 2, 80, 93 };
+        p.notes[2][3] = { 3, 39, 132 };
+        p.notes[2][4] = { 4, 46, 73 };
+        p.notes[2][5] = { 4, 66, 81 };
+        p.notes[2][6] = { 6, 78, 52 };
+        p.notes[3][0] = { 0, 48, 95 };
+        p.notes[3][1] = { 1, 60, 33 };
+        p.notes[3][2] = { 2, 80, 27 };
+        p.notes[3][3] = { 3, 39, 192 };
+        p.notes[3][6] = { 6, 73, 54 };
+        p.notes[4][0] = { 0, 48, 40 };
+        p.notes[4][3] = { 3, 39, 182 };
+        p.notes[4][4] = { 4, 51, 79 };
+        p.notes[4][5] = { 4, 68, 51 };
+        p.notes[5][1] = { 1, 60, 44 };
+        p.notes[5][2] = { 2, 80, 25 };
+        p.notes[5][3] = { 3, 39, 166 };
+        p.notes[5][4] = { 4, 39, 66 };
+        p.notes[5][6] = { 6, 78, 58 };
+        p.notes[6][0] = { 0, 48, 135 };
+        p.notes[6][1] = { 1, 60, 127 };
+        p.notes[6][2] = { 2, 80, 113 };
+        p.notes[6][3] = { 3, 39, 170 };
+        p.notes[6][4] = { 4, 39, 90 };
+        p.notes[6][5] = { 4, 66, 76 };
+        p.notes[7][0] = { 0, 48, 105 };
+        p.notes[7][1] = { 1, 60, 51 };
+        p.notes[7][2] = { 2, 80, 35 };
+        p.notes[7][3] = { 3, 39, 128 };
+        p.notes[7][4] = { 4, 49, 66 };
+        p.notes[7][5] = { 4, 56, 61 };
+        p.notes[8][0] = { 0, 48, 81 };
+        p.notes[8][1] = { 1, 60, 116 };
+        p.notes[8][2] = { 2, 80, 138 };
+        p.notes[8][3] = { 3, 41, 156 };
+        p.notes[8][4] = { 4, 49, 102 };
+        p.notes[8][5] = { 4, 61, 48 };
+        p.notes[9][0] = { 0, 48, 39 };
+        p.notes[9][3] = { 3, 39, 174 };
+        p.notes[9][4] = { 4, 42, 63 };
+        p.notes[9][5] = { 4, 70, 52 };
+        p.notes[10][2] = { 2, 80, 40 };
+        p.notes[10][3] = { 3, 37, 122 };
+        p.notes[10][4] = { 4, 42, 117 };
+        p.notes[10][5] = { 4, 54, 78 };
+        p.notes[11][0] = { 0, 48, 62 };
+        p.notes[11][1] = { 1, 60, 32 };
+        p.notes[11][2] = { 2, 80, 36 };
+        p.notes[11][3] = { 3, 45, 108 };
+        p.notes[11][4] = { 4, 39, 55 };
+        p.notes[11][5] = { 4, 58, 54 };
+        p.notes[12][0] = { 0, 48, 108 };
+        p.notes[12][1] = { 1, 60, 84 };
+        p.notes[12][2] = { 2, 80, 96 };
+        p.notes[12][3] = { 3, 32, 124 };
+        p.notes[12][4] = { 4, 56, 72 };
+        p.notes[13][0] = { 0, 48, 42 };
+        p.notes[13][2] = { 2, 80, 37 };
+        p.notes[13][3] = { 3, 32, 94 };
+        p.notes[13][4] = { 4, 44, 84 };
+        p.notes[13][5] = { 4, 66, 72 };
+        p.notes[14][0] = { 0, 48, 39 };
+        p.notes[14][3] = { 3, 32, 98 };
+        p.notes[14][4] = { 4, 44, 95 };
+        p.notes[14][5] = { 4, 51, 91 };
+        p.notes[15][0] = { 0, 48, 56 };
+        p.notes[15][1] = { 1, 60, 31 };
+        p.notes[15][2] = { 2, 80, 47 };
+        p.notes[15][3] = { 3, 44, 112 };
+        p.notes[15][4] = { 4, 51, 90 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // P11: Outro / loop prep — energetic, smooth transition to bar 1
-    // Chords: C | G
-    // ================================================================
+    // Bar 13
     {
-        Pattern p = emptyPattern();
-        chorusDrums(p);
-        // Bass
-        p.notes[0][3]  = { 3, 36, V_HI };  // C2
-        p.notes[4][3]  = { 3, 48, V_MD };
-        p.notes[8][3]  = { 3, 43, V_HI };  // G2
-        p.notes[12][3] = { 3, 55, V_MD };
-        // Melody: call-back to intro teaser, lands on G5 ready to resolve to C
-        p.notes[0][4]  = { 4, 84, V_HI };  // C6
-        p.notes[2][4]  = { 4, 79, V_MD };  // G5
-        p.notes[4][4]  = { 4, 76, V_MD };  // E5
-        p.notes[6][4]  = { 4, 72, V_MD };  // C5
-        p.notes[8][4]  = { 4, 76, V_HI };  // E5
-        p.notes[10][4] = { 4, 79, V_HI };  // G5
-        // Pad
-        p.notes[0][5]  = { 5, 64, V_MD };  // E4
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 76 };
+        p.notes[0][1] = { 1, 60, 31 };
+        p.notes[0][2] = { 2, 80, 34 };
+        p.notes[0][3] = { 3, 32, 108 };
+        p.notes[0][4] = { 4, 44, 73 };
+        p.notes[0][5] = { 4, 59, 55 };
+        p.notes[1][0] = { 0, 48, 69 };
+        p.notes[1][1] = { 1, 60, 43 };
+        p.notes[1][2] = { 2, 80, 43 };
+        p.notes[1][3] = { 3, 51, 94 };
+        p.notes[1][4] = { 4, 47, 64 };
+        p.notes[1][5] = { 4, 56, 76 };
+        p.notes[1][6] = { 6, 75, 54 };
+        p.notes[2][0] = { 0, 48, 41 };
+        p.notes[2][2] = { 2, 80, 27 };
+        p.notes[2][3] = { 3, 32, 82 };
+        p.notes[2][4] = { 4, 44, 59 };
+        p.notes[2][5] = { 4, 56, 73 };
+        p.notes[3][0] = { 0, 48, 105 };
+        p.notes[3][1] = { 1, 60, 73 };
+        p.notes[3][2] = { 2, 80, 99 };
+        p.notes[3][3] = { 3, 37, 84 };
+        p.notes[3][4] = { 4, 49, 64 };
+        p.notes[3][5] = { 4, 61, 76 };
+        p.notes[4][0] = { 0, 48, 83 };
+        p.notes[4][2] = { 2, 80, 27 };
+        p.notes[4][3] = { 3, 37, 136 };
+        p.notes[5][0] = { 0, 48, 51 };
+        p.notes[5][4] = { 4, 61, 75 };
+        p.notes[7][1] = { 1, 60, 31 };
+        p.notes[7][2] = { 2, 80, 85 };
+        p.notes[8][1] = { 1, 60, 34 };
+        p.notes[8][2] = { 2, 80, 36 };
+        p.notes[9][0] = { 0, 48, 193 };
+        p.notes[9][1] = { 1, 60, 162 };
+        p.notes[9][2] = { 2, 80, 138 };
+        p.notes[9][3] = { 3, 49, 86 };
+        p.notes[10][1] = { 1, 60, 34 };
+        p.notes[10][2] = { 2, 80, 28 };
+        p.notes[11][0] = { 0, 48, 182 };
+        p.notes[11][1] = { 1, 60, 110 };
+        p.notes[11][2] = { 2, 80, 101 };
+        p.notes[11][3] = { 3, 30, 120 };
+        p.notes[11][4] = { 4, 54, 129 };
+        p.notes[11][5] = { 4, 68, 54 };
+        p.notes[12][0] = { 0, 48, 63 };
+        p.notes[12][1] = { 1, 60, 55 };
+        p.notes[12][2] = { 2, 80, 33 };
+        p.notes[12][3] = { 3, 42, 146 };
+        p.notes[12][4] = { 4, 42, 81 };
+        p.notes[12][5] = { 4, 66, 63 };
+        p.notes[12][6] = { 6, 78, 46 };
+        p.notes[13][0] = { 0, 48, 77 };
+        p.notes[13][1] = { 1, 60, 65 };
+        p.notes[13][2] = { 2, 80, 39 };
+        p.notes[13][3] = { 3, 42, 158 };
+        p.notes[13][4] = { 4, 49, 93 };
+        p.notes[13][5] = { 4, 70, 52 };
+        p.notes[14][0] = { 0, 48, 67 };
+        p.notes[14][1] = { 1, 60, 50 };
+        p.notes[14][2] = { 2, 80, 29 };
+        p.notes[14][3] = { 3, 42, 176 };
+        p.notes[14][4] = { 4, 54, 122 };
+        p.notes[14][5] = { 4, 66, 115 };
+        p.notes[15][0] = { 0, 48, 80 };
+        p.notes[15][1] = { 1, 60, 61 };
+        p.notes[15][2] = { 2, 80, 37 };
+        p.notes[15][3] = { 3, 30, 124 };
+        p.notes[15][4] = { 4, 49, 63 };
+        p.notes[15][5] = { 4, 70, 54 };
         m_patterns.push_back(p);
     }
-
-    // ================================================================
-    // Order list: 32 bars = ~64 seconds
-    //
-    // Intro (2) → Verse 1 (4) → Chorus 1 (4) →
-    // Verse 2 (4) → Chorus 2 (4) →
-    // Bridge (4) → Chorus 3 (4) → Outro (4) → Buildup-to-loop (2)
-    // ================================================================
-    m_orderList = {
-        0, 1,                 // Intro: teaser + beat drop (2 bars)
-        2, 3, 4, 5,           // Verse 1: call, response, energy build, pre-chorus (4 bars)
-        6, 7, 8, 6,           // Chorus 1: hook, response, flourish, hook again (4 bars)
-        2, 3, 4, 5,           // Verse 2: same structure, familiarity (4 bars)
-        6, 7, 8, 7,           // Chorus 2: hook, response, flourish, extra response (4 bars)
-        9, 9, 10, 10,         // Bridge: contrast, builds back (4 bars)
-        6, 7, 8, 6,           // Chorus 3: final hook payoff (4 bars)
-        11, 7, 11, 8          // Outro: callbacks + smooth loop-back (4 bars)
-    };
+    // Bar 14
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 121 };
+        p.notes[0][1] = { 1, 60, 109 };
+        p.notes[0][2] = { 2, 80, 85 };
+        p.notes[0][4] = { 4, 42, 84 };
+        p.notes[0][5] = { 4, 61, 72 };
+        p.notes[1][0] = { 0, 48, 88 };
+        p.notes[1][1] = { 1, 60, 94 };
+        p.notes[1][2] = { 2, 80, 62 };
+        p.notes[1][4] = { 4, 42, 95 };
+        p.notes[1][5] = { 4, 68, 45 };
+        p.notes[2][0] = { 0, 48, 64 };
+        p.notes[2][1] = { 1, 60, 92 };
+        p.notes[2][2] = { 2, 80, 80 };
+        p.notes[2][3] = { 3, 49, 92 };
+        p.notes[2][4] = { 4, 42, 97 };
+        p.notes[2][5] = { 4, 68, 72 };
+        p.notes[2][6] = { 6, 85, 40 };
+        p.notes[3][1] = { 1, 60, 46 };
+        p.notes[3][2] = { 2, 80, 32 };
+        p.notes[3][3] = { 3, 42, 100 };
+        p.notes[4][4] = { 4, 54, 91 };
+        p.notes[4][5] = { 4, 66, 73 };
+        p.notes[6][2] = { 2, 80, 37 };
+        p.notes[7][6] = { 6, 73, 51 };
+        p.notes[8][1] = { 1, 60, 96 };
+        p.notes[8][2] = { 2, 80, 101 };
+        p.notes[8][4] = { 4, 61, 66 };
+        p.notes[9][0] = { 0, 48, 121 };
+        p.notes[9][1] = { 1, 60, 111 };
+        p.notes[9][2] = { 2, 80, 96 };
+        p.notes[9][4] = { 4, 61, 95 };
+        p.notes[10][0] = { 0, 48, 45 };
+        p.notes[10][2] = { 2, 80, 26 };
+        p.notes[10][3] = { 3, 35, 154 };
+        p.notes[10][4] = { 4, 49, 52 };
+        p.notes[10][5] = { 4, 71, 61 };
+        p.notes[11][0] = { 0, 48, 75 };
+        p.notes[11][1] = { 1, 60, 38 };
+        p.notes[11][2] = { 2, 80, 73 };
+        p.notes[11][3] = { 3, 35, 164 };
+        p.notes[11][4] = { 4, 54, 75 };
+        p.notes[11][5] = { 4, 61, 70 };
+        p.notes[12][0] = { 0, 48, 51 };
+        p.notes[12][2] = { 2, 80, 35 };
+        p.notes[12][3] = { 3, 35, 132 };
+        p.notes[12][4] = { 4, 54, 104 };
+        p.notes[12][5] = { 4, 66, 69 };
+        p.notes[12][6] = { 6, 78, 45 };
+        p.notes[13][0] = { 0, 48, 43 };
+        p.notes[13][3] = { 3, 35, 136 };
+        p.notes[13][4] = { 4, 54, 99 };
+        p.notes[13][5] = { 4, 66, 67 };
+        p.notes[13][6] = { 6, 78, 78 };
+        p.notes[13][7] = { 7, 73, 44 };
+        p.notes[14][0] = { 0, 48, 154 };
+        p.notes[14][1] = { 1, 60, 164 };
+        p.notes[14][2] = { 2, 80, 147 };
+        p.notes[14][4] = { 4, 54, 70 };
+        p.notes[14][6] = { 6, 85, 55 };
+        p.notes[15][1] = { 1, 60, 54 };
+        p.notes[15][2] = { 2, 80, 38 };
+        p.notes[15][3] = { 3, 37, 140 };
+        p.notes[15][4] = { 4, 49, 81 };
+        p.notes[15][5] = { 4, 61, 105 };
+        p.notes[15][6] = { 6, 78, 91 };
+        p.notes[15][7] = { 7, 78, 40 };
+        m_patterns.push_back(p);
+    }
+    // Bar 15
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][2] = { 2, 80, 26 };
+        p.notes[0][3] = { 3, 39, 84 };
+        p.notes[0][4] = { 4, 49, 133 };
+        p.notes[0][5] = { 4, 68, 54 };
+        p.notes[0][6] = { 6, 78, 61 };
+        p.notes[0][7] = { 7, 78, 49 };
+        p.notes[1][0] = { 0, 48, 156 };
+        p.notes[1][1] = { 1, 60, 123 };
+        p.notes[1][2] = { 2, 80, 141 };
+        p.notes[1][3] = { 3, 30, 118 };
+        p.notes[1][4] = { 4, 49, 135 };
+        p.notes[1][5] = { 4, 66, 67 };
+        p.notes[2][0] = { 0, 48, 52 };
+        p.notes[2][3] = { 3, 42, 116 };
+        p.notes[2][4] = { 4, 49, 75 };
+        p.notes[2][5] = { 4, 59, 67 };
+        p.notes[3][0] = { 0, 48, 141 };
+        p.notes[3][1] = { 1, 60, 71 };
+        p.notes[3][2] = { 2, 80, 60 };
+        p.notes[4][0] = { 0, 48, 71 };
+        p.notes[4][1] = { 1, 60, 33 };
+        p.notes[4][2] = { 2, 80, 46 };
+        p.notes[5][0] = { 0, 48, 49 };
+        p.notes[5][1] = { 1, 60, 47 };
+        p.notes[5][2] = { 2, 80, 26 };
+        p.notes[6][0] = { 0, 48, 109 };
+        p.notes[6][1] = { 1, 60, 154 };
+        p.notes[6][2] = { 2, 80, 150 };
+        p.notes[6][4] = { 4, 49, 84 };
+        p.notes[6][5] = { 4, 54, 91 };
+        p.notes[7][2] = { 2, 80, 28 };
+        p.notes[7][4] = { 4, 42, 111 };
+        p.notes[7][5] = { 4, 68, 45 };
+        p.notes[7][6] = { 6, 73, 55 };
+        p.notes[7][7] = { 7, 73, 40 };
+        p.notes[8][3] = { 3, 37, 170 };
+        p.notes[8][4] = { 4, 42, 131 };
+        p.notes[8][5] = { 4, 68, 63 };
+        p.notes[8][6] = { 6, 85, 52 };
+        p.notes[9][0] = { 0, 48, 58 };
+        p.notes[9][2] = { 2, 80, 38 };
+        p.notes[9][3] = { 3, 37, 140 };
+        p.notes[9][4] = { 4, 42, 95 };
+        p.notes[9][5] = { 4, 61, 66 };
+        p.notes[9][6] = { 6, 77, 42 };
+        p.notes[10][0] = { 0, 48, 121 };
+        p.notes[10][1] = { 1, 60, 66 };
+        p.notes[10][2] = { 2, 80, 51 };
+        p.notes[10][3] = { 3, 39, 200 };
+        p.notes[10][4] = { 4, 54, 75 };
+        p.notes[10][5] = { 4, 61, 70 };
+        p.notes[10][6] = { 6, 77, 55 };
+        p.notes[11][0] = { 0, 48, 48 };
+        p.notes[11][3] = { 3, 39, 186 };
+        p.notes[11][4] = { 4, 51, 108 };
+        p.notes[11][5] = { 4, 70, 58 };
+        p.notes[12][0] = { 0, 48, 84 };
+        p.notes[12][1] = { 1, 60, 65 };
+        p.notes[12][2] = { 2, 80, 64 };
+        p.notes[12][3] = { 3, 39, 192 };
+        p.notes[12][4] = { 4, 61, 75 };
+        p.notes[12][5] = { 4, 63, 66 };
+        p.notes[13][1] = { 1, 60, 63 };
+        p.notes[13][2] = { 2, 80, 39 };
+        p.notes[13][3] = { 3, 39, 142 };
+        p.notes[14][0] = { 0, 48, 104 };
+        p.notes[14][1] = { 1, 60, 118 };
+        p.notes[14][2] = { 2, 80, 112 };
+        p.notes[14][4] = { 4, 49, 111 };
+        p.notes[14][5] = { 4, 70, 67 };
+        p.notes[14][6] = { 6, 73, 40 };
+        p.notes[15][3] = { 3, 37, 136 };
+        p.notes[15][4] = { 4, 49, 138 };
+        p.notes[15][5] = { 4, 68, 73 };
+        p.notes[15][6] = { 6, 73, 73 };
+        m_patterns.push_back(p);
+    }
+    // Bar 16
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 53 };
+        p.notes[0][3] = { 3, 39, 160 };
+        p.notes[0][4] = { 4, 47, 88 };
+        p.notes[0][5] = { 4, 66, 84 };
+        p.notes[1][0] = { 0, 48, 132 };
+        p.notes[1][1] = { 1, 60, 76 };
+        p.notes[1][2] = { 2, 80, 82 };
+        p.notes[1][3] = { 3, 35, 164 };
+        p.notes[1][4] = { 4, 54, 129 };
+        p.notes[1][5] = { 4, 59, 87 };
+        p.notes[2][1] = { 1, 60, 58 };
+        p.notes[2][2] = { 2, 80, 37 };
+        p.notes[3][0] = { 0, 48, 122 };
+        p.notes[3][1] = { 1, 60, 91 };
+        p.notes[3][2] = { 2, 80, 48 };
+        p.notes[4][0] = { 0, 48, 99 };
+        p.notes[4][1] = { 1, 60, 44 };
+        p.notes[4][2] = { 2, 80, 61 };
+        p.notes[5][1] = { 1, 60, 67 };
+        p.notes[5][2] = { 2, 80, 65 };
+        p.notes[5][3] = { 3, 35, 116 };
+        p.notes[5][4] = { 4, 47, 54 };
+        p.notes[5][5] = { 4, 66, 66 };
+        p.notes[6][0] = { 0, 48, 61 };
+        p.notes[6][1] = { 1, 60, 76 };
+        p.notes[6][2] = { 2, 80, 62 };
+        p.notes[6][3] = { 3, 47, 92 };
+        p.notes[6][4] = { 4, 66, 84 };
+        p.notes[6][6] = { 6, 87, 55 };
+        p.notes[7][3] = { 3, 34, 112 };
+        p.notes[7][4] = { 4, 54, 64 };
+        p.notes[8][2] = { 2, 80, 35 };
+        p.notes[8][4] = { 4, 63, 86 };
+        p.notes[9][0] = { 0, 48, 81 };
+        p.notes[9][1] = { 1, 60, 54 };
+        p.notes[9][2] = { 2, 80, 69 };
+        p.notes[9][3] = { 3, 32, 118 };
+        p.notes[9][4] = { 4, 32, 55 };
+        p.notes[9][5] = { 4, 63, 112 };
+        p.notes[10][0] = { 0, 48, 46 };
+        p.notes[10][2] = { 2, 80, 44 };
+        p.notes[10][4] = { 4, 32, 57 };
+        p.notes[10][5] = { 4, 71, 79 };
+        p.notes[11][0] = { 0, 48, 133 };
+        p.notes[11][1] = { 1, 60, 101 };
+        p.notes[11][2] = { 2, 80, 85 };
+        p.notes[11][3] = { 3, 44, 112 };
+        p.notes[11][4] = { 4, 44, 93 };
+        p.notes[11][5] = { 4, 56, 52 };
+        p.notes[12][1] = { 1, 60, 39 };
+        p.notes[12][2] = { 2, 80, 31 };
+        p.notes[12][3] = { 3, 44, 132 };
+        p.notes[12][4] = { 4, 56, 77 };
+        p.notes[12][5] = { 4, 68, 60 };
+        p.notes[13][0] = { 0, 48, 130 };
+        p.notes[13][1] = { 1, 60, 68 };
+        p.notes[13][2] = { 2, 80, 74 };
+        p.notes[13][3] = { 3, 32, 150 };
+        p.notes[13][4] = { 4, 32, 61 };
+        p.notes[13][5] = { 4, 63, 78 };
+        p.notes[13][6] = { 6, 87, 54 };
+        p.notes[14][0] = { 0, 48, 52 };
+        p.notes[14][1] = { 1, 60, 37 };
+        p.notes[14][2] = { 2, 80, 33 };
+        p.notes[14][3] = { 3, 44, 110 };
+        p.notes[15][0] = { 0, 48, 137 };
+        p.notes[15][1] = { 1, 60, 91 };
+        p.notes[15][2] = { 2, 80, 76 };
+        p.notes[15][3] = { 3, 32, 124 };
+        p.notes[15][4] = { 4, 54, 117 };
+        p.notes[15][5] = { 4, 59, 94 };
+        m_patterns.push_back(p);
+    }
+    // Bar 17
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 44 };
+        p.notes[0][1] = { 1, 60, 33 };
+        p.notes[0][2] = { 2, 80, 34 };
+        p.notes[0][3] = { 3, 47, 78 };
+        p.notes[0][4] = { 4, 51, 90 };
+        p.notes[0][5] = { 4, 59, 91 };
+        p.notes[1][0] = { 0, 48, 127 };
+        p.notes[1][1] = { 1, 60, 52 };
+        p.notes[1][2] = { 2, 80, 38 };
+        p.notes[1][3] = { 3, 35, 120 };
+        p.notes[1][4] = { 4, 47, 55 };
+        p.notes[1][5] = { 4, 59, 60 };
+        p.notes[1][6] = { 6, 78, 60 };
+        p.notes[2][0] = { 0, 48, 45 };
+        p.notes[2][1] = { 1, 60, 41 };
+        p.notes[2][4] = { 4, 47, 72 };
+        p.notes[2][5] = { 4, 63, 85 };
+        p.notes[3][0] = { 0, 48, 82 };
+        p.notes[3][1] = { 1, 60, 97 };
+        p.notes[3][2] = { 2, 80, 87 };
+        p.notes[3][3] = { 3, 35, 154 };
+        p.notes[3][4] = { 4, 54, 55 };
+        p.notes[3][5] = { 4, 71, 51 };
+        p.notes[3][6] = { 6, 75, 57 };
+        p.notes[4][0] = { 0, 48, 47 };
+        p.notes[4][3] = { 3, 35, 138 };
+        p.notes[4][4] = { 4, 47, 84 };
+        p.notes[4][5] = { 4, 71, 58 };
+        p.notes[5][0] = { 0, 48, 95 };
+        p.notes[5][1] = { 1, 60, 34 };
+        p.notes[5][2] = { 2, 80, 31 };
+        p.notes[5][3] = { 3, 35, 130 };
+        p.notes[5][4] = { 4, 63, 79 };
+        p.notes[6][1] = { 1, 60, 39 };
+        p.notes[6][3] = { 3, 47, 90 };
+        p.notes[6][4] = { 4, 54, 84 };
+        p.notes[6][6] = { 6, 87, 54 };
+        p.notes[7][0] = { 0, 48, 86 };
+        p.notes[7][1] = { 1, 60, 95 };
+        p.notes[7][2] = { 2, 80, 70 };
+        p.notes[7][3] = { 3, 47, 92 };
+        p.notes[7][4] = { 4, 54, 82 };
+        p.notes[7][5] = { 4, 63, 58 };
+        p.notes[8][0] = { 0, 48, 50 };
+        p.notes[8][2] = { 2, 80, 31 };
+        p.notes[8][3] = { 3, 37, 102 };
+        p.notes[8][4] = { 4, 56, 99 };
+        p.notes[9][0] = { 0, 48, 136 };
+        p.notes[9][1] = { 1, 60, 60 };
+        p.notes[9][2] = { 2, 80, 55 };
+        p.notes[9][3] = { 3, 37, 184 };
+        p.notes[9][4] = { 4, 37, 117 };
+        p.notes[9][5] = { 4, 68, 46 };
+        p.notes[9][6] = { 6, 73, 45 };
+        p.notes[10][0] = { 0, 48, 61 };
+        p.notes[10][1] = { 1, 60, 51 };
+        p.notes[10][2] = { 2, 80, 35 };
+        p.notes[10][3] = { 3, 49, 88 };
+        p.notes[10][4] = { 4, 37, 77 };
+        p.notes[10][5] = { 4, 68, 61 };
+        p.notes[10][6] = { 6, 73, 52 };
+        p.notes[11][0] = { 0, 48, 92 };
+        p.notes[11][1] = { 1, 60, 95 };
+        p.notes[11][2] = { 2, 80, 91 };
+        p.notes[11][3] = { 3, 37, 164 };
+        p.notes[11][4] = { 4, 54, 79 };
+        p.notes[11][5] = { 4, 68, 70 };
+        p.notes[11][6] = { 6, 73, 72 };
+        p.notes[12][0] = { 0, 48, 105 };
+        p.notes[12][1] = { 1, 60, 61 };
+        p.notes[12][2] = { 2, 80, 42 };
+        p.notes[12][4] = { 4, 49, 144 };
+        p.notes[12][5] = { 4, 56, 126 };
+        p.notes[13][0] = { 0, 48, 78 };
+        p.notes[13][1] = { 1, 60, 57 };
+        p.notes[13][2] = { 2, 80, 45 };
+        p.notes[13][3] = { 3, 37, 122 };
+        p.notes[13][4] = { 4, 56, 145 };
+        p.notes[13][5] = { 4, 61, 57 };
+        p.notes[14][0] = { 0, 48, 80 };
+        p.notes[14][1] = { 1, 60, 60 };
+        p.notes[14][2] = { 2, 80, 56 };
+        p.notes[14][3] = { 3, 37, 84 };
+        p.notes[14][4] = { 4, 49, 124 };
+        p.notes[14][5] = { 4, 68, 72 };
+        p.notes[15][0] = { 0, 48, 76 };
+        p.notes[15][1] = { 1, 60, 63 };
+        p.notes[15][2] = { 2, 80, 53 };
+        p.notes[15][3] = { 3, 37, 126 };
+        p.notes[15][4] = { 4, 49, 118 };
+        p.notes[15][5] = { 4, 61, 73 };
+        m_patterns.push_back(p);
+    }
+    // Bar 18
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 57 };
+        p.notes[0][1] = { 1, 60, 48 };
+        p.notes[0][2] = { 2, 80, 33 };
+        p.notes[0][3] = { 3, 37, 168 };
+        p.notes[0][4] = { 4, 49, 93 };
+        p.notes[0][5] = { 4, 68, 81 };
+        p.notes[0][6] = { 6, 73, 54 };
+        p.notes[2][1] = { 1, 60, 35 };
+        p.notes[2][2] = { 2, 80, 52 };
+        p.notes[3][1] = { 1, 60, 32 };
+        p.notes[3][2] = { 2, 80, 50 };
+        p.notes[3][4] = { 4, 66, 55 };
+        p.notes[3][5] = { 4, 70, 67 };
+        p.notes[3][6] = { 6, 82, 64 };
+        p.notes[4][4] = { 4, 61, 59 };
+        p.notes[4][5] = { 4, 68, 55 };
+        p.notes[4][6] = { 6, 78, 61 };
+        p.notes[4][7] = { 7, 78, 44 };
+        p.notes[5][0] = { 0, 48, 230 };
+        p.notes[5][1] = { 1, 60, 202 };
+        p.notes[5][2] = { 2, 80, 198 };
+        p.notes[5][6] = { 6, 73, 69 };
+        p.notes[5][7] = { 7, 73, 40 };
+        p.notes[6][0] = { 0, 48, 132 };
+        p.notes[6][1] = { 1, 60, 61 };
+        p.notes[6][2] = { 2, 80, 44 };
+        p.notes[6][3] = { 3, 39, 82 };
+        p.notes[6][6] = { 6, 73, 88 };
+        p.notes[7][1] = { 1, 60, 41 };
+        p.notes[7][2] = { 2, 80, 30 };
+        p.notes[7][4] = { 4, 54, 63 };
+        p.notes[8][0] = { 0, 48, 154 };
+        p.notes[8][1] = { 1, 60, 85 };
+        p.notes[8][2] = { 2, 80, 87 };
+        p.notes[8][3] = { 3, 35, 160 };
+        p.notes[8][4] = { 4, 54, 140 };
+        p.notes[8][5] = { 4, 61, 64 };
+        p.notes[8][6] = { 6, 73, 60 };
+        p.notes[9][0] = { 0, 48, 57 };
+        p.notes[9][1] = { 1, 60, 37 };
+        p.notes[9][2] = { 2, 80, 34 };
+        p.notes[9][4] = { 4, 54, 133 };
+        p.notes[10][0] = { 0, 48, 126 };
+        p.notes[10][1] = { 1, 60, 106 };
+        p.notes[10][2] = { 2, 80, 88 };
+        p.notes[10][3] = { 3, 47, 92 };
+        p.notes[10][4] = { 4, 47, 64 };
+        p.notes[10][5] = { 4, 59, 72 };
+        p.notes[11][2] = { 2, 80, 28 };
+        p.notes[11][3] = { 3, 35, 126 };
+        p.notes[11][4] = { 4, 47, 115 };
+        p.notes[11][5] = { 4, 59, 105 };
+        p.notes[11][6] = { 6, 73, 58 };
+        p.notes[11][7] = { 7, 75, 43 };
+        p.notes[12][0] = { 0, 48, 147 };
+        p.notes[12][1] = { 1, 60, 45 };
+        p.notes[12][2] = { 2, 80, 40 };
+        p.notes[12][3] = { 3, 35, 120 };
+        p.notes[12][4] = { 4, 54, 127 };
+        p.notes[12][5] = { 4, 66, 55 };
+        p.notes[13][0] = { 0, 48, 72 };
+        p.notes[13][1] = { 1, 60, 42 };
+        p.notes[13][2] = { 2, 80, 30 };
+        p.notes[13][3] = { 3, 37, 144 };
+        p.notes[13][4] = { 4, 37, 75 };
+        p.notes[13][5] = { 4, 66, 58 };
+        p.notes[14][0] = { 0, 48, 79 };
+        p.notes[14][1] = { 1, 60, 92 };
+        p.notes[14][2] = { 2, 80, 104 };
+        p.notes[14][3] = { 3, 37, 174 };
+        p.notes[14][4] = { 4, 37, 102 };
+        p.notes[14][5] = { 4, 66, 57 };
+        p.notes[15][0] = { 0, 48, 47 };
+        p.notes[15][2] = { 2, 80, 28 };
+        p.notes[15][3] = { 3, 37, 122 };
+        p.notes[15][4] = { 4, 37, 82 };
+        p.notes[15][5] = { 4, 70, 52 };
+        p.notes[15][6] = { 6, 78, 64 };
+        p.notes[15][7] = { 7, 73, 44 };
+        m_patterns.push_back(p);
+    }
+    // Bar 19
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 134 };
+        p.notes[0][1] = { 1, 60, 54 };
+        p.notes[0][2] = { 2, 80, 61 };
+        p.notes[0][3] = { 3, 42, 188 };
+        p.notes[0][4] = { 4, 42, 108 };
+        p.notes[0][5] = { 4, 66, 87 };
+        p.notes[1][0] = { 0, 48, 44 };
+        p.notes[1][1] = { 1, 60, 32 };
+        p.notes[1][2] = { 2, 80, 34 };
+        p.notes[1][3] = { 3, 42, 180 };
+        p.notes[1][4] = { 4, 49, 68 };
+        p.notes[2][0] = { 0, 48, 53 };
+        p.notes[2][1] = { 1, 60, 82 };
+        p.notes[2][2] = { 2, 80, 79 };
+        p.notes[2][3] = { 3, 42, 190 };
+        p.notes[2][4] = { 4, 42, 64 };
+        p.notes[2][5] = { 4, 70, 54 };
+        p.notes[2][6] = { 6, 78, 45 };
+        p.notes[3][0] = { 0, 48, 41 };
+        p.notes[3][2] = { 2, 80, 26 };
+        p.notes[3][3] = { 3, 42, 182 };
+        p.notes[3][4] = { 4, 54, 109 };
+        p.notes[3][5] = { 4, 66, 73 };
+        p.notes[3][6] = { 6, 78, 48 };
+        p.notes[4][0] = { 0, 48, 129 };
+        p.notes[4][1] = { 1, 60, 51 };
+        p.notes[4][2] = { 2, 80, 50 };
+        p.notes[4][4] = { 4, 49, 131 };
+        p.notes[4][5] = { 4, 68, 49 };
+        p.notes[5][0] = { 0, 48, 50 };
+        p.notes[5][1] = { 1, 60, 35 };
+        p.notes[5][2] = { 2, 80, 30 };
+        p.notes[5][3] = { 3, 42, 170 };
+        p.notes[5][4] = { 4, 49, 158 };
+        p.notes[6][0] = { 0, 48, 50 };
+        p.notes[6][1] = { 1, 60, 94 };
+        p.notes[6][2] = { 2, 80, 93 };
+        p.notes[6][3] = { 3, 42, 180 };
+        p.notes[6][4] = { 4, 49, 144 };
+        p.notes[6][5] = { 4, 63, 49 };
+        p.notes[7][0] = { 0, 48, 48 };
+        p.notes[7][3] = { 3, 39, 182 };
+        p.notes[7][4] = { 4, 49, 117 };
+        p.notes[7][5] = { 4, 63, 70 };
+        p.notes[8][0] = { 0, 48, 103 };
+        p.notes[8][3] = { 3, 51, 122 };
+        p.notes[8][4] = { 4, 49, 118 };
+        p.notes[8][5] = { 4, 54, 105 };
+        p.notes[9][1] = { 1, 60, 39 };
+        p.notes[9][2] = { 2, 80, 27 };
+        p.notes[9][3] = { 3, 39, 156 };
+        p.notes[9][4] = { 4, 49, 93 };
+        p.notes[9][5] = { 4, 63, 55 };
+        p.notes[10][0] = { 0, 48, 67 };
+        p.notes[10][1] = { 1, 60, 107 };
+        p.notes[10][2] = { 2, 80, 100 };
+        p.notes[10][3] = { 3, 39, 146 };
+        p.notes[10][4] = { 4, 51, 61 };
+        p.notes[10][5] = { 4, 66, 64 };
+        p.notes[11][0] = { 0, 48, 48 };
+        p.notes[11][2] = { 2, 80, 31 };
+        p.notes[11][3] = { 3, 39, 158 };
+        p.notes[11][4] = { 4, 66, 57 };
+        p.notes[12][0] = { 0, 48, 121 };
+        p.notes[12][2] = { 2, 80, 35 };
+        p.notes[12][3] = { 3, 37, 168 };
+        p.notes[12][4] = { 4, 42, 64 };
+        p.notes[12][5] = { 4, 61, 70 };
+        p.notes[12][6] = { 6, 73, 40 };
+        p.notes[13][0] = { 0, 48, 135 };
+        p.notes[13][1] = { 1, 60, 109 };
+        p.notes[13][2] = { 2, 80, 102 };
+        p.notes[13][3] = { 3, 37, 142 };
+        p.notes[13][4] = { 4, 49, 124 };
+        p.notes[13][5] = { 4, 54, 60 };
+        p.notes[14][1] = { 1, 60, 40 };
+        p.notes[14][2] = { 2, 80, 31 };
+        p.notes[14][3] = { 3, 35, 146 };
+        p.notes[14][4] = { 4, 47, 59 };
+        p.notes[14][5] = { 4, 71, 43 };
+        p.notes[14][6] = { 6, 73, 58 };
+        p.notes[15][0] = { 0, 48, 152 };
+        p.notes[15][1] = { 1, 60, 93 };
+        p.notes[15][2] = { 2, 80, 115 };
+        p.notes[15][3] = { 3, 35, 154 };
+        p.notes[15][4] = { 4, 47, 77 };
+        m_patterns.push_back(p);
+    }
+    // Bar 20
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 74 };
+        p.notes[0][2] = { 2, 80, 29 };
+        p.notes[0][3] = { 3, 35, 156 };
+        p.notes[0][4] = { 4, 54, 156 };
+        p.notes[0][5] = { 4, 59, 78 };
+        p.notes[0][6] = { 6, 73, 51 };
+        p.notes[1][0] = { 0, 48, 154 };
+        p.notes[1][1] = { 1, 60, 145 };
+        p.notes[1][2] = { 2, 80, 146 };
+        p.notes[1][3] = { 3, 35, 170 };
+        p.notes[1][4] = { 4, 54, 136 };
+        p.notes[1][5] = { 4, 63, 52 };
+        p.notes[2][1] = { 1, 60, 39 };
+        p.notes[2][2] = { 2, 80, 38 };
+        p.notes[2][3] = { 3, 35, 168 };
+        p.notes[2][4] = { 4, 59, 82 };
+        p.notes[3][0] = { 0, 48, 153 };
+        p.notes[3][1] = { 1, 60, 61 };
+        p.notes[3][2] = { 2, 80, 61 };
+        p.notes[3][3] = { 3, 35, 128 };
+        p.notes[3][4] = { 4, 54, 120 };
+        p.notes[4][0] = { 0, 48, 74 };
+        p.notes[4][1] = { 1, 60, 33 };
+        p.notes[4][2] = { 2, 80, 30 };
+        p.notes[4][3] = { 3, 35, 144 };
+        p.notes[4][4] = { 4, 54, 120 };
+        p.notes[4][5] = { 4, 59, 90 };
+        p.notes[5][0] = { 0, 48, 71 };
+        p.notes[5][1] = { 1, 60, 68 };
+        p.notes[5][2] = { 2, 80, 78 };
+        p.notes[5][3] = { 3, 35, 162 };
+        p.notes[5][4] = { 4, 54, 106 };
+        p.notes[5][5] = { 4, 66, 58 };
+        p.notes[6][2] = { 2, 80, 32 };
+        p.notes[6][3] = { 3, 35, 132 };
+        p.notes[6][4] = { 4, 54, 140 };
+        p.notes[6][5] = { 4, 68, 63 };
+        p.notes[7][0] = { 0, 48, 141 };
+        p.notes[7][1] = { 1, 60, 66 };
+        p.notes[7][2] = { 2, 80, 77 };
+        p.notes[7][3] = { 3, 32, 140 };
+        p.notes[7][4] = { 4, 56, 145 };
+        p.notes[7][5] = { 4, 71, 61 };
+        p.notes[8][0] = { 0, 48, 48 };
+        p.notes[8][1] = { 1, 60, 32 };
+        p.notes[8][2] = { 2, 80, 31 };
+        p.notes[8][4] = { 4, 63, 117 };
+        p.notes[9][0] = { 0, 48, 111 };
+        p.notes[9][1] = { 1, 60, 91 };
+        p.notes[9][2] = { 2, 80, 89 };
+        p.notes[9][4] = { 4, 51, 64 };
+        p.notes[10][0] = { 0, 48, 83 };
+        p.notes[10][2] = { 2, 80, 31 };
+        p.notes[10][3] = { 3, 34, 172 };
+        p.notes[10][6] = { 6, 73, 91 };
+        p.notes[11][2] = { 2, 80, 25 };
+        p.notes[11][4] = { 4, 46, 117 };
+        p.notes[11][5] = { 4, 65, 45 };
+        p.notes[12][1] = { 1, 60, 47 };
+        p.notes[12][2] = { 2, 80, 37 };
+        p.notes[12][3] = { 3, 35, 130 };
+        p.notes[12][4] = { 4, 46, 106 };
+        p.notes[12][5] = { 4, 70, 69 };
+        p.notes[13][0] = { 0, 48, 125 };
+        p.notes[13][1] = { 1, 60, 98 };
+        p.notes[13][2] = { 2, 80, 75 };
+        p.notes[13][3] = { 3, 35, 172 };
+        p.notes[13][4] = { 4, 54, 117 };
+        p.notes[13][5] = { 4, 63, 61 };
+        p.notes[14][2] = { 2, 80, 26 };
+        p.notes[14][4] = { 4, 59, 124 };
+        p.notes[14][5] = { 4, 71, 52 };
+        p.notes[15][1] = { 1, 60, 45 };
+        p.notes[15][2] = { 2, 80, 31 };
+        p.notes[15][3] = { 3, 37, 100 };
+        p.notes[15][4] = { 4, 56, 79 };
+        p.notes[15][5] = { 4, 68, 55 };
+        m_patterns.push_back(p);
+    }
+    // Bar 21
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 84 };
+        p.notes[0][1] = { 1, 60, 87 };
+        p.notes[0][2] = { 2, 80, 56 };
+        p.notes[0][3] = { 3, 37, 110 };
+        p.notes[0][4] = { 4, 49, 138 };
+        p.notes[1][0] = { 0, 48, 110 };
+        p.notes[1][1] = { 1, 60, 85 };
+        p.notes[1][2] = { 2, 80, 72 };
+        p.notes[1][3] = { 3, 37, 156 };
+        p.notes[1][4] = { 4, 49, 122 };
+        p.notes[1][5] = { 4, 68, 51 };
+        p.notes[2][0] = { 0, 48, 57 };
+        p.notes[2][1] = { 1, 60, 50 };
+        p.notes[2][2] = { 2, 80, 38 };
+        p.notes[2][3] = { 3, 37, 186 };
+        p.notes[2][4] = { 4, 49, 52 };
+        p.notes[2][5] = { 4, 61, 109 };
+        p.notes[3][0] = { 0, 48, 65 };
+        p.notes[3][1] = { 1, 60, 56 };
+        p.notes[3][2] = { 2, 80, 38 };
+        p.notes[3][4] = { 4, 49, 91 };
+        p.notes[3][5] = { 4, 68, 66 };
+        p.notes[4][0] = { 0, 48, 68 };
+        p.notes[4][1] = { 1, 60, 53 };
+        p.notes[4][2] = { 2, 80, 37 };
+        p.notes[4][3] = { 3, 37, 164 };
+        p.notes[4][4] = { 4, 53, 77 };
+        p.notes[4][5] = { 4, 61, 94 };
+        p.notes[4][6] = { 6, 73, 54 };
+        p.notes[5][0] = { 0, 48, 90 };
+        p.notes[5][1] = { 1, 60, 107 };
+        p.notes[5][2] = { 2, 80, 72 };
+        p.notes[5][3] = { 3, 37, 152 };
+        p.notes[5][4] = { 4, 54, 97 };
+        p.notes[5][5] = { 4, 68, 66 };
+        p.notes[6][0] = { 0, 48, 68 };
+        p.notes[6][1] = { 1, 60, 76 };
+        p.notes[6][2] = { 2, 80, 77 };
+        p.notes[6][3] = { 3, 42, 114 };
+        p.notes[6][4] = { 4, 42, 68 };
+        p.notes[6][5] = { 4, 54, 121 };
+        p.notes[7][0] = { 0, 48, 82 };
+        p.notes[7][2] = { 2, 80, 41 };
+        p.notes[7][3] = { 3, 30, 98 };
+        p.notes[7][4] = { 4, 42, 118 };
+        p.notes[7][5] = { 4, 61, 61 };
+        p.notes[8][0] = { 0, 48, 99 };
+        p.notes[8][1] = { 1, 60, 71 };
+        p.notes[8][2] = { 2, 80, 48 };
+        p.notes[8][4] = { 4, 42, 100 };
+        p.notes[8][5] = { 4, 66, 54 };
+        p.notes[9][1] = { 1, 60, 40 };
+        p.notes[9][2] = { 2, 80, 33 };
+        p.notes[9][3] = { 3, 42, 166 };
+        p.notes[9][4] = { 4, 42, 75 };
+        p.notes[9][5] = { 4, 66, 54 };
+        p.notes[9][6] = { 6, 73, 61 };
+        p.notes[10][0] = { 0, 48, 120 };
+        p.notes[10][1] = { 1, 60, 79 };
+        p.notes[10][2] = { 2, 80, 97 };
+        p.notes[10][3] = { 3, 30, 108 };
+        p.notes[10][4] = { 4, 42, 108 };
+        p.notes[10][5] = { 4, 61, 82 };
+        p.notes[11][0] = { 0, 48, 82 };
+        p.notes[11][2] = { 2, 80, 31 };
+        p.notes[11][3] = { 3, 42, 96 };
+        p.notes[11][4] = { 4, 42, 104 };
+        p.notes[11][5] = { 4, 58, 84 };
+        p.notes[12][0] = { 0, 48, 110 };
+        p.notes[12][1] = { 1, 60, 82 };
+        p.notes[12][2] = { 2, 80, 82 };
+        p.notes[12][4] = { 4, 49, 124 };
+        p.notes[13][1] = { 1, 60, 36 };
+        p.notes[13][2] = { 2, 80, 29 };
+        p.notes[13][3] = { 3, 42, 128 };
+        p.notes[13][4] = { 4, 42, 77 };
+        p.notes[13][5] = { 4, 65, 81 };
+        p.notes[13][6] = { 6, 73, 52 };
+        p.notes[14][0] = { 0, 48, 161 };
+        p.notes[14][1] = { 1, 60, 105 };
+        p.notes[14][2] = { 2, 80, 113 };
+        p.notes[14][3] = { 3, 42, 84 };
+        p.notes[14][4] = { 4, 49, 163 };
+        p.notes[14][5] = { 4, 54, 85 };
+        p.notes[15][0] = { 0, 48, 65 };
+        p.notes[15][1] = { 1, 60, 34 };
+        p.notes[15][2] = { 2, 80, 26 };
+        p.notes[15][3] = { 3, 42, 104 };
+        p.notes[15][4] = { 4, 49, 165 };
+        p.notes[15][5] = { 4, 56, 60 };
+        m_patterns.push_back(p);
+    }
+    // Bar 22
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 114 };
+        p.notes[0][1] = { 1, 60, 117 };
+        p.notes[0][2] = { 2, 80, 109 };
+        p.notes[0][3] = { 3, 42, 168 };
+        p.notes[0][4] = { 4, 49, 140 };
+        p.notes[0][5] = { 4, 61, 117 };
+        p.notes[0][6] = { 6, 73, 40 };
+        p.notes[1][2] = { 2, 80, 31 };
+        p.notes[1][3] = { 3, 42, 136 };
+        p.notes[1][4] = { 4, 49, 167 };
+        p.notes[1][5] = { 4, 65, 63 };
+        p.notes[1][6] = { 6, 73, 54 };
+        p.notes[2][0] = { 0, 48, 155 };
+        p.notes[2][1] = { 1, 60, 76 };
+        p.notes[2][2] = { 2, 80, 65 };
+        p.notes[2][3] = { 3, 42, 100 };
+        p.notes[2][4] = { 4, 49, 154 };
+        p.notes[2][5] = { 4, 61, 60 };
+        p.notes[3][0] = { 0, 48, 73 };
+        p.notes[3][1] = { 1, 60, 40 };
+        p.notes[3][2] = { 2, 80, 31 };
+        p.notes[3][4] = { 4, 49, 151 };
+        p.notes[3][5] = { 4, 54, 54 };
+        p.notes[3][6] = { 6, 73, 66 };
+        p.notes[3][7] = { 7, 85, 44 };
+        p.notes[4][0] = { 0, 48, 78 };
+        p.notes[4][1] = { 1, 60, 82 };
+        p.notes[4][2] = { 2, 80, 79 };
+        p.notes[4][3] = { 3, 35, 130 };
+        p.notes[4][4] = { 4, 49, 158 };
+        p.notes[4][5] = { 4, 54, 120 };
+        p.notes[5][0] = { 0, 48, 86 };
+        p.notes[5][1] = { 1, 60, 63 };
+        p.notes[5][2] = { 2, 80, 55 };
+        p.notes[5][4] = { 4, 42, 61 };
+        p.notes[5][5] = { 4, 61, 85 };
+        p.notes[6][0] = { 0, 48, 108 };
+        p.notes[6][1] = { 1, 60, 47 };
+        p.notes[6][2] = { 2, 80, 39 };
+        p.notes[6][3] = { 3, 42, 92 };
+        p.notes[6][4] = { 4, 42, 122 };
+        p.notes[6][5] = { 4, 66, 72 };
+        p.notes[7][0] = { 0, 48, 46 };
+        p.notes[7][1] = { 1, 60, 37 };
+        p.notes[7][4] = { 4, 42, 93 };
+        p.notes[7][5] = { 4, 61, 78 };
+        p.notes[8][0] = { 0, 48, 67 };
+        p.notes[8][1] = { 1, 60, 105 };
+        p.notes[8][2] = { 2, 80, 86 };
+        p.notes[8][3] = { 3, 30, 120 };
+        p.notes[8][4] = { 4, 49, 82 };
+        p.notes[8][5] = { 4, 58, 97 };
+        p.notes[9][0] = { 0, 48, 48 };
+        p.notes[9][4] = { 4, 54, 136 };
+        p.notes[10][0] = { 0, 48, 128 };
+        p.notes[10][1] = { 1, 60, 44 };
+        p.notes[10][2] = { 2, 80, 44 };
+        p.notes[10][3] = { 3, 42, 94 };
+        p.notes[10][4] = { 4, 42, 104 };
+        p.notes[10][5] = { 4, 66, 54 };
+        p.notes[10][6] = { 6, 73, 40 };
+        p.notes[11][0] = { 0, 48, 64 };
+        p.notes[11][1] = { 1, 60, 39 };
+        p.notes[11][2] = { 2, 80, 30 };
+        p.notes[11][3] = { 3, 30, 88 };
+        p.notes[11][4] = { 4, 49, 99 };
+        p.notes[11][6] = { 6, 73, 58 };
+        p.notes[12][0] = { 0, 48, 41 };
+        p.notes[12][1] = { 1, 60, 102 };
+        p.notes[12][2] = { 2, 80, 115 };
+        p.notes[12][3] = { 3, 37, 78 };
+        p.notes[12][4] = { 4, 42, 88 };
+        p.notes[12][5] = { 4, 68, 51 };
+        p.notes[12][6] = { 6, 73, 48 };
+        p.notes[13][1] = { 1, 60, 38 };
+        p.notes[13][2] = { 2, 80, 27 };
+        p.notes[13][3] = { 3, 37, 120 };
+        p.notes[13][4] = { 4, 42, 95 };
+        p.notes[14][0] = { 0, 48, 47 };
+        p.notes[14][1] = { 1, 60, 72 };
+        p.notes[14][2] = { 2, 80, 42 };
+        p.notes[14][4] = { 4, 49, 111 };
+        p.notes[14][5] = { 4, 68, 52 };
+        p.notes[15][1] = { 1, 60, 43 };
+        p.notes[15][2] = { 2, 80, 34 };
+        p.notes[15][3] = { 3, 37, 184 };
+        p.notes[15][4] = { 4, 42, 77 };
+        p.notes[15][5] = { 4, 68, 73 };
+        p.notes[15][6] = { 6, 73, 52 };
+        m_patterns.push_back(p);
+    }
+    // Bar 23
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 45 };
+        p.notes[0][1] = { 1, 60, 52 };
+        p.notes[0][2] = { 2, 80, 37 };
+        p.notes[0][3] = { 3, 37, 140 };
+        p.notes[0][4] = { 4, 42, 117 };
+        p.notes[0][5] = { 4, 56, 73 };
+        p.notes[1][2] = { 2, 80, 30 };
+        p.notes[1][4] = { 4, 66, 97 };
+        p.notes[1][6] = { 6, 73, 82 };
+        p.notes[2][4] = { 4, 63, 77 };
+        p.notes[3][0] = { 0, 48, 191 };
+        p.notes[3][1] = { 1, 60, 208 };
+        p.notes[3][2] = { 2, 80, 180 };
+        p.notes[3][4] = { 4, 56, 100 };
+        p.notes[3][5] = { 4, 68, 69 };
+        p.notes[3][6] = { 6, 80, 75 };
+        p.notes[4][1] = { 1, 60, 42 };
+        p.notes[4][2] = { 2, 80, 40 };
+        p.notes[5][0] = { 0, 48, 130 };
+        p.notes[5][1] = { 1, 60, 54 };
+        p.notes[5][2] = { 2, 80, 66 };
+        p.notes[5][3] = { 3, 39, 204 };
+        p.notes[5][4] = { 4, 51, 117 };
+        p.notes[5][5] = { 4, 68, 109 };
+        p.notes[5][6] = { 6, 75, 46 };
+        p.notes[5][7] = { 7, 75, 40 };
+        p.notes[6][0] = { 0, 48, 68 };
+        p.notes[6][2] = { 2, 80, 31 };
+        p.notes[6][4] = { 4, 51, 118 };
+        p.notes[6][5] = { 4, 68, 102 };
+        p.notes[7][0] = { 0, 48, 163 };
+        p.notes[7][1] = { 1, 60, 161 };
+        p.notes[7][2] = { 2, 80, 152 };
+        p.notes[7][3] = { 3, 34, 84 };
+        p.notes[8][1] = { 1, 60, 34 };
+        p.notes[8][2] = { 2, 80, 34 };
+        p.notes[8][3] = { 3, 34, 168 };
+        p.notes[8][4] = { 4, 46, 108 };
+        p.notes[8][5] = { 4, 65, 58 };
+        p.notes[8][6] = { 6, 77, 58 };
+        p.notes[9][0] = { 0, 48, 150 };
+        p.notes[9][1] = { 1, 60, 72 };
+        p.notes[9][2] = { 2, 80, 67 };
+        p.notes[9][3] = { 3, 34, 140 };
+        p.notes[9][4] = { 4, 65, 70 };
+        p.notes[9][6] = { 6, 73, 54 };
+        p.notes[10][0] = { 0, 48, 68 };
+        p.notes[10][1] = { 1, 60, 37 };
+        p.notes[10][2] = { 2, 80, 31 };
+        p.notes[10][3] = { 3, 34, 116 };
+        p.notes[10][4] = { 4, 61, 73 };
+        p.notes[10][5] = { 4, 65, 54 };
+        p.notes[11][0] = { 0, 48, 64 };
+        p.notes[11][1] = { 1, 60, 73 };
+        p.notes[11][2] = { 2, 80, 79 };
+        p.notes[11][3] = { 3, 39, 162 };
+        p.notes[12][2] = { 2, 80, 26 };
+        p.notes[12][3] = { 3, 35, 140 };
+        p.notes[12][4] = { 4, 47, 68 };
+        p.notes[12][5] = { 4, 66, 55 };
+        p.notes[13][0] = { 0, 48, 115 };
+        p.notes[13][1] = { 1, 60, 41 };
+        p.notes[13][2] = { 2, 80, 42 };
+        p.notes[13][3] = { 3, 35, 136 };
+        p.notes[13][4] = { 4, 54, 136 };
+        p.notes[13][5] = { 4, 59, 46 };
+        p.notes[14][0] = { 0, 48, 45 };
+        p.notes[14][1] = { 1, 60, 39 };
+        p.notes[14][2] = { 2, 80, 31 };
+        p.notes[14][3] = { 3, 35, 160 };
+        p.notes[14][4] = { 4, 47, 54 };
+        p.notes[14][5] = { 4, 61, 51 };
+        p.notes[15][0] = { 0, 48, 76 };
+        p.notes[15][1] = { 1, 60, 130 };
+        p.notes[15][2] = { 2, 80, 124 };
+        p.notes[15][3] = { 3, 35, 192 };
+        p.notes[15][4] = { 4, 47, 40 };
+        p.notes[15][5] = { 4, 54, 117 };
+        m_patterns.push_back(p);
+    }
+    // Bar 24
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 44 };
+        p.notes[0][2] = { 2, 80, 28 };
+        p.notes[0][3] = { 3, 35, 172 };
+        p.notes[0][4] = { 4, 47, 86 };
+        p.notes[0][5] = { 4, 61, 70 };
+        p.notes[0][6] = { 6, 78, 54 };
+        p.notes[1][0] = { 0, 48, 125 };
+        p.notes[1][1] = { 1, 60, 68 };
+        p.notes[1][2] = { 2, 80, 57 };
+        p.notes[1][3] = { 3, 35, 170 };
+        p.notes[1][4] = { 4, 54, 59 };
+        p.notes[1][5] = { 4, 59, 51 };
+        p.notes[2][0] = { 0, 48, 55 };
+        p.notes[2][1] = { 1, 60, 33 };
+        p.notes[2][3] = { 3, 35, 156 };
+        p.notes[2][4] = { 4, 54, 81 };
+        p.notes[2][5] = { 4, 71, 54 };
+        p.notes[3][0] = { 0, 48, 55 };
+        p.notes[3][1] = { 1, 60, 89 };
+        p.notes[3][2] = { 2, 80, 93 };
+        p.notes[3][3] = { 3, 35, 144 };
+        p.notes[3][4] = { 4, 47, 75 };
+        p.notes[3][5] = { 4, 54, 121 };
+        p.notes[4][1] = { 1, 60, 33 };
+        p.notes[4][2] = { 2, 80, 27 };
+        p.notes[4][3] = { 3, 35, 146 };
+        p.notes[4][4] = { 4, 47, 93 };
+        p.notes[4][5] = { 4, 54, 105 };
+        p.notes[5][0] = { 0, 48, 70 };
+        p.notes[5][1] = { 1, 60, 98 };
+        p.notes[5][2] = { 2, 80, 98 };
+        p.notes[5][3] = { 3, 37, 190 };
+        p.notes[5][4] = { 4, 56, 82 };
+        p.notes[5][5] = { 4, 68, 55 };
+        p.notes[6][0] = { 0, 48, 60 };
+        p.notes[6][2] = { 2, 80, 26 };
+        p.notes[6][4] = { 4, 49, 59 };
+        p.notes[6][5] = { 4, 56, 105 };
+        p.notes[7][0] = { 0, 48, 42 };
+        p.notes[7][1] = { 1, 60, 38 };
+        p.notes[7][2] = { 2, 80, 32 };
+        p.notes[7][3] = { 3, 37, 162 };
+        p.notes[7][4] = { 4, 56, 99 };
+        p.notes[7][5] = { 4, 68, 57 };
+        p.notes[8][0] = { 0, 48, 74 };
+        p.notes[8][1] = { 1, 60, 95 };
+        p.notes[8][2] = { 2, 80, 94 };
+        p.notes[8][3] = { 3, 37, 170 };
+        p.notes[8][4] = { 4, 49, 68 };
+        p.notes[8][5] = { 4, 56, 117 };
+        p.notes[9][0] = { 0, 48, 74 };
+        p.notes[9][2] = { 2, 80, 28 };
+        p.notes[9][3] = { 3, 37, 174 };
+        p.notes[9][4] = { 4, 49, 64 };
+        p.notes[9][5] = { 4, 68, 57 };
+        p.notes[10][0] = { 0, 48, 57 };
+        p.notes[10][1] = { 1, 60, 52 };
+        p.notes[10][2] = { 2, 80, 52 };
+        p.notes[10][3] = { 3, 37, 156 };
+        p.notes[10][4] = { 4, 49, 77 };
+        p.notes[10][5] = { 4, 68, 67 };
+        p.notes[11][0] = { 0, 48, 78 };
+        p.notes[11][1] = { 1, 60, 84 };
+        p.notes[11][2] = { 2, 80, 93 };
+        p.notes[11][3] = { 3, 37, 168 };
+        p.notes[11][4] = { 4, 54, 120 };
+        p.notes[11][5] = { 4, 63, 51 };
+        p.notes[12][0] = { 0, 48, 65 };
+        p.notes[12][2] = { 2, 80, 27 };
+        p.notes[12][3] = { 3, 37, 134 };
+        p.notes[12][4] = { 4, 49, 95 };
+        p.notes[12][5] = { 4, 68, 46 };
+        m_patterns.push_back(p);
+    }
+    // Bar 25
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][1] = { 1, 60, 43 };
+        p.notes[0][2] = { 2, 80, 76 };
+        p.notes[2][2] = { 2, 80, 35 };
+        p.notes[4][0] = { 0, 48, 229 };
+        p.notes[4][1] = { 1, 60, 198 };
+        p.notes[4][2] = { 2, 80, 210 };
+        p.notes[4][3] = { 3, 39, 122 };
+        p.notes[4][4] = { 4, 49, 93 };
+        p.notes[4][5] = { 4, 70, 48 };
+        p.notes[5][0] = { 0, 48, 58 };
+        p.notes[5][1] = { 1, 60, 33 };
+        p.notes[5][2] = { 2, 80, 53 };
+        p.notes[5][3] = { 3, 51, 106 };
+        p.notes[6][0] = { 0, 48, 152 };
+        p.notes[6][1] = { 1, 60, 79 };
+        p.notes[6][2] = { 2, 80, 68 };
+        p.notes[7][0] = { 0, 48, 73 };
+        p.notes[7][1] = { 1, 60, 36 };
+        p.notes[7][2] = { 2, 80, 42 };
+        p.notes[7][3] = { 3, 37, 134 };
+        p.notes[7][4] = { 4, 49, 127 };
+        p.notes[7][5] = { 4, 68, 46 };
+        p.notes[7][6] = { 6, 77, 51 };
+        p.notes[7][7] = { 7, 73, 40 };
+        p.notes[8][0] = { 0, 48, 84 };
+        p.notes[9][0] = { 0, 48, 69 };
+        p.notes[9][2] = { 2, 80, 34 };
+        p.notes[9][3] = { 3, 47, 88 };
+        p.notes[9][4] = { 4, 54, 113 };
+        p.notes[9][5] = { 4, 59, 58 };
+        p.notes[10][0] = { 0, 48, 77 };
+        p.notes[10][3] = { 3, 35, 150 };
+        p.notes[10][4] = { 4, 47, 79 };
+        p.notes[10][5] = { 4, 63, 73 };
+        p.notes[11][0] = { 0, 48, 57 };
+        p.notes[11][4] = { 4, 54, 144 };
+        p.notes[11][5] = { 4, 59, 106 };
+        p.notes[12][0] = { 0, 48, 95 };
+        p.notes[12][1] = { 1, 60, 43 };
+        p.notes[12][2] = { 2, 80, 25 };
+        p.notes[12][3] = { 3, 35, 170 };
+        p.notes[12][4] = { 4, 59, 122 };
+        p.notes[13][0] = { 0, 48, 83 };
+        p.notes[13][1] = { 1, 60, 33 };
+        p.notes[14][0] = { 0, 48, 91 };
+        p.notes[14][1] = { 1, 60, 34 };
+        p.notes[14][2] = { 2, 80, 39 };
+        p.notes[14][4] = { 4, 47, 79 };
+        p.notes[14][5] = { 4, 63, 54 };
+        p.notes[15][0] = { 0, 48, 59 };
+        p.notes[15][1] = { 1, 60, 50 };
+        p.notes[15][2] = { 2, 80, 37 };
+        p.notes[15][3] = { 3, 35, 120 };
+        p.notes[15][4] = { 4, 54, 135 };
+        p.notes[15][5] = { 4, 63, 55 };
+        m_patterns.push_back(p);
+    }
+    // Bar 26
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 65 };
+        p.notes[0][1] = { 1, 60, 167 };
+        p.notes[0][2] = { 2, 80, 204 };
+        p.notes[0][3] = { 3, 35, 146 };
+        p.notes[0][4] = { 4, 47, 70 };
+        p.notes[0][5] = { 4, 59, 108 };
+        p.notes[1][1] = { 1, 60, 56 };
+        p.notes[1][2] = { 2, 80, 45 };
+        p.notes[1][3] = { 3, 35, 170 };
+        p.notes[1][4] = { 4, 47, 66 };
+        p.notes[1][5] = { 4, 59, 87 };
+        p.notes[2][4] = { 4, 59, 64 };
+        p.notes[2][5] = { 4, 66, 61 };
+        p.notes[3][0] = { 0, 48, 55 };
+        p.notes[3][2] = { 2, 80, 26 };
+        p.notes[3][3] = { 3, 35, 142 };
+        p.notes[3][4] = { 4, 54, 129 };
+        p.notes[3][5] = { 4, 59, 75 };
+        p.notes[4][0] = { 0, 48, 152 };
+        p.notes[4][1] = { 1, 60, 85 };
+        p.notes[4][2] = { 2, 80, 131 };
+        p.notes[4][3] = { 3, 35, 154 };
+        p.notes[4][4] = { 4, 47, 75 };
+        p.notes[4][5] = { 4, 63, 46 };
+        p.notes[4][6] = { 6, 75, 55 };
+        p.notes[4][7] = { 7, 73, 43 };
+        p.notes[5][1] = { 1, 60, 71 };
+        p.notes[5][2] = { 2, 80, 46 };
+        p.notes[5][3] = { 3, 35, 160 };
+        p.notes[6][1] = { 1, 60, 59 };
+        p.notes[6][2] = { 2, 80, 49 };
+        p.notes[6][3] = { 3, 35, 156 };
+        p.notes[6][4] = { 4, 54, 75 };
+        p.notes[6][5] = { 4, 68, 58 };
+        p.notes[7][2] = { 2, 80, 26 };
+        p.notes[7][3] = { 3, 35, 88 };
+        p.notes[7][4] = { 4, 59, 86 };
+        p.notes[8][0] = { 0, 48, 154 };
+        p.notes[8][1] = { 1, 60, 92 };
+        p.notes[8][2] = { 2, 80, 103 };
+        p.notes[8][3] = { 3, 35, 154 };
+        p.notes[8][4] = { 4, 63, 66 };
+        p.notes[9][0] = { 0, 48, 140 };
+        p.notes[9][1] = { 1, 60, 77 };
+        p.notes[9][2] = { 2, 80, 68 };
+        p.notes[9][3] = { 3, 35, 148 };
+        p.notes[9][4] = { 4, 63, 75 };
+        p.notes[9][6] = { 6, 75, 61 };
+        p.notes[10][1] = { 1, 60, 45 };
+        p.notes[10][2] = { 2, 80, 37 };
+        p.notes[10][3] = { 3, 37, 146 };
+        p.notes[10][4] = { 4, 68, 77 };
+        p.notes[11][0] = { 0, 48, 142 };
+        p.notes[11][1] = { 1, 60, 90 };
+        p.notes[11][2] = { 2, 80, 100 };
+        p.notes[11][3] = { 3, 37, 134 };
+        p.notes[12][0] = { 0, 48, 74 };
+        p.notes[12][3] = { 3, 37, 156 };
+        p.notes[12][4] = { 4, 56, 66 };
+        p.notes[13][0] = { 0, 48, 153 };
+        p.notes[13][1] = { 1, 60, 152 };
+        p.notes[13][2] = { 2, 80, 139 };
+        p.notes[13][3] = { 3, 37, 168 };
+        p.notes[13][4] = { 4, 61, 95 };
+        p.notes[14][1] = { 1, 60, 30 };
+        p.notes[14][3] = { 3, 37, 140 };
+        p.notes[14][4] = { 4, 54, 66 };
+        p.notes[14][5] = { 4, 66, 54 };
+        p.notes[14][6] = { 6, 73, 75 };
+        p.notes[14][7] = { 7, 85, 55 };
+        p.notes[15][1] = { 1, 60, 55 };
+        p.notes[15][2] = { 2, 80, 69 };
+        p.notes[15][3] = { 3, 37, 96 };
+        p.notes[15][4] = { 4, 56, 118 };
+        p.notes[15][5] = { 4, 61, 72 };
+        m_patterns.push_back(p);
+    }
+    // Bar 27
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 231 };
+        p.notes[0][1] = { 1, 60, 99 };
+        p.notes[0][2] = { 2, 80, 66 };
+        p.notes[0][3] = { 3, 37, 174 };
+        p.notes[0][4] = { 4, 56, 63 };
+        p.notes[0][5] = { 4, 65, 87 };
+        p.notes[0][6] = { 6, 92, 57 };
+        p.notes[0][7] = { 7, 73, 40 };
+        p.notes[1][0] = { 0, 48, 69 };
+        p.notes[1][1] = { 1, 60, 58 };
+        p.notes[1][2] = { 2, 80, 60 };
+        p.notes[1][3] = { 3, 37, 168 };
+        p.notes[1][4] = { 4, 56, 136 };
+        p.notes[1][5] = { 4, 65, 90 };
+        p.notes[2][0] = { 0, 48, 41 };
+        p.notes[2][3] = { 3, 37, 172 };
+        p.notes[2][4] = { 4, 56, 129 };
+        p.notes[2][5] = { 4, 63, 109 };
+        p.notes[3][0] = { 0, 48, 143 };
+        p.notes[3][1] = { 1, 60, 47 };
+        p.notes[3][3] = { 3, 42, 176 };
+        p.notes[3][4] = { 4, 54, 48 };
+        p.notes[3][5] = { 4, 61, 96 };
+        p.notes[3][6] = { 6, 73, 52 };
+        p.notes[4][0] = { 0, 48, 58 };
+        p.notes[4][1] = { 1, 60, 43 };
+        p.notes[4][2] = { 2, 80, 26 };
+        p.notes[4][3] = { 3, 30, 100 };
+        p.notes[4][4] = { 4, 54, 115 };
+        p.notes[4][5] = { 4, 61, 82 };
+        p.notes[4][6] = { 6, 73, 70 };
+        p.notes[5][0] = { 0, 48, 76 };
+        p.notes[5][1] = { 1, 60, 141 };
+        p.notes[5][2] = { 2, 80, 171 };
+        p.notes[5][3] = { 3, 42, 146 };
+        p.notes[5][4] = { 4, 58, 64 };
+        p.notes[5][5] = { 4, 70, 73 };
+        p.notes[6][3] = { 3, 42, 82 };
+        p.notes[6][4] = { 4, 49, 55 };
+        p.notes[7][0] = { 0, 48, 54 };
+        p.notes[7][2] = { 2, 80, 32 };
+        p.notes[8][0] = { 0, 48, 183 };
+        p.notes[8][1] = { 1, 60, 84 };
+        p.notes[8][2] = { 2, 80, 41 };
+        p.notes[8][3] = { 3, 30, 130 };
+        p.notes[8][4] = { 4, 63, 108 };
+        p.notes[9][0] = { 0, 48, 53 };
+        p.notes[9][1] = { 1, 60, 104 };
+        p.notes[9][2] = { 2, 80, 145 };
+        p.notes[9][3] = { 3, 39, 110 };
+        p.notes[9][4] = { 4, 54, 75 };
+        p.notes[9][5] = { 4, 63, 88 };
+        p.notes[9][6] = { 6, 87, 51 };
+        p.notes[10][0] = { 0, 48, 61 };
+        p.notes[10][3] = { 3, 39, 188 };
+        p.notes[10][4] = { 4, 51, 61 };
+        p.notes[10][5] = { 4, 63, 79 };
+        p.notes[10][6] = { 6, 75, 57 };
+        p.notes[11][0] = { 0, 48, 140 };
+        p.notes[11][1] = { 1, 60, 45 };
+        p.notes[11][2] = { 2, 80, 30 };
+        p.notes[11][3] = { 3, 39, 182 };
+        p.notes[11][4] = { 4, 51, 75 };
+        p.notes[11][5] = { 4, 63, 66 };
+        p.notes[11][6] = { 6, 75, 72 };
+        p.notes[12][0] = { 0, 48, 39 };
+        p.notes[12][1] = { 1, 60, 50 };
+        p.notes[12][2] = { 2, 80, 50 };
+        p.notes[12][3] = { 3, 39, 186 };
+        p.notes[12][4] = { 4, 56, 77 };
+        p.notes[12][5] = { 4, 63, 73 };
+        p.notes[13][0] = { 0, 48, 70 };
+        p.notes[13][1] = { 1, 60, 145 };
+        p.notes[13][2] = { 2, 80, 166 };
+        p.notes[13][3] = { 3, 39, 142 };
+        p.notes[13][4] = { 4, 58, 61 };
+        p.notes[14][4] = { 4, 58, 84 };
+        p.notes[14][5] = { 4, 63, 90 };
+        p.notes[15][0] = { 0, 48, 65 };
+        p.notes[15][1] = { 1, 60, 65 };
+        p.notes[15][2] = { 2, 80, 69 };
+        p.notes[15][3] = { 3, 39, 176 };
+        p.notes[15][4] = { 4, 63, 50 };
+        m_patterns.push_back(p);
+    }
+    // Bar 28
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 172 };
+        p.notes[0][1] = { 1, 60, 77 };
+        p.notes[0][2] = { 2, 80, 43 };
+        p.notes[0][3] = { 3, 39, 164 };
+        p.notes[0][4] = { 4, 51, 104 };
+        p.notes[0][5] = { 4, 63, 139 };
+        p.notes[0][6] = { 6, 75, 78 };
+        p.notes[1][1] = { 1, 60, 66 };
+        p.notes[1][2] = { 2, 80, 74 };
+        p.notes[1][3] = { 3, 39, 116 };
+        p.notes[1][4] = { 4, 51, 95 };
+        p.notes[1][5] = { 4, 63, 123 };
+        p.notes[2][0] = { 0, 48, 95 };
+        p.notes[2][1] = { 1, 60, 59 };
+        p.notes[2][2] = { 2, 80, 63 };
+        p.notes[2][3] = { 3, 35, 160 };
+        p.notes[3][0] = { 0, 48, 81 };
+        p.notes[3][3] = { 3, 35, 168 };
+        p.notes[4][0] = { 0, 48, 139 };
+        p.notes[4][1] = { 1, 60, 151 };
+        p.notes[4][2] = { 2, 80, 156 };
+        p.notes[4][3] = { 3, 35, 160 };
+        p.notes[4][4] = { 4, 47, 127 };
+        p.notes[4][5] = { 4, 63, 100 };
+        p.notes[4][6] = { 6, 75, 51 };
+        p.notes[5][1] = { 1, 60, 42 };
+        p.notes[5][2] = { 2, 80, 25 };
+        p.notes[5][3] = { 3, 35, 108 };
+        p.notes[5][4] = { 4, 47, 100 };
+        p.notes[5][5] = { 4, 63, 93 };
+        p.notes[6][2] = { 2, 80, 46 };
+        p.notes[6][4] = { 4, 54, 86 };
+        p.notes[6][5] = { 4, 66, 52 };
+        p.notes[7][0] = { 0, 48, 221 };
+        p.notes[7][1] = { 1, 60, 149 };
+        p.notes[7][2] = { 2, 80, 164 };
+        p.notes[7][3] = { 3, 47, 84 };
+        p.notes[7][4] = { 4, 54, 145 };
+        p.notes[7][5] = { 4, 71, 72 };
+        p.notes[7][6] = { 6, 73, 70 };
+        p.notes[8][0] = { 0, 48, 104 };
+        p.notes[8][1] = { 1, 60, 58 };
+        p.notes[8][2] = { 2, 80, 57 };
+        p.notes[8][3] = { 3, 35, 168 };
+        p.notes[8][4] = { 4, 59, 84 };
+        p.notes[9][1] = { 1, 60, 31 };
+        p.notes[9][2] = { 2, 80, 36 };
+        p.notes[9][3] = { 3, 37, 112 };
+        p.notes[9][6] = { 6, 80, 52 };
+        p.notes[10][0] = { 0, 48, 166 };
+        p.notes[10][1] = { 1, 60, 66 };
+        p.notes[10][2] = { 2, 80, 51 };
+        p.notes[10][3] = { 3, 37, 140 };
+        p.notes[10][4] = { 4, 49, 156 };
+        p.notes[10][5] = { 4, 65, 78 };
+        p.notes[10][6] = { 6, 73, 52 };
+        p.notes[11][0] = { 0, 48, 64 };
+        p.notes[11][1] = { 1, 60, 41 };
+        p.notes[11][2] = { 2, 80, 29 };
+        p.notes[11][3] = { 3, 37, 170 };
+        p.notes[11][4] = { 4, 49, 153 };
+        p.notes[11][5] = { 4, 61, 43 };
+        p.notes[12][0] = { 0, 48, 84 };
+        p.notes[12][1] = { 1, 60, 99 };
+        p.notes[12][2] = { 2, 80, 101 };
+        p.notes[12][3] = { 3, 49, 88 };
+        p.notes[12][4] = { 4, 49, 95 };
+        p.notes[12][5] = { 4, 56, 81 };
+        p.notes[13][2] = { 2, 80, 31 };
+        p.notes[13][3] = { 3, 37, 144 };
+        p.notes[13][4] = { 4, 49, 73 };
+        p.notes[13][5] = { 4, 65, 82 };
+        p.notes[13][6] = { 6, 84, 60 };
+        p.notes[14][0] = { 0, 48, 42 };
+        p.notes[14][1] = { 1, 60, 32 };
+        p.notes[14][2] = { 2, 80, 63 };
+        p.notes[15][0] = { 0, 48, 188 };
+        p.notes[15][1] = { 1, 60, 97 };
+        p.notes[15][2] = { 2, 80, 60 };
+        p.notes[15][3] = { 3, 37, 104 };
+        m_patterns.push_back(p);
+    }
+    // Bar 29
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 60 };
+        p.notes[0][1] = { 1, 60, 64 };
+        p.notes[0][2] = { 2, 80, 80 };
+        p.notes[1][0] = { 0, 48, 48 };
+        p.notes[1][3] = { 3, 37, 132 };
+        p.notes[1][4] = { 4, 54, 70 };
+        p.notes[1][5] = { 4, 70, 40 };
+        p.notes[2][0] = { 0, 48, 120 };
+        p.notes[2][1] = { 1, 60, 51 };
+        p.notes[2][2] = { 2, 80, 41 };
+        p.notes[2][3] = { 3, 42, 188 };
+        p.notes[2][4] = { 4, 49, 136 };
+        p.notes[2][5] = { 4, 70, 78 };
+        p.notes[2][6] = { 6, 73, 70 };
+        p.notes[2][7] = { 7, 80, 45 };
+        p.notes[3][0] = { 0, 48, 45 };
+        p.notes[3][1] = { 1, 60, 45 };
+        p.notes[3][2] = { 2, 80, 37 };
+        p.notes[3][3] = { 3, 42, 180 };
+        p.notes[3][4] = { 4, 30, 72 };
+        p.notes[3][5] = { 4, 70, 85 };
+        p.notes[4][0] = { 0, 48, 75 };
+        p.notes[4][1] = { 1, 60, 154 };
+        p.notes[4][2] = { 2, 80, 172 };
+        p.notes[4][3] = { 3, 42, 186 };
+        p.notes[4][4] = { 4, 49, 82 };
+        p.notes[4][5] = { 4, 70, 81 };
+        p.notes[4][6] = { 6, 73, 67 };
+        p.notes[4][7] = { 7, 78, 40 };
+        p.notes[5][4] = { 4, 61, 109 };
+        p.notes[5][5] = { 4, 68, 46 };
+        p.notes[6][0] = { 0, 48, 62 };
+        p.notes[6][2] = { 2, 80, 38 };
+        p.notes[6][4] = { 4, 49, 82 };
+        p.notes[6][5] = { 4, 68, 57 };
+        p.notes[6][6] = { 6, 80, 52 };
+        p.notes[7][0] = { 0, 48, 164 };
+        p.notes[7][1] = { 1, 60, 74 };
+        p.notes[7][2] = { 2, 80, 39 };
+        p.notes[7][3] = { 3, 42, 170 };
+        p.notes[7][4] = { 4, 54, 115 };
+        p.notes[7][5] = { 4, 70, 73 };
+        p.notes[7][6] = { 6, 73, 61 };
+        p.notes[8][0] = { 0, 48, 83 };
+        p.notes[8][1] = { 1, 60, 131 };
+        p.notes[8][2] = { 2, 80, 159 };
+        p.notes[8][3] = { 3, 41, 182 };
+        p.notes[8][4] = { 4, 49, 63 };
+        p.notes[8][5] = { 4, 65, 111 };
+        p.notes[8][6] = { 6, 73, 61 };
+        p.notes[9][0] = { 0, 48, 69 };
+        p.notes[9][1] = { 1, 60, 51 };
+        p.notes[9][2] = { 2, 80, 83 };
+        p.notes[9][3] = { 3, 41, 154 };
+        p.notes[9][4] = { 4, 49, 108 };
+        p.notes[9][5] = { 4, 68, 52 };
+        p.notes[9][6] = { 6, 77, 82 };
+        p.notes[9][7] = { 7, 89, 57 };
+        p.notes[10][0] = { 0, 48, 63 };
+        p.notes[10][2] = { 2, 80, 32 };
+        p.notes[10][3] = { 3, 42, 154 };
+        p.notes[10][4] = { 4, 54, 90 };
+        p.notes[10][5] = { 4, 70, 97 };
+        p.notes[10][6] = { 6, 77, 79 };
+        p.notes[10][7] = { 7, 73, 56 };
+        p.notes[11][0] = { 0, 48, 132 };
+        p.notes[11][1] = { 1, 60, 125 };
+        p.notes[11][2] = { 2, 80, 153 };
+        p.notes[11][3] = { 3, 42, 198 };
+        p.notes[11][4] = { 4, 54, 136 };
+        p.notes[11][5] = { 4, 70, 72 };
+        p.notes[11][6] = { 6, 73, 55 };
+        p.notes[12][0] = { 0, 48, 62 };
+        p.notes[12][1] = { 1, 60, 53 };
+        p.notes[12][2] = { 2, 80, 61 };
+        p.notes[12][3] = { 3, 44, 130 };
+        p.notes[12][6] = { 6, 78, 66 };
+        p.notes[13][0] = { 0, 48, 57 };
+        p.notes[13][2] = { 2, 80, 34 };
+        p.notes[14][0] = { 0, 48, 105 };
+        p.notes[14][1] = { 1, 60, 62 };
+        p.notes[14][2] = { 2, 80, 56 };
+        p.notes[14][3] = { 3, 42, 170 };
+        p.notes[14][4] = { 4, 61, 97 };
+        p.notes[14][6] = { 6, 85, 60 };
+        p.notes[15][0] = { 0, 48, 93 };
+        p.notes[15][1] = { 1, 60, 54 };
+        p.notes[15][2] = { 2, 80, 70 };
+        p.notes[15][3] = { 3, 37, 104 };
+        p.notes[15][4] = { 4, 49, 73 };
+        p.notes[15][5] = { 4, 61, 67 };
+        p.notes[15][6] = { 6, 73, 58 };
+        p.notes[15][7] = { 7, 77, 40 };
+        m_patterns.push_back(p);
+    }
+    // Bar 30
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][2] = { 2, 80, 33 };
+        p.notes[0][3] = { 3, 30, 78 };
+        p.notes[0][4] = { 4, 68, 66 };
+        p.notes[1][0] = { 0, 48, 129 };
+        p.notes[1][1] = { 1, 60, 109 };
+        p.notes[1][2] = { 2, 80, 144 };
+        p.notes[1][3] = { 3, 35, 98 };
+        p.notes[1][4] = { 4, 59, 86 };
+        p.notes[1][5] = { 4, 71, 73 };
+        p.notes[1][6] = { 6, 75, 75 };
+        p.notes[2][0] = { 0, 48, 41 };
+        p.notes[2][1] = { 1, 60, 36 };
+        p.notes[2][2] = { 2, 80, 55 };
+        p.notes[2][3] = { 3, 35, 168 };
+        p.notes[2][4] = { 4, 47, 99 };
+        p.notes[2][5] = { 4, 66, 70 };
+        p.notes[2][6] = { 6, 83, 60 };
+        p.notes[2][7] = { 7, 85, 40 };
+        p.notes[3][0] = { 0, 48, 156 };
+        p.notes[3][1] = { 1, 60, 132 };
+        p.notes[3][2] = { 2, 80, 105 };
+        p.notes[3][3] = { 3, 35, 162 };
+        p.notes[3][4] = { 4, 59, 109 };
+        p.notes[3][5] = { 4, 71, 96 };
+        p.notes[4][1] = { 1, 60, 32 };
+        p.notes[4][2] = { 2, 80, 39 };
+        p.notes[4][3] = { 3, 35, 174 };
+        p.notes[4][4] = { 4, 63, 104 };
+        p.notes[4][6] = { 6, 87, 57 };
+        p.notes[5][0] = { 0, 48, 156 };
+        p.notes[5][1] = { 1, 60, 63 };
+        p.notes[5][2] = { 2, 80, 65 };
+        p.notes[5][3] = { 3, 35, 152 };
+        p.notes[5][4] = { 4, 54, 79 };
+        p.notes[5][5] = { 4, 59, 52 };
+        p.notes[6][0] = { 0, 48, 61 };
+        p.notes[6][1] = { 1, 60, 36 };
+        p.notes[6][2] = { 2, 80, 34 };
+        p.notes[6][3] = { 3, 35, 154 };
+        p.notes[6][4] = { 4, 59, 73 };
+        p.notes[6][5] = { 4, 66, 57 };
+        p.notes[7][0] = { 0, 48, 71 };
+        p.notes[7][1] = { 1, 60, 64 };
+        p.notes[7][2] = { 2, 80, 68 };
+        p.notes[7][3] = { 3, 35, 146 };
+        p.notes[7][4] = { 4, 59, 93 };
+        p.notes[8][3] = { 3, 37, 78 };
+        p.notes[8][4] = { 4, 49, 79 };
+        p.notes[8][5] = { 4, 68, 66 };
+        p.notes[8][6] = { 6, 73, 69 };
+        p.notes[8][7] = { 7, 73, 40 };
+        p.notes[9][0] = { 0, 48, 103 };
+        p.notes[9][3] = { 3, 37, 176 };
+        p.notes[9][4] = { 4, 56, 79 };
+        p.notes[9][5] = { 4, 61, 103 };
+        p.notes[10][1] = { 1, 60, 40 };
+        p.notes[10][2] = { 2, 80, 32 };
+        p.notes[10][3] = { 3, 37, 172 };
+        p.notes[10][4] = { 4, 49, 97 };
+        p.notes[10][5] = { 4, 68, 57 };
+        p.notes[10][6] = { 6, 73, 54 };
+        p.notes[11][0] = { 0, 48, 87 };
+        p.notes[11][1] = { 1, 60, 150 };
+        p.notes[11][2] = { 2, 80, 160 };
+        p.notes[11][3] = { 3, 37, 174 };
+        p.notes[11][4] = { 4, 49, 149 };
+        p.notes[12][0] = { 0, 48, 49 };
+        p.notes[12][2] = { 2, 80, 32 };
+        p.notes[12][3] = { 3, 37, 166 };
+        p.notes[12][4] = { 4, 37, 68 };
+        p.notes[12][5] = { 4, 68, 55 };
+        p.notes[12][6] = { 6, 78, 46 };
+        p.notes[13][0] = { 0, 48, 123 };
+        p.notes[13][1] = { 1, 60, 39 };
+        p.notes[13][2] = { 2, 80, 36 };
+        p.notes[13][3] = { 3, 37, 152 };
+        p.notes[13][4] = { 4, 49, 151 };
+        p.notes[14][0] = { 0, 48, 56 };
+        p.notes[14][1] = { 1, 60, 43 };
+        p.notes[14][3] = { 3, 37, 148 };
+        p.notes[14][4] = { 4, 49, 162 };
+        p.notes[14][5] = { 4, 68, 49 };
+        p.notes[14][6] = { 6, 73, 67 };
+        p.notes[15][0] = { 0, 48, 67 };
+        p.notes[15][1] = { 1, 60, 94 };
+        p.notes[15][2] = { 2, 80, 90 };
+        p.notes[15][3] = { 3, 37, 150 };
+        p.notes[15][4] = { 4, 49, 145 };
+        p.notes[15][5] = { 4, 68, 70 };
+        m_patterns.push_back(p);
+    }
+    // Bar 31
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 40 };
+        p.notes[0][3] = { 3, 44, 142 };
+        p.notes[0][4] = { 4, 56, 66 };
+        p.notes[1][0] = { 0, 48, 79 };
+        p.notes[1][1] = { 1, 60, 37 };
+        p.notes[1][2] = { 2, 80, 44 };
+        p.notes[1][3] = { 3, 34, 108 };
+        p.notes[1][4] = { 4, 46, 54 };
+        p.notes[2][1] = { 1, 60, 38 };
+        p.notes[2][2] = { 2, 80, 36 };
+        p.notes[2][3] = { 3, 34, 118 };
+        p.notes[2][4] = { 4, 34, 81 };
+        p.notes[2][5] = { 4, 61, 69 };
+        p.notes[3][0] = { 0, 48, 78 };
+        p.notes[3][1] = { 1, 60, 109 };
+        p.notes[3][2] = { 2, 80, 96 };
+        p.notes[3][3] = { 3, 34, 130 };
+        p.notes[3][4] = { 4, 34, 106 };
+        p.notes[3][5] = { 4, 61, 87 };
+        p.notes[3][6] = { 6, 73, 66 };
+        p.notes[4][3] = { 3, 34, 154 };
+        p.notes[4][4] = { 4, 34, 64 };
+        p.notes[4][5] = { 4, 68, 60 };
+        p.notes[5][0] = { 0, 48, 86 };
+        p.notes[5][3] = { 3, 34, 138 };
+        p.notes[5][4] = { 4, 46, 57 };
+        p.notes[5][5] = { 4, 68, 75 };
+        p.notes[6][0] = { 0, 48, 98 };
+        p.notes[6][1] = { 1, 60, 87 };
+        p.notes[6][2] = { 2, 80, 77 };
+        p.notes[6][3] = { 3, 34, 124 };
+        p.notes[6][4] = { 4, 46, 129 };
+        p.notes[6][5] = { 4, 70, 55 };
+        p.notes[7][1] = { 1, 60, 42 };
+        p.notes[7][2] = { 2, 80, 39 };
+        p.notes[7][3] = { 3, 39, 142 };
+        p.notes[7][4] = { 4, 46, 144 };
+        p.notes[7][5] = { 4, 61, 57 };
+        p.notes[7][6] = { 6, 73, 48 };
+        p.notes[8][0] = { 0, 48, 50 };
+        p.notes[8][2] = { 2, 80, 41 };
+        p.notes[8][3] = { 3, 39, 182 };
+        p.notes[8][4] = { 4, 46, 97 };
+        p.notes[8][5] = { 4, 70, 49 };
+        p.notes[9][0] = { 0, 48, 51 };
+        p.notes[9][3] = { 3, 39, 190 };
+        p.notes[9][4] = { 4, 46, 109 };
+        p.notes[9][5] = { 4, 58, 79 };
+        p.notes[10][0] = { 0, 48, 159 };
+        p.notes[10][1] = { 1, 60, 194 };
+        p.notes[10][2] = { 2, 80, 188 };
+        p.notes[10][3] = { 3, 39, 168 };
+        p.notes[10][4] = { 4, 39, 68 };
+        p.notes[10][5] = { 4, 66, 55 };
+        p.notes[11][1] = { 1, 60, 42 };
+        p.notes[11][2] = { 2, 80, 40 };
+        p.notes[11][3] = { 3, 39, 194 };
+        p.notes[11][4] = { 4, 39, 100 };
+        p.notes[11][5] = { 4, 63, 82 };
+        p.notes[11][6] = { 6, 78, 49 };
+        p.notes[12][0] = { 0, 48, 151 };
+        p.notes[12][1] = { 1, 60, 110 };
+        p.notes[12][2] = { 2, 80, 126 };
+        p.notes[12][3] = { 3, 39, 164 };
+        p.notes[12][4] = { 4, 46, 64 };
+        p.notes[12][5] = { 4, 58, 88 };
+        p.notes[13][0] = { 0, 48, 78 };
+        p.notes[13][1] = { 1, 60, 42 };
+        p.notes[13][2] = { 2, 80, 44 };
+        p.notes[13][3] = { 3, 39, 176 };
+        p.notes[13][4] = { 4, 51, 97 };
+        p.notes[13][5] = { 4, 70, 52 };
+        p.notes[14][0] = { 0, 48, 79 };
+        p.notes[14][1] = { 1, 60, 54 };
+        p.notes[14][2] = { 2, 80, 50 };
+        p.notes[14][3] = { 3, 39, 188 };
+        p.notes[14][4] = { 4, 46, 55 };
+        p.notes[14][5] = { 4, 66, 64 };
+        p.notes[15][2] = { 2, 80, 33 };
+        p.notes[15][3] = { 3, 39, 140 };
+        p.notes[15][4] = { 4, 32, 81 };
+        p.notes[15][5] = { 4, 63, 79 };
+        m_patterns.push_back(p);
+    }
+    // Bar 32
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 119 };
+        p.notes[0][1] = { 1, 60, 59 };
+        p.notes[0][2] = { 2, 80, 65 };
+        p.notes[0][3] = { 3, 32, 108 };
+        p.notes[0][4] = { 4, 32, 104 };
+        p.notes[0][5] = { 4, 68, 93 };
+        p.notes[1][1] = { 1, 60, 36 };
+        p.notes[1][2] = { 2, 80, 37 };
+        p.notes[1][4] = { 4, 32, 129 };
+        p.notes[1][5] = { 4, 68, 91 };
+        p.notes[2][0] = { 0, 48, 98 };
+        p.notes[2][1] = { 1, 60, 100 };
+        p.notes[2][2] = { 2, 80, 96 };
+        p.notes[2][4] = { 4, 32, 79 };
+        p.notes[2][5] = { 4, 56, 58 };
+        p.notes[3][2] = { 2, 80, 32 };
+        p.notes[3][3] = { 3, 32, 134 };
+        p.notes[3][4] = { 4, 44, 66 };
+        p.notes[4][0] = { 0, 48, 128 };
+        p.notes[4][1] = { 1, 60, 39 };
+        p.notes[4][2] = { 2, 80, 49 };
+        p.notes[4][3] = { 3, 32, 100 };
+        p.notes[4][4] = { 4, 51, 90 };
+        p.notes[4][5] = { 4, 71, 51 };
+        p.notes[5][0] = { 0, 48, 56 };
+        p.notes[5][1] = { 1, 60, 38 };
+        p.notes[5][2] = { 2, 80, 31 };
+        p.notes[5][3] = { 3, 44, 124 };
+        p.notes[6][0] = { 0, 48, 69 };
+        p.notes[6][1] = { 1, 60, 85 };
+        p.notes[6][2] = { 2, 80, 85 };
+        p.notes[6][3] = { 3, 37, 68 };
+        p.notes[6][4] = { 4, 51, 73 };
+        p.notes[6][5] = { 4, 68, 63 };
+        p.notes[7][1] = { 1, 60, 32 };
+        p.notes[7][2] = { 2, 80, 32 };
+        p.notes[7][3] = { 3, 37, 182 };
+        p.notes[7][4] = { 4, 37, 54 };
+        p.notes[7][5] = { 4, 61, 76 };
+        p.notes[7][6] = { 6, 73, 52 };
+        p.notes[8][1] = { 1, 60, 33 };
+        p.notes[8][2] = { 2, 80, 33 };
+        p.notes[8][4] = { 4, 37, 129 };
+        p.notes[8][5] = { 4, 70, 48 };
+        p.notes[9][0] = { 0, 48, 87 };
+        p.notes[9][1] = { 1, 60, 89 };
+        p.notes[9][2] = { 2, 80, 85 };
+        p.notes[9][3] = { 3, 37, 186 };
+        p.notes[9][4] = { 4, 37, 91 };
+        p.notes[9][5] = { 4, 61, 88 };
+        p.notes[10][1] = { 1, 60, 36 };
+        p.notes[10][2] = { 2, 80, 46 };
+        p.notes[10][3] = { 3, 37, 160 };
+        p.notes[10][4] = { 4, 37, 126 };
+        p.notes[10][5] = { 4, 68, 72 };
+        p.notes[10][6] = { 6, 73, 66 };
+        p.notes[11][0] = { 0, 48, 42 };
+        p.notes[11][1] = { 1, 60, 39 };
+        p.notes[11][2] = { 2, 80, 33 };
+        p.notes[11][3] = { 3, 37, 174 };
+        p.notes[11][4] = { 4, 37, 82 };
+        p.notes[11][5] = { 4, 49, 94 };
+        p.notes[12][0] = { 0, 48, 51 };
+        p.notes[12][1] = { 1, 60, 67 };
+        p.notes[12][2] = { 2, 80, 52 };
+        p.notes[12][3] = { 3, 37, 164 };
+        p.notes[12][4] = { 4, 37, 79 };
+        p.notes[12][5] = { 4, 68, 85 };
+        p.notes[12][6] = { 6, 73, 67 };
+        p.notes[13][1] = { 1, 60, 31 };
+        p.notes[13][2] = { 2, 80, 29 };
+        p.notes[13][3] = { 3, 37, 130 };
+        p.notes[13][4] = { 4, 42, 68 };
+        p.notes[13][5] = { 4, 56, 60 };
+        p.notes[13][6] = { 6, 85, 55 };
+        p.notes[14][0] = { 0, 48, 121 };
+        p.notes[14][1] = { 1, 60, 106 };
+        p.notes[14][2] = { 2, 80, 82 };
+        p.notes[14][3] = { 3, 37, 150 };
+        p.notes[14][4] = { 4, 49, 64 };
+        p.notes[15][0] = { 0, 48, 115 };
+        p.notes[15][1] = { 1, 60, 101 };
+        p.notes[15][2] = { 2, 80, 92 };
+        p.notes[15][3] = { 3, 30, 132 };
+        p.notes[15][4] = { 4, 42, 48 };
+        p.notes[15][5] = { 4, 70, 63 };
+        m_patterns.push_back(p);
+    }
+    // Bar 33
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 76 };
+        p.notes[0][2] = { 2, 80, 45 };
+        p.notes[0][4] = { 4, 42, 109 };
+        p.notes[0][5] = { 4, 68, 58 };
+        p.notes[1][0] = { 0, 48, 84 };
+        p.notes[1][1] = { 1, 60, 67 };
+        p.notes[1][2] = { 2, 80, 64 };
+        p.notes[1][4] = { 4, 30, 79 };
+        p.notes[1][5] = { 4, 61, 81 };
+        p.notes[2][0] = { 0, 48, 77 };
+        p.notes[2][1] = { 1, 60, 47 };
+        p.notes[2][2] = { 2, 80, 59 };
+        p.notes[2][3] = { 3, 42, 148 };
+        p.notes[2][4] = { 4, 30, 90 };
+        p.notes[2][5] = { 4, 61, 79 };
+        p.notes[3][0] = { 0, 48, 90 };
+        p.notes[3][1] = { 1, 60, 63 };
+        p.notes[3][2] = { 2, 80, 75 };
+        p.notes[3][3] = { 3, 30, 124 };
+        p.notes[3][4] = { 4, 42, 124 };
+        p.notes[3][5] = { 4, 70, 67 };
+        p.notes[4][0] = { 0, 48, 116 };
+        p.notes[4][1] = { 1, 60, 76 };
+        p.notes[4][2] = { 2, 80, 70 };
+        p.notes[4][3] = { 3, 42, 98 };
+        p.notes[4][4] = { 4, 42, 100 };
+        p.notes[4][5] = { 4, 68, 55 };
+        p.notes[4][6] = { 6, 73, 58 };
+        p.notes[4][7] = { 7, 85, 40 };
+        p.notes[5][0] = { 0, 48, 88 };
+        p.notes[5][1] = { 1, 60, 92 };
+        p.notes[5][2] = { 2, 80, 86 };
+        p.notes[5][4] = { 4, 30, 91 };
+        p.notes[5][5] = { 4, 61, 66 };
+        p.notes[6][0] = { 0, 48, 74 };
+        p.notes[6][1] = { 1, 60, 77 };
+        p.notes[6][2] = { 2, 80, 64 };
+        p.notes[6][3] = { 3, 42, 92 };
+        p.notes[6][4] = { 4, 54, 97 };
+        p.notes[6][5] = { 4, 70, 67 };
+        p.notes[6][6] = { 6, 73, 55 };
+        p.notes[7][1] = { 1, 60, 50 };
+        p.notes[7][2] = { 2, 80, 42 };
+        p.notes[8][4] = { 4, 29, 66 };
+        p.notes[8][5] = { 4, 68, 70 };
+        p.notes[9][2] = { 2, 80, 32 };
+        p.notes[10][2] = { 2, 80, 30 };
+        p.notes[11][3] = { 3, 42, 92 };
+        p.notes[12][1] = { 1, 60, 46 };
+        p.notes[12][2] = { 2, 80, 38 };
+        p.notes[13][0] = { 0, 48, 146 };
+        p.notes[13][1] = { 1, 60, 178 };
+        p.notes[13][2] = { 2, 80, 156 };
+        p.notes[13][6] = { 6, 73, 54 };
+        p.notes[14][0] = { 0, 48, 39 };
+        p.notes[14][2] = { 2, 80, 33 };
+        p.notes[14][4] = { 4, 66, 118 };
+        p.notes[15][0] = { 0, 48, 78 };
+        p.notes[15][1] = { 1, 60, 35 };
+        p.notes[15][2] = { 2, 80, 58 };
+        p.notes[15][3] = { 3, 35, 174 };
+        p.notes[15][4] = { 4, 35, 75 };
+        p.notes[15][5] = { 4, 66, 78 };
+        m_patterns.push_back(p);
+    }
+    // Bar 34
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][1] = { 1, 60, 54 };
+        p.notes[0][2] = { 2, 80, 70 };
+        p.notes[0][3] = { 3, 35, 150 };
+        p.notes[0][4] = { 4, 35, 64 };
+        p.notes[0][5] = { 4, 70, 61 };
+        p.notes[1][0] = { 0, 48, 105 };
+        p.notes[1][1] = { 1, 60, 82 };
+        p.notes[1][2] = { 2, 80, 69 };
+        p.notes[1][3] = { 3, 35, 162 };
+        p.notes[1][4] = { 4, 35, 52 };
+        p.notes[1][5] = { 4, 54, 57 };
+        p.notes[2][0] = { 0, 48, 42 };
+        p.notes[2][2] = { 2, 80, 38 };
+        p.notes[2][3] = { 3, 35, 174 };
+        p.notes[2][4] = { 4, 35, 104 };
+        p.notes[2][5] = { 4, 70, 54 };
+        p.notes[3][0] = { 0, 48, 141 };
+        p.notes[3][2] = { 2, 80, 28 };
+        p.notes[3][3] = { 3, 47, 94 };
+        p.notes[3][4] = { 4, 54, 111 };
+        p.notes[3][5] = { 4, 66, 100 };
+        p.notes[4][0] = { 0, 48, 51 };
+        p.notes[4][1] = { 1, 60, 41 };
+        p.notes[4][2] = { 2, 80, 34 };
+        p.notes[4][4] = { 4, 54, 91 };
+        p.notes[4][5] = { 4, 66, 87 };
+        p.notes[5][0] = { 0, 48, 55 };
+        p.notes[5][1] = { 1, 60, 79 };
+        p.notes[5][2] = { 2, 80, 84 };
+        p.notes[5][3] = { 3, 35, 132 };
+        p.notes[5][4] = { 4, 35, 63 };
+        p.notes[5][5] = { 4, 61, 63 };
+        p.notes[5][6] = { 6, 78, 54 };
+        p.notes[5][7] = { 7, 73, 40 };
+        p.notes[6][2] = { 2, 80, 26 };
+        p.notes[6][3] = { 3, 37, 176 };
+        p.notes[6][4] = { 4, 35, 72 };
+        p.notes[6][5] = { 4, 65, 112 };
+        p.notes[7][0] = { 0, 48, 83 };
+        p.notes[7][2] = { 2, 80, 31 };
+        p.notes[7][3] = { 3, 37, 156 };
+        p.notes[7][4] = { 4, 49, 57 };
+        p.notes[7][5] = { 4, 68, 64 };
+        p.notes[7][6] = { 6, 80, 52 };
+        p.notes[8][1] = { 1, 60, 40 };
+        p.notes[8][2] = { 2, 80, 42 };
+        p.notes[8][3] = { 3, 37, 172 };
+        p.notes[8][4] = { 4, 37, 61 };
+        p.notes[8][5] = { 4, 61, 87 };
+        p.notes[8][6] = { 6, 80, 66 };
+        p.notes[9][0] = { 0, 48, 71 };
+        p.notes[9][1] = { 1, 60, 122 };
+        p.notes[9][2] = { 2, 80, 120 };
+        p.notes[9][3] = { 3, 37, 142 };
+        p.notes[9][4] = { 4, 49, 127 };
+        p.notes[9][5] = { 4, 61, 105 };
+        p.notes[9][6] = { 6, 73, 60 };
+        p.notes[9][7] = { 7, 77, 42 };
+        p.notes[10][0] = { 0, 48, 55 };
+        p.notes[10][2] = { 2, 80, 28 };
+        p.notes[10][3] = { 3, 37, 174 };
+        p.notes[10][4] = { 4, 37, 57 };
+        p.notes[10][5] = { 4, 56, 94 };
+        p.notes[10][6] = { 6, 75, 60 };
+        p.notes[10][7] = { 7, 85, 46 };
+        p.notes[11][0] = { 0, 48, 130 };
+        p.notes[11][1] = { 1, 60, 50 };
+        p.notes[11][2] = { 2, 80, 49 };
+        p.notes[11][4] = { 4, 49, 108 };
+        p.notes[11][5] = { 4, 61, 85 };
+        p.notes[11][6] = { 6, 73, 66 };
+        p.notes[11][7] = { 7, 92, 46 };
+        p.notes[12][0] = { 0, 48, 101 };
+        p.notes[12][1] = { 1, 60, 87 };
+        p.notes[12][2] = { 2, 80, 96 };
+        p.notes[12][3] = { 3, 37, 112 };
+        p.notes[12][4] = { 4, 56, 68 };
+        p.notes[12][5] = { 4, 68, 84 };
+        p.notes[12][6] = { 6, 73, 69 };
+        p.notes[13][1] = { 1, 60, 39 };
+        p.notes[13][2] = { 2, 80, 38 };
+        p.notes[13][4] = { 4, 54, 72 };
+        p.notes[13][5] = { 4, 61, 72 };
+        p.notes[14][0] = { 0, 48, 95 };
+        p.notes[14][1] = { 1, 60, 52 };
+        p.notes[14][2] = { 2, 80, 73 };
+        p.notes[14][3] = { 3, 34, 82 };
+        p.notes[14][4] = { 4, 56, 72 };
+        p.notes[14][5] = { 4, 68, 72 };
+        p.notes[15][0] = { 0, 48, 66 };
+        p.notes[15][2] = { 2, 80, 42 };
+        p.notes[15][3] = { 3, 34, 170 };
+        p.notes[15][4] = { 4, 42, 55 };
+        p.notes[15][5] = { 4, 68, 93 };
+        p.notes[15][6] = { 6, 73, 84 };
+        p.notes[15][7] = { 7, 73, 50 };
+        m_patterns.push_back(p);
+    }
+    // Bar 35
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 140 };
+        p.notes[0][1] = { 1, 60, 122 };
+        p.notes[0][2] = { 2, 80, 112 };
+        p.notes[0][3] = { 3, 34, 146 };
+        p.notes[0][4] = { 4, 53, 88 };
+        p.notes[0][5] = { 4, 68, 58 };
+        p.notes[1][0] = { 0, 48, 61 };
+        p.notes[1][1] = { 1, 60, 47 };
+        p.notes[1][2] = { 2, 80, 46 };
+        p.notes[1][3] = { 3, 38, 188 };
+        p.notes[1][4] = { 4, 54, 64 };
+        p.notes[1][5] = { 4, 70, 61 };
+        p.notes[1][6] = { 6, 73, 57 };
+        p.notes[2][0] = { 0, 48, 40 };
+        p.notes[2][2] = { 2, 80, 30 };
+        p.notes[2][4] = { 4, 58, 57 };
+        p.notes[3][0] = { 0, 48, 91 };
+        p.notes[3][1] = { 1, 60, 95 };
+        p.notes[3][2] = { 2, 80, 96 };
+        p.notes[3][3] = { 3, 38, 182 };
+        p.notes[3][4] = { 4, 50, 86 };
+        p.notes[3][5] = { 4, 70, 102 };
+        p.notes[3][6] = { 6, 74, 61 };
+        p.notes[4][0] = { 0, 48, 61 };
+        p.notes[4][1] = { 1, 60, 71 };
+        p.notes[4][2] = { 2, 80, 65 };
+        p.notes[4][3] = { 3, 38, 124 };
+        p.notes[4][4] = { 4, 50, 64 };
+        p.notes[4][5] = { 4, 70, 93 };
+        p.notes[4][6] = { 6, 94, 58 };
+        p.notes[4][7] = { 7, 74, 40 };
+        p.notes[5][0] = { 0, 48, 83 };
+        p.notes[5][1] = { 1, 60, 32 };
+        p.notes[5][2] = { 2, 80, 37 };
+        p.notes[5][3] = { 3, 39, 184 };
+        p.notes[5][4] = { 4, 51, 108 };
+        p.notes[5][5] = { 4, 66, 76 };
+        p.notes[6][0] = { 0, 48, 45 };
+        p.notes[6][2] = { 2, 80, 42 };
+        p.notes[6][3] = { 3, 51, 90 };
+        p.notes[6][4] = { 4, 51, 93 };
+        p.notes[6][5] = { 4, 68, 72 };
+        p.notes[6][6] = { 6, 75, 55 };
+        p.notes[6][7] = { 7, 80, 40 };
+        p.notes[7][0] = { 0, 48, 86 };
+        p.notes[7][1] = { 1, 60, 88 };
+        p.notes[7][2] = { 2, 80, 72 };
+        p.notes[7][3] = { 3, 39, 180 };
+        p.notes[7][4] = { 4, 51, 115 };
+        p.notes[7][5] = { 4, 70, 63 };
+        p.notes[8][0] = { 0, 48, 55 };
+        p.notes[8][1] = { 1, 60, 57 };
+        p.notes[8][2] = { 2, 80, 60 };
+        p.notes[8][3] = { 3, 39, 172 };
+        p.notes[8][4] = { 4, 51, 120 };
+        p.notes[8][5] = { 4, 66, 88 };
+        p.notes[8][6] = { 6, 92, 60 };
+        p.notes[8][7] = { 7, 85, 40 };
+        p.notes[9][0] = { 0, 48, 99 };
+        p.notes[9][1] = { 1, 60, 49 };
+        p.notes[9][2] = { 2, 80, 44 };
+        p.notes[9][3] = { 3, 39, 170 };
+        p.notes[9][4] = { 4, 51, 100 };
+        p.notes[9][5] = { 4, 68, 51 };
+        p.notes[9][6] = { 6, 80, 54 };
+        p.notes[10][0] = { 0, 48, 73 };
+        p.notes[10][1] = { 1, 60, 75 };
+        p.notes[10][2] = { 2, 80, 95 };
+        p.notes[10][3] = { 3, 39, 202 };
+        p.notes[10][4] = { 4, 51, 122 };
+        p.notes[10][5] = { 4, 70, 76 };
+        p.notes[11][0] = { 0, 48, 52 };
+        p.notes[11][2] = { 2, 80, 49 };
+        p.notes[11][3] = { 3, 39, 198 };
+        p.notes[11][4] = { 4, 51, 147 };
+        p.notes[11][5] = { 4, 70, 91 };
+        p.notes[11][6] = { 6, 73, 93 };
+        p.notes[12][2] = { 2, 80, 40 };
+        p.notes[12][3] = { 3, 39, 166 };
+        p.notes[12][4] = { 4, 51, 104 };
+        p.notes[12][5] = { 4, 63, 54 };
+        p.notes[12][6] = { 6, 80, 66 };
+        p.notes[13][0] = { 0, 48, 41 };
+        p.notes[13][2] = { 2, 80, 39 };
+        p.notes[13][3] = { 3, 39, 162 };
+        p.notes[13][4] = { 4, 61, 73 };
+        p.notes[13][5] = { 4, 68, 84 };
+        p.notes[13][6] = { 6, 73, 58 };
+        p.notes[14][0] = { 0, 48, 72 };
+        p.notes[14][1] = { 1, 60, 53 };
+        p.notes[14][2] = { 2, 80, 78 };
+        p.notes[14][3] = { 3, 32, 136 };
+        p.notes[14][4] = { 4, 32, 70 };
+        p.notes[14][5] = { 4, 68, 81 };
+        p.notes[15][2] = { 2, 80, 48 };
+        p.notes[15][4] = { 4, 32, 90 };
+        p.notes[15][5] = { 4, 68, 81 };
+        p.notes[15][6] = { 6, 80, 54 };
+        m_patterns.push_back(p);
+    }
+    // Bar 36
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 55 };
+        p.notes[0][1] = { 1, 60, 55 };
+        p.notes[0][2] = { 2, 80, 67 };
+        p.notes[0][3] = { 3, 32, 158 };
+        p.notes[0][4] = { 4, 32, 100 };
+        p.notes[0][5] = { 4, 63, 88 };
+        p.notes[1][0] = { 0, 48, 45 };
+        p.notes[1][1] = { 1, 60, 35 };
+        p.notes[1][2] = { 2, 80, 43 };
+        p.notes[1][3] = { 3, 32, 162 };
+        p.notes[1][4] = { 4, 44, 75 };
+        p.notes[1][5] = { 4, 68, 81 };
+        p.notes[2][0] = { 0, 48, 94 };
+        p.notes[2][1] = { 1, 60, 55 };
+        p.notes[2][2] = { 2, 80, 51 };
+        p.notes[2][3] = { 3, 32, 162 };
+        p.notes[2][4] = { 4, 32, 63 };
+        p.notes[2][5] = { 4, 71, 73 };
+        p.notes[2][6] = { 6, 75, 55 };
+        p.notes[3][0] = { 0, 48, 75 };
+        p.notes[3][1] = { 1, 60, 64 };
+        p.notes[3][2] = { 2, 80, 75 };
+        p.notes[3][3] = { 3, 32, 146 };
+        p.notes[3][4] = { 4, 44, 129 };
+        p.notes[3][5] = { 4, 63, 102 };
+        p.notes[4][0] = { 0, 48, 53 };
+        p.notes[4][1] = { 1, 60, 41 };
+        p.notes[4][2] = { 2, 80, 39 };
+        p.notes[4][4] = { 4, 44, 104 };
+        p.notes[4][5] = { 4, 71, 67 };
+        p.notes[5][0] = { 0, 48, 40 };
+        p.notes[5][1] = { 1, 60, 44 };
+        p.notes[5][2] = { 2, 80, 38 };
+        p.notes[5][4] = { 4, 54, 61 };
+        p.notes[5][5] = { 4, 61, 82 };
+        p.notes[5][6] = { 6, 73, 52 };
+        p.notes[6][0] = { 0, 48, 64 };
+        p.notes[6][1] = { 1, 60, 50 };
+        p.notes[6][2] = { 2, 80, 56 };
+        p.notes[6][3] = { 3, 34, 142 };
+        p.notes[6][4] = { 4, 58, 88 };
+        p.notes[6][5] = { 4, 68, 57 };
+        p.notes[7][0] = { 0, 48, 53 };
+        p.notes[7][1] = { 1, 60, 43 };
+        p.notes[7][2] = { 2, 80, 48 };
+        p.notes[7][3] = { 3, 34, 156 };
+        p.notes[7][4] = { 4, 54, 111 };
+        p.notes[7][5] = { 4, 66, 52 };
+        p.notes[7][6] = { 6, 73, 60 };
+        p.notes[8][0] = { 0, 48, 84 };
+        p.notes[8][1] = { 1, 60, 43 };
+        p.notes[8][2] = { 2, 80, 39 };
+        p.notes[8][4] = { 4, 61, 108 };
+        p.notes[8][6] = { 6, 73, 73 };
+        p.notes[9][0] = { 0, 48, 54 };
+        p.notes[9][1] = { 1, 60, 55 };
+        p.notes[9][2] = { 2, 80, 60 };
+        p.notes[9][3] = { 3, 34, 166 };
+        p.notes[9][4] = { 4, 49, 63 };
+        p.notes[9][5] = { 4, 61, 100 };
+        p.notes[10][0] = { 0, 48, 88 };
+        p.notes[10][1] = { 1, 60, 65 };
+        p.notes[10][2] = { 2, 80, 55 };
+        p.notes[10][3] = { 3, 34, 152 };
+        p.notes[10][4] = { 4, 68, 54 };
+        p.notes[11][0] = { 0, 48, 61 };
+        p.notes[11][1] = { 1, 60, 80 };
+        p.notes[11][2] = { 2, 80, 79 };
+        p.notes[11][3] = { 3, 53, 76 };
+        p.notes[11][4] = { 4, 54, 64 };
+        p.notes[11][5] = { 4, 68, 75 };
+        p.notes[11][6] = { 6, 73, 79 };
+        p.notes[12][0] = { 0, 48, 72 };
+        p.notes[12][1] = { 1, 60, 59 };
+        p.notes[12][2] = { 2, 80, 51 };
+        p.notes[12][3] = { 3, 34, 124 };
+        p.notes[12][6] = { 6, 75, 57 };
+        p.notes[13][0] = { 0, 48, 59 };
+        p.notes[13][1] = { 1, 60, 47 };
+        p.notes[13][2] = { 2, 80, 53 };
+        p.notes[13][3] = { 3, 35, 164 };
+        p.notes[13][4] = { 4, 54, 100 };
+        p.notes[13][5] = { 4, 59, 96 };
+        p.notes[14][0] = { 0, 48, 49 };
+        p.notes[14][1] = { 1, 60, 31 };
+        p.notes[14][2] = { 2, 80, 39 };
+        p.notes[14][3] = { 3, 35, 172 };
+        p.notes[14][4] = { 4, 47, 90 };
+        p.notes[14][5] = { 4, 66, 73 };
+        p.notes[15][0] = { 0, 48, 95 };
+        p.notes[15][1] = { 1, 60, 52 };
+        p.notes[15][2] = { 2, 80, 59 };
+        p.notes[15][3] = { 3, 35, 158 };
+        p.notes[15][4] = { 4, 59, 124 };
+        p.notes[15][5] = { 4, 71, 42 };
+        m_patterns.push_back(p);
+    }
+    // Bar 37
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 47 };
+        p.notes[0][2] = { 2, 80, 39 };
+        p.notes[0][3] = { 3, 35, 142 };
+        p.notes[0][4] = { 4, 54, 99 };
+        p.notes[0][5] = { 4, 66, 79 };
+        p.notes[0][6] = { 6, 73, 52 };
+        p.notes[1][0] = { 0, 48, 122 };
+        p.notes[1][1] = { 1, 60, 83 };
+        p.notes[1][2] = { 2, 80, 77 };
+        p.notes[1][3] = { 3, 35, 176 };
+        p.notes[1][4] = { 4, 54, 81 };
+        p.notes[1][5] = { 4, 59, 58 };
+        p.notes[2][0] = { 0, 48, 54 };
+        p.notes[2][1] = { 1, 60, 46 };
+        p.notes[2][2] = { 2, 80, 46 };
+        p.notes[2][3] = { 3, 35, 192 };
+        p.notes[2][4] = { 4, 66, 133 };
+        p.notes[3][0] = { 0, 48, 67 };
+        p.notes[3][1] = { 1, 60, 59 };
+        p.notes[3][2] = { 2, 80, 46 };
+        p.notes[3][3] = { 3, 35, 156 };
+        p.notes[3][4] = { 4, 59, 122 };
+        p.notes[4][0] = { 0, 48, 58 };
+        p.notes[4][1] = { 1, 60, 43 };
+        p.notes[4][2] = { 2, 80, 50 };
+        p.notes[4][3] = { 3, 37, 120 };
+        p.notes[4][4] = { 4, 56, 97 };
+        p.notes[4][5] = { 4, 68, 61 };
+        p.notes[5][2] = { 2, 80, 38 };
+        p.notes[5][4] = { 4, 56, 115 };
+        p.notes[5][6] = { 6, 75, 63 };
+        p.notes[6][2] = { 2, 80, 70 };
+        p.notes[6][4] = { 4, 66, 135 };
+        p.notes[6][5] = { 4, 70, 63 };
+        p.notes[7][2] = { 2, 80, 28 };
+        p.notes[7][4] = { 4, 66, 113 };
+        p.notes[7][5] = { 4, 70, 88 };
+        p.notes[7][6] = { 6, 83, 52 };
+        p.notes[8][2] = { 2, 80, 35 };
+        p.notes[10][0] = { 0, 48, 70 };
+        p.notes[10][1] = { 1, 60, 102 };
+        p.notes[10][2] = { 2, 80, 92 };
+        p.notes[10][3] = { 3, 39, 82 };
+        p.notes[11][0] = { 0, 48, 87 };
+        p.notes[11][1] = { 1, 60, 122 };
+        p.notes[11][2] = { 2, 80, 116 };
+        p.notes[11][3] = { 3, 39, 100 };
+        p.notes[12][2] = { 2, 80, 33 };
+        p.notes[12][3] = { 3, 37, 162 };
+        p.notes[13][0] = { 0, 48, 100 };
+        p.notes[13][1] = { 1, 60, 86 };
+        p.notes[13][2] = { 2, 80, 142 };
+        p.notes[13][3] = { 3, 37, 132 };
+        p.notes[13][4] = { 4, 49, 66 };
+        p.notes[13][5] = { 4, 65, 93 };
+        p.notes[14][0] = { 0, 48, 38 };
+        p.notes[14][1] = { 1, 60, 31 };
+        p.notes[14][2] = { 2, 80, 68 };
+        p.notes[14][3] = { 3, 37, 152 };
+        p.notes[14][4] = { 4, 49, 61 };
+        p.notes[14][5] = { 4, 61, 103 };
+        p.notes[14][6] = { 6, 73, 49 };
+        p.notes[15][0] = { 0, 48, 86 };
+        p.notes[15][2] = { 2, 80, 45 };
+        p.notes[15][4] = { 4, 61, 142 };
+        p.notes[15][5] = { 4, 66, 72 };
+        p.notes[15][6] = { 6, 80, 58 };
+        p.notes[15][7] = { 7, 85, 44 };
+        m_patterns.push_back(p);
+    }
+    // Bar 38
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][1] = { 1, 60, 47 };
+        p.notes[0][2] = { 2, 80, 57 };
+        p.notes[0][4] = { 4, 68, 68 };
+        p.notes[0][6] = { 6, 73, 100 };
+        p.notes[0][7] = { 7, 73, 64 };
+        p.notes[1][0] = { 0, 48, 74 };
+        p.notes[1][1] = { 1, 60, 53 };
+        p.notes[1][2] = { 2, 80, 52 };
+        p.notes[1][3] = { 3, 37, 148 };
+        p.notes[1][4] = { 4, 49, 97 };
+        p.notes[1][5] = { 4, 68, 85 };
+        p.notes[2][2] = { 2, 80, 61 };
+        p.notes[2][3] = { 3, 39, 132 };
+        p.notes[2][4] = { 4, 65, 118 };
+        p.notes[2][6] = { 6, 84, 67 };
+        p.notes[2][7] = { 7, 82, 45 };
+        p.notes[3][0] = { 0, 48, 113 };
+        p.notes[3][1] = { 1, 60, 60 };
+        p.notes[3][2] = { 2, 80, 79 };
+        p.notes[3][3] = { 3, 30, 128 };
+        p.notes[3][4] = { 4, 54, 86 };
+        p.notes[3][5] = { 4, 70, 87 };
+        p.notes[3][6] = { 6, 73, 69 };
+        p.notes[3][7] = { 7, 85, 43 };
+        p.notes[4][0] = { 0, 48, 57 };
+        p.notes[4][2] = { 2, 80, 31 };
+        p.notes[4][3] = { 3, 30, 112 };
+        p.notes[4][4] = { 4, 49, 73 };
+        p.notes[4][5] = { 4, 66, 61 };
+        p.notes[4][6] = { 6, 78, 57 };
+        p.notes[5][0] = { 0, 48, 102 };
+        p.notes[5][1] = { 1, 60, 63 };
+        p.notes[5][2] = { 2, 80, 69 };
+        p.notes[5][4] = { 4, 66, 82 };
+        p.notes[6][0] = { 0, 48, 89 };
+        p.notes[6][2] = { 2, 80, 49 };
+        p.notes[7][0] = { 0, 48, 41 };
+        p.notes[7][2] = { 2, 80, 46 };
+        p.notes[7][4] = { 4, 66, 95 };
+        p.notes[8][0] = { 0, 48, 138 };
+        p.notes[8][1] = { 1, 60, 110 };
+        p.notes[8][2] = { 2, 80, 98 };
+        p.notes[8][4] = { 4, 54, 100 };
+        p.notes[9][1] = { 1, 60, 32 };
+        p.notes[9][2] = { 2, 80, 44 };
+        p.notes[9][3] = { 3, 30, 82 };
+        p.notes[9][4] = { 4, 54, 91 };
+        p.notes[9][5] = { 4, 70, 79 };
+        p.notes[9][6] = { 6, 73, 57 };
+        p.notes[10][2] = { 2, 80, 46 };
+        p.notes[10][3] = { 3, 37, 144 };
+        p.notes[10][4] = { 4, 49, 66 };
+        p.notes[10][5] = { 4, 70, 72 };
+        p.notes[10][6] = { 6, 78, 70 };
+        p.notes[11][2] = { 2, 80, 35 };
+        p.notes[11][3] = { 3, 42, 96 };
+        p.notes[11][6] = { 6, 80, 58 };
+        p.notes[12][0] = { 0, 48, 151 };
+        p.notes[12][1] = { 1, 60, 66 };
+        p.notes[12][2] = { 2, 80, 70 };
+        p.notes[12][3] = { 3, 39, 188 };
+        p.notes[12][4] = { 4, 54, 100 };
+        p.notes[12][5] = { 4, 70, 69 };
+        p.notes[13][0] = { 0, 48, 46 };
+        p.notes[13][2] = { 2, 80, 29 };
+        p.notes[13][3] = { 3, 39, 156 };
+        p.notes[13][4] = { 4, 63, 108 };
+        p.notes[13][6] = { 6, 75, 78 };
+        p.notes[14][0] = { 0, 48, 121 };
+        p.notes[14][1] = { 1, 60, 63 };
+        p.notes[14][2] = { 2, 80, 58 };
+        p.notes[14][3] = { 3, 39, 192 };
+        p.notes[14][4] = { 4, 51, 77 };
+        p.notes[14][5] = { 4, 63, 94 };
+        p.notes[15][1] = { 1, 60, 43 };
+        p.notes[15][2] = { 2, 80, 54 };
+        p.notes[15][3] = { 3, 39, 152 };
+        p.notes[15][4] = { 4, 66, 75 };
+        p.notes[15][6] = { 6, 78, 57 };
+        m_patterns.push_back(p);
+    }
+    // Bar 39
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 96 };
+        p.notes[0][1] = { 1, 60, 97 };
+        p.notes[0][2] = { 2, 80, 82 };
+        p.notes[0][3] = { 3, 37, 70 };
+        p.notes[0][4] = { 4, 54, 93 };
+        p.notes[0][6] = { 6, 73, 72 };
+        p.notes[1][1] = { 1, 60, 35 };
+        p.notes[1][2] = { 2, 80, 65 };
+        p.notes[1][3] = { 3, 37, 140 };
+        p.notes[1][4] = { 4, 56, 86 };
+        p.notes[1][5] = { 4, 68, 99 };
+        p.notes[1][6] = { 6, 73, 69 };
+        p.notes[2][0] = { 0, 48, 56 };
+        p.notes[2][1] = { 1, 60, 33 };
+        p.notes[2][2] = { 2, 80, 61 };
+        p.notes[2][3] = { 3, 35, 160 };
+        p.notes[3][0] = { 0, 48, 100 };
+        p.notes[3][1] = { 1, 60, 39 };
+        p.notes[3][2] = { 2, 80, 47 };
+        p.notes[3][3] = { 3, 35, 176 };
+        p.notes[3][4] = { 4, 47, 73 };
+        p.notes[3][5] = { 4, 66, 85 };
+        p.notes[4][1] = { 1, 60, 51 };
+        p.notes[4][2] = { 2, 80, 39 };
+        p.notes[4][3] = { 3, 35, 126 };
+        p.notes[4][4] = { 4, 59, 104 };
+        p.notes[5][0] = { 0, 48, 138 };
+        p.notes[5][1] = { 1, 60, 115 };
+        p.notes[5][2] = { 2, 80, 79 };
+        p.notes[6][0] = { 0, 48, 104 };
+        p.notes[6][2] = { 2, 80, 37 };
+        p.notes[7][1] = { 1, 60, 51 };
+        p.notes[7][2] = { 2, 80, 73 };
+        p.notes[7][3] = { 3, 35, 92 };
+        p.notes[7][4] = { 4, 54, 100 };
+        p.notes[7][5] = { 4, 63, 97 };
+        p.notes[7][6] = { 6, 73, 57 };
+        p.notes[7][7] = { 7, 78, 40 };
+        p.notes[8][0] = { 0, 48, 49 };
+        p.notes[8][1] = { 1, 60, 62 };
+        p.notes[8][2] = { 2, 80, 60 };
+        p.notes[8][3] = { 3, 47, 110 };
+        p.notes[8][4] = { 4, 59, 127 };
+        p.notes[8][5] = { 4, 66, 87 };
+        p.notes[8][6] = { 6, 75, 61 };
+        p.notes[9][2] = { 2, 80, 41 };
+        p.notes[9][3] = { 3, 34, 102 };
+        p.notes[9][6] = { 6, 73, 66 };
+        p.notes[9][7] = { 7, 80, 40 };
+        p.notes[10][2] = { 2, 80, 31 };
+        p.notes[10][4] = { 4, 56, 59 };
+        p.notes[10][5] = { 4, 63, 91 };
+        p.notes[10][6] = { 6, 73, 72 };
+        p.notes[11][2] = { 2, 80, 48 };
+        p.notes[11][3] = { 3, 34, 120 };
+        p.notes[11][4] = { 4, 56, 82 };
+        p.notes[11][5] = { 4, 68, 66 };
+        p.notes[11][6] = { 6, 82, 63 };
+        p.notes[11][7] = { 7, 82, 44 };
+        p.notes[12][0] = { 0, 48, 77 };
+        p.notes[12][1] = { 1, 60, 50 };
+        p.notes[12][2] = { 2, 80, 77 };
+        p.notes[12][3] = { 3, 32, 152 };
+        p.notes[12][4] = { 4, 56, 113 };
+        p.notes[12][5] = { 4, 68, 82 };
+        p.notes[13][0] = { 0, 48, 89 };
+        p.notes[13][1] = { 1, 60, 79 };
+        p.notes[13][2] = { 2, 80, 64 };
+        p.notes[13][3] = { 3, 44, 94 };
+        p.notes[13][4] = { 4, 59, 118 };
+        p.notes[13][5] = { 4, 63, 76 };
+        p.notes[14][1] = { 1, 60, 40 };
+        p.notes[14][2] = { 2, 80, 38 };
+        p.notes[14][4] = { 4, 59, 97 };
+        p.notes[14][5] = { 4, 71, 55 };
+        p.notes[15][0] = { 0, 48, 96 };
+        p.notes[15][1] = { 1, 60, 31 };
+        p.notes[15][2] = { 2, 80, 35 };
+        p.notes[15][3] = { 3, 44, 96 };
+        p.notes[15][4] = { 4, 51, 64 };
+        p.notes[15][5] = { 4, 63, 81 };
+        m_patterns.push_back(p);
+    }
+    // Bar 40
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 66 };
+        p.notes[0][3] = { 3, 32, 158 };
+        p.notes[0][4] = { 4, 51, 61 };
+        p.notes[0][5] = { 4, 59, 75 };
+        p.notes[1][0] = { 0, 48, 149 };
+        p.notes[1][1] = { 1, 60, 167 };
+        p.notes[1][2] = { 2, 80, 174 };
+        p.notes[1][3] = { 3, 32, 160 };
+        p.notes[1][4] = { 4, 44, 90 };
+        p.notes[1][5] = { 4, 71, 60 };
+        p.notes[2][1] = { 1, 60, 43 };
+        p.notes[2][2] = { 2, 80, 32 };
+        p.notes[2][3] = { 3, 35, 76 };
+        p.notes[2][4] = { 4, 54, 54 };
+        p.notes[2][5] = { 4, 71, 61 };
+        p.notes[2][6] = { 6, 82, 52 };
+        p.notes[3][0] = { 0, 48, 166 };
+        p.notes[3][1] = { 1, 60, 108 };
+        p.notes[3][2] = { 2, 80, 126 };
+        p.notes[3][3] = { 3, 35, 174 };
+        p.notes[3][4] = { 4, 54, 147 };
+        p.notes[3][5] = { 4, 66, 69 };
+        p.notes[4][0] = { 0, 48, 59 };
+        p.notes[4][1] = { 1, 60, 32 };
+        p.notes[4][4] = { 4, 59, 117 };
+        p.notes[5][0] = { 0, 48, 111 };
+        p.notes[5][1] = { 1, 60, 136 };
+        p.notes[5][2] = { 2, 80, 129 };
+        p.notes[5][3] = { 3, 35, 174 };
+        p.notes[5][4] = { 4, 54, 100 };
+        p.notes[5][5] = { 4, 66, 67 };
+        p.notes[5][6] = { 6, 87, 61 };
+        p.notes[6][2] = { 2, 80, 28 };
+        p.notes[6][4] = { 4, 47, 84 };
+        p.notes[6][5] = { 4, 66, 73 };
+        p.notes[7][0] = { 0, 48, 121 };
+        p.notes[7][1] = { 1, 60, 51 };
+        p.notes[7][2] = { 2, 80, 47 };
+        p.notes[7][3] = { 3, 35, 164 };
+        p.notes[7][4] = { 4, 54, 108 };
+        p.notes[7][5] = { 4, 66, 60 };
+        p.notes[7][6] = { 6, 78, 57 };
+        p.notes[8][0] = { 0, 48, 47 };
+        p.notes[8][1] = { 1, 60, 38 };
+        p.notes[8][2] = { 2, 80, 27 };
+        p.notes[8][3] = { 3, 35, 134 };
+        p.notes[8][4] = { 4, 54, 90 };
+        p.notes[8][5] = { 4, 66, 69 };
+        p.notes[9][0] = { 0, 48, 87 };
+        p.notes[9][1] = { 1, 60, 109 };
+        p.notes[9][2] = { 2, 80, 102 };
+        p.notes[9][3] = { 3, 35, 164 };
+        p.notes[9][4] = { 4, 59, 154 };
+        p.notes[10][0] = { 0, 48, 39 };
+        p.notes[10][4] = { 4, 49, 111 };
+        p.notes[10][5] = { 4, 61, 79 };
+        p.notes[11][0] = { 0, 48, 142 };
+        p.notes[11][1] = { 1, 60, 39 };
+        p.notes[11][2] = { 2, 80, 34 };
+        p.notes[11][3] = { 3, 37, 168 };
+        p.notes[11][4] = { 4, 56, 117 };
+        p.notes[11][5] = { 4, 68, 93 };
+        p.notes[11][6] = { 6, 80, 55 };
+        p.notes[11][7] = { 7, 80, 40 };
+        p.notes[12][0] = { 0, 48, 64 };
+        p.notes[12][1] = { 1, 60, 42 };
+        p.notes[12][2] = { 2, 80, 32 };
+        p.notes[12][3] = { 3, 37, 160 };
+        p.notes[12][4] = { 4, 56, 113 };
+        p.notes[12][5] = { 4, 68, 76 };
+        p.notes[12][6] = { 6, 80, 49 };
+        p.notes[13][0] = { 0, 48, 99 };
+        p.notes[13][1] = { 1, 60, 120 };
+        p.notes[13][2] = { 2, 80, 133 };
+        p.notes[13][3] = { 3, 37, 140 };
+        p.notes[13][4] = { 4, 56, 108 };
+        p.notes[13][5] = { 4, 68, 94 };
+        p.notes[13][6] = { 6, 85, 51 };
+        p.notes[14][0] = { 0, 48, 65 };
+        p.notes[14][1] = { 1, 60, 42 };
+        p.notes[14][2] = { 2, 80, 34 };
+        p.notes[14][3] = { 3, 37, 156 };
+        p.notes[14][4] = { 4, 49, 106 };
+        p.notes[14][5] = { 4, 56, 97 };
+        p.notes[14][6] = { 6, 80, 66 };
+        p.notes[14][7] = { 7, 73, 48 };
+        p.notes[15][0] = { 0, 48, 135 };
+        p.notes[15][1] = { 1, 60, 96 };
+        p.notes[15][2] = { 2, 80, 85 };
+        p.notes[15][3] = { 3, 37, 106 };
+        p.notes[15][4] = { 4, 56, 111 };
+        p.notes[15][5] = { 4, 61, 84 };
+        m_patterns.push_back(p);
+    }
+    // Bar 41
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 98 };
+        p.notes[0][1] = { 1, 60, 85 };
+        p.notes[0][2] = { 2, 80, 72 };
+        p.notes[0][3] = { 3, 37, 102 };
+        p.notes[0][4] = { 4, 61, 102 };
+        p.notes[0][5] = { 4, 68, 108 };
+        p.notes[0][6] = { 6, 80, 48 };
+        p.notes[1][0] = { 0, 48, 59 };
+        p.notes[1][1] = { 1, 60, 77 };
+        p.notes[1][2] = { 2, 80, 62 };
+        p.notes[1][3] = { 3, 37, 114 };
+        p.notes[1][4] = { 4, 56, 99 };
+        p.notes[1][5] = { 4, 68, 87 };
+        p.notes[2][0] = { 0, 48, 43 };
+        p.notes[2][1] = { 1, 60, 61 };
+        p.notes[2][2] = { 2, 80, 48 };
+        p.notes[2][3] = { 3, 49, 132 };
+        p.notes[2][4] = { 4, 56, 73 };
+        p.notes[2][6] = { 6, 73, 63 };
+        p.notes[3][2] = { 2, 80, 26 };
+        p.notes[3][6] = { 6, 80, 55 };
+        p.notes[5][4] = { 4, 70, 100 };
+        p.notes[6][1] = { 1, 60, 44 };
+        p.notes[6][2] = { 2, 80, 72 };
+        p.notes[7][0] = { 0, 48, 121 };
+        p.notes[7][1] = { 1, 60, 101 };
+        p.notes[7][2] = { 2, 80, 81 };
+        p.notes[7][4] = { 4, 49, 59 };
+        p.notes[7][5] = { 4, 61, 84 };
+        p.notes[7][6] = { 6, 80, 48 };
+        p.notes[7][7] = { 7, 82, 40 };
+        p.notes[8][0] = { 0, 48, 157 };
+        p.notes[8][1] = { 1, 60, 93 };
+        p.notes[8][2] = { 2, 80, 86 };
+        p.notes[9][1] = { 1, 60, 44 };
+        p.notes[9][2] = { 2, 80, 46 };
+        p.notes[10][0] = { 0, 48, 107 };
+        p.notes[10][1] = { 1, 60, 66 };
+        p.notes[10][2] = { 2, 80, 101 };
+        p.notes[10][3] = { 3, 35, 186 };
+        p.notes[10][4] = { 4, 47, 108 };
+        p.notes[10][5] = { 4, 71, 58 };
+        p.notes[10][6] = { 6, 75, 57 };
+        p.notes[11][0] = { 0, 48, 58 };
+        p.notes[11][2] = { 2, 80, 59 };
+        p.notes[11][3] = { 3, 35, 188 };
+        p.notes[11][4] = { 4, 47, 136 };
+        p.notes[11][5] = { 4, 59, 103 };
+        p.notes[12][0] = { 0, 48, 124 };
+        p.notes[12][1] = { 1, 60, 96 };
+        p.notes[12][2] = { 2, 80, 109 };
+        p.notes[12][3] = { 3, 47, 104 };
+        p.notes[12][4] = { 4, 47, 88 };
+        p.notes[12][5] = { 4, 68, 66 };
+        p.notes[13][1] = { 1, 60, 34 };
+        p.notes[13][2] = { 2, 80, 47 };
+        p.notes[13][4] = { 4, 47, 131 };
+        p.notes[13][5] = { 4, 66, 64 };
+        p.notes[13][6] = { 6, 85, 45 };
+        p.notes[14][0] = { 0, 48, 158 };
+        p.notes[14][1] = { 1, 60, 74 };
+        p.notes[14][2] = { 2, 80, 79 };
+        p.notes[14][3] = { 3, 35, 128 };
+        p.notes[14][4] = { 4, 47, 106 };
+        p.notes[14][5] = { 4, 63, 60 };
+        p.notes[15][0] = { 0, 48, 82 };
+        p.notes[15][1] = { 1, 60, 39 };
+        p.notes[15][2] = { 2, 80, 40 };
+        p.notes[15][3] = { 3, 37, 178 };
+        p.notes[15][4] = { 4, 49, 73 };
+        p.notes[15][5] = { 4, 68, 73 };
+        p.notes[15][6] = { 6, 80, 60 };
+        p.notes[15][7] = { 7, 73, 44 };
+        m_patterns.push_back(p);
+    }
+    // Bar 42
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 84 };
+        p.notes[0][1] = { 1, 60, 68 };
+        p.notes[0][2] = { 2, 80, 75 };
+        p.notes[0][3] = { 3, 37, 170 };
+        p.notes[0][4] = { 4, 49, 133 };
+        p.notes[0][5] = { 4, 61, 55 };
+        p.notes[1][2] = { 2, 80, 37 };
+        p.notes[1][3] = { 3, 30, 160 };
+        p.notes[1][4] = { 4, 49, 104 };
+        p.notes[1][5] = { 4, 70, 69 };
+        p.notes[2][0] = { 0, 48, 147 };
+        p.notes[2][1] = { 1, 60, 53 };
+        p.notes[2][2] = { 2, 80, 44 };
+        p.notes[2][4] = { 4, 42, 70 };
+        p.notes[2][5] = { 4, 49, 94 };
+        p.notes[2][6] = { 6, 80, 40 };
+        p.notes[3][0] = { 0, 48, 52 };
+        p.notes[3][1] = { 1, 60, 31 };
+        p.notes[3][2] = { 2, 80, 33 };
+        p.notes[3][4] = { 4, 54, 113 };
+        p.notes[3][5] = { 4, 58, 55 };
+        p.notes[3][6] = { 6, 80, 54 };
+        p.notes[4][0] = { 0, 48, 78 };
+        p.notes[4][1] = { 1, 60, 93 };
+        p.notes[4][2] = { 2, 80, 104 };
+        p.notes[4][3] = { 3, 30, 134 };
+        p.notes[4][4] = { 4, 42, 61 };
+        p.notes[4][5] = { 4, 70, 58 };
+        p.notes[5][2] = { 2, 80, 26 };
+        p.notes[5][3] = { 3, 42, 108 };
+        p.notes[5][4] = { 4, 54, 104 };
+        p.notes[5][5] = { 4, 66, 58 };
+        p.notes[6][0] = { 0, 48, 131 };
+        p.notes[6][1] = { 1, 60, 52 };
+        p.notes[6][2] = { 2, 80, 53 };
+        p.notes[6][4] = { 4, 54, 104 };
+        p.notes[7][0] = { 0, 48, 57 };
+        p.notes[7][1] = { 1, 60, 41 };
+        p.notes[7][2] = { 2, 80, 44 };
+        p.notes[7][3] = { 3, 30, 158 };
+        p.notes[7][4] = { 4, 42, 68 };
+        p.notes[7][5] = { 4, 68, 51 };
+        p.notes[7][6] = { 6, 73, 63 };
+        p.notes[8][0] = { 0, 48, 62 };
+        p.notes[8][1] = { 1, 60, 80 };
+        p.notes[8][2] = { 2, 80, 89 };
+        p.notes[8][3] = { 3, 30, 144 };
+        p.notes[8][4] = { 4, 54, 106 };
+        p.notes[8][5] = { 4, 70, 75 };
+        p.notes[8][6] = { 6, 85, 52 };
+        p.notes[9][0] = { 0, 48, 44 };
+        p.notes[9][3] = { 3, 39, 132 };
+        p.notes[9][4] = { 4, 49, 63 };
+        p.notes[9][5] = { 4, 66, 64 };
+        p.notes[9][6] = { 6, 77, 57 };
+        p.notes[9][7] = { 7, 73, 45 };
+        p.notes[10][0] = { 0, 48, 102 };
+        p.notes[10][1] = { 1, 60, 32 };
+        p.notes[10][2] = { 2, 80, 39 };
+        p.notes[10][3] = { 3, 39, 192 };
+        p.notes[10][4] = { 4, 66, 95 };
+        p.notes[11][1] = { 1, 60, 32 };
+        p.notes[11][2] = { 2, 80, 31 };
+        p.notes[11][3] = { 3, 39, 202 };
+        p.notes[11][4] = { 4, 51, 90 };
+        p.notes[11][5] = { 4, 66, 102 };
+        p.notes[11][6] = { 6, 80, 60 };
+        p.notes[11][7] = { 7, 73, 45 };
+        p.notes[12][0] = { 0, 48, 62 };
+        p.notes[12][1] = { 1, 60, 107 };
+        p.notes[12][2] = { 2, 80, 103 };
+        p.notes[12][4] = { 4, 51, 77 };
+        p.notes[12][6] = { 6, 78, 61 };
+        p.notes[13][0] = { 0, 48, 45 };
+        p.notes[13][2] = { 2, 80, 31 };
+        p.notes[13][3] = { 3, 39, 182 };
+        p.notes[13][4] = { 4, 54, 73 };
+        p.notes[13][5] = { 4, 66, 97 };
+        p.notes[14][0] = { 0, 48, 107 };
+        p.notes[14][2] = { 2, 80, 31 };
+        p.notes[14][3] = { 3, 37, 164 };
+        p.notes[14][4] = { 4, 49, 79 };
+        p.notes[14][5] = { 4, 68, 76 };
+        p.notes[14][6] = { 6, 73, 85 };
+        p.notes[14][7] = { 7, 92, 42 };
+        p.notes[15][0] = { 0, 48, 55 };
+        p.notes[15][1] = { 1, 60, 45 };
+        p.notes[15][2] = { 2, 80, 42 };
+        p.notes[15][3] = { 3, 37, 184 };
+        p.notes[15][4] = { 4, 56, 91 };
+        p.notes[15][6] = { 6, 87, 58 };
+        m_patterns.push_back(p);
+    }
+    // Bar 43
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 49 };
+        p.notes[0][1] = { 1, 60, 82 };
+        p.notes[0][2] = { 2, 80, 84 };
+        p.notes[0][3] = { 3, 35, 174 };
+        p.notes[0][4] = { 4, 47, 70 };
+        p.notes[0][5] = { 4, 71, 66 };
+        p.notes[0][6] = { 6, 75, 55 };
+        p.notes[0][7] = { 7, 75, 44 };
+        p.notes[1][0] = { 0, 48, 50 };
+        p.notes[1][2] = { 2, 80, 30 };
+        p.notes[1][3] = { 3, 47, 84 };
+        p.notes[1][4] = { 4, 47, 138 };
+        p.notes[2][0] = { 0, 48, 100 };
+        p.notes[2][2] = { 2, 80, 28 };
+        p.notes[2][3] = { 3, 35, 178 };
+        p.notes[2][4] = { 4, 35, 61 };
+        p.notes[2][5] = { 4, 71, 75 };
+        p.notes[2][6] = { 6, 87, 67 };
+        p.notes[3][0] = { 0, 48, 105 };
+        p.notes[3][1] = { 1, 60, 129 };
+        p.notes[3][2] = { 2, 80, 119 };
+        p.notes[3][4] = { 4, 47, 99 };
+        p.notes[3][5] = { 4, 61, 60 };
+        p.notes[3][6] = { 6, 75, 60 };
+        p.notes[3][7] = { 7, 73, 48 };
+        p.notes[4][1] = { 1, 60, 36 };
+        p.notes[4][2] = { 2, 80, 41 };
+        p.notes[4][3] = { 3, 47, 96 };
+        p.notes[4][4] = { 4, 47, 93 };
+        p.notes[4][5] = { 4, 63, 79 };
+        p.notes[5][0] = { 0, 48, 112 };
+        p.notes[5][1] = { 1, 60, 80 };
+        p.notes[5][2] = { 2, 80, 97 };
+        p.notes[5][4] = { 4, 63, 120 };
+        p.notes[6][0] = { 0, 48, 71 };
+        p.notes[6][2] = { 2, 80, 41 };
+        p.notes[6][3] = { 3, 35, 120 };
+        p.notes[6][4] = { 4, 54, 90 };
+        p.notes[6][5] = { 4, 66, 96 };
+        p.notes[7][0] = { 0, 48, 107 };
+        p.notes[7][1] = { 1, 60, 70 };
+        p.notes[7][2] = { 2, 80, 69 };
+        p.notes[7][3] = { 3, 35, 182 };
+        p.notes[7][4] = { 4, 47, 70 };
+        p.notes[7][5] = { 4, 59, 103 };
+        p.notes[8][1] = { 1, 60, 37 };
+        p.notes[8][2] = { 2, 80, 31 };
+        p.notes[8][3] = { 3, 35, 146 };
+        p.notes[8][6] = { 6, 83, 66 };
+        p.notes[9][0] = { 0, 48, 144 };
+        p.notes[9][1] = { 1, 60, 123 };
+        p.notes[9][2] = { 2, 80, 154 };
+        p.notes[9][3] = { 3, 32, 148 };
+        p.notes[9][4] = { 4, 47, 64 };
+        p.notes[9][5] = { 4, 68, 61 };
+        p.notes[9][6] = { 6, 80, 70 };
+        p.notes[10][0] = { 0, 48, 47 };
+        p.notes[10][2] = { 2, 80, 39 };
+        p.notes[10][4] = { 4, 56, 133 };
+        p.notes[10][5] = { 4, 68, 64 };
+        p.notes[10][6] = { 6, 75, 54 };
+        p.notes[11][0] = { 0, 48, 108 };
+        p.notes[11][1] = { 1, 60, 70 };
+        p.notes[11][2] = { 2, 80, 61 };
+        p.notes[11][4] = { 4, 56, 109 };
+        p.notes[11][5] = { 4, 68, 90 };
+        p.notes[12][0] = { 0, 48, 75 };
+        p.notes[12][2] = { 2, 80, 38 };
+        p.notes[12][3] = { 3, 34, 162 };
+        p.notes[12][4] = { 4, 61, 88 };
+        p.notes[12][5] = { 4, 70, 48 };
+        p.notes[12][6] = { 6, 78, 63 };
+        p.notes[13][2] = { 2, 80, 38 };
+        p.notes[13][3] = { 3, 34, 168 };
+        p.notes[14][1] = { 1, 60, 37 };
+        p.notes[14][2] = { 2, 80, 47 };
+        p.notes[14][4] = { 4, 46, 70 };
+        p.notes[14][5] = { 4, 70, 87 };
+        p.notes[14][6] = { 6, 73, 60 };
+        p.notes[14][7] = { 7, 73, 40 };
+        p.notes[15][0] = { 0, 48, 133 };
+        p.notes[15][1] = { 1, 60, 92 };
+        p.notes[15][2] = { 2, 80, 79 };
+        p.notes[15][3] = { 3, 35, 142 };
+        p.notes[15][6] = { 6, 73, 66 };
+        m_patterns.push_back(p);
+    }
+    // Bar 44
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][2] = { 2, 80, 41 };
+        p.notes[0][4] = { 4, 63, 127 };
+        p.notes[0][5] = { 4, 71, 51 };
+        p.notes[1][1] = { 1, 60, 38 };
+        p.notes[1][2] = { 2, 80, 40 };
+        p.notes[1][4] = { 4, 56, 61 };
+        p.notes[1][5] = { 4, 63, 87 };
+        p.notes[1][6] = { 6, 85, 51 };
+        p.notes[2][0] = { 0, 48, 86 };
+        p.notes[2][1] = { 1, 60, 89 };
+        p.notes[2][2] = { 2, 80, 77 };
+        p.notes[2][3] = { 3, 37, 162 };
+        p.notes[2][4] = { 4, 49, 61 };
+        p.notes[2][5] = { 4, 68, 51 };
+        p.notes[2][6] = { 6, 73, 73 };
+        p.notes[2][7] = { 7, 73, 46 };
+        p.notes[3][0] = { 0, 48, 40 };
+        p.notes[3][2] = { 2, 80, 33 };
+        p.notes[3][4] = { 4, 49, 126 };
+        p.notes[3][5] = { 4, 61, 79 };
+        p.notes[4][0] = { 0, 48, 72 };
+        p.notes[4][1] = { 1, 60, 38 };
+        p.notes[4][2] = { 2, 80, 32 };
+        p.notes[4][6] = { 6, 85, 54 };
+        p.notes[5][0] = { 0, 48, 64 };
+        p.notes[5][1] = { 1, 60, 91 };
+        p.notes[5][2] = { 2, 80, 105 };
+        p.notes[5][3] = { 3, 37, 178 };
+        p.notes[5][4] = { 4, 54, 84 };
+        p.notes[5][6] = { 6, 73, 60 };
+        p.notes[6][0] = { 0, 48, 57 };
+        p.notes[6][1] = { 1, 60, 39 };
+        p.notes[6][2] = { 2, 80, 39 };
+        p.notes[6][3] = { 3, 37, 116 };
+        p.notes[6][4] = { 4, 49, 66 };
+        p.notes[6][5] = { 4, 61, 55 };
+        p.notes[6][6] = { 6, 85, 60 };
+        p.notes[6][7] = { 7, 80, 40 };
+        p.notes[7][0] = { 0, 48, 103 };
+        p.notes[7][1] = { 1, 60, 89 };
+        p.notes[7][2] = { 2, 80, 56 };
+        p.notes[7][3] = { 3, 49, 84 };
+        p.notes[8][0] = { 0, 48, 80 };
+        p.notes[8][1] = { 1, 60, 88 };
+        p.notes[8][2] = { 2, 80, 90 };
+        p.notes[8][3] = { 3, 42, 136 };
+        p.notes[8][4] = { 4, 54, 144 };
+        p.notes[8][5] = { 4, 70, 96 };
+        p.notes[9][0] = { 0, 48, 64 };
+        p.notes[9][2] = { 2, 80, 52 };
+        p.notes[9][3] = { 3, 30, 122 };
+        p.notes[9][4] = { 4, 54, 120 };
+        p.notes[9][5] = { 4, 61, 100 };
+        p.notes[10][1] = { 1, 60, 40 };
+        p.notes[10][2] = { 2, 80, 49 };
+        p.notes[10][4] = { 4, 66, 82 };
+        p.notes[11][0] = { 0, 48, 42 };
+        p.notes[11][1] = { 1, 60, 49 };
+        p.notes[11][2] = { 2, 80, 43 };
+        p.notes[11][3] = { 3, 49, 74 };
+        p.notes[11][4] = { 4, 54, 163 };
+        p.notes[11][5] = { 4, 58, 66 };
+        p.notes[12][0] = { 0, 48, 40 };
+        p.notes[12][1] = { 1, 60, 30 };
+        p.notes[12][2] = { 2, 80, 49 };
+        p.notes[12][3] = { 3, 42, 112 };
+        p.notes[12][4] = { 4, 54, 111 };
+        p.notes[12][5] = { 4, 61, 58 };
+        p.notes[13][0] = { 0, 48, 109 };
+        p.notes[13][2] = { 2, 80, 29 };
+        p.notes[13][3] = { 3, 42, 118 };
+        p.notes[13][4] = { 4, 54, 70 };
+        p.notes[13][5] = { 4, 70, 52 };
+        p.notes[14][0] = { 0, 48, 128 };
+        p.notes[14][1] = { 1, 60, 84 };
+        p.notes[14][2] = { 2, 80, 72 };
+        p.notes[14][3] = { 3, 42, 92 };
+        p.notes[14][4] = { 4, 42, 91 };
+        p.notes[14][5] = { 4, 61, 57 };
+        p.notes[15][1] = { 1, 60, 33 };
+        p.notes[15][2] = { 2, 80, 33 };
+        p.notes[15][3] = { 3, 30, 114 };
+        p.notes[15][4] = { 4, 42, 109 };
+        p.notes[15][5] = { 4, 70, 84 };
+        m_patterns.push_back(p);
+    }
+    // Bar 45
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 156 };
+        p.notes[0][1] = { 1, 60, 93 };
+        p.notes[0][2] = { 2, 80, 108 };
+        p.notes[0][3] = { 3, 30, 114 };
+        p.notes[0][4] = { 4, 54, 109 };
+        p.notes[0][6] = { 6, 73, 64 };
+        p.notes[1][0] = { 0, 48, 65 };
+        p.notes[1][2] = { 2, 80, 31 };
+        p.notes[1][3] = { 3, 30, 114 };
+        p.notes[1][4] = { 4, 54, 88 };
+        p.notes[1][5] = { 4, 61, 66 };
+        p.notes[2][0] = { 0, 48, 130 };
+        p.notes[2][1] = { 1, 60, 114 };
+        p.notes[2][2] = { 2, 80, 105 };
+        p.notes[2][3] = { 3, 30, 110 };
+        p.notes[2][4] = { 4, 42, 57 };
+        p.notes[2][5] = { 4, 49, 58 };
+        p.notes[3][1] = { 1, 60, 35 };
+        p.notes[3][2] = { 2, 80, 30 };
+        p.notes[3][3] = { 3, 42, 110 };
+        p.notes[3][4] = { 4, 42, 113 };
+        p.notes[3][5] = { 4, 58, 60 };
+        p.notes[4][0] = { 0, 48, 166 };
+        p.notes[4][1] = { 1, 60, 106 };
+        p.notes[4][2] = { 2, 80, 105 };
+        p.notes[4][4] = { 4, 42, 111 };
+        p.notes[4][5] = { 4, 70, 64 };
+        p.notes[5][0] = { 0, 48, 62 };
+        p.notes[5][1] = { 1, 60, 36 };
+        p.notes[5][2] = { 2, 80, 29 };
+        p.notes[5][3] = { 3, 30, 104 };
+        p.notes[5][4] = { 4, 49, 70 };
+        p.notes[5][5] = { 4, 70, 84 };
+        p.notes[5][6] = { 6, 80, 51 };
+        p.notes[6][0] = { 0, 48, 78 };
+        p.notes[6][1] = { 1, 60, 53 };
+        p.notes[6][2] = { 2, 80, 47 };
+        p.notes[6][3] = { 3, 42, 134 };
+        p.notes[6][4] = { 4, 61, 72 };
+        p.notes[7][0] = { 0, 48, 40 };
+        p.notes[7][1] = { 1, 60, 49 };
+        p.notes[7][2] = { 2, 80, 41 };
+        p.notes[7][3] = { 3, 42, 102 };
+        p.notes[7][4] = { 4, 49, 68 };
+        p.notes[7][5] = { 4, 54, 120 };
+        p.notes[8][0] = { 0, 48, 96 };
+        p.notes[8][1] = { 1, 60, 58 };
+        p.notes[8][2] = { 2, 80, 44 };
+        p.notes[8][3] = { 3, 30, 148 };
+        p.notes[8][4] = { 4, 42, 84 };
+        p.notes[8][5] = { 4, 70, 66 };
+        p.notes[8][6] = { 6, 78, 51 };
+        p.notes[9][0] = { 0, 48, 48 };
+        p.notes[9][1] = { 1, 60, 34 };
+        p.notes[9][2] = { 2, 80, 28 };
+        p.notes[9][4] = { 4, 58, 84 };
+        p.notes[9][5] = { 4, 70, 54 };
+        p.notes[10][0] = { 0, 48, 68 };
+        p.notes[10][1] = { 1, 60, 102 };
+        p.notes[10][2] = { 2, 80, 110 };
+        p.notes[10][4] = { 4, 54, 147 };
+        p.notes[10][5] = { 4, 70, 58 };
+        p.notes[11][0] = { 0, 48, 40 };
+        p.notes[11][2] = { 2, 80, 32 };
+        p.notes[11][3] = { 3, 42, 82 };
+        p.notes[11][4] = { 4, 42, 88 };
+        p.notes[11][5] = { 4, 58, 84 };
+        p.notes[12][0] = { 0, 48, 132 };
+        p.notes[12][1] = { 1, 60, 59 };
+        p.notes[12][2] = { 2, 80, 39 };
+        p.notes[12][3] = { 3, 42, 106 };
+        p.notes[12][4] = { 4, 61, 64 };
+        p.notes[13][0] = { 0, 48, 56 };
+        p.notes[13][1] = { 1, 60, 34 };
+        p.notes[13][2] = { 2, 80, 27 };
+        p.notes[13][3] = { 3, 30, 112 };
+        p.notes[13][4] = { 4, 42, 104 };
+        p.notes[13][5] = { 4, 70, 78 };
+        p.notes[14][0] = { 0, 48, 45 };
+        p.notes[14][1] = { 1, 60, 91 };
+        p.notes[14][2] = { 2, 80, 109 };
+        p.notes[14][3] = { 3, 30, 122 };
+        p.notes[14][4] = { 4, 54, 154 };
+        p.notes[15][1] = { 1, 60, 37 };
+        p.notes[15][2] = { 2, 80, 28 };
+        p.notes[15][3] = { 3, 37, 98 };
+        p.notes[15][4] = { 4, 54, 93 };
+        p.notes[15][5] = { 4, 66, 43 };
+        m_patterns.push_back(p);
+    }
+    // Bar 46
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 69 };
+        p.notes[0][1] = { 1, 60, 78 };
+        p.notes[0][2] = { 2, 80, 69 };
+        p.notes[0][3] = { 3, 37, 184 };
+        p.notes[0][4] = { 4, 66, 86 };
+        p.notes[1][1] = { 1, 60, 39 };
+        p.notes[1][2] = { 2, 80, 35 };
+        p.notes[1][3] = { 3, 49, 94 };
+        p.notes[1][4] = { 4, 66, 77 };
+        p.notes[2][0] = { 0, 48, 76 };
+        p.notes[2][1] = { 1, 60, 77 };
+        p.notes[2][2] = { 2, 80, 62 };
+        p.notes[2][3] = { 3, 37, 144 };
+        p.notes[2][4] = { 4, 50, 106 };
+        p.notes[2][5] = { 4, 62, 79 };
+        p.notes[4][4] = { 4, 61, 88 };
+        p.notes[5][1] = { 1, 60, 64 };
+        p.notes[5][2] = { 2, 80, 34 };
+        p.notes[5][3] = { 3, 39, 98 };
+        p.notes[5][6] = { 6, 82, 55 };
+        p.notes[6][0] = { 0, 48, 76 };
+        p.notes[6][1] = { 1, 60, 130 };
+        p.notes[6][2] = { 2, 80, 169 };
+        p.notes[6][4] = { 4, 61, 154 };
+        p.notes[7][0] = { 0, 48, 47 };
+        p.notes[7][2] = { 2, 80, 48 };
+        p.notes[7][3] = { 3, 39, 152 };
+        p.notes[7][4] = { 4, 51, 81 };
+        p.notes[7][5] = { 4, 70, 93 };
+        p.notes[8][0] = { 0, 48, 85 };
+        p.notes[8][2] = { 2, 80, 54 };
+        p.notes[8][3] = { 3, 27, 102 };
+        p.notes[8][4] = { 4, 51, 138 };
+        p.notes[8][5] = { 4, 70, 82 };
+        p.notes[9][0] = { 0, 48, 111 };
+        p.notes[9][1] = { 1, 60, 111 };
+        p.notes[9][2] = { 2, 80, 110 };
+        p.notes[9][3] = { 3, 39, 114 };
+        p.notes[9][4] = { 4, 63, 63 };
+        p.notes[10][1] = { 1, 60, 37 };
+        p.notes[10][2] = { 2, 80, 42 };
+        p.notes[10][3] = { 3, 34, 72 };
+        p.notes[10][4] = { 4, 54, 48 };
+        p.notes[10][5] = { 4, 63, 52 };
+        p.notes[10][6] = { 6, 77, 48 };
+        p.notes[11][0] = { 0, 48, 123 };
+        p.notes[11][1] = { 1, 60, 68 };
+        p.notes[11][2] = { 2, 80, 82 };
+        p.notes[11][3] = { 3, 34, 178 };
+        p.notes[11][4] = { 4, 58, 90 };
+        p.notes[11][5] = { 4, 61, 91 };
+        p.notes[11][6] = { 6, 85, 55 };
+        p.notes[11][7] = { 7, 73, 40 };
+        p.notes[12][0] = { 0, 48, 77 };
+        p.notes[12][2] = { 2, 80, 39 };
+        p.notes[12][3] = { 3, 34, 164 };
+        p.notes[12][4] = { 4, 49, 52 };
+        p.notes[12][5] = { 4, 70, 51 };
+        p.notes[12][6] = { 6, 73, 67 };
+        p.notes[13][0] = { 0, 48, 102 };
+        p.notes[13][1] = { 1, 60, 68 };
+        p.notes[13][2] = { 2, 80, 73 };
+        p.notes[13][3] = { 3, 34, 112 };
+        p.notes[13][4] = { 4, 51, 82 };
+        p.notes[13][5] = { 4, 63, 87 };
+        p.notes[14][2] = { 2, 80, 30 };
+        p.notes[14][4] = { 4, 61, 79 };
+        p.notes[14][5] = { 4, 70, 58 };
+        p.notes[15][0] = { 0, 48, 145 };
+        p.notes[15][1] = { 1, 60, 56 };
+        p.notes[15][2] = { 2, 80, 55 };
+        p.notes[15][3] = { 3, 35, 140 };
+        p.notes[15][4] = { 4, 63, 95 };
+        p.notes[15][6] = { 6, 75, 91 };
+        p.notes[15][7] = { 7, 75, 58 };
+        m_patterns.push_back(p);
+    }
+    // Bar 47
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 47 };
+        p.notes[0][1] = { 1, 60, 37 };
+        p.notes[0][2] = { 2, 80, 31 };
+        p.notes[0][3] = { 3, 35, 158 };
+        p.notes[0][4] = { 4, 35, 45 };
+        p.notes[0][5] = { 4, 71, 70 };
+        p.notes[0][6] = { 6, 75, 66 };
+        p.notes[1][0] = { 0, 48, 107 };
+        p.notes[1][1] = { 1, 60, 131 };
+        p.notes[1][2] = { 2, 80, 112 };
+        p.notes[1][3] = { 3, 35, 194 };
+        p.notes[1][4] = { 4, 35, 91 };
+        p.notes[1][5] = { 4, 63, 69 };
+        p.notes[1][6] = { 6, 75, 96 };
+        p.notes[1][7] = { 7, 83, 48 };
+        p.notes[2][2] = { 2, 80, 32 };
+        p.notes[2][3] = { 3, 35, 190 };
+        p.notes[2][4] = { 4, 47, 120 };
+        p.notes[2][5] = { 4, 63, 82 };
+        p.notes[3][0] = { 0, 48, 106 };
+        p.notes[3][1] = { 1, 60, 38 };
+        p.notes[3][2] = { 2, 80, 33 };
+        p.notes[3][3] = { 3, 47, 96 };
+        p.notes[3][4] = { 4, 47, 84 };
+        p.notes[3][5] = { 4, 66, 58 };
+        p.notes[4][0] = { 0, 48, 48 };
+        p.notes[4][1] = { 1, 60, 37 };
+        p.notes[4][2] = { 2, 80, 35 };
+        p.notes[4][3] = { 3, 35, 170 };
+        p.notes[4][4] = { 4, 54, 66 };
+        p.notes[4][5] = { 4, 66, 94 };
+        p.notes[5][0] = { 0, 48, 56 };
+        p.notes[5][1] = { 1, 60, 78 };
+        p.notes[5][2] = { 2, 80, 96 };
+        p.notes[5][3] = { 3, 35, 170 };
+        p.notes[5][4] = { 4, 47, 81 };
+        p.notes[5][5] = { 4, 71, 70 };
+        p.notes[6][1] = { 1, 60, 34 };
+        p.notes[6][2] = { 2, 80, 31 };
+        p.notes[6][3] = { 3, 35, 142 };
+        p.notes[6][4] = { 4, 49, 81 };
+        p.notes[6][5] = { 4, 56, 48 };
+        p.notes[7][0] = { 0, 48, 79 };
+        p.notes[7][1] = { 1, 60, 114 };
+        p.notes[7][2] = { 2, 80, 121 };
+        p.notes[7][3] = { 3, 37, 178 };
+        p.notes[7][4] = { 4, 56, 64 };
+        p.notes[7][5] = { 4, 68, 60 };
+        p.notes[8][0] = { 0, 48, 73 };
+        p.notes[8][2] = { 2, 80, 35 };
+        p.notes[8][4] = { 4, 47, 55 };
+        p.notes[8][5] = { 4, 68, 55 };
+        p.notes[9][1] = { 1, 60, 41 };
+        p.notes[9][2] = { 2, 80, 43 };
+        p.notes[9][3] = { 3, 49, 96 };
+        p.notes[9][4] = { 4, 46, 70 };
+        p.notes[9][5] = { 4, 56, 70 };
+        p.notes[10][0] = { 0, 48, 70 };
+        p.notes[10][1] = { 1, 60, 78 };
+        p.notes[10][2] = { 2, 80, 82 };
+        p.notes[10][3] = { 3, 37, 180 };
+        p.notes[11][0] = { 0, 48, 65 };
+        p.notes[11][2] = { 2, 80, 28 };
+        p.notes[11][4] = { 4, 49, 64 };
+        p.notes[11][5] = { 4, 68, 42 };
+        p.notes[12][1] = { 1, 60, 32 };
+        p.notes[12][2] = { 2, 80, 32 };
+        p.notes[12][3] = { 3, 37, 162 };
+        p.notes[12][4] = { 4, 46, 55 };
+        p.notes[12][5] = { 4, 68, 55 };
+        p.notes[12][6] = { 6, 75, 54 };
+        p.notes[12][7] = { 7, 73, 40 };
+        p.notes[13][0] = { 0, 48, 57 };
+        p.notes[13][1] = { 1, 60, 49 };
+        p.notes[13][2] = { 2, 80, 55 };
+        p.notes[13][3] = { 3, 37, 170 };
+        p.notes[13][4] = { 4, 49, 81 };
+        p.notes[13][6] = { 6, 73, 82 };
+        p.notes[14][0] = { 0, 48, 52 };
+        p.notes[14][3] = { 3, 37, 124 };
+        p.notes[14][4] = { 4, 61, 84 };
+        p.notes[14][6] = { 6, 73, 82 };
+        m_patterns.push_back(p);
+    }
+    // Bar 48
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[2][2] = { 2, 80, 27 };
+        p.notes[6][3] = { 3, 47, 188 };
+        p.notes[6][4] = { 4, 47, 59 };
+        p.notes[6][5] = { 4, 66, 61 };
+        p.notes[7][3] = { 3, 47, 178 };
+        p.notes[7][4] = { 4, 54, 102 };
+        p.notes[7][5] = { 4, 66, 97 };
+        p.notes[7][6] = { 6, 75, 57 };
+        p.notes[8][4] = { 4, 59, 118 };
+        p.notes[8][5] = { 4, 66, 66 };
+        p.notes[8][6] = { 6, 75, 75 };
+        p.notes[9][3] = { 3, 49, 156 };
+        p.notes[9][4] = { 4, 49, 77 };
+        p.notes[9][5] = { 4, 65, 117 };
+        p.notes[9][6] = { 6, 77, 70 };
+        p.notes[10][4] = { 4, 49, 70 };
+        p.notes[10][5] = { 4, 65, 117 };
+        p.notes[11][3] = { 3, 49, 130 };
+        p.notes[11][4] = { 4, 49, 64 };
+        p.notes[11][5] = { 4, 68, 54 };
+        p.notes[11][6] = { 6, 77, 97 };
+        p.notes[12][3] = { 3, 51, 160 };
+        p.notes[12][4] = { 4, 58, 97 };
+        p.notes[12][5] = { 4, 66, 126 };
+        p.notes[12][6] = { 6, 78, 61 };
+        p.notes[13][4] = { 4, 61, 97 };
+        p.notes[13][5] = { 4, 66, 129 };
+        p.notes[14][4] = { 4, 61, 104 };
+        p.notes[14][5] = { 4, 66, 135 };
+        p.notes[15][4] = { 4, 58, 86 };
+        p.notes[15][5] = { 4, 66, 142 };
+        m_patterns.push_back(p);
+    }
+    // Bar 49
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][4] = { 4, 66, 165 };
+        p.notes[1][3] = { 3, 51, 166 };
+        p.notes[1][4] = { 4, 66, 162 };
+        p.notes[1][6] = { 6, 82, 132 };
+        p.notes[2][3] = { 3, 51, 174 };
+        p.notes[3][3] = { 3, 51, 166 };
+        p.notes[3][4] = { 4, 65, 115 };
+        p.notes[3][5] = { 4, 70, 78 };
+        p.notes[3][6] = { 6, 82, 85 };
+        p.notes[3][7] = { 7, 82, 43 };
+        p.notes[4][3] = { 3, 49, 162 };
+        p.notes[4][4] = { 4, 61, 90 };
+        p.notes[4][6] = { 6, 73, 133 };
+        p.notes[4][7] = { 7, 77, 43 };
+        p.notes[5][3] = { 3, 47, 186 };
+        p.notes[5][4] = { 4, 59, 102 };
+        p.notes[5][5] = { 4, 71, 51 };
+        p.notes[5][6] = { 6, 73, 64 };
+        p.notes[5][7] = { 7, 75, 45 };
+        p.notes[6][3] = { 3, 47, 170 };
+        p.notes[6][4] = { 4, 54, 97 };
+        p.notes[6][5] = { 4, 66, 82 };
+        p.notes[6][6] = { 6, 75, 58 };
+        p.notes[7][4] = { 4, 59, 144 };
+        p.notes[7][5] = { 4, 71, 55 };
+        p.notes[7][6] = { 6, 75, 84 };
+        p.notes[8][3] = { 3, 49, 156 };
+        p.notes[8][4] = { 4, 56, 133 };
+        p.notes[8][5] = { 4, 65, 106 };
+        p.notes[8][6] = { 6, 75, 54 };
+        p.notes[8][7] = { 7, 77, 40 };
+        p.notes[9][4] = { 4, 49, 91 };
+        p.notes[9][5] = { 4, 68, 51 };
+        p.notes[10][3] = { 3, 49, 174 };
+        p.notes[10][4] = { 4, 56, 91 };
+        p.notes[10][5] = { 4, 65, 88 };
+        p.notes[10][6] = { 6, 77, 63 };
+        p.notes[10][7] = { 7, 75, 43 };
+        p.notes[11][3] = { 3, 39, 152 };
+        p.notes[11][4] = { 4, 54, 61 };
+        p.notes[11][5] = { 4, 70, 55 };
+        p.notes[11][6] = { 6, 73, 52 };
+        p.notes[12][3] = { 3, 39, 206 };
+        p.notes[12][4] = { 4, 54, 64 };
+        p.notes[12][5] = { 4, 66, 127 };
+        p.notes[13][3] = { 3, 39, 170 };
+        p.notes[13][4] = { 4, 58, 104 };
+        p.notes[13][5] = { 4, 66, 136 };
+        p.notes[14][4] = { 4, 58, 91 };
+        p.notes[14][5] = { 4, 66, 136 };
+        p.notes[15][4] = { 4, 66, 153 };
+        m_patterns.push_back(p);
+    }
+    // Bar 50
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][3] = { 3, 39, 134 };
+        p.notes[0][4] = { 4, 66, 167 };
+        p.notes[1][3] = { 3, 39, 190 };
+        p.notes[1][4] = { 4, 66, 131 };
+        p.notes[1][6] = { 6, 82, 138 };
+        p.notes[2][2] = { 2, 80, 33 };
+        p.notes[2][3] = { 3, 39, 160 };
+        p.notes[2][4] = { 4, 66, 167 };
+        p.notes[2][6] = { 6, 82, 81 };
+        p.notes[3][1] = { 1, 60, 62 };
+        p.notes[3][2] = { 2, 80, 132 };
+        p.notes[3][3] = { 3, 41, 152 };
+        p.notes[3][4] = { 4, 58, 61 };
+        p.notes[3][5] = { 4, 66, 94 };
+        p.notes[3][6] = { 6, 77, 94 };
+        p.notes[3][7] = { 7, 82, 55 };
+        p.notes[4][1] = { 1, 60, 57 };
+        p.notes[4][2] = { 2, 80, 104 };
+        p.notes[4][3] = { 3, 35, 92 };
+        p.notes[4][4] = { 4, 54, 66 };
+        p.notes[4][5] = { 4, 66, 81 };
+        p.notes[4][6] = { 6, 73, 112 };
+        p.notes[5][0] = { 0, 48, 217 };
+        p.notes[5][1] = { 1, 60, 100 };
+        p.notes[5][2] = { 2, 80, 77 };
+        p.notes[5][3] = { 3, 35, 172 };
+        p.notes[6][0] = { 0, 48, 54 };
+        p.notes[6][4] = { 4, 59, 131 };
+        p.notes[6][5] = { 4, 63, 112 };
+        p.notes[6][6] = { 6, 82, 60 };
+        p.notes[7][0] = { 0, 48, 102 };
+        p.notes[7][1] = { 1, 60, 90 };
+        p.notes[7][2] = { 2, 80, 91 };
+        p.notes[8][0] = { 0, 48, 43 };
+        p.notes[8][3] = { 3, 37, 180 };
+        p.notes[8][4] = { 4, 61, 93 };
+        p.notes[8][5] = { 4, 65, 99 };
+        p.notes[8][6] = { 6, 73, 70 };
+        p.notes[8][7] = { 7, 77, 49 };
+        p.notes[9][0] = { 0, 48, 129 };
+        p.notes[9][1] = { 1, 60, 102 };
+        p.notes[9][2] = { 2, 80, 78 };
+        p.notes[9][3] = { 3, 37, 160 };
+        p.notes[9][4] = { 4, 65, 124 };
+        p.notes[10][0] = { 0, 48, 45 };
+        p.notes[10][3] = { 3, 39, 140 };
+        p.notes[10][4] = { 4, 65, 153 };
+        p.notes[10][6] = { 6, 77, 75 };
+        p.notes[11][0] = { 0, 48, 130 };
+        p.notes[11][1] = { 1, 60, 96 };
+        p.notes[11][2] = { 2, 80, 84 };
+        p.notes[11][3] = { 3, 39, 202 };
+        p.notes[11][4] = { 4, 54, 61 };
+        p.notes[11][5] = { 4, 66, 109 };
+        p.notes[11][6] = { 6, 73, 48 };
+        p.notes[12][0] = { 0, 48, 49 };
+        p.notes[12][4] = { 4, 66, 100 };
+        p.notes[13][0] = { 0, 48, 128 };
+        p.notes[13][1] = { 1, 60, 104 };
+        p.notes[13][2] = { 2, 80, 86 };
+        p.notes[13][3] = { 3, 39, 194 };
+        p.notes[13][4] = { 4, 66, 138 };
+        p.notes[13][6] = { 6, 78, 63 };
+        p.notes[14][0] = { 0, 48, 45 };
+        p.notes[14][4] = { 4, 61, 81 };
+        p.notes[15][0] = { 0, 48, 113 };
+        p.notes[15][1] = { 1, 60, 41 };
+        p.notes[15][4] = { 4, 66, 131 };
+        m_patterns.push_back(p);
+    }
+    // Bar 51
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 40 };
+        p.notes[0][2] = { 2, 80, 26 };
+        p.notes[0][3] = { 3, 39, 180 };
+        p.notes[0][4] = { 4, 63, 129 };
+        p.notes[0][5] = { 4, 66, 133 };
+        p.notes[0][6] = { 6, 82, 78 };
+        p.notes[0][7] = { 7, 78, 49 };
+        p.notes[1][0] = { 0, 48, 109 };
+        p.notes[1][1] = { 1, 60, 32 };
+        p.notes[1][3] = { 3, 39, 206 };
+        p.notes[1][4] = { 4, 54, 64 };
+        p.notes[1][5] = { 4, 68, 51 };
+        p.notes[1][6] = { 6, 82, 87 };
+        p.notes[1][7] = { 7, 80, 40 };
+        p.notes[2][0] = { 0, 48, 42 };
+        p.notes[2][2] = { 2, 80, 32 };
+        p.notes[2][3] = { 3, 39, 190 };
+        p.notes[2][4] = { 4, 54, 61 };
+        p.notes[2][5] = { 4, 58, 121 };
+        p.notes[2][6] = { 6, 77, 100 };
+        p.notes[3][0] = { 0, 48, 93 };
+        p.notes[3][1] = { 1, 60, 34 };
+        p.notes[3][3] = { 3, 51, 86 };
+        p.notes[3][4] = { 4, 58, 109 };
+        p.notes[3][5] = { 4, 66, 73 };
+        p.notes[3][6] = { 6, 73, 108 };
+        p.notes[3][7] = { 7, 77, 58 };
+        p.notes[4][0] = { 0, 48, 40 };
+        p.notes[4][2] = { 2, 80, 31 };
+        p.notes[4][3] = { 3, 35, 186 };
+        p.notes[5][0] = { 0, 48, 76 };
+        p.notes[5][1] = { 1, 60, 45 };
+        p.notes[5][2] = { 2, 80, 52 };
+        p.notes[5][4] = { 4, 59, 91 };
+        p.notes[5][5] = { 4, 63, 78 };
+        p.notes[5][6] = { 6, 82, 55 };
+        p.notes[6][0] = { 0, 48, 46 };
+        p.notes[6][3] = { 3, 35, 136 };
+        p.notes[6][4] = { 4, 59, 91 };
+        p.notes[6][5] = { 4, 71, 51 };
+        p.notes[7][0] = { 0, 48, 84 };
+        p.notes[7][3] = { 3, 37, 162 };
+        p.notes[7][4] = { 4, 63, 118 };
+        p.notes[7][5] = { 4, 65, 63 };
+        p.notes[7][6] = { 6, 73, 82 };
+        p.notes[7][7] = { 7, 77, 57 };
+        p.notes[8][0] = { 0, 48, 70 };
+        p.notes[8][1] = { 1, 60, 128 };
+        p.notes[8][2] = { 2, 80, 168 };
+        p.notes[8][4] = { 4, 61, 75 };
+        p.notes[9][0] = { 0, 48, 53 };
+        p.notes[9][3] = { 3, 37, 134 };
+        p.notes[9][4] = { 4, 61, 73 };
+        p.notes[9][6] = { 6, 77, 81 };
+        p.notes[10][0] = { 0, 48, 110 };
+        p.notes[10][1] = { 1, 60, 122 };
+        p.notes[10][2] = { 2, 80, 127 };
+        p.notes[10][3] = { 3, 39, 194 };
+        p.notes[10][6] = { 6, 78, 90 };
+        p.notes[10][7] = { 7, 73, 40 };
+        p.notes[11][0] = { 0, 48, 47 };
+        p.notes[11][3] = { 3, 39, 206 };
+        p.notes[11][4] = { 4, 54, 79 };
+        p.notes[11][5] = { 4, 66, 103 };
+        p.notes[11][6] = { 6, 73, 51 };
+        p.notes[12][0] = { 0, 48, 170 };
+        p.notes[12][1] = { 1, 60, 177 };
+        p.notes[12][2] = { 2, 80, 191 };
+        p.notes[12][3] = { 3, 39, 208 };
+        p.notes[12][4] = { 4, 66, 142 };
+        p.notes[12][6] = { 6, 73, 69 };
+        p.notes[13][0] = { 0, 48, 45 };
+        p.notes[13][4] = { 4, 66, 122 };
+        p.notes[13][5] = { 4, 70, 55 };
+        p.notes[13][6] = { 6, 73, 54 };
+        p.notes[14][0] = { 0, 48, 164 };
+        p.notes[14][1] = { 1, 60, 145 };
+        p.notes[14][2] = { 2, 80, 128 };
+        p.notes[14][3] = { 3, 39, 196 };
+        p.notes[14][6] = { 6, 73, 69 };
+        p.notes[15][0] = { 0, 48, 49 };
+        p.notes[15][3] = { 3, 39, 182 };
+        p.notes[15][4] = { 4, 63, 59 };
+        p.notes[15][6] = { 6, 82, 52 };
+        m_patterns.push_back(p);
+    }
+    // Bar 52
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 167 };
+        p.notes[0][1] = { 1, 60, 127 };
+        p.notes[0][2] = { 2, 80, 145 };
+        p.notes[0][3] = { 3, 39, 184 };
+        p.notes[0][4] = { 4, 54, 73 };
+        p.notes[0][5] = { 4, 70, 81 };
+        p.notes[0][6] = { 6, 82, 72 };
+        p.notes[0][7] = { 7, 82, 56 };
+        p.notes[1][0] = { 0, 48, 48 };
+        p.notes[1][3] = { 3, 39, 198 };
+        p.notes[1][4] = { 4, 54, 63 };
+        p.notes[1][5] = { 4, 70, 97 };
+        p.notes[1][6] = { 6, 82, 58 };
+        p.notes[2][0] = { 0, 48, 135 };
+        p.notes[2][1] = { 1, 60, 75 };
+        p.notes[2][2] = { 2, 80, 62 };
+        p.notes[2][3] = { 3, 39, 190 };
+        p.notes[2][4] = { 4, 58, 66 };
+        p.notes[2][5] = { 4, 66, 85 };
+        p.notes[2][6] = { 6, 77, 79 };
+        p.notes[3][0] = { 0, 48, 40 };
+        p.notes[3][1] = { 1, 60, 35 };
+        p.notes[3][3] = { 3, 39, 166 };
+        p.notes[3][4] = { 4, 61, 73 };
+        p.notes[3][6] = { 6, 73, 75 };
+        p.notes[4][0] = { 0, 48, 146 };
+        p.notes[4][1] = { 1, 60, 155 };
+        p.notes[4][2] = { 2, 80, 142 };
+        p.notes[4][3] = { 3, 32, 158 };
+        p.notes[4][4] = { 4, 63, 88 };
+        p.notes[4][6] = { 6, 75, 67 };
+        p.notes[6][0] = { 0, 48, 72 };
+        p.notes[6][2] = { 2, 80, 28 };
+        p.notes[6][3] = { 3, 44, 134 };
+        p.notes[6][4] = { 4, 56, 68 };
+        p.notes[6][5] = { 4, 68, 58 };
+        p.notes[7][1] = { 1, 60, 44 };
+        p.notes[7][2] = { 2, 80, 40 };
+        p.notes[7][3] = { 3, 44, 124 };
+        p.notes[8][0] = { 0, 48, 67 };
+        p.notes[8][1] = { 1, 60, 33 };
+        p.notes[8][2] = { 2, 80, 25 };
+        p.notes[8][3] = { 3, 44, 118 };
+        p.notes[8][4] = { 4, 59, 90 };
+        p.notes[8][5] = { 4, 71, 51 };
+        p.notes[8][6] = { 6, 75, 61 };
+        p.notes[8][7] = { 7, 75, 48 };
+        p.notes[9][0] = { 0, 48, 39 };
+        p.notes[9][1] = { 1, 60, 34 };
+        p.notes[9][2] = { 2, 80, 27 };
+        p.notes[9][3] = { 3, 51, 76 };
+        p.notes[9][4] = { 4, 54, 61 };
+        p.notes[9][6] = { 6, 73, 63 };
+        p.notes[9][7] = { 7, 82, 48 };
+        p.notes[10][0] = { 0, 48, 60 };
+        p.notes[10][3] = { 3, 32, 150 };
+        p.notes[10][4] = { 4, 70, 90 };
+        p.notes[10][6] = { 6, 73, 87 };
+        p.notes[10][7] = { 7, 82, 42 };
+        p.notes[11][0] = { 0, 48, 40 };
+        p.notes[11][1] = { 1, 60, 47 };
+        p.notes[11][2] = { 2, 80, 52 };
+        p.notes[11][4] = { 4, 61, 86 };
+        p.notes[11][6] = { 6, 73, 61 };
+        p.notes[11][7] = { 7, 82, 46 };
+        p.notes[12][0] = { 0, 48, 79 };
+        p.notes[12][1] = { 1, 60, 56 };
+        p.notes[12][2] = { 2, 80, 39 };
+        p.notes[12][3] = { 3, 34, 160 };
+        p.notes[12][4] = { 4, 61, 153 };
+        p.notes[12][6] = { 6, 73, 66 };
+        p.notes[13][3] = { 3, 46, 102 };
+        p.notes[13][4] = { 4, 58, 75 };
+        p.notes[13][5] = { 4, 70, 54 };
+        p.notes[14][0] = { 0, 48, 60 };
+        p.notes[14][1] = { 1, 60, 30 };
+        p.notes[14][3] = { 3, 46, 92 };
+        p.notes[14][4] = { 4, 61, 86 };
+        p.notes[15][0] = { 0, 48, 39 };
+        p.notes[15][1] = { 1, 60, 35 };
+        p.notes[15][2] = { 2, 80, 28 };
+        p.notes[15][3] = { 3, 34, 160 };
+        p.notes[15][4] = { 4, 58, 45 };
+        p.notes[15][5] = { 4, 66, 54 };
+        p.notes[15][6] = { 6, 73, 87 };
+        p.notes[15][7] = { 7, 78, 68 };
+        m_patterns.push_back(p);
+    }
+    // Bar 53
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 57 };
+        p.notes[0][1] = { 1, 60, 35 };
+        p.notes[0][3] = { 3, 34, 174 };
+        p.notes[0][4] = { 4, 61, 93 };
+        p.notes[0][5] = { 4, 68, 79 };
+        p.notes[1][0] = { 0, 48, 49 };
+        p.notes[1][1] = { 1, 60, 51 };
+        p.notes[1][2] = { 2, 80, 42 };
+        p.notes[1][3] = { 3, 34, 138 };
+        p.notes[1][4] = { 4, 58, 108 };
+        p.notes[2][0] = { 0, 48, 93 };
+        p.notes[2][1] = { 1, 60, 48 };
+        p.notes[2][2] = { 2, 80, 28 };
+        p.notes[2][3] = { 3, 34, 158 };
+        p.notes[2][4] = { 4, 56, 108 };
+        p.notes[2][5] = { 4, 68, 75 };
+        p.notes[3][0] = { 0, 48, 69 };
+        p.notes[3][1] = { 1, 60, 96 };
+        p.notes[3][2] = { 2, 80, 108 };
+        p.notes[3][3] = { 3, 35, 160 };
+        p.notes[3][4] = { 4, 59, 127 };
+        p.notes[3][6] = { 6, 73, 55 };
+        p.notes[3][7] = { 7, 78, 43 };
+        p.notes[4][0] = { 0, 48, 46 };
+        p.notes[4][1] = { 1, 60, 32 };
+        p.notes[4][2] = { 2, 80, 32 };
+        p.notes[4][4] = { 4, 56, 93 };
+        p.notes[4][5] = { 4, 68, 60 };
+        p.notes[4][6] = { 6, 73, 70 };
+        p.notes[4][7] = { 7, 75, 40 };
+        p.notes[5][0] = { 0, 48, 63 };
+        p.notes[5][1] = { 1, 60, 34 };
+        p.notes[5][2] = { 2, 80, 32 };
+        p.notes[5][3] = { 3, 35, 166 };
+        p.notes[6][4] = { 4, 56, 79 };
+        p.notes[6][5] = { 4, 68, 79 };
+        p.notes[7][0] = { 0, 48, 84 };
+        p.notes[7][1] = { 1, 60, 60 };
+        p.notes[7][2] = { 2, 80, 75 };
+        p.notes[7][3] = { 3, 35, 168 };
+        p.notes[7][4] = { 4, 59, 81 };
+        p.notes[7][5] = { 4, 71, 57 };
+        p.notes[7][6] = { 6, 75, 63 };
+        p.notes[8][0] = { 0, 48, 42 };
+        p.notes[8][3] = { 3, 35, 184 };
+        p.notes[8][6] = { 6, 78, 73 };
+        p.notes[8][7] = { 7, 78, 56 };
+        p.notes[9][0] = { 0, 48, 99 };
+        p.notes[9][1] = { 1, 60, 69 };
+        p.notes[9][2] = { 2, 80, 55 };
+        p.notes[9][4] = { 4, 56, 108 };
+        p.notes[9][6] = { 6, 80, 66 };
+        p.notes[10][0] = { 0, 48, 45 };
+        p.notes[10][1] = { 1, 60, 40 };
+        p.notes[10][2] = { 2, 80, 28 };
+        p.notes[10][3] = { 3, 35, 150 };
+        p.notes[10][4] = { 4, 56, 95 };
+        p.notes[10][5] = { 4, 66, 52 };
+        p.notes[10][6] = { 6, 78, 90 };
+        p.notes[10][7] = { 7, 78, 40 };
+        p.notes[11][0] = { 0, 48, 58 };
+        p.notes[11][1] = { 1, 60, 37 };
+        p.notes[11][2] = { 2, 80, 30 };
+        p.notes[11][3] = { 3, 37, 146 };
+        p.notes[11][4] = { 4, 49, 75 };
+        p.notes[11][5] = { 4, 56, 103 };
+        p.notes[11][6] = { 6, 78, 63 };
+        p.notes[12][3] = { 3, 37, 178 };
+        p.notes[12][4] = { 4, 56, 75 };
+        p.notes[12][6] = { 6, 78, 79 };
+        p.notes[13][0] = { 0, 48, 86 };
+        p.notes[13][1] = { 1, 60, 56 };
+        p.notes[13][2] = { 2, 80, 43 };
+        p.notes[13][3] = { 3, 37, 170 };
+        p.notes[13][4] = { 4, 54, 111 };
+        p.notes[13][5] = { 4, 66, 64 };
+        p.notes[13][6] = { 6, 78, 103 };
+        p.notes[13][7] = { 7, 78, 63 };
+        p.notes[14][3] = { 3, 37, 156 };
+        p.notes[14][4] = { 4, 54, 84 };
+        p.notes[14][5] = { 4, 66, 76 };
+        p.notes[14][6] = { 6, 78, 78 };
+        p.notes[14][7] = { 7, 78, 48 };
+        p.notes[15][0] = { 0, 48, 68 };
+        p.notes[15][1] = { 1, 60, 76 };
+        p.notes[15][2] = { 2, 80, 64 };
+        p.notes[15][3] = { 3, 37, 156 };
+        p.notes[15][4] = { 4, 49, 68 };
+        p.notes[15][5] = { 4, 66, 84 };
+        m_patterns.push_back(p);
+    }
+    // Bar 54
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 48 };
+        p.notes[0][1] = { 1, 60, 44 };
+        p.notes[0][2] = { 2, 80, 36 };
+        p.notes[0][4] = { 4, 49, 82 };
+        p.notes[0][5] = { 4, 54, 78 };
+        p.notes[0][6] = { 6, 78, 81 };
+        p.notes[1][0] = { 0, 48, 105 };
+        p.notes[1][1] = { 1, 60, 57 };
+        p.notes[1][2] = { 2, 80, 37 };
+        p.notes[1][3] = { 3, 37, 176 };
+        p.notes[1][4] = { 4, 49, 149 };
+        p.notes[1][5] = { 4, 56, 73 };
+        p.notes[2][0] = { 0, 48, 45 };
+        p.notes[2][3] = { 3, 37, 174 };
+        p.notes[2][4] = { 4, 49, 138 };
+        p.notes[2][5] = { 4, 56, 90 };
+        p.notes[3][3] = { 3, 37, 144 };
+        p.notes[4][2] = { 2, 80, 35 };
+        p.notes[5][2] = { 2, 80, 38 };
+        p.notes[6][2] = { 2, 80, 42 };
+        p.notes[8][2] = { 2, 80, 62 };
+        p.notes[9][2] = { 2, 80, 34 };
+        p.notes[10][3] = { 3, 47, 90 };
+        p.notes[10][4] = { 4, 47, 84 };
+        p.notes[10][5] = { 4, 71, 82 };
+        p.notes[11][2] = { 2, 80, 30 };
+        p.notes[12][4] = { 4, 54, 113 };
+        p.notes[13][3] = { 3, 58, 106 };
+        p.notes[15][4] = { 4, 49, 100 };
+        p.notes[15][5] = { 4, 68, 57 };
+        p.notes[15][6] = { 6, 77, 69 };
+        p.notes[15][7] = { 7, 87, 42 };
+        m_patterns.push_back(p);
+    }
+    // Bar 55
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][3] = { 3, 54, 110 };
+        p.notes[0][4] = { 4, 54, 120 };
+        p.notes[1][4] = { 4, 54, 172 };
+        p.notes[1][5] = { 4, 66, 55 };
+        p.notes[2][2] = { 2, 80, 40 };
+        p.notes[2][4] = { 4, 42, 55 };
+        p.notes[2][5] = { 4, 66, 67 };
+        p.notes[2][6] = { 6, 82, 55 };
+        p.notes[3][3] = { 3, 54, 142 };
+        p.notes[3][4] = { 4, 54, 162 };
+        p.notes[4][2] = { 2, 80, 103 };
+        p.notes[5][2] = { 2, 80, 38 };
+        p.notes[5][3] = { 3, 49, 100 };
+        p.notes[5][4] = { 4, 54, 151 };
+        p.notes[5][5] = { 4, 66, 61 };
+        p.notes[6][3] = { 3, 52, 92 };
+        p.notes[6][4] = { 4, 42, 90 };
+        p.notes[6][5] = { 4, 61, 40 };
+        p.notes[6][6] = { 6, 73, 40 };
+        p.notes[7][3] = { 3, 54, 80 };
+        p.notes[7][4] = { 4, 54, 135 };
+        p.notes[7][5] = { 4, 61, 69 };
+        p.notes[8][4] = { 4, 54, 162 };
+        p.notes[8][6] = { 6, 73, 48 };
+        p.notes[9][4] = { 4, 54, 124 };
+        p.notes[10][3] = { 3, 54, 66 };
+        p.notes[10][4] = { 4, 51, 91 };
+        p.notes[10][5] = { 4, 66, 79 };
+        p.notes[10][6] = { 6, 73, 48 };
+        p.notes[11][3] = { 3, 54, 84 };
+        p.notes[11][4] = { 4, 54, 68 };
+        p.notes[12][3] = { 3, 54, 104 };
+        p.notes[12][4] = { 4, 51, 106 };
+        p.notes[12][5] = { 4, 54, 90 };
+        p.notes[12][6] = { 6, 75, 48 };
+        p.notes[13][4] = { 4, 66, 84 };
+        p.notes[13][6] = { 6, 78, 64 };
+        p.notes[14][3] = { 3, 49, 120 };
+        p.notes[14][4] = { 4, 49, 129 };
+        p.notes[14][5] = { 4, 61, 72 };
+        p.notes[14][6] = { 6, 73, 67 };
+        p.notes[14][7] = { 7, 77, 43 };
+        p.notes[15][3] = { 3, 30, 106 };
+        p.notes[15][4] = { 4, 54, 167 };
+        p.notes[15][5] = { 4, 66, 72 };
+        m_patterns.push_back(p);
+    }
+    // Bar 56
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][3] = { 3, 54, 122 };
+        p.notes[0][4] = { 4, 49, 63 };
+        p.notes[0][5] = { 4, 66, 109 };
+        p.notes[0][6] = { 6, 78, 54 };
+        p.notes[1][4] = { 4, 61, 117 };
+        p.notes[2][3] = { 3, 54, 118 };
+        p.notes[2][4] = { 4, 54, 171 };
+        p.notes[2][5] = { 4, 66, 75 };
+        p.notes[2][6] = { 6, 82, 52 };
+        p.notes[3][1] = { 1, 60, 33 };
+        p.notes[3][2] = { 2, 80, 55 };
+        p.notes[3][4] = { 4, 42, 68 };
+        p.notes[3][5] = { 4, 58, 75 };
+        p.notes[4][3] = { 3, 54, 56 };
+        p.notes[4][6] = { 6, 73, 52 };
+        p.notes[5][2] = { 2, 80, 44 };
+        p.notes[5][3] = { 3, 54, 100 };
+        p.notes[5][4] = { 4, 58, 79 };
+        p.notes[5][5] = { 4, 66, 58 };
+        p.notes[6][4] = { 4, 54, 156 };
+        p.notes[7][2] = { 2, 80, 48 };
+        p.notes[7][3] = { 3, 53, 74 };
+        p.notes[7][4] = { 4, 54, 127 };
+        p.notes[8][2] = { 2, 80, 28 };
+        p.notes[8][3] = { 3, 59, 122 };
+        p.notes[8][4] = { 4, 47, 68 };
+        p.notes[9][3] = { 3, 47, 72 };
+        p.notes[9][4] = { 4, 47, 113 };
+        p.notes[10][2] = { 2, 80, 28 };
+        p.notes[11][3] = { 3, 56, 112 };
+        p.notes[11][4] = { 4, 47, 111 };
+        p.notes[11][5] = { 4, 54, 84 };
+        p.notes[12][3] = { 3, 58, 112 };
+        p.notes[12][4] = { 4, 47, 160 };
+        p.notes[12][5] = { 4, 66, 70 };
+        p.notes[13][4] = { 4, 47, 117 };
+        p.notes[13][5] = { 4, 66, 66 };
+        p.notes[14][3] = { 3, 49, 110 };
+        p.notes[14][4] = { 4, 49, 59 };
+        p.notes[14][5] = { 4, 54, 91 };
+        p.notes[15][4] = { 4, 47, 126 };
+        p.notes[15][5] = { 4, 66, 72 };
+        m_patterns.push_back(p);
+    }
+    // Bar 57
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][4] = { 4, 47, 127 };
+        p.notes[0][5] = { 4, 66, 63 };
+        p.notes[1][6] = { 6, 78, 51 };
+        p.notes[2][4] = { 4, 47, 90 };
+        p.notes[2][5] = { 4, 66, 63 };
+        p.notes[3][2] = { 2, 80, 45 };
+        p.notes[3][4] = { 4, 47, 108 };
+        p.notes[3][5] = { 4, 59, 85 };
+        p.notes[4][4] = { 4, 47, 84 };
+        p.notes[4][5] = { 4, 63, 93 };
+        p.notes[5][2] = { 2, 80, 34 };
+        p.notes[5][4] = { 4, 47, 117 };
+        p.notes[5][5] = { 4, 66, 55 };
+        p.notes[6][4] = { 4, 47, 99 };
+        p.notes[6][5] = { 4, 66, 67 };
+        p.notes[7][2] = { 2, 80, 45 };
+        p.notes[7][4] = { 4, 54, 124 };
+        p.notes[8][0] = { 0, 48, 51 };
+        p.notes[8][2] = { 2, 80, 31 };
+        p.notes[8][4] = { 4, 68, 61 };
+        p.notes[9][0] = { 0, 48, 204 };
+        p.notes[9][1] = { 1, 60, 174 };
+        p.notes[9][2] = { 2, 80, 191 };
+        p.notes[9][3] = { 3, 37, 170 };
+        p.notes[9][4] = { 4, 56, 113 };
+        p.notes[9][5] = { 4, 68, 76 };
+        p.notes[9][6] = { 6, 77, 58 };
+        p.notes[10][0] = { 0, 48, 76 };
+        p.notes[10][1] = { 1, 60, 60 };
+        p.notes[10][2] = { 2, 80, 63 };
+        p.notes[10][3] = { 3, 37, 172 };
+        p.notes[10][4] = { 4, 56, 111 };
+        p.notes[10][5] = { 4, 65, 108 };
+        p.notes[11][0] = { 0, 48, 90 };
+        p.notes[11][1] = { 1, 60, 83 };
+        p.notes[11][2] = { 2, 80, 85 };
+        p.notes[11][3] = { 3, 37, 178 };
+        p.notes[11][4] = { 4, 49, 64 };
+        p.notes[11][5] = { 4, 65, 99 };
+        p.notes[11][6] = { 6, 73, 58 };
+        p.notes[12][0] = { 0, 48, 80 };
+        p.notes[12][1] = { 1, 60, 58 };
+        p.notes[12][2] = { 2, 80, 49 };
+        p.notes[12][3] = { 3, 37, 186 };
+        p.notes[12][4] = { 4, 56, 73 };
+        p.notes[12][5] = { 4, 61, 64 };
+        p.notes[13][0] = { 0, 48, 64 };
+        p.notes[13][1] = { 1, 60, 80 };
+        p.notes[13][2] = { 2, 80, 95 };
+        p.notes[13][3] = { 3, 37, 176 };
+        p.notes[13][4] = { 4, 56, 64 };
+        p.notes[13][5] = { 4, 65, 90 };
+        p.notes[13][6] = { 6, 73, 73 };
+        p.notes[14][0] = { 0, 48, 74 };
+        p.notes[14][1] = { 1, 60, 68 };
+        p.notes[14][2] = { 2, 80, 76 };
+        p.notes[14][3] = { 3, 37, 166 };
+        p.notes[14][4] = { 4, 61, 82 };
+        p.notes[14][5] = { 4, 68, 57 };
+        p.notes[15][0] = { 0, 48, 68 };
+        p.notes[15][1] = { 1, 60, 89 };
+        p.notes[15][2] = { 2, 80, 99 };
+        p.notes[15][4] = { 4, 49, 68 };
+        p.notes[15][5] = { 4, 68, 109 };
+        m_patterns.push_back(p);
+    }
+    // Bar 58
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 51 };
+        p.notes[0][1] = { 1, 60, 56 };
+        p.notes[0][2] = { 2, 80, 65 };
+        p.notes[0][3] = { 3, 37, 142 };
+        p.notes[0][6] = { 6, 87, 52 };
+        p.notes[1][2] = { 2, 80, 31 };
+        p.notes[2][3] = { 3, 49, 76 };
+        p.notes[3][3] = { 3, 47, 90 };
+        p.notes[4][1] = { 1, 60, 51 };
+        p.notes[4][2] = { 2, 80, 62 };
+        p.notes[5][0] = { 0, 48, 105 };
+        p.notes[5][1] = { 1, 60, 90 };
+        p.notes[5][2] = { 2, 80, 105 };
+        p.notes[6][0] = { 0, 48, 121 };
+        p.notes[6][1] = { 1, 60, 87 };
+        p.notes[6][2] = { 2, 80, 85 };
+        p.notes[6][3] = { 3, 39, 74 };
+        p.notes[7][1] = { 1, 60, 38 };
+        p.notes[7][2] = { 2, 80, 34 };
+        p.notes[8][0] = { 0, 48, 154 };
+        p.notes[8][1] = { 1, 60, 92 };
+        p.notes[8][2] = { 2, 80, 108 };
+        p.notes[8][3] = { 3, 35, 148 };
+        p.notes[9][0] = { 0, 48, 49 };
+        p.notes[9][1] = { 1, 60, 36 };
+        p.notes[9][2] = { 2, 80, 59 };
+        p.notes[9][3] = { 3, 35, 176 };
+        p.notes[9][4] = { 4, 56, 88 };
+        p.notes[9][5] = { 4, 59, 57 };
+        p.notes[10][0] = { 0, 48, 119 };
+        p.notes[10][1] = { 1, 60, 83 };
+        p.notes[10][2] = { 2, 80, 90 };
+        p.notes[11][2] = { 2, 80, 48 };
+        p.notes[11][4] = { 4, 59, 97 };
+        p.notes[11][5] = { 4, 66, 70 };
+        p.notes[12][0] = { 0, 48, 148 };
+        p.notes[12][1] = { 1, 60, 47 };
+        p.notes[12][2] = { 2, 80, 47 };
+        p.notes[12][4] = { 4, 54, 91 };
+        p.notes[12][5] = { 4, 63, 67 };
+        p.notes[12][6] = { 6, 80, 55 };
+        p.notes[12][7] = { 7, 82, 40 };
+        p.notes[13][0] = { 0, 48, 64 };
+        p.notes[13][1] = { 1, 60, 53 };
+        p.notes[13][2] = { 2, 80, 68 };
+        p.notes[13][3] = { 3, 37, 182 };
+        p.notes[13][4] = { 4, 56, 68 };
+        p.notes[13][5] = { 4, 70, 51 };
+        p.notes[13][6] = { 6, 87, 49 };
+        p.notes[14][1] = { 1, 60, 48 };
+        p.notes[14][2] = { 2, 80, 79 };
+        p.notes[14][3] = { 3, 37, 170 };
+        p.notes[14][4] = { 4, 54, 106 };
+        p.notes[15][2] = { 2, 80, 57 };
+        p.notes[15][3] = { 3, 30, 154 };
+        p.notes[15][4] = { 4, 54, 100 };
+        p.notes[15][5] = { 4, 70, 88 };
+        p.notes[15][6] = { 6, 85, 52 };
+        m_patterns.push_back(p);
+    }
+    // Bar 59
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 163 };
+        p.notes[0][1] = { 1, 60, 41 };
+        p.notes[0][2] = { 2, 80, 45 };
+        p.notes[0][3] = { 3, 42, 154 };
+        p.notes[1][0] = { 0, 48, 41 };
+        p.notes[1][1] = { 1, 60, 30 };
+        p.notes[1][2] = { 2, 80, 33 };
+        p.notes[1][4] = { 4, 66, 57 };
+        p.notes[2][0] = { 0, 48, 59 };
+        p.notes[2][1] = { 1, 60, 69 };
+        p.notes[2][2] = { 2, 80, 63 };
+        p.notes[2][3] = { 3, 42, 132 };
+        p.notes[2][4] = { 4, 42, 64 };
+        p.notes[2][5] = { 4, 70, 91 };
+        p.notes[3][2] = { 2, 80, 31 };
+        p.notes[3][3] = { 3, 42, 140 };
+        p.notes[3][4] = { 4, 49, 63 };
+        p.notes[3][5] = { 4, 70, 66 };
+        p.notes[3][6] = { 6, 82, 64 };
+        p.notes[4][0] = { 0, 48, 126 };
+        p.notes[4][2] = { 2, 80, 30 };
+        p.notes[4][3] = { 3, 42, 138 };
+        p.notes[4][4] = { 4, 49, 88 };
+        p.notes[4][5] = { 4, 68, 57 };
+        p.notes[5][0] = { 0, 48, 49 };
+        p.notes[5][1] = { 1, 60, 43 };
+        p.notes[5][2] = { 2, 80, 45 };
+        p.notes[5][3] = { 3, 30, 132 };
+        p.notes[5][4] = { 4, 54, 95 };
+        p.notes[5][5] = { 4, 66, 60 };
+        p.notes[6][0] = { 0, 48, 63 };
+        p.notes[6][1] = { 1, 60, 90 };
+        p.notes[6][2] = { 2, 80, 72 };
+        p.notes[6][3] = { 3, 42, 128 };
+        p.notes[6][4] = { 4, 54, 100 };
+        p.notes[6][5] = { 4, 66, 76 };
+        p.notes[7][0] = { 0, 48, 43 };
+        p.notes[7][2] = { 2, 80, 25 };
+        p.notes[7][3] = { 3, 51, 90 };
+        p.notes[7][4] = { 4, 49, 72 };
+        p.notes[7][5] = { 4, 61, 52 };
+        p.notes[8][0] = { 0, 48, 116 };
+        p.notes[8][1] = { 1, 60, 33 };
+        p.notes[8][2] = { 2, 80, 37 };
+        p.notes[8][3] = { 3, 39, 174 };
+        p.notes[8][4] = { 4, 61, 61 };
+        p.notes[8][5] = { 4, 68, 76 };
+        p.notes[8][6] = { 6, 77, 58 };
+        p.notes[9][1] = { 1, 60, 45 };
+        p.notes[9][2] = { 2, 80, 49 };
+        p.notes[9][4] = { 4, 66, 73 };
+        p.notes[9][6] = { 6, 78, 40 };
+        p.notes[10][0] = { 0, 48, 49 };
+        p.notes[10][1] = { 1, 60, 80 };
+        p.notes[10][2] = { 2, 80, 81 };
+        p.notes[10][3] = { 3, 51, 88 };
+        p.notes[10][4] = { 4, 51, 45 };
+        p.notes[10][5] = { 4, 70, 82 };
+        p.notes[11][0] = { 0, 48, 42 };
+        p.notes[11][2] = { 2, 80, 32 };
+        p.notes[11][3] = { 3, 39, 184 };
+        p.notes[11][4] = { 4, 58, 70 };
+        p.notes[11][5] = { 4, 70, 102 };
+        p.notes[12][0] = { 0, 48, 91 };
+        p.notes[12][1] = { 1, 60, 33 };
+        p.notes[12][2] = { 2, 80, 35 };
+        p.notes[12][3] = { 3, 39, 134 };
+        p.notes[12][4] = { 4, 51, 75 };
+        p.notes[12][5] = { 4, 70, 55 };
+        p.notes[12][6] = { 6, 80, 57 };
+        p.notes[13][0] = { 0, 48, 116 };
+        p.notes[13][1] = { 1, 60, 116 };
+        p.notes[13][2] = { 2, 80, 132 };
+        p.notes[13][3] = { 3, 37, 98 };
+        p.notes[13][4] = { 4, 56, 91 };
+        p.notes[13][5] = { 4, 70, 66 };
+        p.notes[13][6] = { 6, 80, 64 };
+        p.notes[13][7] = { 7, 75, 42 };
+        p.notes[14][1] = { 1, 60, 46 };
+        p.notes[14][2] = { 2, 80, 45 };
+        p.notes[14][3] = { 3, 35, 136 };
+        p.notes[14][4] = { 4, 54, 59 };
+        p.notes[14][5] = { 4, 71, 54 };
+        p.notes[15][0] = { 0, 48, 107 };
+        p.notes[15][1] = { 1, 60, 67 };
+        p.notes[15][2] = { 2, 80, 89 };
+        p.notes[15][3] = { 3, 35, 192 };
+        p.notes[15][4] = { 4, 47, 81 };
+        p.notes[15][5] = { 4, 66, 81 };
+        m_patterns.push_back(p);
+    }
+    // Bar 60
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 63 };
+        p.notes[0][2] = { 2, 80, 35 };
+        p.notes[0][3] = { 3, 35, 186 };
+        p.notes[0][4] = { 4, 59, 127 };
+        p.notes[0][5] = { 4, 71, 73 };
+        p.notes[0][6] = { 6, 73, 55 };
+        p.notes[1][0] = { 0, 48, 118 };
+        p.notes[1][1] = { 1, 60, 98 };
+        p.notes[1][2] = { 2, 80, 85 };
+        p.notes[1][3] = { 3, 47, 84 };
+        p.notes[1][4] = { 4, 63, 133 };
+        p.notes[2][1] = { 1, 60, 34 };
+        p.notes[2][2] = { 2, 80, 37 };
+        p.notes[2][3] = { 3, 35, 190 };
+        p.notes[2][4] = { 4, 63, 111 };
+        p.notes[2][5] = { 4, 71, 48 };
+        p.notes[2][6] = { 6, 75, 58 };
+        p.notes[3][0] = { 0, 48, 126 };
+        p.notes[3][1] = { 1, 60, 59 };
+        p.notes[3][2] = { 2, 80, 66 };
+        p.notes[3][4] = { 4, 54, 73 };
+        p.notes[3][5] = { 4, 71, 55 };
+        p.notes[4][0] = { 0, 48, 67 };
+        p.notes[4][1] = { 1, 60, 39 };
+        p.notes[4][2] = { 2, 80, 41 };
+        p.notes[4][3] = { 3, 35, 190 };
+        p.notes[4][4] = { 4, 47, 63 };
+        p.notes[4][5] = { 4, 66, 64 };
+        p.notes[5][0] = { 0, 48, 72 };
+        p.notes[5][1] = { 1, 60, 51 };
+        p.notes[5][2] = { 2, 80, 50 };
+        p.notes[5][3] = { 3, 35, 184 };
+        p.notes[5][4] = { 4, 59, 99 };
+        p.notes[5][5] = { 4, 63, 114 };
+        p.notes[6][2] = { 2, 80, 33 };
+        p.notes[6][3] = { 3, 35, 140 };
+        p.notes[6][4] = { 4, 51, 61 };
+        p.notes[6][5] = { 4, 63, 60 };
+        p.notes[6][6] = { 6, 85, 55 };
+        p.notes[7][0] = { 0, 48, 134 };
+        p.notes[7][1] = { 1, 60, 77 };
+        p.notes[7][2] = { 2, 80, 90 };
+        p.notes[7][3] = { 3, 32, 156 };
+        p.notes[7][4] = { 4, 56, 109 };
+        p.notes[8][1] = { 1, 60, 31 };
+        p.notes[8][2] = { 2, 80, 47 };
+        p.notes[8][4] = { 4, 56, 73 };
+        p.notes[8][5] = { 4, 68, 57 };
+        p.notes[9][0] = { 0, 48, 99 };
+        p.notes[9][1] = { 1, 60, 77 };
+        p.notes[9][2] = { 2, 80, 69 };
+        p.notes[9][4] = { 4, 66, 55 };
+        p.notes[9][5] = { 4, 68, 85 };
+        p.notes[10][0] = { 0, 48, 78 };
+        p.notes[10][1] = { 1, 60, 31 };
+        p.notes[10][2] = { 2, 80, 39 };
+        p.notes[10][3] = { 3, 34, 174 };
+        p.notes[10][4] = { 4, 54, 55 };
+        p.notes[10][5] = { 4, 66, 97 };
+        p.notes[10][6] = { 6, 78, 66 };
+        p.notes[10][7] = { 7, 82, 42 };
+        p.notes[11][2] = { 2, 80, 37 };
+        p.notes[11][4] = { 4, 58, 70 };
+        p.notes[11][5] = { 4, 70, 43 };
+        p.notes[11][6] = { 6, 73, 75 };
+        p.notes[11][7] = { 7, 80, 45 };
+        p.notes[12][1] = { 1, 60, 37 };
+        p.notes[12][2] = { 2, 80, 49 };
+        p.notes[12][3] = { 3, 47, 102 };
+        p.notes[12][4] = { 4, 51, 59 };
+        p.notes[12][5] = { 4, 70, 85 };
+        p.notes[12][6] = { 6, 92, 58 };
+        p.notes[13][0] = { 0, 48, 109 };
+        p.notes[13][1] = { 1, 60, 71 };
+        p.notes[13][2] = { 2, 80, 72 };
+        p.notes[13][3] = { 3, 35, 192 };
+        p.notes[13][4] = { 4, 54, 91 };
+        p.notes[13][6] = { 6, 90, 51 };
+        p.notes[13][7] = { 7, 73, 40 };
+        p.notes[14][2] = { 2, 80, 44 };
+        p.notes[14][3] = { 3, 35, 138 };
+        p.notes[14][4] = { 4, 59, 64 };
+        p.notes[14][5] = { 4, 63, 79 };
+        p.notes[14][6] = { 6, 87, 52 };
+        p.notes[14][7] = { 7, 75, 40 };
+        p.notes[15][1] = { 1, 60, 37 };
+        p.notes[15][2] = { 2, 80, 41 };
+        p.notes[15][4] = { 4, 54, 59 };
+        p.notes[15][5] = { 4, 68, 90 };
+        p.notes[15][6] = { 6, 73, 52 };
+        m_patterns.push_back(p);
+    }
+    // Bar 61
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 82 };
+        p.notes[0][1] = { 1, 60, 74 };
+        p.notes[0][2] = { 2, 80, 53 };
+        p.notes[0][3] = { 3, 37, 164 };
+        p.notes[0][4] = { 4, 56, 77 };
+        p.notes[0][5] = { 4, 68, 69 };
+        p.notes[0][6] = { 6, 73, 94 };
+        p.notes[0][7] = { 7, 85, 50 };
+        p.notes[1][0] = { 0, 48, 49 };
+        p.notes[1][1] = { 1, 60, 34 };
+        p.notes[1][2] = { 2, 80, 35 };
+        p.notes[1][6] = { 6, 85, 82 };
+        p.notes[2][0] = { 0, 48, 65 };
+        p.notes[2][1] = { 1, 60, 35 };
+        p.notes[2][2] = { 2, 80, 29 };
+        p.notes[2][3] = { 3, 49, 118 };
+        p.notes[2][4] = { 4, 54, 77 };
+        p.notes[2][5] = { 4, 68, 99 };
+        p.notes[2][6] = { 6, 73, 109 };
+        p.notes[2][7] = { 7, 73, 67 };
+        p.notes[3][0] = { 0, 48, 64 };
+        p.notes[3][1] = { 1, 60, 96 };
+        p.notes[3][2] = { 2, 80, 124 };
+        p.notes[3][3] = { 3, 37, 182 };
+        p.notes[3][4] = { 4, 49, 97 };
+        p.notes[3][5] = { 4, 68, 93 };
+        p.notes[3][6] = { 6, 92, 46 };
+        p.notes[4][0] = { 0, 48, 52 };
+        p.notes[4][1] = { 1, 60, 42 };
+        p.notes[4][2] = { 2, 80, 40 };
+        p.notes[4][3] = { 3, 49, 90 };
+        p.notes[4][4] = { 4, 54, 93 };
+        p.notes[4][5] = { 4, 66, 73 };
+        p.notes[4][6] = { 6, 73, 64 };
+        p.notes[4][7] = { 7, 92, 46 };
+        p.notes[5][0] = { 0, 48, 102 };
+        p.notes[5][1] = { 1, 60, 96 };
+        p.notes[5][2] = { 2, 80, 60 };
+        p.notes[5][3] = { 3, 37, 116 };
+        p.notes[5][4] = { 4, 56, 66 };
+        p.notes[5][5] = { 4, 68, 66 };
+        p.notes[5][6] = { 6, 82, 57 };
+        p.notes[5][7] = { 7, 73, 43 };
+        p.notes[6][0] = { 0, 48, 58 };
+        p.notes[6][1] = { 1, 60, 63 };
+        p.notes[6][2] = { 2, 80, 62 };
+        p.notes[6][3] = { 3, 30, 112 };
+        p.notes[6][4] = { 4, 66, 68 };
+        p.notes[6][5] = { 4, 70, 91 };
+        p.notes[6][6] = { 6, 82, 61 };
+        p.notes[6][7] = { 7, 80, 46 };
+        p.notes[7][0] = { 0, 48, 68 };
+        p.notes[7][2] = { 2, 80, 44 };
+        p.notes[7][3] = { 3, 42, 130 };
+        p.notes[7][4] = { 4, 54, 106 };
+        p.notes[7][5] = { 4, 70, 90 };
+        p.notes[7][6] = { 6, 82, 61 };
+        p.notes[7][7] = { 7, 92, 40 };
+        p.notes[8][0] = { 0, 48, 69 };
+        p.notes[8][1] = { 1, 60, 54 };
+        p.notes[8][2] = { 2, 80, 42 };
+        p.notes[8][3] = { 3, 42, 128 };
+        p.notes[8][4] = { 4, 54, 113 };
+        p.notes[8][5] = { 4, 58, 64 };
+        p.notes[9][1] = { 1, 60, 44 };
+        p.notes[9][2] = { 2, 80, 53 };
+        p.notes[9][4] = { 4, 54, 129 };
+        p.notes[9][5] = { 4, 66, 61 };
+        p.notes[9][6] = { 6, 73, 66 };
+        p.notes[10][0] = { 0, 48, 63 };
+        p.notes[10][1] = { 1, 60, 31 };
+        p.notes[10][2] = { 2, 80, 47 };
+        p.notes[10][3] = { 3, 42, 100 };
+        p.notes[10][6] = { 6, 92, 40 };
+        p.notes[11][0] = { 0, 48, 83 };
+        p.notes[11][2] = { 2, 80, 32 };
+        p.notes[11][3] = { 3, 30, 110 };
+        p.notes[12][0] = { 0, 48, 118 };
+        p.notes[12][1] = { 1, 60, 95 };
+        p.notes[12][2] = { 2, 80, 106 };
+        p.notes[12][3] = { 3, 42, 118 };
+        p.notes[12][4] = { 4, 54, 64 };
+        p.notes[13][1] = { 1, 60, 36 };
+        p.notes[13][2] = { 2, 80, 35 };
+        p.notes[13][3] = { 3, 42, 160 };
+        p.notes[13][4] = { 4, 49, 66 };
+        p.notes[13][5] = { 4, 70, 97 };
+        p.notes[14][0] = { 0, 48, 172 };
+        p.notes[14][1] = { 1, 60, 91 };
+        p.notes[14][2] = { 2, 80, 94 };
+        p.notes[14][3] = { 3, 30, 84 };
+        p.notes[14][4] = { 4, 54, 84 };
+        p.notes[15][0] = { 0, 48, 53 };
+        p.notes[15][1] = { 1, 60, 32 };
+        p.notes[15][2] = { 2, 80, 28 };
+        p.notes[15][3] = { 3, 42, 96 };
+        p.notes[15][4] = { 4, 54, 86 };
+        m_patterns.push_back(p);
+    }
+    // Bar 62
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 128 };
+        p.notes[0][1] = { 1, 60, 136 };
+        p.notes[0][2] = { 2, 80, 124 };
+        p.notes[0][3] = { 3, 42, 118 };
+        p.notes[0][4] = { 4, 54, 57 };
+        p.notes[0][5] = { 4, 61, 54 };
+        p.notes[1][2] = { 2, 80, 30 };
+        p.notes[1][3] = { 3, 42, 132 };
+        p.notes[1][4] = { 4, 70, 82 };
+        p.notes[2][0] = { 0, 48, 158 };
+        p.notes[2][1] = { 1, 60, 79 };
+        p.notes[2][2] = { 2, 80, 71 };
+        p.notes[2][3] = { 3, 42, 134 };
+        p.notes[2][4] = { 4, 42, 79 };
+        p.notes[2][5] = { 4, 70, 82 };
+        p.notes[3][0] = { 0, 48, 54 };
+        p.notes[3][1] = { 1, 60, 32 };
+        p.notes[3][2] = { 2, 80, 26 };
+        p.notes[3][3] = { 3, 42, 146 };
+        p.notes[4][0] = { 0, 48, 57 };
+        p.notes[4][1] = { 1, 60, 59 };
+        p.notes[4][2] = { 2, 80, 64 };
+        p.notes[4][3] = { 3, 42, 114 };
+        p.notes[4][4] = { 4, 56, 68 };
+        p.notes[4][5] = { 4, 63, 63 };
+        p.notes[5][0] = { 0, 48, 48 };
+        p.notes[5][1] = { 1, 60, 39 };
+        p.notes[5][2] = { 2, 80, 37 };
+        p.notes[5][3] = { 3, 30, 94 };
+        p.notes[5][4] = { 4, 70, 73 };
+        p.notes[6][0] = { 0, 48, 94 };
+        p.notes[6][1] = { 1, 60, 37 };
+        p.notes[6][2] = { 2, 80, 34 };
+        p.notes[6][3] = { 3, 42, 146 };
+        p.notes[6][4] = { 4, 54, 109 };
+        p.notes[6][5] = { 4, 70, 72 };
+        p.notes[6][6] = { 6, 82, 57 };
+        p.notes[7][1] = { 1, 60, 35 };
+        p.notes[7][6] = { 6, 82, 72 };
+        p.notes[8][0] = { 0, 48, 63 };
+        p.notes[8][1] = { 1, 60, 125 };
+        p.notes[8][2] = { 2, 80, 113 };
+        p.notes[8][3] = { 3, 30, 106 };
+        p.notes[8][4] = { 4, 70, 77 };
+        p.notes[8][6] = { 6, 92, 46 };
+        p.notes[9][3] = { 3, 42, 106 };
+        p.notes[10][0] = { 0, 48, 122 };
+        p.notes[10][1] = { 1, 60, 39 };
+        p.notes[10][2] = { 2, 80, 35 };
+        p.notes[10][3] = { 3, 42, 108 };
+        p.notes[10][4] = { 4, 54, 106 };
+        p.notes[10][5] = { 4, 70, 66 };
+        p.notes[10][6] = { 6, 82, 76 };
+        p.notes[10][7] = { 7, 82, 40 };
+        p.notes[11][0] = { 0, 48, 67 };
+        p.notes[11][1] = { 1, 60, 39 };
+        p.notes[11][2] = { 2, 80, 27 };
+        p.notes[11][3] = { 3, 49, 88 };
+        p.notes[11][4] = { 4, 54, 93 };
+        p.notes[11][5] = { 4, 63, 75 };
+        p.notes[11][6] = { 6, 82, 64 };
+        p.notes[12][0] = { 0, 48, 40 };
+        p.notes[12][1] = { 1, 60, 99 };
+        p.notes[12][2] = { 2, 80, 131 };
+        p.notes[12][3] = { 3, 30, 90 };
+        p.notes[12][6] = { 6, 82, 51 };
+        p.notes[13][1] = { 1, 60, 32 };
+        p.notes[13][2] = { 2, 80, 26 };
+        p.notes[13][3] = { 3, 30, 78 };
+        p.notes[13][4] = { 4, 54, 102 };
+        p.notes[13][6] = { 6, 82, 70 };
+        p.notes[13][7] = { 7, 80, 52 };
+        p.notes[14][0] = { 0, 48, 45 };
+        p.notes[14][1] = { 1, 60, 79 };
+        p.notes[14][2] = { 2, 80, 64 };
+        p.notes[14][3] = { 3, 37, 176 };
+        p.notes[14][4] = { 4, 68, 59 };
+        p.notes[14][6] = { 6, 80, 67 };
+        p.notes[14][7] = { 7, 75, 40 };
+        p.notes[15][1] = { 1, 60, 31 };
+        m_patterns.push_back(p);
+    }
+    // Bar 63
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][0] = { 0, 48, 61 };
+        p.notes[0][1] = { 1, 60, 83 };
+        p.notes[0][2] = { 2, 80, 75 };
+        p.notes[0][3] = { 3, 37, 164 };
+        p.notes[1][1] = { 1, 60, 32 };
+        p.notes[1][2] = { 2, 80, 27 };
+        p.notes[1][3] = { 3, 39, 166 };
+        p.notes[1][4] = { 4, 66, 104 };
+        p.notes[2][0] = { 0, 48, 43 };
+        p.notes[2][1] = { 1, 60, 68 };
+        p.notes[2][2] = { 2, 80, 64 };
+        p.notes[2][3] = { 3, 39, 194 };
+        p.notes[3][0] = { 0, 48, 77 };
+        p.notes[3][1] = { 1, 60, 88 };
+        p.notes[3][2] = { 2, 80, 79 };
+        p.notes[3][3] = { 3, 39, 166 };
+        p.notes[4][1] = { 1, 60, 39 };
+        p.notes[4][2] = { 2, 80, 50 };
+        p.notes[4][4] = { 4, 63, 75 };
+        p.notes[5][0] = { 0, 48, 124 };
+        p.notes[5][1] = { 1, 60, 73 };
+        p.notes[5][2] = { 2, 80, 94 };
+        p.notes[5][3] = { 3, 39, 128 };
+        p.notes[5][4] = { 4, 49, 68 };
+        p.notes[5][5] = { 4, 68, 81 };
+        p.notes[5][6] = { 6, 82, 70 };
+        p.notes[5][7] = { 7, 82, 54 };
+        p.notes[6][0] = { 0, 48, 62 };
+        p.notes[6][2] = { 2, 80, 43 };
+        p.notes[6][3] = { 3, 46, 110 };
+        p.notes[6][4] = { 4, 58, 86 };
+        p.notes[6][5] = { 4, 70, 48 };
+        p.notes[6][6] = { 6, 77, 52 };
+        p.notes[6][7] = { 7, 94, 40 };
+        p.notes[7][0] = { 0, 48, 121 };
+        p.notes[7][1] = { 1, 60, 137 };
+        p.notes[7][2] = { 2, 80, 135 };
+        p.notes[7][4] = { 4, 51, 70 };
+        p.notes[7][5] = { 4, 56, 63 };
+        p.notes[8][2] = { 2, 80, 28 };
+        p.notes[8][3] = { 3, 34, 78 };
+        p.notes[8][4] = { 4, 51, 79 };
+        p.notes[8][5] = { 4, 56, 61 };
+        p.notes[8][6] = { 6, 82, 58 };
+        p.notes[9][0] = { 0, 48, 165 };
+        p.notes[9][1] = { 1, 60, 76 };
+        p.notes[9][2] = { 2, 80, 87 };
+        p.notes[9][3] = { 3, 39, 136 };
+        p.notes[9][4] = { 4, 51, 77 };
+        p.notes[9][5] = { 4, 61, 69 };
+        p.notes[9][6] = { 6, 80, 55 };
+        p.notes[10][0] = { 0, 48, 51 };
+        p.notes[10][1] = { 1, 60, 31 };
+        p.notes[10][2] = { 2, 80, 26 };
+        p.notes[10][3] = { 3, 34, 104 };
+        p.notes[10][4] = { 4, 51, 64 };
+        p.notes[10][5] = { 4, 56, 63 };
+        p.notes[10][6] = { 6, 75, 52 };
+        p.notes[11][0] = { 0, 48, 80 };
+        p.notes[11][1] = { 1, 60, 126 };
+        p.notes[11][2] = { 2, 80, 137 };
+        p.notes[11][3] = { 3, 39, 146 };
+        p.notes[12][3] = { 3, 35, 168 };
+        p.notes[12][4] = { 4, 49, 66 };
+        p.notes[12][5] = { 4, 66, 52 };
+        p.notes[13][0] = { 0, 48, 117 };
+        p.notes[13][3] = { 3, 35, 172 };
+        p.notes[13][4] = { 4, 49, 63 };
+        p.notes[13][6] = { 6, 83, 51 };
+        p.notes[14][0] = { 0, 48, 39 };
+        p.notes[14][1] = { 1, 60, 36 };
+        p.notes[14][2] = { 2, 80, 33 };
+        p.notes[14][3] = { 3, 35, 180 };
+        p.notes[14][4] = { 4, 47, 64 };
+        p.notes[14][5] = { 4, 63, 51 };
+        p.notes[14][6] = { 6, 83, 46 };
+        p.notes[15][0] = { 0, 48, 73 };
+        p.notes[15][1] = { 1, 60, 116 };
+        p.notes[15][2] = { 2, 80, 108 };
+        p.notes[15][3] = { 3, 35, 188 };
+        p.notes[15][4] = { 4, 47, 99 };
+        p.notes[15][5] = { 4, 63, 75 };
+        p.notes[15][6] = { 6, 87, 75 };
+        p.notes[15][7] = { 7, 75, 49 };
+        m_patterns.push_back(p);
+    }
+    // Bar 64
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][3] = { 3, 35, 174 };
+        p.notes[0][4] = { 4, 47, 93 };
+        p.notes[0][5] = { 4, 71, 58 };
+        p.notes[0][6] = { 6, 83, 70 };
+        p.notes[0][7] = { 7, 87, 40 };
+        p.notes[1][0] = { 0, 48, 108 };
+        p.notes[1][1] = { 1, 60, 38 };
+        p.notes[1][2] = { 2, 80, 39 };
+        p.notes[1][3] = { 3, 35, 164 };
+        p.notes[1][6] = { 6, 83, 70 };
+        p.notes[1][7] = { 7, 75, 46 };
+        p.notes[2][0] = { 0, 48, 64 };
+        p.notes[2][1] = { 1, 60, 40 };
+        p.notes[2][2] = { 2, 80, 27 };
+        p.notes[2][3] = { 3, 35, 140 };
+        p.notes[2][4] = { 4, 71, 55 };
+        p.notes[3][1] = { 1, 60, 66 };
+        p.notes[3][2] = { 2, 80, 77 };
+        p.notes[3][3] = { 3, 35, 148 };
+        p.notes[3][6] = { 6, 87, 72 };
+        p.notes[3][7] = { 7, 82, 44 };
+        p.notes[4][2] = { 2, 80, 26 };
+        p.notes[4][3] = { 3, 37, 164 };
+        p.notes[4][4] = { 4, 49, 88 };
+        p.notes[4][5] = { 4, 68, 81 };
+        p.notes[5][0] = { 0, 48, 124 };
+        p.notes[5][1] = { 1, 60, 128 };
+        p.notes[5][2] = { 2, 80, 135 };
+        p.notes[5][4] = { 4, 49, 115 };
+        p.notes[5][5] = { 4, 56, 70 };
+        p.notes[6][2] = { 2, 80, 38 };
+        p.notes[6][3] = { 3, 37, 158 };
+        p.notes[6][4] = { 4, 49, 120 };
+        p.notes[6][5] = { 4, 68, 61 };
+        p.notes[7][0] = { 0, 48, 54 };
+        p.notes[7][1] = { 1, 60, 65 };
+        p.notes[7][2] = { 2, 80, 66 };
+        p.notes[7][3] = { 3, 37, 178 };
+        p.notes[7][4] = { 4, 56, 88 };
+        p.notes[8][0] = { 0, 48, 89 };
+        p.notes[8][1] = { 1, 60, 36 };
+        p.notes[8][2] = { 2, 80, 40 };
+        p.notes[8][3] = { 3, 37, 166 };
+        p.notes[8][4] = { 4, 68, 88 };
+        p.notes[8][6] = { 6, 80, 43 };
+        p.notes[9][0] = { 0, 48, 40 };
+        p.notes[9][1] = { 1, 60, 40 };
+        p.notes[9][2] = { 2, 80, 61 };
+        p.notes[9][3] = { 3, 37, 202 };
+        p.notes[9][4] = { 4, 56, 63 };
+        p.notes[9][5] = { 4, 68, 91 };
+        p.notes[9][6] = { 6, 80, 63 };
+        p.notes[10][0] = { 0, 48, 66 };
+        p.notes[10][1] = { 1, 60, 35 };
+        p.notes[10][2] = { 2, 80, 38 };
+        p.notes[10][3] = { 3, 37, 188 };
+        p.notes[10][4] = { 4, 49, 70 };
+        p.notes[10][5] = { 4, 68, 69 };
+        p.notes[10][6] = { 6, 77, 66 };
+        p.notes[11][0] = { 0, 48, 84 };
+        p.notes[11][1] = { 1, 60, 114 };
+        p.notes[11][2] = { 2, 80, 111 };
+        p.notes[11][3] = { 3, 37, 164 };
+        p.notes[12][0] = { 0, 48, 40 };
+        p.notes[12][1] = { 1, 60, 46 };
+        p.notes[12][2] = { 2, 80, 38 };
+        p.notes[15][3] = { 3, 53, 88 };
+        m_patterns.push_back(p);
+    }
+    // Bar 65
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][2] = { 2, 80, 55 };
+        p.notes[0][3] = { 3, 53, 74 };
+        p.notes[4][3] = { 3, 47, 126 };
+        p.notes[4][4] = { 4, 47, 93 };
+        p.notes[4][5] = { 4, 66, 64 };
+        p.notes[4][6] = { 6, 73, 93 };
+        p.notes[5][3] = { 3, 31, 104 };
+        p.notes[5][4] = { 4, 54, 158 };
+        p.notes[5][5] = { 4, 66, 70 };
+        p.notes[5][6] = { 6, 73, 109 };
+        p.notes[5][7] = { 7, 85, 43 };
+        p.notes[6][3] = { 3, 54, 82 };
+        p.notes[6][4] = { 4, 47, 124 };
+        p.notes[6][5] = { 4, 71, 54 };
+        p.notes[6][6] = { 6, 83, 94 };
+        p.notes[7][4] = { 4, 47, 108 };
+        p.notes[7][5] = { 4, 66, 46 };
+        p.notes[7][6] = { 6, 73, 115 };
+        p.notes[7][7] = { 7, 78, 75 };
+        p.notes[9][3] = { 3, 53, 88 };
+        p.notes[9][4] = { 4, 65, 124 };
+        p.notes[9][6] = { 6, 77, 90 };
+        p.notes[10][4] = { 4, 51, 144 };
+        p.notes[10][5] = { 4, 70, 88 };
+        p.notes[10][6] = { 6, 78, 94 };
+        p.notes[10][7] = { 7, 82, 46 };
+        p.notes[11][3] = { 3, 54, 100 };
+        p.notes[12][3] = { 3, 54, 90 };
+        p.notes[13][4] = { 4, 51, 153 };
+        p.notes[13][5] = { 4, 63, 67 };
+        p.notes[14][3] = { 3, 50, 116 };
+        p.notes[14][4] = { 4, 51, 122 };
+        p.notes[14][5] = { 4, 66, 111 };
+        p.notes[14][6] = { 6, 78, 144 };
+        p.notes[15][3] = { 3, 54, 140 };
+        p.notes[15][4] = { 4, 42, 109 };
+        p.notes[15][5] = { 4, 66, 73 };
+        p.notes[15][6] = { 6, 77, 102 };
+        p.notes[15][7] = { 7, 73, 80 };
+        m_patterns.push_back(p);
+    }
+    // Bar 66
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][3] = { 3, 54, 138 };
+        p.notes[0][4] = { 4, 42, 133 };
+        p.notes[0][5] = { 4, 66, 85 };
+        p.notes[0][6] = { 6, 78, 133 };
+        p.notes[1][4] = { 4, 42, 118 };
+        p.notes[1][5] = { 4, 61, 63 };
+        p.notes[1][6] = { 6, 78, 105 };
+        p.notes[1][7] = { 7, 82, 74 };
+        p.notes[2][3] = { 3, 54, 102 };
+        p.notes[2][4] = { 4, 66, 111 };
+        p.notes[2][6] = { 6, 85, 105 };
+        p.notes[2][7] = { 7, 73, 52 };
+        p.notes[3][4] = { 4, 49, 129 };
+        p.notes[3][5] = { 4, 68, 93 };
+        p.notes[3][6] = { 6, 80, 78 };
+        p.notes[4][3] = { 3, 49, 138 };
+        p.notes[4][4] = { 4, 49, 163 };
+        p.notes[4][6] = { 6, 82, 106 };
+        p.notes[5][3] = { 3, 52, 122 };
+        p.notes[5][4] = { 4, 49, 167 };
+        p.notes[5][5] = { 4, 68, 76 };
+        p.notes[5][6] = { 6, 82, 87 };
+        p.notes[6][3] = { 3, 54, 102 };
+        p.notes[6][4] = { 4, 56, 145 };
+        p.notes[6][5] = { 4, 70, 93 };
+        p.notes[6][6] = { 6, 78, 111 };
+        p.notes[6][7] = { 7, 78, 76 };
+        p.notes[7][4] = { 4, 49, 59 };
+        p.notes[7][5] = { 4, 56, 127 };
+        p.notes[8][4] = { 4, 49, 108 };
+        p.notes[8][5] = { 4, 68, 73 };
+        p.notes[8][6] = { 6, 77, 90 };
+        p.notes[9][3] = { 3, 50, 112 };
+        p.notes[9][4] = { 4, 51, 138 };
+        p.notes[9][5] = { 4, 70, 84 };
+        p.notes[9][6] = { 6, 78, 99 };
+        p.notes[10][3] = { 3, 54, 98 };
+        p.notes[10][6] = { 6, 75, 57 };
+        p.notes[12][4] = { 4, 66, 126 };
+        p.notes[13][3] = { 3, 51, 70 };
+        p.notes[14][4] = { 4, 51, 93 };
+        p.notes[14][5] = { 4, 70, 55 };
+        p.notes[14][6] = { 6, 83, 114 };
+        p.notes[14][7] = { 7, 82, 55 };
+        p.notes[15][3] = { 3, 58, 92 };
+        p.notes[15][4] = { 4, 51, 64 };
+        p.notes[15][5] = { 4, 70, 81 };
+        p.notes[15][6] = { 6, 82, 139 };
+        m_patterns.push_back(p);
+    }
+    // Bar 67
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][3] = { 3, 54, 126 };
+        p.notes[0][4] = { 4, 54, 135 };
+        p.notes[0][5] = { 4, 66, 84 };
+        p.notes[0][6] = { 6, 78, 94 };
+        p.notes[0][7] = { 7, 82, 50 };
+        p.notes[1][3] = { 3, 49, 80 };
+        p.notes[1][4] = { 4, 54, 144 };
+        p.notes[1][5] = { 4, 70, 63 };
+        p.notes[1][6] = { 6, 73, 138 };
+        p.notes[1][7] = { 7, 82, 48 };
+        p.notes[2][4] = { 4, 47, 57 };
+        p.notes[2][5] = { 4, 71, 106 };
+        p.notes[2][6] = { 6, 73, 72 };
+        p.notes[3][3] = { 3, 47, 118 };
+        p.notes[3][4] = { 4, 47, 99 };
+        p.notes[3][5] = { 4, 70, 136 };
+        p.notes[4][3] = { 3, 54, 136 };
+        p.notes[4][4] = { 4, 47, 108 };
+        p.notes[4][5] = { 4, 59, 48 };
+        p.notes[5][3] = { 3, 35, 74 };
+        p.notes[5][4] = { 4, 47, 102 };
+        p.notes[5][5] = { 4, 71, 135 };
+        p.notes[6][3] = { 3, 54, 116 };
+        p.notes[6][4] = { 4, 47, 111 };
+        p.notes[6][5] = { 4, 71, 93 };
+        p.notes[7][3] = { 3, 47, 104 };
+        p.notes[8][3] = { 3, 53, 172 };
+        p.notes[8][4] = { 4, 54, 111 };
+        p.notes[8][5] = { 4, 65, 156 };
+        p.notes[9][3] = { 3, 53, 132 };
+        p.notes[9][4] = { 4, 65, 172 };
+        p.notes[10][3] = { 3, 54, 128 };
+        p.notes[10][4] = { 4, 54, 129 };
+        p.notes[10][5] = { 4, 66, 94 };
+        p.notes[11][3] = { 3, 47, 94 };
+        p.notes[11][4] = { 4, 47, 59 };
+        p.notes[13][3] = { 3, 54, 162 };
+        p.notes[13][4] = { 4, 47, 79 };
+        p.notes[13][5] = { 4, 61, 70 };
+        p.notes[15][3] = { 3, 47, 96 };
+        m_patterns.push_back(p);
+    }
+    // Bar 68
+    {
+        Pattern p;
+        for (int r = 0; r < 16; r++)
+            for (int t = 0; t < 8; t++)
+                p.notes[r][t] = { 0xFF, 0, 0 };
+        p.notes[0][3] = { 3, 54, 92 };
+        p.notes[1][3] = { 3, 54, 118 };
+        p.notes[1][4] = { 4, 54, 158 };
+        p.notes[2][3] = { 3, 54, 88 };
+        p.notes[2][4] = { 4, 47, 86 };
+        p.notes[3][4] = { 4, 61, 90 };
+        p.notes[4][3] = { 3, 54, 126 };
+        p.notes[6][3] = { 3, 47, 98 };
+        p.notes[7][4] = { 4, 54, 178 };
+        p.notes[8][3] = { 3, 49, 132 };
+        p.notes[8][4] = { 4, 54, 167 };
+        p.notes[9][3] = { 3, 49, 82 };
+        p.notes[9][4] = { 4, 54, 156 };
+        p.notes[10][4] = { 4, 54, 158 };
+        p.notes[11][4] = { 4, 47, 75 };
+        p.notes[12][4] = { 4, 42, 68 };
+        p.notes[13][3] = { 3, 49, 126 };
+        p.notes[13][4] = { 4, 42, 86 };
+        p.notes[14][3] = { 3, 54, 132 };
+        p.notes[14][4] = { 4, 47, 70 };
+        p.notes[14][5] = { 4, 54, 132 };
+        m_patterns.push_back(p);
+    }
+    m_orderList = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67 };
 }
+
+
+
+
+
+
+
+
 
 // ============================================================
 // Play a note on the next available voice

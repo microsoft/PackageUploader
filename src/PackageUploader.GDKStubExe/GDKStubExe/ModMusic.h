@@ -40,7 +40,7 @@ private:
     static constexpr int   SAMPLE_RATE = 44100;
     static constexpr int   NUM_INSTRUMENTS = 8;
     static constexpr int   NUM_CHANNELS = 14;  // polyphony
-    static constexpr int   BPM = 80;
+    static constexpr int   BPM = 120;
     static constexpr int   ROWS_PER_BEAT = 4;  // 16th note resolution
     static constexpr float SECONDS_PER_ROW = 60.0f / (BPM * ROWS_PER_BEAT);
     static constexpr int   PATTERN_ROWS = 16;  // rows per pattern

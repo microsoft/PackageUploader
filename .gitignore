@@ -357,3 +357,7 @@ MigrationBackup/
 /src/PackageUploader.Application/Properties/launchSettings.json
 /src/PackageUploader.UI/GDKStubExe/Gaming.Xbox.Scarlett.x64/Layout
 /src/PackageUploader.UI/GDKStubExe/Gaming.Xbox.XboxOne.x64/Layout
+
+# Build-time generated zip of GDKStubExe sources
+GDKStubExe.zip
+/src/PackageUploader.GDKStubExe/GDKStubExe/Gaming.Xbox.Scarlett.x64/Layout
