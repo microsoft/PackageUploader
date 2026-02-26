@@ -91,9 +91,9 @@
 #include <tuple>
 #include <vector>
 
-#ifdef _GAMING_XBOX
 #include <XGameRuntime.h>
 #include <XGameUI.h>
+#ifdef _GAMING_XBOX
 #include <xsapi-c/services_c.h>
 #include <httpClient/httpClient.h>
 #include <XCurl.h>

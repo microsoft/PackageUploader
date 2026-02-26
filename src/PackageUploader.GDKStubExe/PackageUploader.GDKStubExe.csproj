@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyName>GDKStubExe</AssemblyName>
+    <RootNamespace>PackageUploader.GDKStubExe</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <!-- GDKStubExe project files: zipped at build time for smaller assembly size,
+       extracted at runtime before MSBuild invocation. -->
+  <ItemGroup>
+    <EmbeddedResource Include="GDKStubExe.zip">
+      <LogicalName>GDKStubExe.zip</LogicalName>
+      <Visible>false</Visible>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Target Name="ZipGdkStubExe" BeforeTargets="CoreCompile" DependsOnTargets="PrepareForBuild">
+    <ItemGroup>
+      <_GdkStubSrc Include="GDKStubExe\*.cpp;GDKStubExe\*.h;GDKStubExe\*.hlsl;GDKStubExe\*.sln;GDKStubExe\*.vcxproj;GDKStubExe\*.vcxproj.filters;GDKStubExe\*.vcxproj.user" />
+    </ItemGroup>
+    <RemoveDir Directories="$(IntermediateOutputPath)_GdkStubStage" />
+    <Copy SourceFiles="@(_GdkStubSrc)" DestinationFolder="$(IntermediateOutputPath)_GdkStubStage" />
+    <ZipDirectory SourceDirectory="$(IntermediateOutputPath)_GdkStubStage"
+                  DestinationFile="$(MSBuildProjectDirectory)\GDKStubExe.zip"
+                  Overwrite="true" />
+    <RemoveDir Directories="$(IntermediateOutputPath)_GdkStubStage" />
+  </Target>
+
+</Project>

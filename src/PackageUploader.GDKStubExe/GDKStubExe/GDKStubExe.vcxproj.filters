@@ -18,6 +18,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="ModMusic.h" />
+    <ClInclude Include="AnsiArtData.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
     <ClInclude Include="AnsiArtPS.h">
       <Filter>Shaders</Filter>
     </ClInclude>

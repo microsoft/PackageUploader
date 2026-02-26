@@ -58,10 +58,10 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR lp
         return 1;
     }
 
-#ifdef _GAMING_XBOX
     if (FAILED(XGameRuntimeInitialize()))
         return 1;
 
+#ifdef _GAMING_XBOX
     // Microsoft GDKX supports UTF-8 everywhere
     assert(GetACP() == CP_UTF8);
 #else
@@ -168,6 +168,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE, _In_ LPWSTR lp
     XGameRuntimeUninitialize();
 #else
     CoUninitialize();
+    XGameRuntimeUninitialize();
 #endif
 
     return static_cast<int>(msg.wParam);

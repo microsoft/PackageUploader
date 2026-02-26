@@ -48,6 +48,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PackageUploader.ClientApi\PackageUploader.ClientApi.csproj" />
     <ProjectReference Include="..\PackageUploader.FileLogger\PackageUploader.FileLogger.csproj" />
+    <ProjectReference Include="..\PackageUploader.GDKStubExe\PackageUploader.GDKStubExe.csproj" />
   </ItemGroup>
 
   <ItemGroup>

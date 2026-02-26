@@ -15,6 +15,9 @@ using Microsoft::WRL::ComPtr;
 #include "AnsiArtVS.h"
 #include "AnsiArtPS.h"
 
+// ANSI animation cell data (auto-generated, uploaded to GPU StructuredBuffer).
+#include "AnsiArtData.h"
+
 Game::Game() noexcept(false) :
     m_frame(0),
     m_totalTime(0.f)
@@ -36,24 +39,24 @@ void Game::Initialize(HWND window)
 
     m_music.Initialize();
 
-    //static XAsyncBlock s_showNotReadyDialogAsync{};
-    //s_showNotReadyDialogAsync.queue = nullptr;
-    //s_showNotReadyDialogAsync.context = nullptr;
-    //s_showNotReadyDialogAsync.callback = [](XAsyncBlock* async)
-    //{
-    //    XGameUiMessageDialogButton ignored{};
-    //    std::ignore = XGameUiShowMessageDialogResult(async, &ignored);
-    //};
+    static XAsyncBlock s_showNotReadyDialogAsync{};
+    s_showNotReadyDialogAsync.queue = nullptr;
+    s_showNotReadyDialogAsync.context = nullptr;
+    s_showNotReadyDialogAsync.callback = [](XAsyncBlock* async)
+    {
+        XGameUiMessageDialogButton ignored{};
+        std::ignore = XGameUiShowMessageDialogResult(async, &ignored);
+    };
 
-    //std::ignore = XGameUiShowMessageDialogAsync(
-    //    &s_showNotReadyDialogAsync,
-    //    "Notice",
-    //    "This game is not ready yet.",
-    //    "OK",
-    //    nullptr,
-    //    nullptr,
-    //    XGameUiMessageDialogButton::First,
-    //    XGameUiMessageDialogButton::First);
+    std::ignore = XGameUiShowMessageDialogAsync(
+        &s_showNotReadyDialogAsync,
+        "Notice",
+        "This game is not ready yet.",
+        "OK",
+        nullptr,
+        nullptr,
+        XGameUiMessageDialogButton::First,
+        XGameUiMessageDialogButton::First);
 }
 
 #pragma region Frame Update
@@ -107,6 +110,7 @@ void Game::Render()
     commandList->SetGraphicsRootSignature(m_rootSignature.Get());
     commandList->SetPipelineState(m_pipelineState.Get());
     commandList->SetGraphicsRoot32BitConstant(0, *reinterpret_cast<const UINT*>(&m_totalTime), 0);
+    commandList->SetGraphicsRootShaderResourceView(1, m_cellDataBuffer->GetGPUVirtualAddress());
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->DrawInstanced(3, 1, 0, 0);
 
@@ -168,17 +172,22 @@ void Game::CreateDeviceDependentResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
-    // --- Root signature: single 32-bit constant (time) ---
-    D3D12_ROOT_PARAMETER rootParam = {};
-    rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-    rootParam.Constants.ShaderRegister = 0;
-    rootParam.Constants.RegisterSpace = 0;
-    rootParam.Constants.Num32BitValues = 1;
-    rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+    // --- Root signature: 32-bit constant (time) + SRV (cell data buffer) ---
+    D3D12_ROOT_PARAMETER rootParams[2] = {};
+    rootParams[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+    rootParams[0].Constants.ShaderRegister = 0;
+    rootParams[0].Constants.RegisterSpace = 0;
+    rootParams[0].Constants.Num32BitValues = 1;
+    rootParams[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+    rootParams[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+    rootParams[1].Descriptor.ShaderRegister = 0;  // t0
+    rootParams[1].Descriptor.RegisterSpace = 0;
+    rootParams[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
     D3D12_ROOT_SIGNATURE_DESC rsDesc = {};
-    rsDesc.NumParameters = 1;
-    rsDesc.pParameters = &rootParam;
+    rsDesc.NumParameters = 2;
+    rsDesc.pParameters = rootParams;
     rsDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
     ComPtr<ID3DBlob> rsBlob, rsError;
@@ -209,6 +218,21 @@ void Game::CreateDeviceDependentResources()
 
     DX::ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc,
         IID_GRAPHICS_PPV_ARGS(m_pipelineState.ReleaseAndGetAddressOf())));
+
+    // --- Upload ANSI cell data to GPU buffer ---
+    const UINT dataSize = sizeof(g_ansiCellData);
+    auto heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(dataSize);
+
+    DX::ThrowIfFailed(device->CreateCommittedResource(
+        &heapProps, D3D12_HEAP_FLAG_NONE, &bufferDesc,
+        D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
+        IID_GRAPHICS_PPV_ARGS(m_cellDataBuffer.ReleaseAndGetAddressOf())));
+
+    void* mapped = nullptr;
+    DX::ThrowIfFailed(m_cellDataBuffer->Map(0, nullptr, &mapped));
+    memcpy(mapped, g_ansiCellData, dataSize);
+    m_cellDataBuffer->Unmap(0, nullptr);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

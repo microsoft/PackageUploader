@@ -59,6 +59,7 @@ private:
     // Procedural animation resources.
     Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rootSignature;
     Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pipelineState;
+    Microsoft::WRL::ComPtr<ID3D12Resource>      m_cellDataBuffer;
     float                                       m_totalTime;
 
     // MOD-style music engine.
