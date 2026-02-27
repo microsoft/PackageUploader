@@ -160,6 +160,24 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Now opening the Microsoft Game Config Editor..
+        /// </summary>
+        public static string GameConfigEditorDialogMessage {
+            get {
+                return ResourceManager.GetString("GameConfigEditorDialogMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GameConfigEditor.exe wasn&apos;t found. Please install the GDK to generate a MicrosoftGame.config file..
+        /// </summary>
+        public static string GameConfigEditorNotFoundErrMsg {
+            get {
+                return ResourceManager.GetString("GameConfigEditorNotFoundErrMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select or enter the game&apos;s location.
         /// </summary>
         public static string GamePathBoxDefaultText {
@@ -174,6 +192,24 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string GamePathTitleText {
             get {
                 return ResourceManager.GetString("GamePathTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate.
+        /// </summary>
+        public static string GenerateButtonText {
+            get {
+                return ResourceManager.GetString("GenerateButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate stub.
+        /// </summary>
+        public static string GenerateStubButtonText {
+            get {
+                return ResourceManager.GetString("GenerateStubButtonText", resourceCulture);
             }
         }
         

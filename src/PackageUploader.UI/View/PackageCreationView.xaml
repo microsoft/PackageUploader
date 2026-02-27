@@ -183,6 +183,41 @@
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
+                        <Button Grid.Row="4" Grid.Column="2"
+                                d:Content="Generate"
+                                AutomationProperties.HelpText="Generate a MicrosoftGame.config file"
+                                Content="{x:Static strings:PackageCreation.GenerateButtonText}"
+                                Command="{Binding GenerateGameConfigCommand}"
+                                Width="90"
+                                Height="32"
+                                Visibility="{Binding IsMissingGameConfig, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <Button Grid.Row="4" Grid.Column="2"
+                                d:Content="Generate stub"
+                                AutomationProperties.HelpText="Generate a stub executable for the MicrosoftGame.config"
+                                Content="{x:Static strings:PackageCreation.GenerateStubButtonText}"
+                                Command="{Binding GenerateStubCommand}"
+                                Width="90"
+                                Height="32"
+                                Padding="6,0"
+                                Margin="3,0,0,0"
+                                HorizontalAlignment="Left"
+                                Visibility="{Binding IsMissingExecutable, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <StackPanel Grid.Row="5"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="3"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    Visibility="{Binding GameConfigEditorNotFoundError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                            <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                   Width="16" 
+                                   Height="16"
+                                   VerticalAlignment="Top"
+                                   Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding GameConfigEditorNotFoundError}"
+                                       Foreground="{DynamicResource ErrorRedBrush}"
+                                       HorizontalAlignment="Left"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
                     </Grid>
                     <Expander Style="{StaticResource CustomExpanderStyle}" 
                              Margin="0,10,0,20"

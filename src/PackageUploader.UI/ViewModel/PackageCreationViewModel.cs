@@ -183,7 +183,35 @@ public partial class PackageCreationViewModel : BaseViewModel
     public string GameConfigLoadError
     {
         get => _gameConfigLoadError;
-        set => SetProperty(ref _gameConfigLoadError, value);
+        set
+        {
+            if (SetProperty(ref _gameConfigLoadError, value))
+            {
+                IsMissingGameConfig = !string.IsNullOrEmpty(value) &&
+                    value == Resources.Strings.PackageCreation.FolderDoesNotContainConfigErrMsg;
+            }
+        }
+    }
+
+    private bool _isMissingGameConfig;
+    public bool IsMissingGameConfig
+    {
+        get => _isMissingGameConfig;
+        set => SetProperty(ref _isMissingGameConfig, value);
+    }
+
+    private string _gameConfigEditorNotFoundError = string.Empty;
+    public string GameConfigEditorNotFoundError
+    {
+        get => _gameConfigEditorNotFoundError;
+        set => SetProperty(ref _gameConfigEditorNotFoundError, value);
+    }
+
+    private bool _isMissingExecutable;
+    public bool IsMissingExecutable
+    {
+        get => _isMissingExecutable;
+        set => SetProperty(ref _isMissingExecutable, value);
     }
 
     private string _layoutParseError = string.Empty;
@@ -329,6 +357,8 @@ public partial class PackageCreationViewModel : BaseViewModel
     public ICommand BrowsePackageOutputPathCommand { get; }
     public ICommand BrowseSubValPathCommand { get; }
     public ICommand CancelButtonCommand { get; }
+    public ICommand GenerateGameConfigCommand { get; }
+    public ICommand GenerateStubCommand { get; }
 
     public PackageCreationViewModel(PackageModelProvider packageModelService,
                                     PathConfigurationProvider pathConfigurationService,
@@ -378,6 +408,8 @@ public partial class PackageCreationViewModel : BaseViewModel
         BrowsePackageOutputPathCommand = new RelayCommand(OnBrowsePackageOutputPath);
         BrowseSubValPathCommand = new RelayCommand(OnBrowseSubValPath);
         CancelButtonCommand = new RelayCommand(OnCancelButton);
+        GenerateGameConfigCommand = new RelayCommand(OnGenerateGameConfig);
+        GenerateStubCommand = new RelayCommand(OnGenerateStub);
 
         GameDataPath = GetPropertyFromApplicationPreferences(nameof(GameDataPath));
         if (GameDataPath != string.Empty)
@@ -942,6 +974,70 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
+    private async void OnGenerateGameConfig()
+    {
+        GameConfigEditorNotFoundError = string.Empty;
+
+        string editorPath = FileResolver.ResolveFilePath("GameConfigEditor.exe");
+
+        if (string.IsNullOrEmpty(editorPath))
+        {
+            GameConfigEditorNotFoundError = Resources.Strings.PackageCreation.GameConfigEditorNotFoundErrMsg;
+            return;
+        }
+
+        var result = System.Windows.MessageBox.Show(
+            Resources.Strings.PackageCreation.GameConfigEditorDialogMessage,
+            Resources.Strings.PackageCreation.GenerateButtonText,
+            System.Windows.MessageBoxButton.OKCancel,
+            System.Windows.MessageBoxImage.Information);
+
+        if (result != System.Windows.MessageBoxResult.OK)
+        {
+            return;
+        }
+
+        try
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = editorPath,
+                    Arguments = $"\"{GameDataPath}\"",
+                    UseShellExecute = true,
+                },
+                EnableRaisingEvents = true
+            };
+
+            process.Start();
+            _logger.LogInformation("Launched GameConfigEditor.exe from {Path} with target directory {Directory}", editorPath, GameDataPath);
+
+            await process.WaitForExitAsync();
+
+            // After the editor closes, check if MicrosoftGame.config now exists
+            if (!string.IsNullOrEmpty(GameDataPath) && Directory.Exists(GameDataPath))
+            {
+                string gameConfigPath = Path.Combine(GameDataPath, "MicrosoftGame.config");
+                if (File.Exists(gameConfigPath))
+                {
+                    _logger.LogInformation("MicrosoftGame.config detected after GameConfigEditor closed.");
+                    LoadGameConfigValues();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error launching GameConfigEditor.exe");
+            GameConfigEditorNotFoundError = ex.Message;
+        }
+    }
+
+    private void OnGenerateStub()
+    {
+        // TODO: Implement stub executable generation
+    }
+
     private void OnBrowseMappingDataXml()
     {
         var dialog = new Microsoft.Win32.OpenFileDialog
@@ -1053,6 +1149,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     {
         GameConfigLoadError = string.Empty;
         HasValidGameConfig = false;
+        IsMissingExecutable = false;
 
         if (string.IsNullOrEmpty(GameDataPath) || !Directory.Exists(GameDataPath))
         {           
@@ -1115,6 +1212,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         {
             _logger.LogError(ex, "Error getting device family from game config.");
             GameConfigLoadError = ex.Message;
+            IsMissingExecutable = gameConfig.Executables.Count == 0;
             return;
         }
 

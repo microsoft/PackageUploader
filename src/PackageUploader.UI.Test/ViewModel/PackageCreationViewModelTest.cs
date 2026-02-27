@@ -87,6 +87,8 @@ namespace PackageUploader.UI.Test.ViewModel
             Assert.IsNotNull(_viewModel.BrowsePackageOutputPathCommand);
             Assert.IsNotNull(_viewModel.BrowseSubValPathCommand);
             Assert.IsNotNull(_viewModel.CancelButtonCommand);
+            Assert.IsNotNull(_viewModel.GenerateGameConfigCommand);
+            Assert.IsNotNull(_viewModel.GenerateStubCommand);
             Assert.IsFalse(_viewModel.IsCreationInProgress);
         }
 
@@ -827,6 +829,139 @@ namespace PackageUploader.UI.Test.ViewModel
             Assert.IsTrue(result);
             Assert.IsFalse(updatedArguments.Contains("/validationpath"));
             Assert.AreEqual(string.Empty, _viewModel.SubValDllError);
+        }
+
+        [TestMethod]
+        public void IsMissingGameConfig_TrueWhenFolderLacksConfig()
+        {
+            // Arrange - _gameDataPath exists but has no MicrosoftGame.config
+
+            // Act
+            _viewModel.GameDataPath = _gameDataPath;
+
+            // Assert
+            Assert.IsTrue(_viewModel.IsMissingGameConfig);
+            Assert.AreEqual(Resources.Strings.PackageCreation.FolderDoesNotContainConfigErrMsg, _viewModel.GameConfigLoadError);
+        }
+
+        [WpfTestMethod]
+        public void IsMissingGameConfig_FalseWhenConfigExists()
+        {
+            // Arrange - create a valid MicrosoftGame.config with a real PNG logo
+            string logoPath = Path.Combine(_gameDataPath, "logo.png");
+            CreateMinimalPng(logoPath);
+
+            string configContent = $"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <Game ConfigVersion="0">
+                    <Identity Name="TestGame" Publisher="TestPublisher" Version="1.0.0.0" />
+                    <ExecutableList>
+                        <Executable Id="TestExe" Name="test.exe" TargetDeviceFamily="PC" />
+                    </ExecutableList>
+                    <ShellVisuals DefaultDisplayName="Test" 
+                                  PublisherDisplayName="Test" 
+                                  StoreLogo="{logoPath}" 
+                                  Square150x150Logo="{logoPath}" 
+                                  Square44x44Logo="{logoPath}" 
+                                  SplashScreenImage="{logoPath}" 
+                                  Description="Test" />
+                    <StoreId>ABC123</StoreId>
+                </Game>
+                """;
+            File.WriteAllText(Path.Combine(_gameDataPath, "MicrosoftGame.config"), configContent);
+
+            // Act
+            _viewModel.GameDataPath = _gameDataPath;
+
+            // Assert
+            Assert.IsFalse(_viewModel.IsMissingGameConfig);
+            Assert.IsTrue(_viewModel.HasValidGameConfig);
+        }
+
+        [WpfTestMethod]
+        public void IsMissingExecutable_TrueWhenNoDeviceFamily()
+        {
+            // Arrange - create a MicrosoftGame.config with no Executable entries
+            string logoPath = Path.Combine(_gameDataPath, "logo.png");
+            CreateMinimalPng(logoPath);
+
+            string configContent = $"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <Game ConfigVersion="0">
+                    <Identity Name="TestGame" Publisher="TestPublisher" Version="1.0.0.0" />
+                    <ShellVisuals DefaultDisplayName="Test" 
+                                  PublisherDisplayName="Test" 
+                                  StoreLogo="{logoPath}" 
+                                  Square150x150Logo="{logoPath}" 
+                                  Square44x44Logo="{logoPath}" 
+                                  SplashScreenImage="{logoPath}" 
+                                  Description="Test" />
+                    <StoreId>ABC123</StoreId>
+                </Game>
+                """;
+            File.WriteAllText(Path.Combine(_gameDataPath, "MicrosoftGame.config"), configContent);
+
+            // Act
+            _viewModel.GameDataPath = _gameDataPath;
+
+            // Assert
+            Assert.IsTrue(_viewModel.IsMissingExecutable);
+            Assert.IsFalse(_viewModel.HasValidGameConfig);
+            Assert.IsFalse(string.IsNullOrEmpty(_viewModel.GameConfigLoadError));
+        }
+
+        [WpfTestMethod]
+        public void IsMissingExecutable_FalseWhenExecutablePresent()
+        {
+            // Arrange - create a MicrosoftGame.config with a valid Executable
+            string logoPath = Path.Combine(_gameDataPath, "logo.png");
+            CreateMinimalPng(logoPath);
+
+            string configContent = $"""
+                <?xml version="1.0" encoding="utf-8"?>
+                <Game ConfigVersion="0">
+                    <Identity Name="TestGame" Publisher="TestPublisher" Version="1.0.0.0" />
+                    <ExecutableList>
+                        <Executable Id="TestExe" Name="test.exe" TargetDeviceFamily="PC" />
+                    </ExecutableList>
+                    <ShellVisuals DefaultDisplayName="Test" 
+                                  PublisherDisplayName="Test" 
+                                  StoreLogo="{logoPath}" 
+                                  Square150x150Logo="{logoPath}" 
+                                  Square44x44Logo="{logoPath}" 
+                                  SplashScreenImage="{logoPath}" 
+                                  Description="Test" />
+                    <StoreId>ABC123</StoreId>
+                </Game>
+                """;
+            File.WriteAllText(Path.Combine(_gameDataPath, "MicrosoftGame.config"), configContent);
+
+            // Act
+            _viewModel.GameDataPath = _gameDataPath;
+
+            // Assert
+            Assert.IsFalse(_viewModel.IsMissingExecutable);
+            Assert.IsTrue(_viewModel.HasValidGameConfig);
+        }
+
+        /// <summary>
+        /// Creates a minimal valid 1x1 PNG file.
+        /// </summary>
+        private static void CreateMinimalPng(string path)
+        {
+            // Minimal 1x1 white PNG (67 bytes)
+            byte[] png = [
+                0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
+                0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, // IHDR chunk
+                0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // 1x1
+                0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE, // 8-bit RGB
+                0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54, // IDAT chunk
+                0x08, 0xD7, 0x63, 0xF8, 0xCF, 0xC0, 0x00, 0x00, // compressed data
+                0x00, 0x02, 0x00, 0x01, 0xE2, 0x21, 0xBC, 0x33, // checksum
+                0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, // IEND chunk
+                0xAE, 0x42, 0x60, 0x82
+            ];
+            File.WriteAllBytes(path, png);
         }
 
         [TestCleanup]

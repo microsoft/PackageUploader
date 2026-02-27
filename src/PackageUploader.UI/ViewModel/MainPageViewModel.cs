@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
@@ -192,7 +191,7 @@ public partial class MainPageViewModel : BaseViewModel
 
         IsUserLoggedIn = false;
 
-        string makePkgPath = ResolveFilePath("MakePkg.exe");
+        string makePkgPath = FileResolver.ResolveFilePath("MakePkg.exe");
 
         if (File.Exists(makePkgPath))
         {
@@ -206,7 +205,7 @@ public partial class MainPageViewModel : BaseViewModel
             MakePkgUnavailableErrorMessage = PackageUploader.UI.Resources.Strings.MainPage.MakePackageNotFoundErrorMsg;
         }
 
-        string subValPath = ResolveFilePath("SubmissionValidator.dll");
+        string subValPath = FileResolver.ResolveFilePath("SubmissionValidator.dll");
 
         if (File.Exists(subValPath))
         {
@@ -286,88 +285,4 @@ public partial class MainPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsUserLoggedIn));
     }
 
-    private static string ResolveFilePath(string fileName)
-    {
-        // We search in several locations in priority order:
-        // 1. Next to our current executable
-        // 2. In the CurrentDirectory
-        // 3. In the GDK if it's installed
-        // 4. In the directories specified by the PATH environment variable
-
-        // Use AppContext.BaseDirectory instead of Assembly.Location for single-file compatibility
-        var assemblyDirectory = AppContext.BaseDirectory;
-
-        if (Directory.Exists(assemblyDirectory))
-        {
-            var nextToExePath = Path.Combine(assemblyDirectory, fileName);
-
-            if (File.Exists(nextToExePath))
-            {
-                return nextToExePath;
-            }
-        }
-
-        var currentDirectory = Directory.GetCurrentDirectory();
-
-        var currentDirectoryPath = Path.Combine(currentDirectory, fileName);
-
-        if (File.Exists(currentDirectoryPath))
-        {
-            return currentDirectoryPath;
-        }
-
-        string GdkRegistryPath = @"SOFTWARE\Microsoft\GDK\Installed Roots";
-        string? gdkPath = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{GdkRegistryPath}", "GDKInstallPath", null) as string;
-
-        if (!string.IsNullOrEmpty(gdkPath))
-        {
-            var gdkFilePath = Path.Combine(gdkPath, "bin", fileName);
-            if (File.Exists(gdkFilePath))
-            {
-                return gdkFilePath;
-            }
-        }
-
-        string GdkAltRegistryPath = @"SOFTWARE\WOW6432Node\Microsoft\GDK\Installed Roots";
-        string? gdkAltPath = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{GdkAltRegistryPath}", "GDKInstallPath", null) as string;
-
-        if (!string.IsNullOrEmpty(gdkAltPath))
-        {
-            var gdkFilePath = Path.Combine(gdkAltPath, "bin", fileName);
-            if (File.Exists(gdkFilePath))
-            {
-                return gdkFilePath;
-            }
-        }
-
-        string? filePath = FindFileInPath(fileName);
-
-        if (File.Exists(filePath))
-        {
-            return filePath;
-        }
-
-        return string.Empty;
-    }
-
-    private static string? FindFileInPath(string fileName)
-    {
-        var pathValue = Environment.GetEnvironmentVariable("PATH");
-
-        if (string.IsNullOrEmpty(pathValue))
-        {
-            return null;
-        }
-
-        var paths = pathValue.Split(Path.PathSeparator);
-        foreach (var path in paths)
-        {
-            var filePath = Path.Combine(path, fileName);
-            if (File.Exists(filePath))
-            {
-                return filePath;
-            }
-        }
-        return null;
-    }
 }

@@ -237,4 +237,16 @@
   <data name="ValidatorPathTitleText" xml:space="preserve">
     <value>Folder path for SubmissionValidator.dll</value>
   </data>
+  <data name="GenerateButtonText" xml:space="preserve">
+    <value>Generate</value>
+  </data>
+  <data name="GenerateStubButtonText" xml:space="preserve">
+    <value>Generate stub</value>
+  </data>
+  <data name="GameConfigEditorDialogMessage" xml:space="preserve">
+    <value>Now opening the Microsoft Game Config Editor.</value>
+  </data>
+  <data name="GameConfigEditorNotFoundErrMsg" xml:space="preserve">
+    <value>GameConfigEditor.exe wasn't found. Please install the GDK to generate a MicrosoftGame.config file.</value>
+  </data>
 </root>

@@ -27,4 +27,9 @@ public partial class PackageCreationView : System.Windows.Controls.UserControl
         DragDropHelper.RegisterTextBoxDragDrop(PackagePathTextBox, path => _viewModel.PackageFilePath = path, true);
         DragDropHelper.RegisterTextBoxDragDrop(SubValPathTextBox, path => _viewModel.SubValPath = path, true);
     }
+
+    private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+
+    }
 }

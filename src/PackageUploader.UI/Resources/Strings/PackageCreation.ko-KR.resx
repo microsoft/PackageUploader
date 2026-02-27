@@ -236,4 +236,16 @@
   <data name="ValidatorPathTitleText" xml:space="preserve">
     <value>SubmissionValidator.dll 폴더 경로</value>
   </data>
+  <data name="GenerateButtonText" xml:space="preserve">
+    <value>생성</value>
+  </data>
+  <data name="GenerateStubButtonText" xml:space="preserve">
+    <value>스텁 생성</value>
+  </data>
+  <data name="GameConfigEditorDialogMessage" xml:space="preserve">
+    <value>Microsoft Game Config Editor를 엽니다.</value>
+  </data>
+  <data name="GameConfigEditorNotFoundErrMsg" xml:space="preserve">
+    <value>GameConfigEditor.exe를 찾을 수 없습니다. MicrosoftGame.config 파일을 생성하려면 GDK를 설치하세요.</value>
+  </data>
 </root>

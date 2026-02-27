@@ -237,4 +237,16 @@
   <data name="ValidatorPathTitleText" xml:space="preserve">
     <value>SubmissionValidator.dll 的文件夹路径</value>
   </data>
+  <data name="GenerateButtonText" xml:space="preserve">
+    <value>生成</value>
+  </data>
+  <data name="GenerateStubButtonText" xml:space="preserve">
+    <value>生成存根</value>
+  </data>
+  <data name="GameConfigEditorDialogMessage" xml:space="preserve">
+    <value>正在打开 Microsoft Game Config Editor。</value>
+  </data>
+  <data name="GameConfigEditorNotFoundErrMsg" xml:space="preserve">
+    <value>未找到 GameConfigEditor.exe。请安装 GDK 以生成 MicrosoftGame.config 文件。</value>
+  </data>
 </root>
