@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.UI.Model;
+using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 
@@ -19,7 +22,13 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
 {
     private readonly IWindowService _windowService;
     private readonly IPackageUploaderService _uploaderService;
+    private readonly PathConfigurationProvider _pathConfigurationProvider;
+    private readonly ErrorModelProvider _errorModelProvider;
     private readonly ILogger<Msixvc2UploadViewModel> _logger;
+
+    private Process? _packProcess;
+    private Process? _uploadProcess;
+    private CancellationTokenSource _cancellationTokenSource = new();
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
@@ -183,6 +192,28 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         set => SetProperty(ref _packagePreviewImage, value);
     }
 
+    // Packaging state
+    private bool _isPackaging = false;
+    public bool IsPackaging
+    {
+        get => _isPackaging;
+        set => SetProperty(ref _isPackaging, value);
+    }
+
+    private string _statusMessage = string.Empty;
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set => SetProperty(ref _statusMessage, value);
+    }
+
+    private int _progressValue = 0;
+    public int ProgressValue
+    {
+        get => _progressValue;
+        set => SetProperty(ref _progressValue, value);
+    }
+
     // Commands
     public ICommand BrowseContentPathCommand { get; }
     public ICommand BrowseMappingDataXmlPathCommand { get; }
@@ -193,10 +224,14 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
 
     public Msixvc2UploadViewModel(IWindowService windowService,
                                   IPackageUploaderService uploaderService,
+                                  PathConfigurationProvider pathConfigurationProvider,
+                                  ErrorModelProvider errorModelProvider,
                                   ILogger<Msixvc2UploadViewModel> logger)
     {
         _windowService = windowService;
         _uploaderService = uploaderService;
+        _pathConfigurationProvider = pathConfigurationProvider;
+        _errorModelProvider = errorModelProvider;
         _logger = logger;
 
         BrowseContentPathCommand = new RelayCommand(OnBrowseContentPath);
@@ -209,10 +244,18 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
                 ContentPath = path;
             }
         });
-        // TODO: Wire actual upload logic
-        UploadPackageCommand = new RelayCommand(() => { });
+        UploadPackageCommand = new RelayCommand(ExecuteUploadPackageAsync);
         CancelButtonCommand = new RelayCommand(() =>
         {
+            if (IsPackaging)
+            {
+                _cancellationTokenSource.Cancel();
+                if (_packProcess != null && !_packProcess.HasExited) _packProcess.Kill();
+                if (_uploadProcess != null && !_uploadProcess.HasExited) _uploadProcess.Kill();
+                IsPackaging = false;
+                StatusMessage = "Cancelled.";
+                return;
+            }
             _windowService.NavigateTo(typeof(MainPageView));
         });
     }
@@ -517,5 +560,354 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         image.EndInit();
         image.Freeze();
         return image;
+    }
+
+    // ── Upload Package flow ────────────────────────────────────────────
+
+    private async void ExecuteUploadPackageAsync()
+    {
+        if (IsPackaging)
+        {
+            return;
+        }
+
+        // Validation
+        string makePkg2Path = _pathConfigurationProvider.MakePkg2Path;
+        if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+        {
+            ContentPathError = "makepkg2 was not found. Please install the microsoft.xbox.packaging.tools.makepkg2 NuGet package.";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(ContentPath) || !Directory.Exists(ContentPath))
+        {
+            ContentPathError = "Please provide a valid content path.";
+            return;
+        }
+
+        string gameConfigPath = Path.Combine(ContentPath, "MicrosoftGame.config");
+        if (!File.Exists(gameConfigPath))
+        {
+            ContentPathError = Resources.Strings.PackageCreation.FolderDoesNotContainConfigErrMsg;
+            return;
+        }
+
+        if (string.IsNullOrEmpty(BranchOrFlightDisplayName))
+        {
+            BranchOrFlightErrorMessage = "Please select a destination branch or flight.";
+            return;
+        }
+
+        if (string.IsNullOrEmpty(MarketGroupName))
+        {
+            MarketGroupErrorMessage = "Please select a market group.";
+            return;
+        }
+
+        // Prepare output directory
+        string outputDir = Path.Combine(Path.GetTempPath(), "MSIXVC2_" + Guid.NewGuid().ToString());
+        Directory.CreateDirectory(outputDir);
+
+        _cancellationTokenSource = new CancellationTokenSource();
+        IsPackaging = true;
+        StatusMessage = "Creating MSIXVC2 package...";
+        ProgressValue = 0;
+
+        // Auto-generate layout file if not provided
+        if (string.IsNullOrEmpty(MappingDataXmlPath) || !File.Exists(MappingDataXmlPath))
+        {
+            StatusMessage = "Generating layout file...";
+            bool genMapSuccess = await RunMakePkg2GenMap(makePkg2Path, outputDir);
+            if (!genMapSuccess)
+            {
+                IsPackaging = false;
+                return;
+            }
+        }
+
+        // Run makepkg2 pack
+        StatusMessage = "Packaging with makepkg2...";
+        bool packSuccess = await RunMakePkg2Pack(makePkg2Path, outputDir);
+
+        if (!packSuccess)
+        {
+            IsPackaging = false;
+            return;
+        }
+
+        // Run makepkg2 upload
+        StatusMessage = "Uploading package to Partner Center...";
+        bool uploadSuccess = await RunMakePkg2Upload(makePkg2Path, outputDir);
+
+        IsPackaging = false;
+
+        if (uploadSuccess)
+        {
+            StatusMessage = "Upload complete.";
+            _logger.LogInformation("MSIXVC2 package uploaded successfully.");
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                _windowService.NavigateTo(typeof(UploadingFinishedView));
+            });
+        }
+    }
+
+    private async Task<bool> RunMakePkg2GenMap(string makePkg2Path, string outputDir)
+    {
+        string layoutFile = Path.Combine(outputDir, "generated_layout.xml");
+        // makepkg2 genmap requires the output file to already exist
+        File.Create(layoutFile).Dispose();
+        string arguments = $"genmap /f \"{layoutFile}\" /d \"{ContentPath}\"";
+
+        ArrayList processOutput = [];
+        ArrayList processErrorOutput = [];
+
+        var process = new Process();
+        process.StartInfo.FileName = makePkg2Path;
+        process.StartInfo.Arguments = arguments;
+        process.StartInfo.RedirectStandardOutput = true;
+        process.StartInfo.RedirectStandardError = true;
+        process.EnableRaisingEvents = true;
+        process.StartInfo.CreateNoWindow = true;
+
+        process.OutputDataReceived += (_, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.Data)) processOutput.Add(args.Data);
+        };
+        process.ErrorDataReceived += (_, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.Data)) processErrorOutput.Add(args.Data);
+        };
+
+        _logger.LogInformation("Running: {Command} {Arguments}", makePkg2Path, arguments);
+        process.Start();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        await process.WaitForExitAsync();
+
+        if (process.ExitCode != 0)
+        {
+            string errorString = string.Join("\n", processErrorOutput.ToArray());
+            _logger.LogError("makepkg2 genmap failed with exit code {ExitCode}: {Error}", process.ExitCode, errorString);
+            ContentPathError = "Failed to generate layout file.";
+            return false;
+        }
+
+        if (File.Exists(layoutFile))
+        {
+            MappingDataXmlPath = layoutFile;
+        }
+
+        return File.Exists(MappingDataXmlPath);
+    }
+
+    private async Task<bool> RunMakePkg2Pack(string makePkg2Path, string outputDir)
+    {
+        string arguments = $"pack /msixvc2 /d \"{ContentPath}\" /pd \"{outputDir}\" /pc /v";
+
+        if (!string.IsNullOrEmpty(MappingDataXmlPath) && File.Exists(MappingDataXmlPath))
+        {
+            arguments += $" /f \"{MappingDataXmlPath}\"";
+        }
+
+        if (!string.IsNullOrEmpty(SubValPath) && Directory.Exists(SubValPath))
+        {
+            arguments += $" /validationpath \"{SubValPath}\"";
+        }
+
+        ArrayList processOutput = [];
+        ArrayList processErrorOutput = [];
+
+        _packProcess = new Process();
+        _packProcess.StartInfo.FileName = makePkg2Path;
+        _packProcess.StartInfo.Arguments = arguments;
+        _packProcess.StartInfo.RedirectStandardOutput = true;
+        _packProcess.StartInfo.RedirectStandardError = true;
+        _packProcess.EnableRaisingEvents = true;
+        _packProcess.StartInfo.CreateNoWindow = true;
+
+        _packProcess.OutputDataReceived += (_, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.Data))
+            {
+                processOutput.Add(args.Data);
+
+                // Parse encryption progress: "Encrypted XX %"
+                if (args.Data.Contains("Encrypted") && args.Data.Contains("%"))
+                {
+                    var parts = args.Data.Split(' ');
+                    foreach (var part in parts)
+                    {
+                        if (int.TryParse(part, out int pct))
+                        {
+                            // Map 0-100 to 5-50 (pack is first half, upload is second)
+                            ProgressValue = (int)(pct * 0.45 + 5);
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+
+        _packProcess.ErrorDataReceived += (_, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.Data))
+            {
+                processErrorOutput.Add(args.Data);
+            }
+        };
+
+        _logger.LogInformation("Running: {Command} {Arguments}", makePkg2Path, arguments);
+        _packProcess.Start();
+        _packProcess.BeginOutputReadLine();
+        _packProcess.BeginErrorReadLine();
+        await _packProcess.WaitForExitAsync();
+
+        // Log output to file
+        string outputString = string.Join("\n", processOutput.ToArray());
+        outputString += "\n" + string.Join("\n", processErrorOutput.ToArray());
+        string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_MakePkg2_Pack_{DateTime.Now:yyyyMMddHHmmss}.log");
+        File.WriteAllText(logFilePath, outputString);
+
+        _logger.LogInformation("makepkg2 pack log written to {LogFilePath}.", logFilePath);
+
+        if (_packProcess.ExitCode != 0)
+        {
+            string errorString = string.Join("\n", processErrorOutput.ToArray());
+
+            _errorModelProvider.Error.MainMessage = "Error creating MSIXVC2 package.";
+            _errorModelProvider.Error.DetailMessage = errorString;
+            _errorModelProvider.Error.OriginPage = typeof(Msixvc2UploadView);
+            _errorModelProvider.Error.LogsPath = logFilePath;
+
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                _windowService.NavigateTo(typeof(ErrorPageView));
+            });
+
+            _logger.LogError("makepkg2 pack failed with exit code {ExitCode}.", _packProcess.ExitCode);
+            return false;
+        }
+
+        ProgressValue = 50;
+        _logger.LogInformation("makepkg2 pack completed successfully.");
+
+        // Ensure file handles are fully released before upload
+        _packProcess.Dispose();
+        _packProcess = null;
+
+        return true;
+    }
+
+    private async Task<bool> RunMakePkg2Upload(string makePkg2Path, string outputDir)
+    {
+        // Verify the .msixvc file exists before attempting upload
+        var msixvcFiles = Directory.GetFiles(outputDir, "*.msixvc");
+        if (msixvcFiles.Length == 0)
+        {
+            _logger.LogError("No .msixvc file found in {OutputDir} after pack.", outputDir);
+            ContentPathError = "Package file not found after pack completed.";
+            return false;
+        }
+        _logger.LogInformation("Found package: {PackageFile}", msixvcFiles[0]);
+
+        // Parse branch or flight from UI selection
+        bool isBranch = BranchOrFlightDisplayName.StartsWith("Branch: ");
+        string name = BranchOrFlightDisplayName[(BranchOrFlightDisplayName.IndexOf(':') + 2)..];
+
+        // Use the output directory path — makepkg2 upload /pd expects the directory containing the .msixvc and chunk blobs
+        string arguments = $"upload /pd \"{outputDir}\" /auth Browser /v";
+
+        if (isBranch)
+        {
+            arguments += $" /branch \"{name}\"";
+        }
+        else
+        {
+            arguments += $" /flight \"{name}\"";
+        }
+
+        if (!string.IsNullOrEmpty(MarketGroupName))
+        {
+            arguments += $" /market \"{MarketGroupName}\"";
+        }
+
+        ArrayList processOutput = [];
+        ArrayList processErrorOutput = [];
+
+        _uploadProcess = new Process();
+        _uploadProcess.StartInfo.FileName = makePkg2Path;
+        _uploadProcess.StartInfo.Arguments = arguments;
+        _uploadProcess.StartInfo.RedirectStandardOutput = true;
+        _uploadProcess.StartInfo.RedirectStandardError = true;
+        _uploadProcess.EnableRaisingEvents = true;
+        _uploadProcess.StartInfo.CreateNoWindow = true;
+
+        _uploadProcess.OutputDataReceived += (_, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.Data))
+            {
+                processOutput.Add(args.Data);
+
+                // Parse upload progress (map 50-100%)
+                if (args.Data.Contains("Uploading") && args.Data.Contains("%"))
+                {
+                    var parts = args.Data.Split(' ');
+                    foreach (var part in parts)
+                    {
+                        string trimmed = part.TrimEnd('%');
+                        if (int.TryParse(trimmed, out int pct))
+                        {
+                            ProgressValue = (int)(pct * 0.5 + 50);
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+
+        _uploadProcess.ErrorDataReceived += (_, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.Data))
+            {
+                processErrorOutput.Add(args.Data);
+            }
+        };
+
+        _logger.LogInformation("Running: {Command} {Arguments}", makePkg2Path, arguments);
+        _uploadProcess.Start();
+        _uploadProcess.BeginOutputReadLine();
+        _uploadProcess.BeginErrorReadLine();
+        await _uploadProcess.WaitForExitAsync();
+
+        // Log output to file
+        string outputString = string.Join("\n", processOutput.ToArray());
+        outputString += "\n" + string.Join("\n", processErrorOutput.ToArray());
+        string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_MakePkg2_Upload_{DateTime.Now:yyyyMMddHHmmss}.log");
+        File.WriteAllText(logFilePath, outputString);
+
+        _logger.LogInformation("makepkg2 upload log written to {LogFilePath}.", logFilePath);
+
+        if (_uploadProcess.ExitCode != 0)
+        {
+            string errorString = string.Join("\n", processErrorOutput.ToArray());
+
+            _errorModelProvider.Error.MainMessage = "Error uploading MSIXVC2 package.";
+            _errorModelProvider.Error.DetailMessage = errorString;
+            _errorModelProvider.Error.OriginPage = typeof(Msixvc2UploadView);
+            _errorModelProvider.Error.LogsPath = logFilePath;
+
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                _windowService.NavigateTo(typeof(ErrorPageView));
+            });
+
+            _logger.LogError("makepkg2 upload failed with exit code {ExitCode}.", _uploadProcess.ExitCode);
+            return false;
+        }
+
+        ProgressValue = 100;
+        _logger.LogInformation("makepkg2 upload completed successfully.");
+        return true;
     }
 }

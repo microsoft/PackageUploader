@@ -219,6 +219,13 @@ public partial class MainPageViewModel : BaseViewModel
             _pathConfigurationService.BaseSubValPath = subValPath;
         }
 
+        // Discover makepkg2 from the NuGet package cache
+        string makePkg2Path = ResolveMakePkg2Path();
+        if (File.Exists(makePkg2Path))
+        {
+            _pathConfigurationService.MakePkg2Path = makePkg2Path;
+        }
+
         // Log version of the tool
         _logger.LogInformation("PackageUploader.UI version {version} is starting from location {location}.", GetVersion(), AppContext.BaseDirectory);
 
@@ -229,6 +236,17 @@ public partial class MainPageViewModel : BaseViewModel
             makePkgVersion = fileVersionInfo.FileVersion ?? string.Empty;
 
             _logger.LogInformation("Using MakePkg.exe version: {makePkgVersion} from location {makePkgLocation}.", makePkgVersion, makePkgPath);
+        }
+
+        if (File.Exists(makePkg2Path))
+        {
+            var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(makePkg2Path);
+            string makePkg2Version = fileVersionInfo.FileVersion ?? string.Empty;
+            _logger.LogInformation("Using makepkg2.exe version: {makePkg2Version} from location {makePkg2Location}.", makePkg2Version, makePkg2Path);
+        }
+        else
+        {
+            _logger.LogWarning("makepkg2 was not found in the NuGet package cache. MSIXVC2 packaging will not be available.");
         }
     }
 
@@ -290,6 +308,43 @@ public partial class MainPageViewModel : BaseViewModel
     public void OnAppearing()
     {
         OnPropertyChanged(nameof(IsUserLoggedIn));
+    }
+
+    /// <summary>
+    /// Discovers makepkg2.exe from the NuGet package cache.
+    /// Searches %USERPROFILE%\.nuget\packages\microsoft.xbox.packaging.tools.makepkg2\{version}\tools\any\win-x64\makepkg2.exe
+    /// and returns the path from the highest installed version.
+    /// </summary>
+    private static string ResolveMakePkg2Path()
+    {
+        const string packageId = "microsoft.xbox.packaging.tools.makepkg2";
+        const string relativePath = @"tools\any\win-x64\makepkg2.exe";
+
+        string nugetPackagesDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".nuget", "packages", packageId);
+
+        if (!Directory.Exists(nugetPackagesDir))
+        {
+            return string.Empty;
+        }
+
+        // Find the highest version directory that contains the exe
+        var versionDirs = Directory.GetDirectories(nugetPackagesDir);
+        string bestPath = string.Empty;
+        Version bestVersion = new(0, 0, 0);
+
+        foreach (var dir in versionDirs)
+        {
+            string candidate = Path.Combine(dir, relativePath);
+            if (File.Exists(candidate) && Version.TryParse(Path.GetFileName(dir), out var ver) && ver > bestVersion)
+            {
+                bestVersion = ver;
+                bestPath = candidate;
+            }
+        }
+
+        return bestPath;
     }
 
     private static string ResolveFilePath(string fileName)

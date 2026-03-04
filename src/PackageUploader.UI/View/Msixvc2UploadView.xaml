@@ -635,6 +635,22 @@
             </Grid>
 
             <!-- ============================================ -->
+            <!-- Progress panel (visible during pack/upload)  -->
+            <!-- ============================================ -->
+            <StackPanel Margin="0,16,0,0"
+                        Visibility="{Binding IsPackaging, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           FontSize="13"
+                           Margin="0,0,0,6"/>
+                <ProgressBar Value="{Binding ProgressValue}"
+                             Minimum="0"
+                             Maximum="100"
+                             Height="18"
+                             Foreground="{DynamicResource PrimaryButtonBackgroundBrush}"/>
+            </StackPanel>
+
+            <!-- ============================================ -->
             <!-- Button panel                                 -->
             <!-- ============================================ -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
@@ -650,6 +666,7 @@
                 <Button d:Content="Upload Package"
                         Content="{x:Static strings:Msixvc2Upload.UploadButtonContentText}"
                         Command="{Binding UploadPackageCommand}"
+                        IsEnabled="{Binding IsPackaging, Converter={StaticResource InverseBooleanConverter}}"
                         Style="{StaticResource PrimaryButtonStyle}"
                         Width="133"
                         Height="34"
