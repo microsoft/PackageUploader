@@ -110,21 +110,21 @@ void ModMusic::Initialize()
 
 void ModMusic::SynthesizeInstruments()
 {
-    const int SR = SAMPLE_RATE;
+    const int sampleRate = SAMPLE_RATE;
 
     // --- Kick drum (tight, controlled) ---
     {
-        const int len = (int)(0.15f * SR);
+        const int len = (int)(0.15f * sampleRate);
         auto& inst = m_instruments[0];
         inst.baseFreq = 55.0f;
         inst.pcm.resize(len);
         for (int i = 0; i < len; i++) {
-            float t = (float)i / SR;
+            float t = (float)i / sampleRate;
             // Tight pitch sweep 120Hz->50Hz, fast decay
             float bodyPhase = 0.0f;
             for (int j = 0; j <= i; j++) {
-                float f = 120.0f * expf(-(float)j / SR * 20.0f) + 50.0f;
-                bodyPhase += f / SR;
+                float f = 120.0f * expf(-(float)j / sampleRate * 20.0f) + 50.0f;
+                bodyPhase += f / sampleRate;
             }
             float body = sinf(bodyPhase * 6.2831853f) * expf(-t * 18.0f);
             // Brief click transient
@@ -135,12 +135,12 @@ void ModMusic::SynthesizeInstruments()
 
     // --- Snare drum (sharp, short) ---
     {
-        const int len = (int)(0.12f * SR);
+        const int len = (int)(0.12f * sampleRate);
         auto& inst = m_instruments[1];
         inst.baseFreq = 220.0f;
         inst.pcm.resize(len);
         for (int i = 0; i < len; i++) {
-            float t = (float)i / SR;
+            float t = (float)i / sampleRate;
             // Tonal body - fast decay
             float body = sinf(t * 220.0f * 6.2831853f) * expf(-t * 35.0f) * 0.4f;
             // Noise crack - very fast attack, medium decay
@@ -152,12 +152,12 @@ void ModMusic::SynthesizeInstruments()
 
     // --- Hi-hat ---
     {
-        const int len = (int)(0.07f * SR);
+        const int len = (int)(0.07f * sampleRate);
         auto& inst = m_instruments[2];
         inst.baseFreq = 8000.0f;
         inst.pcm.resize(len);
         for (int i = 0; i < len; i++) {
-            float t = (float)i / SR;
+            float t = (float)i / sampleRate;
             float env = expf(-t * 55.0f);
             float metal = sinf(t * 6100.0f * 6.2831853f) * 0.3f
                         + sinf(t * 8300.0f * 6.2831853f) * 0.25f
@@ -170,12 +170,12 @@ void ModMusic::SynthesizeInstruments()
 
     // --- Bass ---
     {
-        const int len = (int)(0.5f * SR);
+        const int len = (int)(0.5f * sampleRate);
         auto& inst = m_instruments[3];
         inst.baseFreq = 110.0f;
         inst.pcm.resize(len);
         for (int i = 0; i < len; i++) {
-            float t = (float)i / SR;
+            float t = (float)i / sampleRate;
             float phase = t * 110.0f * 6.2831853f;
             float saw = 0.0f;
             for (int h = 1; h <= 6; h++)
@@ -187,12 +187,12 @@ void ModMusic::SynthesizeInstruments()
 
     // --- Piano ---
     {
-        const int len = (int)(1.0f * SR);
+        const int len = (int)(1.0f * sampleRate);
         auto& inst = m_instruments[4];
         inst.baseFreq = 440.0f;
         inst.pcm.resize(len);
         for (int i = 0; i < len; i++) {
-            float t = (float)i / SR;
+            float t = (float)i / sampleRate;
             float phase = t * 440.0f * 6.2831853f;
             float tone = sinf(phase)
                        + 0.45f * sinf(phase * 2.0f)
@@ -210,12 +210,12 @@ void ModMusic::SynthesizeInstruments()
 
     // --- Pad ---
     {
-        const int len = (int)(1.0f * SR);
+        const int len = (int)(1.0f * sampleRate);
         auto& inst = m_instruments[5];
         inst.baseFreq = 220.0f;
         inst.pcm.resize(len);
         for (int i = 0; i < len; i++) {
-            float t = (float)i / SR;
+            float t = (float)i / sampleRate;
             float phase = t * 220.0f * 6.2831853f;
             float tone = sinf(phase) + 0.4f * sinf(phase * 2.0f)
                        + 0.2f * sinf(phase * 3.0f);
@@ -226,12 +226,12 @@ void ModMusic::SynthesizeInstruments()
 
     // --- Lead ---
     {
-        const int len = (int)(0.5f * SR);
+        const int len = (int)(0.5f * sampleRate);
         auto& inst = m_instruments[6];
         inst.baseFreq = 440.0f;
         inst.pcm.resize(len);
         for (int i = 0; i < len; i++) {
-            float t = (float)i / SR;
+            float t = (float)i / sampleRate;
             float phase = t * 440.0f * 6.2831853f;
             float saw = 0.0f;
             for (int h = 1; h <= 8; h++)
@@ -243,12 +243,12 @@ void ModMusic::SynthesizeInstruments()
 
     // --- Strings ---
     {
-        const int len = (int)(1.0f * SR);
+        const int len = (int)(1.0f * sampleRate);
         auto& inst = m_instruments[7];
         inst.baseFreq = 440.0f;
         inst.pcm.resize(len);
         for (int i = 0; i < len; i++) {
-            float t = (float)i / SR;
+            float t = (float)i / sampleRate;
             float phase = t * 440.0f * 6.2831853f;
             float tone = sinf(phase)
                        + 0.5f * sinf(phase * 2.0f)

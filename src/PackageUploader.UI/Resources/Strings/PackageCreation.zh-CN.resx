@@ -249,4 +249,37 @@
   <data name="GameConfigEditorNotFoundErrMsg" xml:space="preserve">
     <value>未找到 GameConfigEditor.exe。请安装 GDK 以生成 MicrosoftGame.config 文件。</value>
   </data>
+  <data name="StubConfigDialogTitle" xml:space="preserve">
+    <value>生成存根可执行文件</value>
+  </data>
+  <data name="StubConfigPlatformLabel" xml:space="preserve">
+    <value>目标平台：</value>
+  </data>
+  <data name="StubConfigGdkVersionLabel" xml:space="preserve">
+    <value>GDK 版本：</value>
+  </data>
+  <data name="StubConfigBuildButtonText" xml:space="preserve">
+    <value>构建</value>
+  </data>
+  <data name="StubConfigMsBuildFoundMsg" xml:space="preserve">
+    <value>✓ MSBuild: {0}</value>
+  </data>
+  <data name="StubConfigMsBuildNotFoundMsg" xml:space="preserve">
+    <value>⚠ 未找到 MSBuild。请安装包含 C++ 桌面开发和 GDK 组件的 Visual Studio。</value>
+  </data>
+  <data name="StubConfigNoGdkMsg" xml:space="preserve">
+    <value>⚠ 未检测到 GDK 版本。请安装 Microsoft GDK。</value>
+  </data>
+  <data name="StubBuildingStatusMsg" xml:space="preserve">
+    <value>正在构建存根可执行文件...</value>
+  </data>
+  <data name="StubDeployingStatusMsg" xml:space="preserve">
+    <value>正在部署存根文件...</value>
+  </data>
+  <data name="StubBuildCompleteMsg" xml:space="preserve">
+    <value>存根生成完成！</value>
+  </data>
+  <data name="StubBuildFailedMsg" xml:space="preserve">
+    <value>构建失败。请检查输出中的错误。</value>
+  </data>
 </root>

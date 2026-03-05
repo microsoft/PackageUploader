@@ -249,4 +249,37 @@
   <data name="GameConfigEditorNotFoundErrMsg" xml:space="preserve">
     <value>GameConfigEditor.exe が見つかりませんでした。MicrosoftGame.config ファイルを生成するには、GDK をインストールしてください。</value>
   </data>
+  <data name="StubConfigDialogTitle" xml:space="preserve">
+    <value>スタブ実行ファイルを生成</value>
+  </data>
+  <data name="StubConfigPlatformLabel" xml:space="preserve">
+    <value>ターゲット プラットフォーム:</value>
+  </data>
+  <data name="StubConfigGdkVersionLabel" xml:space="preserve">
+    <value>GDK バージョン:</value>
+  </data>
+  <data name="StubConfigBuildButtonText" xml:space="preserve">
+    <value>ビルド</value>
+  </data>
+  <data name="StubConfigMsBuildFoundMsg" xml:space="preserve">
+    <value>✓ MSBuild: {0}</value>
+  </data>
+  <data name="StubConfigMsBuildNotFoundMsg" xml:space="preserve">
+    <value>⚠ MSBuild が見つかりません。C++ デスクトップ開発と GDK コンポーネントを含む Visual Studio をインストールしてください。</value>
+  </data>
+  <data name="StubConfigNoGdkMsg" xml:space="preserve">
+    <value>⚠ GDK バージョンが検出されませんでした。Microsoft GDK をインストールしてください。</value>
+  </data>
+  <data name="StubBuildingStatusMsg" xml:space="preserve">
+    <value>スタブ実行ファイルをビルド中...</value>
+  </data>
+  <data name="StubDeployingStatusMsg" xml:space="preserve">
+    <value>スタブ ファイルを配置中...</value>
+  </data>
+  <data name="StubBuildCompleteMsg" xml:space="preserve">
+    <value>スタブの生成が完了しました！</value>
+  </data>
+  <data name="StubBuildFailedMsg" xml:space="preserve">
+    <value>ビルドに失敗しました。出力を確認してください。</value>
+  </data>
 </root>

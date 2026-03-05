@@ -130,7 +130,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         {
             if (_packageFilePath != value)
             {
-                _packageFilePath = value;
+                 _packageFilePath = value;
                 OnPropertyChanged(nameof(PackageFilePath));
             }
         }
@@ -654,8 +654,11 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         ArrayList processOutput = [];
         ArrayList processErrorOutput = [];
-        string tempBuildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        string buildPath = String.IsNullOrEmpty(PackageFilePath) ? tempBuildPath : PackageFilePath;
+        string buildPath = PackageFilePath;
+        if (String.IsNullOrEmpty(buildPath))
+        {
+            buildPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        }
         if (!Directory.Exists(buildPath))
         {
             try
@@ -702,11 +705,19 @@ public partial class PackageCreationViewModel : BaseViewModel
         _makePackageProcess.StartInfo.CreateNoWindow = true;
         ProgressValue = 0;
 
+        // Show live MakePkg output in a build output dialog
+        var makePkgOutputDialog = new BuildOutputDialog();
+        makePkgOutputDialog.Owner = System.Windows.Application.Current.MainWindow;
+        makePkgOutputDialog.SetStatus("Running MakePkg...");
+        makePkgOutputDialog.AppendOutput($"{_pathConfigurationService.MakePkgPath} {arguments}");
+        makePkgOutputDialog.AppendOutput("");
+
         _makePackageProcess.OutputDataReceived += (sender, args) =>
         {
             if (!String.IsNullOrEmpty(args.Data))
             {
                 processOutput.Add(args.Data);
+                makePkgOutputDialog.AppendOutput(args.Data);
 
                 // Check for encryption progress messages
                 var match = EncryptionProgressRegex().Match(args.Data);
@@ -723,11 +734,18 @@ public partial class PackageCreationViewModel : BaseViewModel
             if (!String.IsNullOrEmpty(args.Data))
             {
                 processErrorOutput.Add(args.Data);
+                makePkgOutputDialog.AppendOutput($"ERROR: {args.Data}");
             }
         };
 
         _makePackageProcess.Exited += (sender, args) =>
         {
+            // WaitForExit() ensures all redirected stdout/stderr output has been
+            // fully read before we process it. Without this, the async
+            // OutputDataReceived handlers may not have delivered all data yet.
+            _makePackageProcess.WaitForExit();
+            int exitCode = _makePackageProcess.ExitCode;
+
             string outputString = string.Join("\n", processOutput.ToArray());
 
             // Log error output as well
@@ -736,13 +754,17 @@ public partial class PackageCreationViewModel : BaseViewModel
             // Parse Make Package Output
             ProcessMakePackageOutput(outputString);
 
-            if (!_makePackageProcess.HasExited)
-            {
-                _makePackageProcess.WaitForExit();
-            }
-            int exitCode = _makePackageProcess.ExitCode;
-
             IsCreationInProgress = false;
+
+            if (exitCode != 0)
+            {
+                makePkgOutputDialog.SetStatus($"MakePkg failed (exit code {exitCode}).");
+            }
+            else
+            {
+                makePkgOutputDialog.SetStatus("MakePkg completed successfully.");
+            }
+            makePkgOutputDialog.BuildComplete();
 
             // Log the output to a file for debugging
             string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_MakePkg_{DateTime.Now:yyyyMMddHHmmss}.log");
@@ -802,6 +824,8 @@ public partial class PackageCreationViewModel : BaseViewModel
         _makePackageProcess.Start();
         _makePackageProcess.BeginOutputReadLine();
         _makePackageProcess.BeginErrorReadLine();
+
+        makePkgOutputDialog.Show();
 
         // Navigate using the window service
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -1033,9 +1057,107 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
-    private void OnGenerateStub()
+    private async void OnGenerateStub()
     {
-        // TODO: Implement stub executable generation
+        // Show configuration dialog for platform and GDK version selection
+        var configDialog = new StubConfigDialog();
+        configDialog.Owner = System.Windows.Application.Current.MainWindow;
+        if (configDialog.ShowDialog() != true)
+            return;
+
+        string targetDeviceFamily = configDialog.SelectedPlatform;
+        string gdkVersion = configDialog.SelectedGdkVersion;
+        string msbuildPath = configDialog.MsBuildPath;
+
+        string projectDir;
+        try
+        {
+            projectDir = StubBuilder.ExtractStubProject();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to extract stub project.");
+            GameConfigLoadError = $"Failed to extract stub project: {ex.Message}";
+            return;
+        }
+
+        var buildDialog = new BuildOutputDialog();
+        buildDialog.Owner = System.Windows.Application.Current.MainWindow;
+
+        // Start async build work; ShowDialog pumps messages so continuations execute
+        var buildWork = RunStubBuildAsync(
+            buildDialog, msbuildPath, targetDeviceFamily, gdkVersion, projectDir);
+
+        buildDialog.ShowDialog();
+
+        bool buildSucceeded = false;
+        try
+        {
+            buildSucceeded = await buildWork;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Stub build failed.");
+        }
+        finally
+        {
+            try { Directory.Delete(projectDir, true); } catch { }
+        }
+
+        if (buildSucceeded)
+        {
+            LoadGameConfigValues();
+        }
+    }
+
+    private async Task<bool> RunStubBuildAsync(BuildOutputDialog dialog,
+        string msbuildPath, string targetDeviceFamily, string gdkVersion, string projectDir)
+    {
+        await Task.Yield(); // Let ShowDialog start first
+
+        string msbuildPlatform = StubBuilder.GetMsBuildPlatform(targetDeviceFamily);
+        string slnPath = Path.Combine(projectDir, "GDKStubExe.sln");
+        string args = StubBuilder.GetMsBuildArguments(slnPath, msbuildPlatform, gdkVersion);
+
+        dialog.AppendOutput($"MSBuild: {msbuildPath}");
+        dialog.AppendOutput($"Platform: {msbuildPlatform} | GDK: {gdkVersion}");
+        dialog.AppendOutput($"Arguments: {args}");
+        dialog.AppendOutput("");
+
+        dialog.SetStatus(Resources.Strings.PackageCreation.StubBuildingStatusMsg);
+
+        bool success = await StubBuilder.RunBuildAsync(msbuildPath, args, dialog.AppendOutput);
+
+        if (!success)
+        {
+            dialog.SetStatus(Resources.Strings.PackageCreation.StubBuildFailedMsg);
+            dialog.BuildComplete();
+            return false;
+        }
+
+        dialog.SetStatus(Resources.Strings.PackageCreation.StubDeployingStatusMsg);
+        dialog.AppendOutput("");
+
+        try
+        {
+            string buildOutputDir = StubBuilder.GetBuildOutputDir(projectDir, msbuildPlatform);
+            StubBuilder.DeployStubFiles(buildOutputDir, targetDeviceFamily, gdkVersion, GameDataPath, dialog.AppendOutput);
+
+            string configPath = Path.Combine(GameDataPath, "MicrosoftGame.config");
+            StubBuilder.UpdateGameConfig(configPath, "GDKStubExe.exe", targetDeviceFamily);
+            dialog.AppendOutput("Updated MicrosoftGame.config with GDKStubExe.exe entry.");
+
+            dialog.SetStatus(Resources.Strings.PackageCreation.StubBuildCompleteMsg);
+            dialog.BuildComplete();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            dialog.AppendOutput($"ERROR: {ex.Message}");
+            dialog.SetStatus(Resources.Strings.PackageCreation.StubBuildFailedMsg);
+            dialog.BuildComplete();
+            return false;
+        }
     }
 
     private void OnBrowseMappingDataXml()

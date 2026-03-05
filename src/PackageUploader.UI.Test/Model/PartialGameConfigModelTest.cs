@@ -274,7 +274,7 @@ public class PartialGameConfigModelTest
 
     private static string RandomDeviceFamily()
     {
-        var deviceFamilies = new string[] { "PC", "Console" };
+        var deviceFamilies = new string[] { "PC", "Scarlett", "XboxOne" };
         return deviceFamilies[Random.Shared.Next(deviceFamilies.Length)];
     }
 }

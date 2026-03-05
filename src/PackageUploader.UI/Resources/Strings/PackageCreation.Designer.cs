@@ -455,5 +455,104 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("ValidatorPathTitleText", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate Stub Executable.
+        /// </summary>
+        public static string StubConfigDialogTitle {
+            get {
+                return ResourceManager.GetString("StubConfigDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target Platform:.
+        /// </summary>
+        public static string StubConfigPlatformLabel {
+            get {
+                return ResourceManager.GetString("StubConfigPlatformLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GDK Version:.
+        /// </summary>
+        public static string StubConfigGdkVersionLabel {
+            get {
+                return ResourceManager.GetString("StubConfigGdkVersionLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Build.
+        /// </summary>
+        public static string StubConfigBuildButtonText {
+            get {
+                return ResourceManager.GetString("StubConfigBuildButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ✓ MSBuild: {0}.
+        /// </summary>
+        public static string StubConfigMsBuildFoundMsg {
+            get {
+                return ResourceManager.GetString("StubConfigMsBuildFoundMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ⚠ MSBuild not found. Install Visual Studio with C++ desktop development and GDK components..
+        /// </summary>
+        public static string StubConfigMsBuildNotFoundMsg {
+            get {
+                return ResourceManager.GetString("StubConfigMsBuildNotFoundMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ⚠ No GDK versions detected. Install the Microsoft GDK..
+        /// </summary>
+        public static string StubConfigNoGdkMsg {
+            get {
+                return ResourceManager.GetString("StubConfigNoGdkMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Building stub executable....
+        /// </summary>
+        public static string StubBuildingStatusMsg {
+            get {
+                return ResourceManager.GetString("StubBuildingStatusMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Deploying stub files....
+        /// </summary>
+        public static string StubDeployingStatusMsg {
+            get {
+                return ResourceManager.GetString("StubDeployingStatusMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stub generation complete!.
+        /// </summary>
+        public static string StubBuildCompleteMsg {
+            get {
+                return ResourceManager.GetString("StubBuildCompleteMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Build failed. Check output for errors..
+        /// </summary>
+        public static string StubBuildFailedMsg {
+            get {
+                return ResourceManager.GetString("StubBuildFailedMsg", resourceCulture);
+            }
+        }
     }
 }

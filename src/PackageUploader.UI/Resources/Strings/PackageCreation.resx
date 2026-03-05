@@ -249,4 +249,37 @@
   <data name="GameConfigEditorNotFoundErrMsg" xml:space="preserve">
     <value>GameConfigEditor.exe wasn't found. Please install the GDK to generate a MicrosoftGame.config file.</value>
   </data>
+  <data name="StubConfigDialogTitle" xml:space="preserve">
+    <value>Generate Stub Executable</value>
+  </data>
+  <data name="StubConfigPlatformLabel" xml:space="preserve">
+    <value>Target Platform:</value>
+  </data>
+  <data name="StubConfigGdkVersionLabel" xml:space="preserve">
+    <value>GDK Version:</value>
+  </data>
+  <data name="StubConfigBuildButtonText" xml:space="preserve">
+    <value>Build</value>
+  </data>
+  <data name="StubConfigMsBuildFoundMsg" xml:space="preserve">
+    <value>✓ MSBuild: {0}</value>
+  </data>
+  <data name="StubConfigMsBuildNotFoundMsg" xml:space="preserve">
+    <value>⚠ MSBuild not found. Install Visual Studio with C++ desktop development and GDK components.</value>
+  </data>
+  <data name="StubConfigNoGdkMsg" xml:space="preserve">
+    <value>⚠ No GDK versions detected. Install the Microsoft GDK.</value>
+  </data>
+  <data name="StubBuildingStatusMsg" xml:space="preserve">
+    <value>Building stub executable...</value>
+  </data>
+  <data name="StubDeployingStatusMsg" xml:space="preserve">
+    <value>Deploying stub files...</value>
+  </data>
+  <data name="StubBuildCompleteMsg" xml:space="preserve">
+    <value>Stub generation complete!</value>
+  </data>
+  <data name="StubBuildFailedMsg" xml:space="preserve">
+    <value>Build failed. Check output for errors.</value>
+  </data>
 </root>

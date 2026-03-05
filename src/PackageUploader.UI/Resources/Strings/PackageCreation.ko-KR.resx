@@ -248,4 +248,37 @@
   <data name="GameConfigEditorNotFoundErrMsg" xml:space="preserve">
     <value>GameConfigEditor.exe를 찾을 수 없습니다. MicrosoftGame.config 파일을 생성하려면 GDK를 설치하세요.</value>
   </data>
+  <data name="StubConfigDialogTitle" xml:space="preserve">
+    <value>스텁 실행 파일 생성</value>
+  </data>
+  <data name="StubConfigPlatformLabel" xml:space="preserve">
+    <value>대상 플랫폼:</value>
+  </data>
+  <data name="StubConfigGdkVersionLabel" xml:space="preserve">
+    <value>GDK 버전:</value>
+  </data>
+  <data name="StubConfigBuildButtonText" xml:space="preserve">
+    <value>빌드</value>
+  </data>
+  <data name="StubConfigMsBuildFoundMsg" xml:space="preserve">
+    <value>✓ MSBuild: {0}</value>
+  </data>
+  <data name="StubConfigMsBuildNotFoundMsg" xml:space="preserve">
+    <value>⚠ MSBuild을 찾을 수 없습니다. C++ 데스크톱 개발 및 GDK 구성 요소가 포함된 Visual Studio를 설치하세요.</value>
+  </data>
+  <data name="StubConfigNoGdkMsg" xml:space="preserve">
+    <value>⚠ GDK 버전이 감지되지 않았습니다. Microsoft GDK를 설치하세요.</value>
+  </data>
+  <data name="StubBuildingStatusMsg" xml:space="preserve">
+    <value>스텁 실행 파일 빌드 중...</value>
+  </data>
+  <data name="StubDeployingStatusMsg" xml:space="preserve">
+    <value>스텁 파일 배포 중...</value>
+  </data>
+  <data name="StubBuildCompleteMsg" xml:space="preserve">
+    <value>스텁 생성 완료!</value>
+  </data>
+  <data name="StubBuildFailedMsg" xml:space="preserve">
+    <value>빌드에 실패했습니다. 출력을 확인하세요.</value>
+  </data>
 </root>

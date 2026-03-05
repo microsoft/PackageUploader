@@ -143,7 +143,7 @@ namespace PackageUploader.UI.Model
                 throw new Exception("The MicrosoftGame.config does not have a target device family");
             }
 
-            return targetDeviceFamily == "PC" ? "PC" : "Console";
+            return targetDeviceFamily;
         }
     }
 
