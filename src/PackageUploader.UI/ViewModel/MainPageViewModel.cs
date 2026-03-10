@@ -25,7 +25,6 @@ public partial class MainPageViewModel : BaseViewModel
 
     public ICommand NavigateToPackageCreationCommand { get; }
     public ICommand NavigateToPackageUploadCommand { get; }
-    public ICommand NavigateToMsixvc2Command { get; }
     public ICommand SignInCommand { get; }
     public ICommand PackagingLearnMoreURL { get; }
     public ICommand ShowTenantSelectionCommand { get; }
@@ -189,11 +188,6 @@ public partial class MainPageViewModel : BaseViewModel
         GetTenantsCommand = new RelayCommand(() =>
         {
             LoadAvailableTenants();
-        });
-
-        NavigateToMsixvc2Command = new RelayCommand(() =>
-        {
-            // TODO: Navigate to MSIXVC2 loose file upload view once implemented
         });
 
         IsUserLoggedIn = false;
