@@ -193,7 +193,7 @@ public partial class MainPageViewModel : BaseViewModel
 
         NavigateToMsixvc2Command = new RelayCommand(() =>
         {
-            windowService.NavigateTo(typeof(Msixvc2UploadView));
+            // TODO: Navigate to MSIXVC2 loose file upload view once implemented
         });
 
         IsUserLoggedIn = false;
