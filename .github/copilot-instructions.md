@@ -82,7 +82,6 @@ Three package formats are supported:
 ### makepkg2 (MSIXVC2 tooling)
 
 `makepkg2` is the next-gen packaging tool replacing `MakePkg.exe` for MSIXVC2 packages.
-- Source: `Xbox.Apps.Platform` repo (`src/packaging/makepkg2/`) in Azure DevOps (`Xbox.Apps` project)
 - Distributed as NuGet: `Microsoft.Xbox.Packaging.Tools.makepkg2`
 - Built on .NET 10.0 (win-x64)
 - Library: `Microsoft.Xbox.Packaging` — entry interface `IPackagingOperations` (impl: `PackagingOperations`)
@@ -102,17 +101,6 @@ packageutil2 extract /package <file>.msixvc /out <outputDir>
 - Auth forwarded via `/auth` flag (Browser, AzureCli, etc.)
 - Delta uploads between versions (V1→V2) built into `makepkg2 upload`
 - Uses `layout.xml` for chunk organization (same concept as legacy)
-
-**Server-side processing** (Xbox.Xbet.Service repo, `Workflows/MSIXVC2/`):
-- `XPackageMsixvc2PublishWorkflow` — Publishing
-- `XPackageMsixvc2IngestWorkflow` → `IngestPackageWorkflow` → `IngestBoxWorkflow` — Ingestion pipeline
-- `XPackageMsixvc2ScanWorkflow` / `FileScanWorkflow` — Validation scanning
-- "Box" = GUID-named `.box` processing unit with tracked `BoxIngestionStatus`
-
-**Reference repos:**
-- makepkg2 source: `https://microsoft.visualstudio.com/Xbox.Apps/_git/Xbox.Apps.Platform?path=/src/packaging`
-- MSIXVC2 workflows: `https://microsoft.visualstudio.com/Xbox/_git/Xbox.Xbet.Service?path=/src/XPackage/XPackageWorkflow/XPackageWorkflow/Workflows/MSIXVC2`
-- Test assets wiki: `https://Microsoft.visualstudio.com/Xbox/_wiki/wikis/Xbox.wiki/314469`
 
 ## Domain Glossary
 

@@ -53,6 +53,5 @@ The UI currently supports XVC package creation (via MakePkg.exe) and upload. MSI
 - **MSIXVC2 upload** uses `makepkg2 upload /msixvc2` — supports both loose-file and packaged upload
 - makepkg2 is distributed via NuGet: `Microsoft.Xbox.Packaging.Tools.makepkg2`
 - The `Microsoft.Xbox.Packaging` library (`IPackagingOperations`) is the C# entry point for programmatic access
-- Source: `Xbox.Apps.Platform` repo in ADO (`Xbox.Apps` project, `src/packaging/`)
 - Key differences from legacy: brotli compression, `/noembed` mode, loose-file upload, delta uploads, `/auth` flag forwarding
 - Output: `.msixvc` files containing `.box` chunks, organized by `layout.xml`

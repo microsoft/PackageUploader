@@ -28,7 +28,6 @@ MSIXVC2 upload differs fundamentally from legacy:
 - Supports loose-file upload (no prior packaging step) or packaged upload (`-UsePackage`)
 - Delta uploads between versions are built into `makepkg2 upload`
 - Auth forwarded via `/auth` flag (Browser, AzureCli, etc.)
-- makepkg2 tool source: `Xbox.Apps.Platform` repo (`src/packaging/makepkg2/`)
 - NuGet: `Microsoft.Xbox.Packaging.Tools.makepkg2`
 
 ## Conventions

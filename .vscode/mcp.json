@@ -1,8 +1,0 @@
-{
-  "servers": {
-    "azure-devops": {
-      "type": "copilot",
-      "id": "github.copilot.azure-devops"
-    }
-  }
-}
