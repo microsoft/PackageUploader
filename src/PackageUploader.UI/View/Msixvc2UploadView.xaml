@@ -635,6 +635,20 @@
             </Grid>
 
             <!-- ============================================ -->
+            <!-- Progress section (visible during operation) -->
+            <!-- ============================================ -->
+            <StackPanel Margin="0,20,0,0"
+                        Visibility="{Binding IsOperationInProgress, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           Margin="0,0,0,8"/>
+                <ProgressBar Value="{Binding ProgressValue}"
+                             Minimum="0"
+                             Maximum="100"
+                             Height="8"/>
+            </StackPanel>
+
+            <!-- ============================================ -->
             <!-- Button panel                                 -->
             <!-- ============================================ -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">

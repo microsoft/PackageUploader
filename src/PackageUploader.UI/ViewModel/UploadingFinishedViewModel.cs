@@ -90,9 +90,18 @@ namespace PackageUploader.UI.ViewModel
             VersionNum = _packageModelProvider.Package.Version;
             StoreId = _packageModelProvider.Package.BigId;
 
-            FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
-            PackageFileName = packageInfo.Name;
-            PackageSize = TranslateFileSize(packageInfo.Length);
+            string packageFilePath = _packageModelProvider.Package.PackageFilePath;
+            if (!string.IsNullOrEmpty(packageFilePath) && File.Exists(packageFilePath))
+            {
+                FileInfo packageInfo = new(packageFilePath);
+                PackageFileName = packageInfo.Name;
+                PackageSize = TranslateFileSize(packageInfo.Length);
+            }
+            else
+            {
+                PackageFileName = "Loose content upload";
+                PackageSize = string.Empty;
+            }
             PackageType = _packageModelProvider.Package.PackageType;
         }
 

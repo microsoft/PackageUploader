@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.UI.Model;
+using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 
@@ -20,9 +23,16 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
     private readonly IWindowService _windowService;
     private readonly IPackageUploaderService _uploaderService;
     private readonly ILogger<Msixvc2UploadViewModel> _logger;
+    private readonly ErrorModelProvider _errorModelProvider;
+    private readonly PathConfigurationProvider _pathConfigurationService;
+    private readonly PackageModelProvider _packageModelProvider;
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
+
+    private Process? _makePkg2Process;
+    private string _operationLogOutput = string.Empty;
+    private string _lastLogFilePath = string.Empty;
 
     // Step 1 — Build location
     private string _contentPath = string.Empty;
@@ -37,6 +47,7 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
                 OnPropertyChanged(nameof(ContentPath));
                 LoadGameConfigValues();
                 EstimateFolderSize();
+                CheckCanExecuteUploadCommand();
             }
         }
     }
@@ -87,6 +98,7 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
             if (SetProperty(ref _branchOrFlightDisplayName, value) && value != null)
             {
                 UpdateMarketGroups();
+                CheckCanExecuteUploadCommand();
             }
         }
     }
@@ -102,7 +114,13 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
     public bool IsLoadingBranchesAndFlights
     {
         get => _isLoadingBranchesAndFlights;
-        set => SetProperty(ref _isLoadingBranchesAndFlights, value);
+        set
+        {
+            if (SetProperty(ref _isLoadingBranchesAndFlights, value))
+            {
+                CheckCanExecuteUploadCommand();
+            }
+        }
     }
 
     private string _branchOrFlightErrorMessage = string.Empty;
@@ -116,7 +134,13 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
     public string MarketGroupName
     {
         get => _marketGroupName;
-        set => SetProperty(ref _marketGroupName, value);
+        set
+        {
+            if (SetProperty(ref _marketGroupName, value))
+            {
+                CheckCanExecuteUploadCommand();
+            }
+        }
     }
 
     private string[] _marketGroupNames = [];
@@ -130,7 +154,13 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
     public bool IsLoadingMarkets
     {
         get => _isLoadingMarkets;
-        set => SetProperty(ref _isLoadingMarkets, value);
+        set
+        {
+            if (SetProperty(ref _isLoadingMarkets, value))
+            {
+                CheckCanExecuteUploadCommand();
+            }
+        }
     }
 
     private string _marketGroupErrorMessage = string.Empty;
@@ -183,6 +213,33 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         set => SetProperty(ref _packagePreviewImage, value);
     }
 
+    private bool _isOperationInProgress = false;
+    public bool IsOperationInProgress
+    {
+        get => _isOperationInProgress;
+        set
+        {
+            if (SetProperty(ref _isOperationInProgress, value))
+            {
+                CheckCanExecuteUploadCommand();
+            }
+        }
+    }
+
+    private string _statusMessage = string.Empty;
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set => SetProperty(ref _statusMessage, value);
+    }
+
+    private int _progressValue;
+    public int ProgressValue
+    {
+        get => _progressValue;
+        set => SetProperty(ref _progressValue, value);
+    }
+
     // Commands
     public ICommand BrowseContentPathCommand { get; }
     public ICommand BrowseMappingDataXmlPathCommand { get; }
@@ -193,11 +250,17 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
 
     public Msixvc2UploadViewModel(IWindowService windowService,
                                   IPackageUploaderService uploaderService,
-                                  ILogger<Msixvc2UploadViewModel> logger)
+                                  ILogger<Msixvc2UploadViewModel> logger,
+                                  ErrorModelProvider errorModelProvider,
+                                  PathConfigurationProvider pathConfigurationService,
+                                  PackageModelProvider packageModelProvider)
     {
         _windowService = windowService;
         _uploaderService = uploaderService;
         _logger = logger;
+        _errorModelProvider = errorModelProvider;
+        _pathConfigurationService = pathConfigurationService;
+        _packageModelProvider = packageModelProvider;
 
         BrowseContentPathCommand = new RelayCommand(OnBrowseContentPath);
         BrowseMappingDataXmlPathCommand = new RelayCommand(OnBrowseMappingDataXml);
@@ -209,10 +272,13 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
                 ContentPath = path;
             }
         });
-        // TODO: Wire actual upload logic
-        UploadPackageCommand = new RelayCommand(() => { });
+        UploadPackageCommand = new RelayCommand(StartPackAndUploadAsync, CanUpload);
         CancelButtonCommand = new RelayCommand(() =>
         {
+            if (IsOperationInProgress && _makePkg2Process != null && !_makePkg2Process.HasExited)
+            {
+                _makePkg2Process.Kill(true);
+            }
             _windowService.NavigateTo(typeof(MainPageView));
         });
     }
@@ -506,6 +572,215 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
             _logger.LogError(ex, "Error parsing layout file for size.");
             return GetDirectorySizeInBytes(ContentPath);
         }
+    }
+
+    private bool CanUpload()
+    {
+        return !string.IsNullOrEmpty(ContentPath)
+            && Directory.Exists(ContentPath)
+            && string.IsNullOrEmpty(ContentPathError)
+            && _gameProduct != null
+            && !string.IsNullOrEmpty(BranchOrFlightDisplayName)
+            && !string.IsNullOrEmpty(MarketGroupName)
+            && !IsOperationInProgress
+            && !IsLoadingBranchesAndFlights
+            && !IsLoadingMarkets;
+    }
+
+    private void CheckCanExecuteUploadCommand()
+    {
+        if (UploadPackageCommand is RelayCommand command)
+        {
+            command.RaiseCanExecuteChanged();
+        }
+    }
+
+    private async void StartPackAndUploadAsync()
+    {
+        if (IsOperationInProgress) return;
+
+        string makePkg2Path = _pathConfigurationService.MakePkg2Path;
+        if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+        {
+            SetErrorAndGoToErrorPage("makepkg2 Not Found",
+                "makepkg2.exe was not found. Please install the Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package.");
+            return;
+        }
+
+        IsOperationInProgress = true;
+        StatusMessage = "Uploading loose content to Partner Center...";
+        ProgressValue = 0;
+        _operationLogOutput = string.Empty;
+
+        try
+        {
+            string uploadArgs = BuildUploadArguments();
+            _logger.LogInformation("Starting makepkg2 loose upload: {Arguments}", uploadArgs);
+
+            int uploadExitCode = await RunMakePkg2ProcessAsync(uploadArgs, "Upload", line =>
+            {
+                var match = Regex.Match(line, @"([\d.]+ \S+) / ([\d.]+ \S+) read \(([\d.]+)%\).*?([\d.]+ \S+) / ([\d.]+ \S+) written \(([\d.]+)%\)");
+                if (match.Success)
+                {
+                    string readAmount = match.Groups[1].Value;
+                    string readTotal = match.Groups[2].Value;
+                    string readPct = match.Groups[3].Value;
+                    string writtenAmount = match.Groups[4].Value;
+                    string writtenTotal = match.Groups[5].Value;
+                    string writtenPct = match.Groups[6].Value;
+
+                    if (double.TryParse(writtenPct, out double wp))
+                    {
+                        ProgressValue = (int)wp;
+                    }
+
+                    StatusMessage = $"Read: {readAmount}/{readTotal} ({readPct}%)  |  Written: {writtenAmount}/{writtenTotal} ({writtenPct}%)";
+                }
+            });
+
+            if (uploadExitCode != 0)
+            {
+                _logger.LogError("makepkg2 upload failed with exit code {ExitCode}.", uploadExitCode);
+                SetErrorAndGoToErrorPage("Upload Failed",
+                    $"makepkg2 upload exited with code {uploadExitCode}.\n\n{_operationLogOutput}");
+                return;
+            }
+
+            ProgressValue = 100;
+            StatusMessage = "Upload complete!";
+            _logger.LogInformation("MSIXVC2 loose upload completed successfully.");
+
+            var branchOrFlight = GetBranchOrFlightFromUISelection();
+            _packageModelProvider.Package.BigId = BigId;
+            _packageModelProvider.Package.PackageType = "MSIXVC2";
+            _packageModelProvider.Package.PackagePreviewImage = PackagePreviewImage;
+            if (branchOrFlight != null)
+            {
+                _packageModelProvider.Package.BranchId = branchOrFlight.CurrentDraftInstanceId;
+            }
+
+            NavigateOnUIThread(typeof(UploadingFinishedView));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during MSIXVC2 upload.");
+            SetErrorAndGoToErrorPage("Unexpected Error", ex.ToString());
+        }
+        finally
+        {
+            IsOperationInProgress = false;
+        }
+    }
+
+    internal string BuildUploadArguments()
+    {
+        var args = $"upload /d \"{ContentPath}\" /msixvc2";
+
+        if (BranchOrFlightDisplayName.StartsWith("Branch: "))
+        {
+            string branchName = BranchOrFlightDisplayName[(BranchOrFlightDisplayName.IndexOf(':') + 2)..];
+            args += $" /branch \"{branchName}\"";
+        }
+        else if (BranchOrFlightDisplayName.StartsWith("Flight: "))
+        {
+            string flightName = BranchOrFlightDisplayName[(BranchOrFlightDisplayName.IndexOf(':') + 2)..];
+            args += $" /flight \"{flightName}\"";
+        }
+
+        if (!string.IsNullOrEmpty(MarketGroupName))
+        {
+            args += $" /market \"{MarketGroupName}\"";
+        }
+
+        if (!string.IsNullOrEmpty(BigId) && BigId != "None")
+        {
+            args += $" /storeid \"{BigId}\"";
+        }
+
+        if (!string.IsNullOrEmpty(SubValPath) && Directory.Exists(SubValPath))
+        {
+            args += $" /validationpath \"{SubValPath}\"";
+        }
+
+        args += " /auth Browser";
+
+        return args;
+    }
+
+    private Task<int> RunMakePkg2ProcessAsync(string arguments, string operationName, Action<string>? onOutputLine = null)
+    {
+        var tcs = new TaskCompletionSource<int>();
+        var processOutput = new List<string>();
+        var processErrors = new List<string>();
+
+        _makePkg2Process = new Process();
+        _makePkg2Process.StartInfo.FileName = _pathConfigurationService.MakePkg2Path;
+        _makePkg2Process.StartInfo.Arguments = arguments;
+        _makePkg2Process.StartInfo.RedirectStandardOutput = true;
+        _makePkg2Process.StartInfo.RedirectStandardError = true;
+        _makePkg2Process.StartInfo.CreateNoWindow = true;
+        _makePkg2Process.EnableRaisingEvents = true;
+
+        _makePkg2Process.OutputDataReceived += (s, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                processOutput.Add(e.Data);
+                _logger.LogTrace("[{Op}] {Data}", operationName, e.Data);
+                onOutputLine?.Invoke(e.Data);
+            }
+        };
+
+        _makePkg2Process.ErrorDataReceived += (s, e) =>
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                processErrors.Add(e.Data);
+                _logger.LogWarning("[{Op}] stderr: {Data}", operationName, e.Data);
+            }
+        };
+
+        _makePkg2Process.Exited += (s, e) =>
+        {
+            _operationLogOutput = string.Join("\n", processOutput) + "\n" + string.Join("\n", processErrors);
+            WriteLogFile(operationName, _operationLogOutput);
+
+            if (!_makePkg2Process.HasExited)
+            {
+                _makePkg2Process.WaitForExit();
+            }
+            tcs.TrySetResult(_makePkg2Process.ExitCode);
+        };
+
+        _makePkg2Process.Start();
+        _makePkg2Process.BeginOutputReadLine();
+        _makePkg2Process.BeginErrorReadLine();
+
+        return tcs.Task;
+    }
+
+    private void SetErrorAndGoToErrorPage(string title, string detail)
+    {
+        _errorModelProvider.Error.MainMessage = title;
+        _errorModelProvider.Error.DetailMessage = detail;
+        _errorModelProvider.Error.OriginPage = typeof(Msixvc2UploadView);
+        _errorModelProvider.Error.LogsPath = _lastLogFilePath;
+        NavigateOnUIThread(typeof(ErrorPageView));
+    }
+
+    private void NavigateOnUIThread(Type viewType)
+    {
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+        {
+            _windowService.NavigateTo(viewType);
+        });
+    }
+
+    private void WriteLogFile(string operationName, string content)
+    {
+        _lastLogFilePath = Path.Combine(Path.GetTempPath(),
+            $"PackageUploader_UI_Msixvc2_{operationName}_{DateTime.Now:yyyyMMddHHmmss}.log");
+        File.WriteAllText(_lastLogFilePath, content);
     }
 
     private static BitmapImage LoadBitmapImage(string imagePath)

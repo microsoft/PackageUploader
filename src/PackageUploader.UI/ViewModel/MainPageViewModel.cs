@@ -219,6 +219,13 @@ public partial class MainPageViewModel : BaseViewModel
             _pathConfigurationService.BaseSubValPath = subValPath;
         }
 
+        string makePkg2Path = ResolveMakePkg2Path();
+
+        if (File.Exists(makePkg2Path))
+        {
+            _pathConfigurationService.MakePkg2Path = makePkg2Path;
+        }
+
         // Log version of the tool
         _logger.LogInformation("PackageUploader.UI version {version} is starting from location {location}.", GetVersion(), AppContext.BaseDirectory);
 
@@ -229,6 +236,13 @@ public partial class MainPageViewModel : BaseViewModel
             makePkgVersion = fileVersionInfo.FileVersion ?? string.Empty;
 
             _logger.LogInformation("Using MakePkg.exe version: {makePkgVersion} from location {makePkgLocation}.", makePkgVersion, makePkgPath);
+        }
+
+        if (File.Exists(makePkg2Path))
+        {
+            var makePkg2VersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(makePkg2Path);
+            string makePkg2Version = makePkg2VersionInfo.FileVersion ?? string.Empty;
+            _logger.LogInformation("Using makepkg2.exe version: {makePkg2Version} from location {makePkg2Location}.", makePkg2Version, makePkg2Path);
         }
     }
 
@@ -375,5 +389,45 @@ public partial class MainPageViewModel : BaseViewModel
             }
         }
         return null;
+    }
+
+    private static string ResolveMakePkg2Path()
+    {
+        string localPath = ResolveFilePath("makepkg2.exe");
+        if (File.Exists(localPath))
+        {
+            return localPath;
+        }
+
+        string nugetPackagesDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".nuget", "packages", "microsoft.xbox.packaging.tools.makepkg2");
+
+        if (Directory.Exists(nugetPackagesDir))
+        {
+            string? bestPath = null;
+            Version? bestVersion = null;
+
+            foreach (var versionDir in Directory.GetDirectories(nugetPackagesDir))
+            {
+                string dirName = Path.GetFileName(versionDir);
+                if (Version.TryParse(dirName, out var version))
+                {
+                    string candidate = Path.Combine(versionDir, "tools", "any", "win-x64", "makepkg2.exe");
+                    if (File.Exists(candidate) && (bestVersion == null || version > bestVersion))
+                    {
+                        bestVersion = version;
+                        bestPath = candidate;
+                    }
+                }
+            }
+
+            if (bestPath != null)
+            {
+                return bestPath;
+            }
+        }
+
+        return string.Empty;
     }
 }
