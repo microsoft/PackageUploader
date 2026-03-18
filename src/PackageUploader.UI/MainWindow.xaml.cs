@@ -10,6 +10,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace PackageUploader.UI
 {
@@ -17,12 +18,14 @@ namespace PackageUploader.UI
     {
         private readonly UserLoggedInProvider _userLoggedInProvider;
         private readonly IAuthenticationService _authenticationService;
+        private readonly CompactModeProvider _compactModeProvider;
 
-        public MainWindow(UserLoggedInProvider userLoggedInProvider, IAuthenticationService authenticationService)
+        public MainWindow(UserLoggedInProvider userLoggedInProvider, IAuthenticationService authenticationService, CompactModeProvider compactModeProvider)
         {
             InitializeComponent();
             _userLoggedInProvider = userLoggedInProvider;
             _authenticationService = authenticationService;
+            _compactModeProvider = compactModeProvider;
 
             // Subscribe to property changes to update the username display
             _userLoggedInProvider.PropertyChanged += UserLoggedInProvider_PropertyChanged;
@@ -30,11 +33,17 @@ namespace PackageUploader.UI
             // Subscribe to ContentArea.Content changes
             RegisterContentAreaChangeHandler();
 
+            // Update maximize/restore icon when window state changes
+            StateChanged += MainWindow_StateChanged;
+
             // Initial update of username display
             UpdateUsernameDisplay();
 
             // Set version display
             VersionText.Text = string.Format(UI.Resources.Strings.MainPage.VersionLabel, GetSimpleVersion());
+
+            // Sync icons with initial state
+            UpdateCompactModeIcon();
         }
 
         private void RegisterContentAreaChangeHandler()
@@ -116,6 +125,20 @@ namespace PackageUploader.UI
             }
         }
 
+        private void MainWindow_StateChanged(object? sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Maximized)
+            {
+                // Restore icon (two overlapping rectangles)
+                MaximizeIcon.Data = System.Windows.Media.Geometry.Parse("M2,0 H10 V8 H2 Z M0,2 H8 V10 H0 Z");
+            }
+            else
+            {
+                // Maximize icon (single rectangle)
+                MaximizeIcon.Data = System.Windows.Media.Geometry.Parse("M0,0 H10 V10 H0 V0");
+            }
+        }
+
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
@@ -134,6 +157,42 @@ namespace PackageUploader.UI
             {
                 UseShellExecute = true
             });
+        }
+
+        private void CompactModeButton_Click(object sender, RoutedEventArgs e)
+        {
+            _compactModeProvider.IsCompactMode = !_compactModeProvider.IsCompactMode;
+            UpdateCompactModeIcon();
+
+            if (WindowState == WindowState.Normal)
+            {
+                if (_compactModeProvider.IsCompactMode)
+                {
+                    Width = 800;
+                    Height = 550;
+                }
+                else
+                {
+                    Width = 1200;
+                    Height = 800;
+                }
+            }
+        }
+
+        private void UpdateCompactModeIcon()
+        {
+            if (_compactModeProvider.IsCompactMode)
+            {
+                // Expand icon (lines spread apart)
+                CompactModeIcon.Data = Geometry.Parse("M3,3 H13 M3,8 H13 M3,13 H13");
+                CompactModeButton.ToolTip = "Switch to standard mode";
+            }
+            else
+            {
+                // Compact icon (lines close together)
+                CompactModeIcon.Data = Geometry.Parse("M3,5 H13 M3,8 H13 M3,11 H13");
+                CompactModeButton.ToolTip = "Switch to compact mode";
+            }
         }
     }
 }

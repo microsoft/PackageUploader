@@ -10,13 +10,14 @@
              d:DataContext="{d:DesignInstance Type=viewmodel:MainPageViewModel}"
              Background="{DynamicResource AppBackgroundBrush}">
 
-    <StackPanel Orientation="Vertical" Margin="30,0" >
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Margin="{DynamicResource MainPagePadding}" >
         <TextBlock 
                Text="{x:Static strings:MainPage.TitleTextBlock}"
                d:Text="Make a package and upload it to Microsoft Partner Center" 
                Style="{StaticResource Headline}"
                HorizontalAlignment="Left"
-               Margin="0,25,0,25"/>
+               Margin="{DynamicResource HeadlineMargin}"/>
         
         <TextBlock 
                Text="{x:Static strings:MainPage.SubTitleTextBlock}"
@@ -28,7 +29,7 @@
         <TextBlock Text="{Binding MakePkgUnavailableErrorMessage}"
                Foreground="{DynamicResource ErrorRedBrush}"
                Visibility="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" 
-               Margin="0,0,0,25"/>
+               Margin="{DynamicResource SubtitleMargin}"/>
                
         <Grid>
             <Grid.RowDefinitions>
@@ -48,8 +49,8 @@
                     Grid.ColumnSpan="3"
                     BorderBrush="{DynamicResource BorderBrush}"
                     Background="{DynamicResource AppBackgroundBrush}"
-                    Margin="0, 0, 0, 20"
-                    Padding="10" 
+                    Margin="{DynamicResource CardBottomMargin}"
+                    Padding="{DynamicResource SectionCardPadding}" 
                     CornerRadius="5"
                     Visibility="{Binding IsUserLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                 <StackPanel HorizontalAlignment="Left"
@@ -117,8 +118,8 @@
             <Border Grid.Column="0"
                     Grid.Row="2"
                     Background="{DynamicResource AppBackgroundBrush}"
-                    Margin="0, 0, 0, 20"
-                    Padding="10"
+                    Margin="{DynamicResource CardBottomMargin}"
+                    Padding="{DynamicResource SectionCardPadding}"
                     CornerRadius="5">
                 <StackPanel HorizontalAlignment="Left"
                             VerticalAlignment="Center">
@@ -158,8 +159,8 @@
             <Border Grid.Column="2"
                     Grid.Row="2"
                     Background="{DynamicResource AppBackgroundBrush}"
-                    Margin="0, 0, 0, 20"
-                    Padding="10"
+                    Margin="{DynamicResource CardBottomMargin}"
+                    Padding="{DynamicResource SectionCardPadding}"
                     CornerRadius="5">
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock Text="{x:Static strings:MainPage.UploadPackageBlockTitle}"
@@ -186,7 +187,7 @@
             <Border Grid.Column="0"
                     Grid.Row="4"
                     Background="{DynamicResource AppBackgroundBrush}"
-                    Padding="10"
+                    Padding="{DynamicResource SectionCardPadding}"
                     CornerRadius="5">
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock Text="{x:Static strings:MainPage.Msixvc2TextBlockTitle}"
@@ -211,4 +212,5 @@
             </Border>
         </Grid>
     </StackPanel>
+    </ScrollViewer>
 </UserControl>

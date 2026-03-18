@@ -26,12 +26,12 @@
         </Grid.ColumnDefinitions>
 
         <Image Grid.Row="0"
-               Margin="0, 175, 0, 30"
+               Margin="{DynamicResource StatusImageMargin}"
                Source="/Resources/Images/Complete.png"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
-               Height="130"
-               Width="130" />
+               Height="{DynamicResource StatusImageSize}"
+               Width="{DynamicResource StatusImageSize}" />
         <TextBlock Grid.Row="1"
            Margin="0, 0, 0, 23"
            Style="{StaticResource SubHeadline}"
@@ -39,11 +39,10 @@
            d:Text="Upload complete"
            Foreground="{DynamicResource PrimaryTextBrush}" />
         <Border Grid.Row="2"
-                Margin="100, 0, 100, 0"
+                Margin="40, 0, 40, 0"
                 BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1"
                 CornerRadius="6"
-                Height="100"
                 Padding="6">
             <Grid>
                 <Grid.RowDefinitions>

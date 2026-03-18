@@ -19,7 +19,8 @@
         </Storyboard>
     </UserControl.Resources>
     <Grid Background="{DynamicResource AppBackgroundBrush}">
-        <StackPanel Margin="32">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="{DynamicResource PagePadding}">
             <!-- Add Back Arrow Icon -->
             <StackPanel Orientation="Horizontal"
                         VerticalAlignment="Top"
@@ -48,7 +49,7 @@
                        HorizontalAlignment="Left"
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        TextWrapping="Wrap"
-                       Margin="0,5,0,20"/>
+                       Margin="{DynamicResource SubtitleMargin}"/>
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -57,9 +58,9 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="30" />
-                    <ColumnDefinition Width="607"/>
+                    <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="468" />
+                    <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Row="0"
@@ -88,9 +89,9 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="96"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0" 
@@ -187,7 +188,6 @@
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding PackageErrorMessage}"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -216,7 +216,6 @@
                                      Background="{DynamicResource AppBackgroundBrush}"
                                      Margin="0,0,10,10"
                                      HorizontalAlignment="Left"
-                                     Width="530"
                                      AutomationProperties.Name="Store ID"
                                      AutomationProperties.HelpText="Enter or view the Store ID"
                                      IsEnabled="{Binding IsPackageMissingStoreId}"
@@ -280,9 +279,9 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="96"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
@@ -361,7 +360,6 @@
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding BranchOrFlightErrorMessage}"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -432,7 +430,6 @@
                                    Margin="0,0,5,0"/>
                             <TextBlock Text="{Binding MarketGroupErrorMessage}"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
-                                       Width="450"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
@@ -577,5 +574,6 @@
                         TabIndex="5" />
             </StackPanel>
         </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

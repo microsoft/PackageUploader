@@ -1,0 +1,33 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <!-- Font Sizes -->
+    <sys:Double x:Key="HeadlineFontSize">15</sys:Double>
+    <sys:Double x:Key="SubHeadlineFontSize">12</sys:Double>
+    <sys:Double x:Key="BodyFontSize">11</sys:Double>
+    <sys:Double x:Key="SmallFontSize">10</sys:Double>
+    <sys:Double x:Key="TinyFontSize">9</sys:Double>
+
+    <!-- Control Sizing -->
+    <sys:Double x:Key="ControlMinHeight">24</sys:Double>
+    <sys:Double x:Key="InputMinHeight">26</sys:Double>
+
+    <!-- Padding -->
+    <Thickness x:Key="ButtonPadding">6,2,6,2</Thickness>
+    <Thickness x:Key="PagePadding">10,6,10,6</Thickness>
+    <Thickness x:Key="MainPagePadding">10,0,10,0</Thickness>
+
+    <!-- Status/Progress Screens -->
+    <sys:Double x:Key="StatusImageSize">50</sys:Double>
+    <Thickness x:Key="StatusImageMargin">0,10,0,8</Thickness>
+    <Thickness x:Key="ProgressImageMargin">0,20,0,8</Thickness>
+    <sys:Double x:Key="ProgressBarMaxWidth">400</sys:Double>
+
+    <!-- Section Spacing -->
+    <Thickness x:Key="HeadlineMargin">0,6,0,6</Thickness>
+    <Thickness x:Key="SubtitleMargin">0,2,0,6</Thickness>
+    <Thickness x:Key="SectionCardPadding">4,4,4,4</Thickness>
+    <Thickness x:Key="CardBottomMargin">0,0,0,4</Thickness>
+
+</ResourceDictionary>

@@ -10,7 +10,8 @@
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageCreationViewModel}">
   
     <Grid Background="{DynamicResource AppBackgroundBrush}">
-        <StackPanel Margin="32">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="{DynamicResource PagePadding}">
             <!-- Add Back Arrow Icon -->
             <StackPanel Orientation="Horizontal"
                         VerticalAlignment="Top"
@@ -41,7 +42,7 @@
                    HorizontalAlignment="Left"
                    Foreground="{DynamicResource PrimaryTextBrush}"
                    TextWrapping="Wrap"
-                   Margin="0,5,0,20"/>
+                   Margin="{DynamicResource SubtitleMargin}"/>
             
             <!-- Grid: 4 columns, 2 rows-->
             <Grid>
@@ -51,9 +52,9 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="30" />
-                    <ColumnDefinition Width="667"/>
+                    <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="408" />
+                    <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Row="0"
@@ -83,9 +84,9 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="96"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0" 
                                Text="{x:Static strings:PackageCreation.BuildLocationTitle}"
@@ -202,8 +203,8 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="476"/>
-                                <ColumnDefinition Width="96" />
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.LayoutFileMapTitle}"
@@ -404,9 +405,9 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="96"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                Text="{x:Static strings:PackageCreation.PackageOutputTitleText}"
@@ -614,5 +615,6 @@
                         Width="128"/>
             </StackPanel>
         </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>
