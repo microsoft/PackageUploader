@@ -24,6 +24,5 @@ public partial class Msixvc2UploadView : System.Windows.Controls.UserControl
     {
         DragDropHelper.RegisterTextBoxDragDrop(ContentPathTextBox, _viewModel.ContentPathDroppedCommand, true);
         DragDropHelper.RegisterTextBoxDragDrop(MappingDataTextBox, path => _viewModel.MappingDataXmlPath = path, false);
-        DragDropHelper.RegisterTextBoxDragDrop(SubValPathTextBox, path => _viewModel.SubValPath = path, true);
     }
 }

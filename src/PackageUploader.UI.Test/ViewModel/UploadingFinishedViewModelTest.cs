@@ -39,16 +39,19 @@ namespace PackageUploader.UI.Test.ViewModel
             // Setup mock package
             _mockPackage = new PackageModel
             {
-                PackageFilePath = Path.GetTempFileName(),
-                Version = "1.0.0.0",
                 BigId = "12345678",
-                PackageType = "Xbox Game Package",
+                PackageType = "PC",
                 BranchId = "branch-123",
-                PackagePreviewImage = new BitmapImage()
+                PackagePreviewImage = new BitmapImage(),
+                PackageName = "Test Game",
+                Destination = "Branch: main",
+                Market = "default",
+                PackageIdentityName = "Publisher.TestGame",
+                FolderSize = "1.04 GB",
+                UploadSize = "1.001 GB"
             };
             
             _packageModelProvider.Package = _mockPackage;
-            
             
             // Setup App.GetLogFilePath for log tests
             typeof(App).GetField("_logFilePath", BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, @"C:\test\logs\app.log");
@@ -72,26 +75,71 @@ namespace PackageUploader.UI.Test.ViewModel
         }
 
         [TestMethod]
-        public void OnAppearing_LoadsPackageInformation()
+        public void OnAppearing_LoadsAllPreviewFields()
         {
-            // Arrange
-            var packagePath = _mockPackage.PackageFilePath;
-            var fileInfo = new FileInfo(packagePath);
-            var mockFileLength = 1024 * 1024 * 10; // 10 MB
-            
-            // Use reflection to set private field values if necessary for file info
-            SetFileInfoLength(fileInfo, mockFileLength);
-            
             // Act
             _viewModel.OnAppearing();
             
             // Assert
             Assert.AreEqual(_mockPackage.PackagePreviewImage, _viewModel.PackagePreviewImage);
-            Assert.AreEqual(_mockPackage.Version, _viewModel.VersionNum);
-            Assert.AreEqual(_mockPackage.BigId, _viewModel.StoreId);
-            Assert.AreEqual(Path.GetFileName(packagePath), _viewModel.PackageFileName);
-            Assert.AreEqual("0 B", _viewModel.PackageSize); // temp file is empty
-            Assert.AreEqual(_mockPackage.PackageType, _viewModel.PackageType);
+            Assert.AreEqual("Test Game", _viewModel.ProductName);
+            Assert.AreEqual("Branch: main", _viewModel.Destination);
+            Assert.AreEqual("default", _viewModel.Market);
+            Assert.AreEqual("Publisher.TestGame", _viewModel.PackageIdentityName);
+            Assert.AreEqual("12345678", _viewModel.StoreId);
+            Assert.AreEqual("1.04 GB", _viewModel.FolderSize);
+            Assert.AreEqual("PC", _viewModel.PackageType);
+            Assert.IsTrue(_viewModel.HasUploadSize);
+            Assert.AreEqual("1.001 GB", _viewModel.UploadSize);
+        }
+
+        [TestMethod]
+        public void OnAppearing_WithoutUploadSize_HidesUploadSize()
+        {
+            // Arrange
+            _mockPackage.UploadSize = string.Empty;
+
+            // Act
+            _viewModel.OnAppearing();
+
+            // Assert
+            Assert.IsFalse(_viewModel.HasUploadSize);
+        }
+
+        [TestMethod]
+        public void OnAppearing_WithoutPackageName_FallsBackToFileName()
+        {
+            // Arrange - legacy path with file but no package name
+            string tempFile = Path.GetTempFileName();
+            try
+            {
+                _mockPackage.PackageName = string.Empty;
+                _mockPackage.PackageFilePath = tempFile;
+
+                // Act
+                _viewModel.OnAppearing();
+
+                // Assert
+                Assert.AreEqual(Path.GetFileName(tempFile), _viewModel.ProductName);
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
+        }
+
+        [TestMethod]
+        public void OnAppearing_WithNoNameOrFile_ShowsFallbackText()
+        {
+            // Arrange
+            _mockPackage.PackageName = string.Empty;
+            _mockPackage.PackageFilePath = string.Empty;
+
+            // Act
+            _viewModel.OnAppearing();
+
+            // Assert
+            Assert.AreEqual("Loose content upload", _viewModel.ProductName);
         }
 
         [TestMethod]
@@ -149,76 +197,9 @@ namespace PackageUploader.UI.Test.ViewModel
                 Times.Once);
         }
 
-        [TestMethod]
-        public void TranslateFileSize_FormatsCorrectly()
-        {
-            // Arrange & Act - Use reflection to call private static method
-            string bytesResult = InvokePrivateStaticMethod<string>(
-                typeof(UploadingFinishedViewModel), "TranslateFileSize", 500L);
-                
-            string kbResult = InvokePrivateStaticMethod<string>(
-                typeof(UploadingFinishedViewModel), "TranslateFileSize", 1500L);
-                
-            string mbResult = InvokePrivateStaticMethod<string>(
-                typeof(UploadingFinishedViewModel), "TranslateFileSize", 1500 * 1024L);
-                
-            string gbResult = InvokePrivateStaticMethod<string>(
-                typeof(UploadingFinishedViewModel), "TranslateFileSize", 1500 * 1024 * 1024L);
-
-            // Assert
-            Assert.AreEqual("500 B", bytesResult);
-            Assert.AreEqual("1 KB", kbResult);
-            Assert.AreEqual("1 MB", mbResult);
-            Assert.AreEqual("1.46 GB", gbResult);
-        }
-
         [TestCleanup]
         public void Cleanup()
         {
-            // Delete temp file
-            if (File.Exists(_mockPackage.PackageFilePath))
-            {
-                File.Delete(_mockPackage.PackageFilePath);
-            }
         }
-
-        #region Helper Methods
-
-        private static void SetStaticProperty(Type type, string propertyName, object value)
-        {
-            var propertyInfo = type.GetProperty(
-                propertyName,
-                BindingFlags.Public | BindingFlags.Static);
-                
-            if (propertyInfo != null && propertyInfo.CanWrite)
-            {
-                propertyInfo.SetValue(null, value);
-            }
-        }
-
-        private static void SetFileInfoLength(FileInfo fileInfo, long length)
-        {
-            // This is a hack for testing purposes since FileInfo length is read-only
-            // In real tests, you'd use a file system abstraction instead
-            var fieldInfo = typeof(FileInfo).GetField(
-                "length", 
-                BindingFlags.NonPublic | BindingFlags.Instance);
-                
-            if (fieldInfo != null)
-            {
-                fieldInfo.SetValue(fileInfo, length);
-            }
-        }
-
-        private static T InvokePrivateStaticMethod<T>(Type type, string methodName, params object[] parameters)
-        {
-            var method = type.GetMethod(
-                methodName,
-                BindingFlags.NonPublic | BindingFlags.Static);
-                
-            return (T)method?.Invoke(null, parameters);
-        }
-
-        #endregion
     }
 }
