@@ -61,6 +61,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Destination.
+        /// </summary>
+        public static string DestinationTitleText {
+            get {
+                return ResourceManager.GetString("DestinationTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Family.
         /// </summary>
         public static string FamilyTitleText {
@@ -79,11 +88,56 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Folder size.
+        /// </summary>
+        public static string FolderSizeTitleText {
+            get {
+                return ResourceManager.GetString("FolderSizeTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Home.
         /// </summary>
         public static string GoHomeButtonContent {
             get {
                 return ResourceManager.GetString("GoHomeButtonContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Market.
+        /// </summary>
+        public static string MarketTitleText {
+            get {
+                return ResourceManager.GetString("MarketTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package Identity name.
+        /// </summary>
+        public static string PackageIdentityNameTitleText {
+            get {
+                return ResourceManager.GetString("PackageIdentityNameTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package Name.
+        /// </summary>
+        public static string PackageNameTitleText {
+            get {
+                return ResourceManager.GetString("PackageNameTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Product name.
+        /// </summary>
+        public static string ProductNameTitleText {
+            get {
+                return ResourceManager.GetString("ProductNameTitleText", resourceCulture);
             }
         }
         
@@ -111,6 +165,15 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string UploadCompleteTitleText {
             get {
                 return ResourceManager.GetString("UploadCompleteTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload Size.
+        /// </summary>
+        public static string UploadSizeTitleText {
+            get {
+                return ResourceManager.GetString("UploadSizeTitleText", resourceCulture);
             }
         }
         

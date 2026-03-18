@@ -43,79 +43,109 @@
                 BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1"
                 CornerRadius="6"
-                Height="100"
-                Padding="6">
+                Padding="10">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/>
-                    <!-- image -->
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition />
-                    <!-- text -->
-                    <ColumnDefinition Width="auto"/>
-                    <!-- button -->
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Image Grid.Row="0"
-                       Grid.Column="0"
-                       Grid.RowSpan="4"
+
+                <!-- Package Image -->
+                <Image Grid.Column="0"
                        Source="{Binding PackagePreviewImage}"
-                       HorizontalAlignment="Left"
+                       HorizontalAlignment="Center"
                        VerticalAlignment="Center"
-                       Height="80"
-                       Width="80"
-                       Margin="10,0,15,0"/>
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
-                    <TextBlock HorizontalAlignment="Left"
-                               Text="{x:Static strings:UploadingFinished.FileNameTitleText}"
-                               d:Text="File name" 
-                               Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <TextBlock HorizontalAlignment="Left"
-                               Text="{Binding PackageFileName}" 
-                               Foreground="{DynamicResource PrimaryTextBrush}"/>
-                </StackPanel>
-                <Grid Margin="0, 10, 0, 0" Grid.Row="1" Grid.Column="1">
+                       Height="65" Width="65"
+                       Margin="0,0,15,0"/>
+
+                <!-- 3x3 Metadata Grid -->
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="33*" />
-                        <ColumnDefinition Width="33*" />
-                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0"
-                                Orientation="Vertical"
-                                HorizontalAlignment="Left"
-                                Margin="0, 0, 50, 0">
-                        <TextBlock HorizontalAlignment="Left"
-                                   Text="{x:Static strings:UploadingFinished.StoreIdTitleText}"
-                                   d:Text="Store ID" 
+
+                    <!-- Row 0 -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,10">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.ProductNameTitleText}"
+                                   d:Text="Product name"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding ProductName}"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,10">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.PackageIdentityNameTitleText}"
+                                   d:Text="Package Identity name"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding PackageIdentityName}"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,10">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.StoreIdTitleText}"
+                                   d:Text="Store ID"
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
                         <TextBlock Text="{Binding StoreId}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock Text="{x:Static strings:UploadingFinished.SizeTitleText}"
-                                   d:Text="Size" 
+
+                    <!-- Row 1 -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,10">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.DestinationTitleText}"
+                                   d:Text="Destination"
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBlock Text="{Binding PackageSize}" 
+                        <TextBlock Text="{Binding Destination}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock Text="{x:Static strings:UploadingFinished.FamilyTitleText}"
-                                   d:Text="Family" 
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,10">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.MarketTitleText}"
+                                   d:Text="Market"
                                    Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBlock Text="{Binding PackageType}" 
+                        <TextBlock Text="{Binding Market}"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,10">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.FamilyTitleText}"
+                                   d:Text="Family"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding PackageType}"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </StackPanel>
+
+                    <!-- Row 2 -->
+                    <StackPanel Grid.Row="2" Grid.Column="0">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.FolderSizeTitleText}"
+                                   d:Text="Folder size"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding FolderSize}"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="1"
+                                Visibility="{Binding HasUploadSize, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="{x:Static strings:UploadingFinished.UploadSizeTitleText}"
+                                   d:Text="Upload Size"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
+                        <TextBlock Text="{Binding UploadSize}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"/>
                     </StackPanel>
                 </Grid>
-                <Button Grid.RowSpan="4" Grid.Column="2"
+
+                <!-- View in Partner Center Button -->
+                <Button Grid.Column="2"
                         Content="{x:Static strings:UploadingFinished.ViewPartnerCenterButtonContent}"
                         d:Content="View in Partner Center"
                         Command="{Binding ViewInPartnerCenterCommand}"
                         IsEnabled="True"
-                        Width="150"
-                        Height="30"
-                        Margin="10, 0, 10, 0"/>
+                        Width="150" Height="30"
+                        VerticalAlignment="Center"
+                        Margin="10,0,0,0"/>
             </Grid>
         </Border>
         <StackPanel Grid.Row="3"

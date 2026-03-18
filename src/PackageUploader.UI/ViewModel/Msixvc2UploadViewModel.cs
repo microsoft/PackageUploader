@@ -612,6 +612,10 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         ProgressValue = 0;
         _operationLogOutput = string.Empty;
 
+        int lastReportedPct = -1;
+        string? lastErrorMessage = null;
+        string lastWrittenTotal = string.Empty;
+
         try
         {
             string uploadArgs = BuildUploadArguments();
@@ -622,8 +626,6 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
                 var match = Regex.Match(line, @"([\d.]+ \S+) / ([\d.]+ \S+) read \(([\d.]+)%\).*?([\d.]+ \S+) / ([\d.]+ \S+) written \(([\d.]+)%\)");
                 if (match.Success)
                 {
-                    string readAmount = match.Groups[1].Value;
-                    string readTotal = match.Groups[2].Value;
                     string readPct = match.Groups[3].Value;
                     string writtenAmount = match.Groups[4].Value;
                     string writtenTotal = match.Groups[5].Value;
@@ -631,18 +633,36 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
 
                     if (double.TryParse(writtenPct, out double wp))
                     {
-                        ProgressValue = (int)wp;
-                    }
+                        int wholePct = (int)wp;
+                        if (wholePct != lastReportedPct)
+                        {
+                            lastReportedPct = wholePct;
+                            ProgressValue = wholePct;
 
-                    StatusMessage = $"Read: {readAmount}/{readTotal} ({readPct}%)  |  Written: {writtenAmount}/{writtenTotal} ({writtenPct}%)";
+                            string phase = double.TryParse(readPct, out double rp) && rp < 100.0
+                                ? "Packaging & uploading"
+                                : "Uploading";
+                            StatusMessage = $"{phase}... {writtenAmount} / {writtenTotal} ({writtenPct}%)";
+                        }
+                        lastWrittenTotal = writtenTotal;
+                    }
+                }
+
+                if (line.Contains("fail:", StringComparison.OrdinalIgnoreCase)
+                    || line.Contains("Exception:", StringComparison.OrdinalIgnoreCase))
+                {
+                    lastErrorMessage = line;
                 }
             });
 
             if (uploadExitCode != 0)
             {
                 _logger.LogError("makepkg2 upload failed with exit code {ExitCode}.", uploadExitCode);
-                SetErrorAndGoToErrorPage("Upload Failed",
-                    $"makepkg2 upload exited with code {uploadExitCode}.\n\n{_operationLogOutput}");
+
+                string errorDetail = !string.IsNullOrEmpty(lastErrorMessage)
+                    ? lastErrorMessage
+                    : $"makepkg2 upload exited with code {uploadExitCode}.";
+                SetErrorAndGoToErrorPage("Upload Failed", errorDetail);
                 return;
             }
 
@@ -652,8 +672,14 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
 
             var branchOrFlight = GetBranchOrFlightFromUISelection();
             _packageModelProvider.Package.BigId = BigId;
-            _packageModelProvider.Package.PackageType = "MSIXVC2";
+            _packageModelProvider.Package.PackageType = "PC";
             _packageModelProvider.Package.PackagePreviewImage = PackagePreviewImage;
+            _packageModelProvider.Package.PackageName = ProductName;
+            _packageModelProvider.Package.UploadSize = lastWrittenTotal;
+            _packageModelProvider.Package.Destination = BranchOrFlightDisplayName;
+            _packageModelProvider.Package.Market = MarketGroupName;
+            _packageModelProvider.Package.PackageIdentityName = PackageIdentityName;
+            _packageModelProvider.Package.FolderSize = EstimatedFolderSize;
             if (branchOrFlight != null)
             {
                 _packageModelProvider.Package.BranchId = branchOrFlight.CurrentDraftInstanceId;

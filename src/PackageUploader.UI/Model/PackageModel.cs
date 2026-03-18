@@ -19,4 +19,10 @@ public class PackageModel
     public string PackageType { get; set; } = string.Empty;
     public BitmapImage? PackagePreviewImage { get; set; } = null;
     public string BranchId { get; internal set; } = string.Empty;
+    public string PackageName { get; set; } = string.Empty;
+    public string UploadSize { get; set; } = string.Empty;
+    public string Destination { get; set; } = string.Empty;
+    public string Market { get; set; } = string.Empty;
+    public string PackageIdentityName { get; set; } = string.Empty;
+    public string FolderSize { get; set; } = string.Empty;
 }
