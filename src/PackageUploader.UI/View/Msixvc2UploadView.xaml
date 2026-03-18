@@ -202,10 +202,6 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                                 <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="476"/>
@@ -274,67 +270,6 @@
                                     Width="90"
                                     Height="32"
                                     Margin="0,0,0,10"/>
-
-                            <!-- Validator path -->
-                            <TextBlock Grid.Row="2" Grid.Column="0"
-                                       Text="{x:Static strings:Msixvc2Upload.ValidatorPathTitleText}"
-                                       d:Text="Folder path for SubmissionValidator.dll"
-                                       Foreground="{DynamicResource PrimaryTextBrush}"
-                                       HorizontalAlignment="Left"
-                                       Margin="0,0,0,5"/>
-                            <TextBlock Grid.Row="2" Grid.Column="0"
-                                       Text="{x:Static strings:Msixvc2Upload.OptionalText}"
-                                       d:Text="Optional"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                       HorizontalAlignment="Right"
-                                       Margin="0,0,10,5"/>
-                            <TextBox Grid.Row="3" Grid.Column="0"
-                                     x:Name="SubValPathTextBox"
-                                     AutomationProperties.HelpText="Submission Validator folder path"
-                                     Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Foreground="{DynamicResource PrimaryTextBrush}"
-                                     Background="{DynamicResource SecondaryButtonBrush}"
-                                     Margin="0,0,10,0">
-                                <TextBox.Style>
-                                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="TextBox">
-                                                    <Border x:Name="Border"
-                                                            Background="{TemplateBinding Background}" 
-                                                            BorderBrush="{TemplateBinding BorderBrush}" 
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="6">
-                                                        <Grid>
-                                                            <TextBlock Text="{x:Static strings:Msixvc2Upload.ValidatorPathBoxDefaultText}"
-                                                                       d:Text="Select or enter the folder path for SubmissionValidator.dll" 
-                                                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                                                       VerticalAlignment="Center"
-                                                                       Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}" 
-                                                                       Margin="15,2"/>
-                                                            <ScrollViewer x:Name="PART_ContentHost" 
-                                                                          Margin="5,2" 
-                                                                          VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsFocused" Value="True">
-                                                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource TextEntryHighlightedBackgroundBrush}" />
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </TextBox.Style>
-                            </TextBox>
-                            <Button Grid.Row="3" Grid.Column="1"
-                                    Content="{x:Static strings:Msixvc2Upload.BrowseText}"
-                                    d:Content="Browse"
-                                    AutomationProperties.HelpText="Browse to Submission Validator folder path"
-                                    Command="{Binding BrowseSubValPathCommand}"
-                                    Width="90"
-                                    Height="32"/>
                         </Grid>
                     </Expander>
                 </StackPanel>
@@ -633,20 +568,6 @@
                     </Border>
                 </StackPanel>
             </Grid>
-
-            <!-- ============================================ -->
-            <!-- Progress section (visible during operation) -->
-            <!-- ============================================ -->
-            <StackPanel Margin="0,20,0,0"
-                        Visibility="{Binding IsOperationInProgress, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock Text="{Binding StatusMessage}"
-                           Foreground="{DynamicResource PrimaryTextBrush}"
-                           Margin="0,0,0,8"/>
-                <ProgressBar Value="{Binding ProgressValue}"
-                             Minimum="0"
-                             Maximum="100"
-                             Height="8"/>
-            </StackPanel>
 
             <!-- ============================================ -->
             <!-- Button panel                                 -->

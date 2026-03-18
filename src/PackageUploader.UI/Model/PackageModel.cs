@@ -25,4 +25,6 @@ public class PackageModel
     public string Market { get; set; } = string.Empty;
     public string PackageIdentityName { get; set; } = string.Empty;
     public string FolderSize { get; set; } = string.Empty;
+    public string UploadArguments { get; set; } = string.Empty;
+    public string MakePkg2Path { get; set; } = string.Empty;
 }

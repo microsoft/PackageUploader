@@ -49,37 +49,11 @@ public class Msixvc2UploadViewModelTest
     public void Constructor_InitializesProperties()
     {
         Assert.AreEqual(string.Empty, _viewModel.ContentPath);
-        Assert.AreEqual(string.Empty, _viewModel.StatusMessage);
-        Assert.AreEqual(0, _viewModel.ProgressValue);
-        Assert.IsFalse(_viewModel.IsOperationInProgress);
         Assert.IsNotNull(_viewModel.UploadPackageCommand);
         Assert.IsNotNull(_viewModel.CancelButtonCommand);
         Assert.IsNotNull(_viewModel.BrowseContentPathCommand);
     }
 
-    [TestMethod]
-    public void IsOperationInProgress_SetAndGet()
-    {
-        _viewModel.IsOperationInProgress = true;
-        Assert.IsTrue(_viewModel.IsOperationInProgress);
-
-        _viewModel.IsOperationInProgress = false;
-        Assert.IsFalse(_viewModel.IsOperationInProgress);
-    }
-
-    [TestMethod]
-    public void StatusMessage_SetAndGet()
-    {
-        _viewModel.StatusMessage = "Packaging...";
-        Assert.AreEqual("Packaging...", _viewModel.StatusMessage);
-    }
-
-    [TestMethod]
-    public void ProgressValue_SetAndGet()
-    {
-        _viewModel.ProgressValue = 50;
-        Assert.AreEqual(50, _viewModel.ProgressValue);
-    }
     #endregion
 
     #region BuildUploadArguments Tests
@@ -129,30 +103,6 @@ public class Msixvc2UploadViewModelTest
 
         Assert.IsFalse(args.Contains("/storeid"));
     }
-
-    [TestMethod]
-    public void BuildUploadArguments_WithSubValPath()
-    {
-        _viewModel.ContentPath = @"C:\game\content";
-        _viewModel.BranchOrFlightDisplayName = "Branch: Main";
-        _viewModel.MarketGroupName = "default";
-
-        string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempDir);
-
-        try
-        {
-            _viewModel.SubValPath = tempDir;
-
-            string args = _viewModel.BuildUploadArguments();
-
-            Assert.IsTrue(args.Contains($"/validationpath \"{tempDir}\""));
-        }
-        finally
-        {
-            Directory.Delete(tempDir);
-        }
-    }
     #endregion
 
     #region CanUpload (via UploadPackageCommand.CanExecute) Tests
@@ -161,14 +111,6 @@ public class Msixvc2UploadViewModelTest
     public void CanUpload_ReturnsFalse_WhenContentPathEmpty()
     {
         _viewModel.ContentPath = string.Empty;
-
-        Assert.IsFalse(_viewModel.UploadPackageCommand.CanExecute(null));
-    }
-
-    [TestMethod]
-    public void CanUpload_ReturnsFalse_WhenOperationInProgress()
-    {
-        _viewModel.IsOperationInProgress = true;
 
         Assert.IsFalse(_viewModel.UploadPackageCommand.CanExecute(null));
     }
