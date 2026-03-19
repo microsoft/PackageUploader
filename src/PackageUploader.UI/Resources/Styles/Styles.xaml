@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Global Font Family -->
+
+    <!-- Shared icon geometry for info tooltip buttons -->
+    <Geometry x:Key="InfoIconGeometry">M8,0 A8,8 0 1,0 8,16 A8,8 0 1,0 8,0 M8,3 L8,3.5 M8,6 L8,12</Geometry>
     <Style TargetType="{x:Type Window}">
         <Setter Property="FontFamily" Value="Segoe Sans" />
     </Style>

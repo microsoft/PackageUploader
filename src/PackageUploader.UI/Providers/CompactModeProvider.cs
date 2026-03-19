@@ -40,23 +40,26 @@ public class CompactModeProvider : INotifyPropertyChanged
 
     private bool LoadSetting()
     {
-        try
+        lock (_settingsLock)
         {
-            if (File.Exists(SettingsFilePath))
+            try
             {
-                var json = File.ReadAllText(SettingsFilePath);
-                var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-                if (dict != null && dict.TryGetValue(SettingsKey, out var value))
+                if (File.Exists(SettingsFilePath))
                 {
-                    return bool.TryParse(value, out var result) && result;
+                    var json = File.ReadAllText(SettingsFilePath);
+                    var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+                    if (dict != null && dict.TryGetValue(SettingsKey, out var value))
+                    {
+                        return bool.TryParse(value, out var result) && result;
+                    }
                 }
             }
+            catch
+            {
+                // Settings file may not exist or be malformed
+            }
+            return false;
         }
-        catch
-        {
-            // Settings file may not exist or be malformed
-        }
-        return false;
     }
 
     private void SaveSetting(bool value)

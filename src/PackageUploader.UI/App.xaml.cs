@@ -185,15 +185,19 @@ public partial class App : System.Windows.Application
     {
         string sizesToApply = isCompact ? CompactSizes : NormalSizes;
         var dicts = Resources.MergedDictionaries;
+        int themeIndex = -1;
         for (int i = dicts.Count - 1; i >= 0; i--)
         {
             var src = dicts[i].Source?.ToString();
-            if (src != null && (src.EndsWith(NormalSizes) || src.EndsWith(CompactSizes)))
+            if (src == null) continue;
+            if (src.EndsWith(NormalSizes) || src.EndsWith(CompactSizes))
                 dicts.RemoveAt(i);
+            else if (src.EndsWith(LightTheme) || src.EndsWith(DarkTheme) || src.EndsWith(HighContrastTheme))
+                themeIndex = i;
         }
-        // Insert after theme (index 1) so colors load first, then sizes, then styles
-        var insertIndex = Math.Min(1, dicts.Count);
-        dicts.Insert(insertIndex, new ResourceDictionary { Source = new Uri(sizesToApply, UriKind.Relative) });
+        // Insert immediately after the theme dictionary so colors resolve first, then sizes, then styles
+        var insertAt = themeIndex >= 0 ? themeIndex + 1 : 0;
+        dicts.Insert(Math.Min(insertAt, dicts.Count), new ResourceDictionary { Source = new Uri(sizesToApply, UriKind.Relative) });
     }
 
     private void ApplyTheme()

@@ -23,6 +23,7 @@
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
             <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
             <converters:BooleanAndConverter x:Key="BooleanAndConverter"/>
+            <converters:PercentageConverter x:Key="PercentageConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

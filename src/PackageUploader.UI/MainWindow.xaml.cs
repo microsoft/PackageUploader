@@ -168,8 +168,8 @@ namespace PackageUploader.UI
             {
                 if (_compactModeProvider.IsCompactMode)
                 {
-                    Width = 800;
-                    Height = 550;
+                    Width = 600;
+                    Height = 420;
                 }
                 else
                 {
