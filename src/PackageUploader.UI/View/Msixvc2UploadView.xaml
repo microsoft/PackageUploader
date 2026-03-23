@@ -21,14 +21,15 @@
     <Grid Background="{DynamicResource AppBackgroundBrush}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="{DynamicResource PagePadding}">
-            <!-- Back Arrow -->
+            <!-- Back Arrow + Title -->
             <StackPanel Orientation="Horizontal"
                         VerticalAlignment="Top"
-                        Margin="0, 0, 0, 15">
+                        Margin="0, 0, 0, 10">
                 <Button Width="16"
                         Height="16"
                         Command="{Binding CancelButtonCommand}"
                         Style="{StaticResource WindowControlButtonStyle}"
+                        VerticalAlignment="Center"
                         AutomationProperties.HelpText="Back to home">
                     <Path Data="M16,8 L4,8 M4,8 L8,4 M4,8 L8,12" 
                           Stroke="{DynamicResource PrimaryTextBrush}" 
@@ -37,26 +38,26 @@
                           VerticalAlignment="Center" 
                           HorizontalAlignment="Center"/>
                 </Button>
+                <TextBlock Text="{x:Static strings:Msixvc2Upload.TitleText}"
+                           d:Text="Upload Loose Files (PC only)"
+                           Style="{StaticResource Headline}"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
+                           VerticalAlignment="Center"
+                           Margin="10,0,0,0"/>
             </StackPanel>
-
-            <!-- Title -->
-            <TextBlock Text="{x:Static strings:Msixvc2Upload.TitleText}"
-                       d:Text="Upload Loose Files (PC only)"
-                       Style="{StaticResource Headline}"
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       HorizontalAlignment="Left"/>
             <TextBlock Text="{x:Static strings:Msixvc2Upload.SubtitleText}"
                        d:Text="Point to your loose file directory for your PC game containing a MicrosoftGame.config and we will package and upload using the MSIXVC2 format."
                        HorizontalAlignment="Left"
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        TextWrapping="Wrap"
-                       Margin="{DynamicResource SubtitleMargin}"/>
+                       Margin="{DynamicResource SubtitleMargin}"
+                       Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
 
             <!-- Main Grid: 4 columns, 2 rows -->
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="30" />
@@ -110,7 +111,8 @@
                                    HorizontalAlignment="Left"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    TextWrapping="Wrap"
-                                   Margin="0,0,0,10"/>
+                                   Margin="0,0,0,10"
+                                    Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
                         <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{x:Static strings:Msixvc2Upload.ContentPathTitleText}"
                                    d:Text="Content path"
@@ -312,7 +314,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{x:Static strings:Msixvc2Upload.DestinationTitleText}"
-                                   d:Text="Destination"
+                                   d:Text="Branch"
                                    Style="{StaticResource SubHeadline}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
@@ -323,11 +325,12 @@
                                    HorizontalAlignment="Left"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    TextWrapping="Wrap"
-                                   Margin="0,0,0,10"/>
+                                   Margin="0,0,0,10"
+                                    Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
                         <!-- Destination combo -->
                         <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{x:Static strings:Msixvc2Upload.DestinationTitleText}"
-                                   d:Text="Destination"
+                                   d:Text="Branch"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
@@ -455,7 +458,7 @@
                 <!-- ============================================ -->
                 <!-- Upload Preview (right panel)                 -->
                 <!-- ============================================ -->
-                <StackPanel Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="10,0,0,0">
+                <StackPanel Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="10,0,0,0" VerticalAlignment="Top">
                     <TextBlock Text="{x:Static strings:Msixvc2Upload.UploadPreviewTitleText}"
                                d:Text="Upload Preview"
                                Style="{StaticResource SubHeadline}"
@@ -465,8 +468,8 @@
                     <Border BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6"
-                            Padding="6"
-                            Margin="0, 20, 0, 0"
+                            Padding="{DynamicResource PreviewPadding}"
+                            TextElement.FontSize="{DynamicResource PreviewFontSize}"
                             Visibility="{Binding ProductName, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -484,31 +487,32 @@
                                    Grid.RowSpan="4"
                                    Source="{Binding PackagePreviewImage}"
                                    HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   Height="65"
-                                   Width="65"
+                                   VerticalAlignment="Top"
+                                   Height="{DynamicResource PreviewImageSize}"
+                                   Width="{DynamicResource PreviewImageSize}"
                                    Margin="0,0,10,0"/>
                             <!-- Product name -->
                             <StackPanel Grid.Row="0"
                                         Grid.Column="1"
                                         Orientation="Vertical"
                                         HorizontalAlignment="Left"
-                                        Margin="0, 0, 0, 10">
+                                        Margin="{DynamicResource PreviewItemMargin}">
                                 <TextBlock Text="{x:Static strings:Msixvc2Upload.ProductNameText}"
                                            d:Text="Product name"
                                            Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding ProductName}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"/>
                             </StackPanel>
-                            <!-- Destination + Market -->
-                            <Grid Grid.Row="1" Grid.Column="1" Margin="0,0,0,15">
+                            <!-- Destination + Market — standard mode -->
+                            <Grid Grid.Row="1" Grid.Column="1" Margin="0,0,0,15"
+                                  Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="50*" />
                                     <ColumnDefinition Width="50*" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="{x:Static strings:Msixvc2Upload.DestinationTitleText}"
-                                               d:Text="Destination"
+                                               d:Text="Branch"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding BranchOrFlightDisplayName}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
@@ -521,12 +525,20 @@
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                             </Grid>
+                            <!-- Destination + Market — compact mode: stacked -->
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,4"
+                                        Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{x:Static strings:Msixvc2Upload.DestinationTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding BranchOrFlightDisplayName}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="{x:Static strings:Msixvc2Upload.MarketTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding MarketGroupName}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
                             <!-- Package Identity name -->
                             <StackPanel Grid.Row="2"
                                         Grid.Column="1"
                                         Orientation="Vertical" 
                                         HorizontalAlignment="Left"
-                                        Margin="0,0,0,10">
+                                        Margin="{DynamicResource PreviewItemMargin}">
                                 <TextBlock Text="{x:Static strings:Msixvc2Upload.PackageIdentityNameTitleText}"
                                            d:Text="Package Identity name"
                                            Foreground="{DynamicResource SecondaryTextBrush}"/>
@@ -534,8 +546,9 @@
                                            Foreground="{DynamicResource PrimaryTextBrush}"
                                            TextWrapping="Wrap"/>
                             </StackPanel>
-                            <!-- Store ID, Folder size, Family -->
-                            <Grid Grid.Row="3" Grid.Column="1">
+                            <!-- Store ID, Folder size, Family — standard mode -->
+                            <Grid Grid.Row="3" Grid.Column="1"
+                                  Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="33*" />
                                     <ColumnDefinition Width="33*" />
@@ -563,6 +576,16 @@
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                             </Grid>
+                            <!-- Store ID, Folder size, Family — compact mode: stacked -->
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,4"
+                                        Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{x:Static strings:Msixvc2Upload.StoreIdTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding BigId}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="{x:Static strings:Msixvc2Upload.FolderSizeTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding EstimatedFolderSize}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="{x:Static strings:Msixvc2Upload.FamilyTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding PackageType}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </StackPanel>

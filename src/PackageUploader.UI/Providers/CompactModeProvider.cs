@@ -15,7 +15,6 @@ public class CompactModeProvider : INotifyPropertyChanged
         "XboxPackageTool", "settings.json");
 
     private const string SettingsKey = "CompactModeProvider_IsCompactMode";
-    private static readonly object _settingsLock = new();
 
     private bool _isCompactMode;
 
@@ -40,7 +39,7 @@ public class CompactModeProvider : INotifyPropertyChanged
 
     private bool LoadSetting()
     {
-        lock (_settingsLock)
+        lock (ViewModel.BaseViewModel.SettingsFileLock)
         {
             try
             {
@@ -64,7 +63,7 @@ public class CompactModeProvider : INotifyPropertyChanged
 
     private void SaveSetting(bool value)
     {
-        lock (_settingsLock)
+        lock (ViewModel.BaseViewModel.SettingsFileLock)
         {
             try
             {

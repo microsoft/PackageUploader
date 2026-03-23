@@ -334,7 +334,7 @@
                     <ColumnDefinition />
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button Content="{x:Static strings:MainPage.Msixvc2ButtonText}"
+                <Button Content="{x:Static strings:MainPage.Msixvc2TextBlockTitle}"
                         Command="{Binding NavigateToMsixvc2Command}"
                         HorizontalAlignment="Stretch"/>
                 <Button Grid.Column="1"

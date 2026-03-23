@@ -29,5 +29,9 @@
     <Thickness x:Key="SubtitleMargin">0,2,0,6</Thickness>
     <Thickness x:Key="SectionCardPadding">4,4,4,4</Thickness>
     <Thickness x:Key="CardBottomMargin">0,0,0,4</Thickness>
+    <sys:Double x:Key="PreviewFontSize">10</sys:Double>
+    <sys:Double x:Key="PreviewImageSize">40</sys:Double>
+    <Thickness x:Key="PreviewPadding">3,3,3,3</Thickness>
+    <Thickness x:Key="PreviewItemMargin">0,0,0,2</Thickness>
 
 </ResourceDictionary>

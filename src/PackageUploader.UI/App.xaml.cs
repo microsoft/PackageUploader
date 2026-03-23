@@ -145,6 +145,7 @@ public partial class App : System.Windows.Application
         // Both App and CompactModeProvider are singletons, so the lambda
         // subscription lives for the entire process — no unsubscribe needed.
         var compactProvider = _host.Services.GetRequiredService<CompactModeProvider>();
+        BaseViewModel.InitializeCompactMode(compactProvider);
         ApplyCompactMode(compactProvider.IsCompactMode);
         compactProvider.PropertyChanged += (s, e) =>
         {

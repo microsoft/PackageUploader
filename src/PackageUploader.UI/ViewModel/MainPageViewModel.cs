@@ -20,7 +20,6 @@ public partial class MainPageViewModel : BaseViewModel
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly UserLoggedInProvider _userLoggedInProvider;
     private readonly IAuthenticationService _authenticationService;
-    private readonly CompactModeProvider _compactModeProvider;
     private readonly ILogger<MainPageViewModel> _logger;
     private CancellationTokenSource _tenantsLoadingCts = new();
 
@@ -31,8 +30,6 @@ public partial class MainPageViewModel : BaseViewModel
     public ICommand PackagingLearnMoreURL { get; }
     public ICommand ShowTenantSelectionCommand { get; }
     public ICommand GetTenantsCommand { get; }
-
-    public bool IsCompactMode => _compactModeProvider.IsCompactMode;
 
     private bool _isMakePkgEnabled = true;
     public bool IsMakePkgEnabled 
@@ -127,24 +124,16 @@ public partial class MainPageViewModel : BaseViewModel
         PathConfigurationProvider pathConfigurationService, 
         UserLoggedInProvider userLoggedInProvider, 
         IAuthenticationService authenticationService,
-        CompactModeProvider compactModeProvider,
         IWindowService windowService, 
         ILogger<MainPageViewModel> logger)
     {
         _pathConfigurationService = pathConfigurationService;
         _userLoggedInProvider = userLoggedInProvider;
         _authenticationService = authenticationService;
-        _compactModeProvider = compactModeProvider;
         _logger = logger;
 
         // Subscribe to UserLoggedInProvider changes
         _userLoggedInProvider.PropertyChanged += UserLoggedInProvider_PropertyChanged;
-
-        // Subscribe to CompactModeProvider changes
-        _compactModeProvider.PropertyChanged += (s, e) =>
-        {
-            OnPropertyChanged(nameof(IsCompactMode));
-        };
 
         NavigateToPackageCreationCommand = new RelayCommand(() => 
         {

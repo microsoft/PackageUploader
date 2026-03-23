@@ -139,7 +139,7 @@
     <value>パッケージの場所を確認</value>
   </data>
   <data name="DestinationTitleText" xml:space="preserve">
-    <value>送信先</value>
+    <value>ブランチ</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
     <value>ディレクトリが見つかりませんでした: {0}</value>

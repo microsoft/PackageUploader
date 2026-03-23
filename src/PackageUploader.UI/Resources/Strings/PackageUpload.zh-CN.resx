@@ -139,7 +139,7 @@
     <value>确认包的位置</value>
   </data>
   <data name="DestinationTitleText" xml:space="preserve">
-    <value>目标位置</value>
+    <value>分支</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
     <value>未找到目录: {0}</value>

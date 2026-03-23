@@ -21,14 +21,15 @@
     <Grid Background="{DynamicResource AppBackgroundBrush}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="{DynamicResource PagePadding}">
-            <!-- Add Back Arrow Icon -->
+            <!-- Back Arrow + Title -->
             <StackPanel Orientation="Horizontal"
                         VerticalAlignment="Top"
-                        Margin="0, 0, 0, 15">
+                        Margin="0, 0, 0, 10">
                 <Button Width="16"
                         Height="16"
                         Command="{Binding CancelButtonCommand}"
                         Style="{StaticResource WindowControlButtonStyle}"
+                        VerticalAlignment="Center"
                         AutomationProperties.HelpText="Back to home">
                     <Path Data="M16,8 L4,8 M4,8 L8,4 M4,8 L8,12" 
                           Stroke="{DynamicResource PrimaryTextBrush}" 
@@ -37,24 +38,25 @@
                           VerticalAlignment="Center" 
                           HorizontalAlignment="Center"/>
                 </Button>
+                <TextBlock Text="{x:Static strings:PackageUpload.UploadPackageTitleText}"
+                       d:Text="Upload a package"
+                       Style="{StaticResource Headline}"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       VerticalAlignment="Center"
+                       Margin="10,0,0,0"/>
             </StackPanel>
-
-            <TextBlock Text="{x:Static strings:PackageUpload.UploadPackageTitleText}"
-                   d:Text="Upload a package"
-                   Style="{StaticResource Headline}"
-                   Foreground="{DynamicResource PrimaryTextBrush}"
-                   HorizontalAlignment="Left"/>
             <TextBlock Text="{x:Static strings:PackageUpload.UploadPackageSubtitleText}"
                        d:Text="Locate the package for uploading. The Xbox Game Package Manager will remember these paths for easier access in the future."
                        HorizontalAlignment="Left"
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        TextWrapping="Wrap"
-                       Margin="{DynamicResource SubtitleMargin}"/>
+                       Margin="{DynamicResource SubtitleMargin}"
+                       Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
 
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="30" />
@@ -107,7 +109,8 @@
                                    HorizontalAlignment="Left"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    TextWrapping="Wrap"
-                                   Margin="0,0,0,10"/>
+                                   Margin="0,0,0,10"
+                                   Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
                         <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="{x:Static strings:PackageUpload.PackagePathText}"
                                    d:Text="Package path"
@@ -286,7 +289,7 @@
                         <TextBlock Grid.Row="0"
                                    Grid.Column="0"
                                    Text="{x:Static strings:PackageUpload.DestinationTitleText}"
-                                   d:Text="Destination"
+                                   d:Text="Branch"
                                    Style="{StaticResource SubHeadline}"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
@@ -298,11 +301,12 @@
                                    HorizontalAlignment="Left"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    TextWrapping="Wrap"
-                                   Margin="0,0,0,10"/>
+                                   Margin="0,0,0,10"
+                                   Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Text="{x:Static strings:PackageUpload.DestinationTitleText}"
-                                   d:Text="Destination"
+                                   d:Text="Branch"
                                    Foreground="{DynamicResource PrimaryTextBrush}"
                                    HorizontalAlignment="Left"
                                    Margin="0,0,0,5"/>
@@ -436,7 +440,7 @@
                     </Grid>
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{DynamicResource BorderBrush}" Margin="10,0" />
-                <StackPanel Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="10,0,0,0">
+                <StackPanel Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="10,0,0,0" VerticalAlignment="Top">
                     <TextBlock Text="{x:Static strings:PackageUpload.UploadPreviewTitleText}"
                                d:Text="Upload Preview"
                                Style="{StaticResource SubHeadline}"
@@ -446,8 +450,8 @@
                     <Border BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6"
-                            Padding="6"
-                            Margin="0, 20, 0, 0"
+                            Padding="{DynamicResource PreviewPadding}"
+                            TextElement.FontSize="{DynamicResource PreviewFontSize}"
                             Visibility="{Binding ProductName, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -465,31 +469,33 @@
                                    Grid.RowSpan="4"
                                    Source="{Binding PackagePreviewImage}"
                                    HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   Height="65"
-                                   Width="65"
+                                   VerticalAlignment="Top"
+                                   Height="{DynamicResource PreviewImageSize}"
+                                   Width="{DynamicResource PreviewImageSize}"
                                    Margin="0,0,10,0"/>
                             <StackPanel Grid.Row="0"
                                         Grid.Column="1"
                                         Orientation="Vertical"
                                         HorizontalAlignment="Left"
-                                        Margin="0, 0, 0, 10">
+                                        Margin="{DynamicResource PreviewItemMargin}">
                                 <TextBlock Text="{x:Static strings:PackageUpload.ProductNameText}"
                                            d:Text="Product name"
                                            Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding ProductName}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"/>
                             </StackPanel>
+                            <!-- Destination / Market — standard mode: side by side -->
                             <Grid Grid.Row="1"
                                   Grid.Column="1"
-                                  Margin="0,0,0,15">
+                                  Margin="0,0,0,15"
+                                  Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="50*" />
                                     <ColumnDefinition Width="50*" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="{x:Static strings:PackageUpload.DestinationTitleText}"
-                                               d:Text="Destination"
+                                               d:Text="Branch"
                                                Foreground="{DynamicResource SecondaryTextBrush}"/>
                                     <TextBlock Text="{Binding BranchOrFlightDisplayName}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
@@ -502,11 +508,19 @@
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                             </Grid>
+                            <!-- Destination / Market — compact mode: stacked -->
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,4"
+                                        Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{x:Static strings:PackageUpload.DestinationTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding BranchOrFlightDisplayName}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="{x:Static strings:PackageUpload.MarketTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding MarketGroupName}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
                             <StackPanel Grid.Row="2"
                                         Grid.Column="1"
                                         Orientation="Vertical" 
                                         HorizontalAlignment="Left"
-                                        Margin="0,0,0,10">
+                                        Margin="{DynamicResource PreviewItemMargin}">
                                 <TextBlock Text="{x:Static strings:PackageUpload.FileNameTitleText}"
                                            d:Text="File name"
                                            Foreground="{DynamicResource SecondaryTextBrush}"/>
@@ -514,7 +528,9 @@
                                            Foreground="{DynamicResource PrimaryTextBrush}"
                                            TextWrapping="Wrap"/>
                             </StackPanel>
-                            <Grid Grid.Row="3" Grid.Column="1" >
+                            <!-- StoreID / Size / Family — standard mode: side by side -->
+                            <Grid Grid.Row="3" Grid.Column="1"
+                                  Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="33*" />
                                     <ColumnDefinition Width="33*" />
@@ -542,6 +558,16 @@
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
                             </Grid>
+                            <!-- StoreID / Size / Family — compact mode: stacked -->
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,0,4"
+                                        Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{x:Static strings:PackageUpload.StoreIdTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding BigId}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="{x:Static strings:PackageUpload.SizeTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding PackageSize}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
+                                <TextBlock Text="{x:Static strings:PackageUpload.FamilyTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding PackageType}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </StackPanel>
