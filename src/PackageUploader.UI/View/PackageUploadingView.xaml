@@ -42,14 +42,14 @@
                Height="{DynamicResource StatusImageSize}"
                Width="{DynamicResource StatusImageSize}" />
         <TextBlock Grid.Row="1"
-                   Margin="0, 0, 0, 23"
+                   Margin="{DynamicResource ProgressHeadingMargin}"
                    Style="{StaticResource SubHeadline}"
                    Text="{x:Static strings:PackageUploading.TitleText}"
                    d:Text="Uploading package to partner center"
                    Foreground="{DynamicResource PrimaryTextBrush}" />
         <!-- Loading Bar -->
         <Grid Grid.Row="2"
-              Margin="0, 0, 0, 23"
+              Margin="{DynamicResource ProgressSectionMargin}"
               MaxWidth="{DynamicResource ProgressBarMaxWidth}"
               HorizontalAlignment="Center">
             <Grid.RowDefinitions>
@@ -70,7 +70,8 @@
             <StackPanel Grid.Row="0"
                         Grid.Column="1"
                         Orientation="Horizontal"
-                        HorizontalAlignment="Right">
+                        HorizontalAlignment="Right"
+                        Margin="12,0,0,0">
                 <TextBlock Text="{Binding PackageUploadPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                            Foreground="{DynamicResource PrimaryTextBrush}"/>
                 <TextBlock Text="{x:Static strings:PackageUploading.PercentCompleteText}"

@@ -21,8 +21,10 @@
     <!-- Status/Progress Screens -->
     <sys:Double x:Key="StatusImageSize">50</sys:Double>
     <Thickness x:Key="StatusImageMargin">0,10,0,8</Thickness>
-    <Thickness x:Key="ProgressImageMargin">0,20,0,8</Thickness>
+    <Thickness x:Key="ProgressImageMargin">0,10,0,4</Thickness>
     <sys:Double x:Key="ProgressBarMaxWidth">400</sys:Double>
+    <Thickness x:Key="ProgressHeadingMargin">0,0,0,6</Thickness>
+    <Thickness x:Key="ProgressSectionMargin">0,0,0,12</Thickness>
 
     <!-- Section Spacing -->
     <Thickness x:Key="HeadlineMargin">0,6,0,6</Thickness>

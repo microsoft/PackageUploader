@@ -23,6 +23,8 @@
     <Thickness x:Key="StatusImageMargin">0,50,0,30</Thickness>
     <Thickness x:Key="ProgressImageMargin">0,100,0,23</Thickness>
     <sys:Double x:Key="ProgressBarMaxWidth">600</sys:Double>
+    <Thickness x:Key="ProgressHeadingMargin">0,0,0,23</Thickness>
+    <Thickness x:Key="ProgressSectionMargin">0,0,0,23</Thickness>
 
     <!-- Section Spacing -->
     <Thickness x:Key="HeadlineMargin">0,25,0,25</Thickness>
