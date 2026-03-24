@@ -187,6 +187,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MSIXVC2 upload requires makepkg2 tools, available as a preview in the April 2026 GDK. Install the April 2026 GDK to get started..
+        /// </summary>
+        public static string MakePkg2NotFoundErrorMsg {
+            get {
+                return ResourceManager.GetString("MakePkg2NotFoundErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Upload Loose Files (PC only).
         /// </summary>
         public static string Msixvc2TextBlockTitle {
