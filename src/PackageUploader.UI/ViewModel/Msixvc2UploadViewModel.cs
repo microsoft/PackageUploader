@@ -358,6 +358,10 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
                     displayNames.Add("Flight: " + branch.Name);
             }
             BranchAndFlightNames = [.. displayNames];
+
+            string mainBranch = displayNames.FirstOrDefault(n => n.Equals("Branch: Main", StringComparison.OrdinalIgnoreCase), string.Empty);
+            BranchOrFlightDisplayName = !string.IsNullOrEmpty(mainBranch) ? mainBranch : BranchAndFlightNames.FirstOrDefault(string.Empty);
+            OnPropertyChanged(nameof(BranchOrFlightDisplayName));
         }
         catch (Exception ex)
         {
