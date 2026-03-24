@@ -600,7 +600,7 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
             args += $" /storeid \"{BigId}\"";
         }
 
-        args += " /auth Browser";
+        args += " /auth CacheableBrowser";
 
         return args;
     }
