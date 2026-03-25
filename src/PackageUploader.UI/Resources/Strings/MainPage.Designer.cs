@@ -169,6 +169,42 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Point to your loose file directory containing a MicrosoftGame.config for your PC game. Your files will be packaged and uploaded using the MSIXVC2 format — no pre-built package required..
+        /// </summary>
+        public static string Msixvc2BodyText {
+            get {
+                return ResourceManager.GetString("Msixvc2BodyText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Get started.
+        /// </summary>
+        public static string Msixvc2ButtonText {
+            get {
+                return ResourceManager.GetString("Msixvc2ButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MSIXVC2 upload requires makepkg2 tools, available as a preview in the April 2026 GDK. Install the April 2026 GDK to get started..
+        /// </summary>
+        public static string MakePkg2NotFoundErrorMsg {
+            get {
+                return ResourceManager.GetString("MakePkg2NotFoundErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Upload Loose Files (PC only).
+        /// </summary>
+        public static string Msixvc2TextBlockTitle {
+            get {
+                return ResourceManager.GetString("Msixvc2TextBlockTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sign in.
         /// </summary>
         public static string SignInButtonContent {

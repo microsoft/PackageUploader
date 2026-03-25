@@ -117,14 +117,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DestinationTitleText" xml:space="preserve">
+    <value>Destination</value>
+  </data>
   <data name="FamilyTitleText" xml:space="preserve">
     <value>Family</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
     <value>File name</value>
   </data>
+  <data name="FolderSizeTitleText" xml:space="preserve">
+    <value>Folder size</value>
+  </data>
   <data name="GoHomeButtonContent" xml:space="preserve">
     <value>Home</value>
+  </data>
+  <data name="MarketTitleText" xml:space="preserve">
+    <value>Market</value>
+  </data>
+  <data name="PackageIdentityNameTitleText" xml:space="preserve">
+    <value>Package Identity name</value>
+  </data>
+  <data name="PackageNameTitleText" xml:space="preserve">
+    <value>Package Name</value>
+  </data>
+  <data name="ProductNameTitleText" xml:space="preserve">
+    <value>Product name</value>
   </data>
   <data name="SizeTitleText" xml:space="preserve">
     <value>Size</value>
@@ -134,6 +152,9 @@
   </data>
   <data name="UploadCompleteTitleText" xml:space="preserve">
     <value>Upload complete</value>
+  </data>
+  <data name="UploadSizeTitleText" xml:space="preserve">
+    <value>Upload Size</value>
   </data>
   <data name="ViewLogsButtonContent" xml:space="preserve">
     <value>View logs</value>

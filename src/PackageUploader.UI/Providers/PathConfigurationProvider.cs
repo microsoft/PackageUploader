@@ -36,6 +36,20 @@ public partial class PathConfigurationProvider : INotifyPropertyChanged
         }
     }
 
+    private string _makePkg2Path = string.Empty;
+    public string MakePkg2Path
+    {
+        get => _makePkg2Path;
+        set
+        {
+            if (_makePkg2Path != value)
+            {
+                _makePkg2Path = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     private string _packageUploaderPath = string.Empty;
     public string PackageUploaderPath
     {

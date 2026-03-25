@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
@@ -27,25 +27,32 @@ namespace PackageUploader.UI.ViewModel
             set => SetProperty(ref _packagePreviewImage, value);
         }
 
-        private string _packageFileName = string.Empty;
-        public string PackageFileName
+        private string _productName = string.Empty;
+        public string ProductName
         {
-            get => _packageFileName;
-            set => SetProperty(ref _packageFileName, value);
+            get => _productName;
+            set => SetProperty(ref _productName, value);
         }
 
-        private string _packageSize = string.Empty;
-        public string PackageSize
+        private string _destination = string.Empty;
+        public string Destination
         {
-            get => _packageSize;
-            set => SetProperty(ref _packageSize, value);
+            get => _destination;
+            set => SetProperty(ref _destination, value);
         }
 
-        private string _versionNum = string.Empty;
-        public string VersionNum
+        private string _market = string.Empty;
+        public string Market
         {
-            get => _versionNum;
-            set => SetProperty(ref _versionNum, value);
+            get => _market;
+            set => SetProperty(ref _market, value);
+        }
+
+        private string _packageIdentityName = string.Empty;
+        public string PackageIdentityName
+        {
+            get => _packageIdentityName;
+            set => SetProperty(ref _packageIdentityName, value);
         }
 
         private string _storeId = string.Empty;
@@ -53,6 +60,27 @@ namespace PackageUploader.UI.ViewModel
         {
             get => _storeId;
             set => SetProperty(ref _storeId, value);
+        }
+
+        private string _folderSize = string.Empty;
+        public string FolderSize
+        {
+            get => _folderSize;
+            set => SetProperty(ref _folderSize, value);
+        }
+
+        private string _uploadSize = string.Empty;
+        public string UploadSize
+        {
+            get => _uploadSize;
+            set => SetProperty(ref _uploadSize, value);
+        }
+
+        private bool _hasUploadSize;
+        public bool HasUploadSize
+        {
+            get => _hasUploadSize;
+            set => SetProperty(ref _hasUploadSize, value);
         }
 
         private string _packageType = string.Empty;
@@ -87,13 +115,41 @@ namespace PackageUploader.UI.ViewModel
         public void OnAppearing()
         {
             PackagePreviewImage = _packageModelProvider.Package.PackagePreviewImage;
-            VersionNum = _packageModelProvider.Package.Version;
             StoreId = _packageModelProvider.Package.BigId;
-
-            FileInfo packageInfo = new(_packageModelProvider.Package.PackageFilePath);
-            PackageFileName = packageInfo.Name;
-            PackageSize = TranslateFileSize(packageInfo.Length);
             PackageType = _packageModelProvider.Package.PackageType;
+
+            string packageName = _packageModelProvider.Package.PackageName;
+            string packageFilePath = _packageModelProvider.Package.PackageFilePath;
+            if (!string.IsNullOrEmpty(packageName))
+            {
+                ProductName = packageName;
+            }
+            else if (!string.IsNullOrEmpty(packageFilePath) && File.Exists(packageFilePath))
+            {
+                ProductName = new FileInfo(packageFilePath).Name;
+            }
+            else
+            {
+                ProductName = "Loose content upload";
+            }
+
+            Destination = _packageModelProvider.Package.Destination;
+            Market = _packageModelProvider.Package.Market;
+
+            PackageIdentityName = _packageModelProvider.Package.PackageIdentityName;
+
+            FolderSize = _packageModelProvider.Package.FolderSize;
+
+            string uploadSize = _packageModelProvider.Package.UploadSize;
+            if (!string.IsNullOrEmpty(uploadSize))
+            {
+                UploadSize = uploadSize;
+                HasUploadSize = true;
+            }
+            else
+            {
+                HasUploadSize = false;
+            }
         }
 
         public void OnHome()
@@ -115,26 +171,6 @@ namespace PackageUploader.UI.ViewModel
             string branchId = _packageModelProvider.Package.BranchId;
             string partnerCenterUrl = $"https://partner.microsoft.com/en-us/dashboard/products/{StoreId}/packages/{branchId}";
             _processStarterService.Start(new ProcessStartInfo(partnerCenterUrl) { UseShellExecute = true });
-        }
-
-        private static string TranslateFileSize(long size)
-        {
-            if (size > 1024 * 1024 * 1024)
-            {
-                return $"{(size / 1024d / 1024d / 1024d):F2} GB"; // Format to 2 decimal places
-            }
-            else if (size > 1024 * 1024)
-            {
-                return $"{size / 1024 / 1024} MB"; // No need to include decimal places if the package is less than 1 GB.
-            }
-            else if (size > 1024)
-            {
-                return $"{size / 1024} KB";
-            }
-            else
-            {
-                return $"{size} B";
-            }
         }
     }
 }

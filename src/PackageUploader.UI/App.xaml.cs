@@ -64,6 +64,8 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<PackageUploadingViewModel>();
                 services.AddSingleton<UploadingFinishedViewModel>();
                 services.AddSingleton<ErrorScreenViewModel>();
+                services.AddSingleton<Msixvc2UploadViewModel>();
+                services.AddSingleton<Msixvc2UploadingViewModel>();
 
                 // Register Views
                 services.AddTransient<MainPageView>();
@@ -74,6 +76,8 @@ public partial class App : System.Windows.Application
                 services.AddTransient<PackageUploadingView>();
                 services.AddTransient<UploadingFinishedView>();
                 services.AddTransient<ErrorPageView>();
+                services.AddTransient<Msixvc2UploadView>();
+                services.AddTransient<Msixvc2UploadingView>();
 
                 // Register the main window
                 services.AddSingleton<MainWindow>();

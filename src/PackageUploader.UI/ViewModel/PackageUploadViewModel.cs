@@ -880,7 +880,13 @@ public partial class PackageUploadViewModel : BaseViewModel
 
             timer.Stop();
             // SuccessMessage = $"Package uploaded successfully in {timer.Elapsed:hh\\:mm\\:ss}.";
-            
+
+            Package.PackageName = ProductName;
+            Package.Destination = BranchOrFlightDisplayName;
+            Package.Market = MarketGroupName;
+            Package.PackageIdentityName = PackageId;
+            Package.FolderSize = PackageSize;
+
             // After successful upload, navigate to upload finished page
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
