@@ -10,11 +10,11 @@
     <sys:Double x:Key="TinyFontSize">9</sys:Double>
 
     <!-- Control Sizing -->
-    <sys:Double x:Key="ControlMinHeight">24</sys:Double>
-    <sys:Double x:Key="InputMinHeight">26</sys:Double>
+    <sys:Double x:Key="ControlMinHeight">30</sys:Double>
+    <sys:Double x:Key="InputMinHeight">30</sys:Double>
 
     <!-- Padding -->
-    <Thickness x:Key="ButtonPadding">6,2,6,2</Thickness>
+    <Thickness x:Key="ButtonPadding">10,5,10,5</Thickness>
     <Thickness x:Key="PagePadding">10,6,10,6</Thickness>
     <Thickness x:Key="MainPagePadding">10,0,10,0</Thickness>
 
@@ -30,7 +30,7 @@
     <Thickness x:Key="HeadlineMargin">0,6,0,6</Thickness>
     <Thickness x:Key="SubtitleMargin">0,2,0,6</Thickness>
     <Thickness x:Key="SectionCardPadding">4,4,4,4</Thickness>
-    <Thickness x:Key="CardBottomMargin">0,0,0,4</Thickness>
+    <Thickness x:Key="CardBottomMargin">0,0,0,15</Thickness>
     <sys:Double x:Key="PreviewFontSize">10</sys:Double>
     <sys:Double x:Key="PreviewImageSize">40</sys:Double>
     <Thickness x:Key="PreviewPadding">3,3,3,3</Thickness>

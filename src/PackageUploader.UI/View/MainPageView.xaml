@@ -274,7 +274,7 @@
         <!-- Compact mode: single-column vertical layout -->
         <StackPanel Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}"
                     HorizontalAlignment="Center"
-                    Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource PercentageConverter}, ConverterParameter=0.5}">
+                    Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource PercentageConverter}, ConverterParameter=0.7}">
             <!-- Sign In -->
             <Grid Margin="{DynamicResource CardBottomMargin}"
                   Visibility="{Binding IsUserLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
