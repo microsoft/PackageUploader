@@ -73,7 +73,7 @@ public class Msixvc2UploadViewModelTest
         Assert.IsFalse(args.Contains("/flight"));
         Assert.IsTrue(args.Contains("/market \"default\""));
         Assert.IsTrue(args.Contains("/storeid \"9ABC123DEF456\""));
-        Assert.IsTrue(args.Contains("/auth Browser"));
+        Assert.IsTrue(args.Contains("/auth CacheableBrowser"));
     }
 
     [TestMethod]

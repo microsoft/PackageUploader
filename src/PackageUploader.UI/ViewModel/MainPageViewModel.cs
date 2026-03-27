@@ -45,6 +45,20 @@ public partial class MainPageViewModel : BaseViewModel
         set => SetProperty(ref _makePkgUnavailableErrorMessage, value);
     }
 
+    private bool _isMakePkg2Enabled = true;
+    public bool IsMakePkg2Enabled
+    {
+        get => _isMakePkg2Enabled;
+        set => SetProperty(ref _isMakePkg2Enabled, value);
+    }
+
+    private string _makePkg2UnavailableErrorMessage = string.Empty;
+    public string MakePkg2UnavailableErrorMessage
+    {
+        get => _makePkg2UnavailableErrorMessage;
+        set => SetProperty(ref _makePkg2UnavailableErrorMessage, value);
+    }
+
     public bool IsUserLoggedIn
     {
         get => _userLoggedInProvider.UserLoggedIn;
@@ -224,6 +238,12 @@ public partial class MainPageViewModel : BaseViewModel
         if (File.Exists(makePkg2Path))
         {
             _pathConfigurationService.MakePkg2Path = makePkg2Path;
+            IsMakePkg2Enabled = true;
+        }
+        else
+        {
+            IsMakePkg2Enabled = false;
+            MakePkg2UnavailableErrorMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
         }
 
         // Log version of the tool
