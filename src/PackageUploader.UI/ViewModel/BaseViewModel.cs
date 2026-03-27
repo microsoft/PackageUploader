@@ -61,6 +61,22 @@ public partial class BaseViewModel : INotifyPropertyChanged
     // and CompactModeProvider to prevent concurrent read-modify-write corruption.
     internal static readonly object SettingsFileLock = new();
 
+    /// <summary>
+    /// Writes a key/value pair into the shared in-memory settings cache and persists it.
+    /// Use this instead of writing settings.json directly so the cache stays consistent.
+    /// </summary>
+    internal static void SetExternalSetting(string key, string value)
+    {
+        _settings[key] = value;
+        SaveSettings();
+    }
+
+    /// <summary>
+    /// Reads a value from the shared in-memory settings cache.
+    /// </summary>
+    internal static string GetExternalSetting(string key)
+        => _settings.TryGetValue(key, out var value) ? value : string.Empty;
+
     private static readonly Dictionary<string, string> _settings = LoadSettings();
 
     public event PropertyChangedEventHandler? PropertyChanged;

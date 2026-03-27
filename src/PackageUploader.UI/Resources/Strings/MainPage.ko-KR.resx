@@ -126,6 +126,15 @@
   <data name="CloseWindow" xml:space="preserve">
     <value>닫기</value>
   </data>
+  <data name="CompactModeHelpText" xml:space="preserve">
+    <value>컴팩트 모드 전환</value>
+  </data>
+  <data name="CompactModeTooltipCompact" xml:space="preserve">
+    <value>컴팩트 모드로 전환</value>
+  </data>
+  <data name="CompactModeTooltipExpand" xml:space="preserve">
+    <value>표준 모드로 전환</value>
+  </data>
   <data name="GitHubIssues" xml:space="preserve">
     <value>피드백 보내기...</value>
   </data>

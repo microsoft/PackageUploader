@@ -185,13 +185,13 @@ namespace PackageUploader.UI
             {
                 // Expand icon (lines spread apart)
                 CompactModeIcon.Data = Geometry.Parse("M3,3 H13 M3,8 H13 M3,13 H13");
-                CompactModeButton.ToolTip = "Switch to standard mode";
+                CompactModeButton.ToolTip = UI.Resources.Strings.MainPage.CompactModeTooltipExpand;
             }
             else
             {
                 // Compact icon (lines close together)
                 CompactModeIcon.Data = Geometry.Parse("M3,5 H13 M3,8 H13 M3,11 H13");
-                CompactModeButton.ToolTip = "Switch to compact mode";
+                CompactModeButton.ToolTip = UI.Resources.Strings.MainPage.CompactModeTooltipCompact;
             }
         }
     }

@@ -126,6 +126,15 @@
   <data name="CloseWindow" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="CompactModeHelpText" xml:space="preserve">
+    <value>Toggle compact mode</value>
+  </data>
+  <data name="CompactModeTooltipCompact" xml:space="preserve">
+    <value>Switch to compact mode</value>
+  </data>
+  <data name="CompactModeTooltipExpand" xml:space="preserve">
+    <value>Switch to standard mode</value>
+  </data>
   <data name="GitHubIssues" xml:space="preserve">
     <value>Send feedback...</value>
   </data>

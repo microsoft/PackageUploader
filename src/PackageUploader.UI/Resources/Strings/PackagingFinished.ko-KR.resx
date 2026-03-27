@@ -150,4 +150,7 @@
   <data name="ValidatorFailuresTitleText" xml:space="preserve">
     <value>제출 검증기 오류</value>
   </data>
+  <data name="ValidatorMessagesExpanderText" xml:space="preserve">
+    <value>제출 검증기 메시지</value>
+  </data>
 </root>

@@ -97,8 +97,8 @@
                             WindowChrome.IsHitTestVisibleInChrome="True"
                             Click="CompactModeButton_Click"
                             Style="{StaticResource WindowControlButtonStyle}"
-                            AutomationProperties.HelpText="Toggle compact mode"
-                            ToolTip="Switch to compact mode">
+                            AutomationProperties.HelpText="{x:Static strings:MainPage.CompactModeHelpText}"
+                            ToolTip="{x:Static strings:MainPage.CompactModeTooltipCompact}">
                         <Path x:Name="CompactModeIcon"
                               Data="M3,5 H13 M3,8 H13 M3,11 H13"
                               Stroke="{StaticResource SecondaryTextBrush}"

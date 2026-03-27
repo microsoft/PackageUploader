@@ -186,18 +186,25 @@ public partial class App : System.Windows.Application
     {
         string sizesToApply = isCompact ? CompactSizes : NormalSizes;
         var dicts = Resources.MergedDictionaries;
-        int themeIndex = -1;
         for (int i = dicts.Count - 1; i >= 0; i--)
         {
             var src = dicts[i].Source?.ToString();
             if (src == null) continue;
             if (src.EndsWith(NormalSizes) || src.EndsWith(CompactSizes))
                 dicts.RemoveAt(i);
-            else if (src.EndsWith(LightTheme) || src.EndsWith(DarkTheme) || src.EndsWith(HighContrastTheme))
-                themeIndex = i;
         }
-        // Insert immediately after the theme dictionary so colors resolve first, then sizes, then styles
-        var insertAt = themeIndex >= 0 ? themeIndex + 1 : 0;
+        // Re-query the theme index after removals — the loop above may have shifted indices.
+        // Insert sizes immediately after the theme dictionary so colors resolve first, then sizes, then styles.
+        int insertAt = 0;
+        for (int i = 0; i < dicts.Count; i++)
+        {
+            var src = dicts[i].Source?.ToString();
+            if (src != null && (src.EndsWith(LightTheme) || src.EndsWith(DarkTheme) || src.EndsWith(HighContrastTheme)))
+            {
+                insertAt = i + 1;
+                break;
+            }
+        }
         dicts.Insert(Math.Min(insertAt, dicts.Count), new ResourceDictionary { Source = new Uri(sizesToApply, UriKind.Relative) });
     }
 

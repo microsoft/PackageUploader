@@ -120,7 +120,9 @@
                         Margin="0, 0, 10, 0"/>
             </Grid>
         </Border>
-        <Border Grid.Row="3" Visibility="{Binding ValidatorFailuresExist, Converter={StaticResource BooleanToVisibilityConverter}}"
+        <!-- Full mode: draw all validator errors inline -->
+        <Border Grid.Row="3"
+                Visibility="{Binding ShowFullValidatorBlock, Converter={StaticResource BooleanToVisibilityConverter}}"
                 Background="{DynamicResource ErrorRedTransluscentBrush}"
                 Margin="40, 10, 40, 0"
                 CornerRadius="6"
@@ -160,6 +162,38 @@
                                MaxHeight="300"/>
                 </Grid>
             </ScrollViewer>
+        </Border>
+
+        <!-- Compact mode: collapsible expander so buttons are never pushed off-screen -->
+        <Border Grid.Row="3"
+                Visibility="{Binding ShowCompactValidatorExpander, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Background="{DynamicResource ErrorRedTransluscentBrush}"
+                Margin="40, 10, 40, 0"
+                CornerRadius="6"
+                Padding="4">
+            <Expander>
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                               Width="16" Height="16"
+                               Margin="0,0,8,0"
+                               VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static strings:PackagingFinished.ValidatorMessagesExpanderText}"
+                                   d:Text="Submission Validator messages"
+                                   FontSize="{DynamicResource SubHeadlineFontSize}"
+                                   Foreground="{DynamicResource ErrorRedBrush}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Expander.Header>
+                <ScrollViewer MaxHeight="120"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Margin="10,4,10,8">
+                    <TextBlock Text="{Binding ValidatorFailuresText, Mode=OneWay}"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
+                               TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </Expander>
         </Border>
         <StackPanel Grid.Row="4"
                     Orientation="Horizontal"

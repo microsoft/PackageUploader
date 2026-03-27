@@ -126,6 +126,15 @@
   <data name="CloseWindow" xml:space="preserve">
     <value>閉じる</value>
   </data>
+  <data name="CompactModeHelpText" xml:space="preserve">
+    <value>コンパクトモードの切り替え</value>
+  </data>
+  <data name="CompactModeTooltipCompact" xml:space="preserve">
+    <value>コンパクトモードに切り替える</value>
+  </data>
+  <data name="CompactModeTooltipExpand" xml:space="preserve">
+    <value>標準モードに切り替える</value>
+  </data>
   <data name="GitHubIssues" xml:space="preserve">
     <value>フィードバックを送信...</value>
   </data>

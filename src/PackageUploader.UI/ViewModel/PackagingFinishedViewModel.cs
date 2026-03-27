@@ -8,6 +8,7 @@ using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
@@ -74,6 +75,21 @@ namespace PackageUploader.UI.ViewModel
 
         public bool ValidatorFailuresExist => !_validatorResultsProvider.Results.Succeeded;
         public string ValidatorFailuresText => _validatorResultsProvider.Results.ErrorToString();
+
+        // In full mode, draw errors normally. In compact mode, show a collapsible expander instead
+        // so the buttons below are never pushed off-screen by a long error list.
+        public bool ShowFullValidatorBlock => ValidatorFailuresExist && !IsCompactMode;
+        public bool ShowCompactValidatorExpander => ValidatorFailuresExist && IsCompactMode;
+
+        protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            base.OnPropertyChanged(propertyName);
+            if (propertyName == nameof(IsCompactMode))
+            {
+                base.OnPropertyChanged(nameof(ShowFullValidatorBlock));
+                base.OnPropertyChanged(nameof(ShowCompactValidatorExpander));
+            }
+        }
 
         private Process? _installGameProcess = null;
         private bool _isInstallingGame = false;
