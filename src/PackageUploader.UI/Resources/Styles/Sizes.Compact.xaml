@@ -27,7 +27,7 @@
     <Thickness x:Key="ProgressSectionMargin">0,0,0,12</Thickness>
 
     <!-- Section Spacing -->
-    <Thickness x:Key="HeadlineMargin">0,6,0,6</Thickness>
+    <Thickness x:Key="HeadlineMargin">0,25,0,6</Thickness>
     <Thickness x:Key="SubtitleMargin">0,2,0,6</Thickness>
     <Thickness x:Key="SectionCardPadding">4,4,4,4</Thickness>
     <Thickness x:Key="CardBottomMargin">0,0,0,15</Thickness>
