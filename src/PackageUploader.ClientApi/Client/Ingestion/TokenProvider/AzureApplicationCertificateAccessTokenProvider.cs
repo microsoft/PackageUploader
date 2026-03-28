@@ -52,7 +52,7 @@ public class AzureApplicationCertificateAccessTokenProvider : IAccessTokenProvid
         var authority = _config.AadAuthorityBaseUrl + _aadAuthInfo.TenantId;
         var msalClient = ConfidentialClientApplicationBuilder
             .Create(_aadAuthInfo.ClientId)
-            .WithCertificate(certificate)
+            .WithCertificate(certificate, true)
             .WithAuthority(authority)
             .Build();
 
