@@ -139,7 +139,7 @@
     <value>패키지 위치 확인</value>
   </data>
   <data name="DestinationTitleText" xml:space="preserve">
-    <value>대상</value>
+    <value>브랜치</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
     <value>디렉터리를 찾을 수 없습니다: {0}</value>

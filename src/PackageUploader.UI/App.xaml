@@ -9,6 +9,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <!-- Default to Colors.Dark.xaml, will be swapped at runtime -->
                 <ResourceDictionary Source="Resources/Styles/Colors.Dark.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Sizes.Normal.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/WindowStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -22,6 +23,7 @@
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
             <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
             <converters:BooleanAndConverter x:Key="BooleanAndConverter"/>
+            <converters:PercentageConverter x:Key="PercentageConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -139,7 +139,7 @@
     <value>Confirm the location of the package</value>
   </data>
   <data name="DestinationTitleText" xml:space="preserve">
-    <value>Destination</value>
+    <value>Branch</value>
   </data>
   <data name="DirectoryNotFoundErrMsg" xml:space="preserve">
     <value>The directory wasn't found: {0}</value>

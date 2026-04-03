@@ -10,15 +10,17 @@
              d:DataContext="{d:DesignInstance Type=viewmodel:PackageCreationViewModel}">
   
     <Grid Background="{DynamicResource AppBackgroundBrush}">
-        <StackPanel Margin="32">
-            <!-- Add Back Arrow Icon -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="{DynamicResource PagePadding}">
+            <!-- Back Arrow + Title -->
             <StackPanel Orientation="Horizontal"
                         VerticalAlignment="Top"
-                        Margin="0, 0, 0, 15">
+                        Margin="0, 0, 0, 10">
                 <Button Width="16"
                         Height="16"
                         Command="{Binding CancelButtonCommand}"
                         Style="{StaticResource WindowControlButtonStyle}"
+                        VerticalAlignment="Center"
                         AutomationProperties.HelpText="Back to home">
                     <Path Data="M16,8 L4,8 M4,8 L8,4 M4,8 L8,12" 
                           Stroke="{DynamicResource PrimaryTextBrush}" 
@@ -27,21 +29,22 @@
                           VerticalAlignment="Center" 
                           HorizontalAlignment="Center"/>
                 </Button>
+                <TextBlock 
+                       Text="{x:Static strings:PackageCreation.TitleString}"
+                       d:Text="Make a game package"
+                       Style="{StaticResource Headline}"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       VerticalAlignment="Center"
+                       Margin="10,0,0,0"/>
             </StackPanel>
-
-            <TextBlock 
-                   Text="{x:Static strings:PackageCreation.TitleString}"
-                   d:Text="Make a game package"
-                   Style="{StaticResource Headline}"
-                   Foreground="{DynamicResource PrimaryTextBrush}"
-                   HorizontalAlignment="Left"/>
             <TextBlock 
                    Text="{x:Static strings:PackageCreation.SubTitleText}"
                    d:Text="Locate your game's build to create a package. The Xbox Game Package Manager will remember these paths for easier access in the future."
                    HorizontalAlignment="Left"
                    Foreground="{DynamicResource PrimaryTextBrush}"
                    TextWrapping="Wrap"
-                   Margin="0,5,0,20"/>
+                   Margin="{DynamicResource SubtitleMargin}"
+                   Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
             
             <!-- Grid: 4 columns, 2 rows-->
             <Grid>
@@ -51,9 +54,9 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="30" />
-                    <ColumnDefinition Width="667"/>
+                    <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="408" />
+                    <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Row="0"
@@ -83,9 +86,9 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="96"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0" 
                                Text="{x:Static strings:PackageCreation.BuildLocationTitle}"
@@ -100,7 +103,8 @@
                                HorizontalAlignment="Left"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                TextWrapping="Wrap"
-                               Margin="0,0,0,10"/>
+                               Margin="0,0,0,10"
+                               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.GamePathTitleText}"
@@ -202,8 +206,8 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="476"/>
-                                <ColumnDefinition Width="96" />
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                    Text="{x:Static strings:PackageCreation.LayoutFileMapTitle}"
@@ -404,9 +408,9 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="476"/>
+                            <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="96"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Row="0" Grid.Column="0"
                                Text="{x:Static strings:PackageCreation.PackageOutputTitleText}"
@@ -421,7 +425,8 @@
                                HorizontalAlignment="Left"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                TextWrapping="Wrap"
-                               Margin="0,0,0,10"/>
+                               Margin="0,0,0,10"
+                               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
                         <TextBlock Grid.Row="2" Grid.Column="0"
                                 Text="{x:Static strings:PackageCreation.PackagePathTitleText}"
                                 d:Text="Package path"
@@ -514,7 +519,8 @@
                     <Border BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="6"
-                            Padding="6"
+                            Padding="{DynamicResource PreviewPadding}"
+                            TextElement.FontSize="{DynamicResource PreviewFontSize}"
                             Visibility="{Binding HasValidGameConfig, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -531,13 +537,13 @@
                                    Grid.RowSpan="3"
                                    Source="{Binding PackagePreviewImage}"
                                    HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   Height="65"
-                                   Width="65"
+                                   VerticalAlignment="Top"
+                                   Height="{DynamicResource PreviewImageSize}"
+                                   Width="{DynamicResource PreviewImageSize}"
                                    Margin="0,0,10,0"/>
                             <Grid Grid.Row="0"
                                   Grid.Column="1"
-                                  Margin="0,0,0,10">
+                                  Margin="{DynamicResource PreviewItemMargin}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition />
                                     <RowDefinition />
@@ -553,7 +559,10 @@
                                            Foreground="{DynamicResource PrimaryTextBrush}"
                                            TextWrapping="Wrap"/>
                             </Grid>
-                            <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                            <!-- StoreId / Size / Family — standard mode -->
+                            <Grid Grid.Row="1" Grid.Column="1"
+                                  Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                                <Grid Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition />
                                     <RowDefinition />
@@ -590,7 +599,18 @@
                                            Grid.Column="2"
                                            Text="{Binding PackageType}" 
                                            Foreground="{DynamicResource PrimaryTextBrush}"/>
+                                </Grid>
                             </Grid>
+                            <!-- StoreId / Size / Family — compact mode: stacked -->
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,2"
+                                        Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewStoreIdText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding BigId}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,2"/>
+                                <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewSizeEstimate}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding PackageSize}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,2"/>
+                                <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewFamilyText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{Binding PackageType}" Foreground="{DynamicResource PrimaryTextBrush}"/>
+                            </StackPanel>
                             <Grid Grid.Row="1" Grid.Column="1" Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewNoPreviewAvailable}"
                                            d:Text="Full preview is not available because the provided MicrosoftGame.config file does not have a StoreId. Please add your StoreId to your MicrosoftGame.config file."
@@ -614,5 +634,6 @@
                         Width="128"/>
             </StackPanel>
         </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

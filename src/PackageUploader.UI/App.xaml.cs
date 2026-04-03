@@ -31,6 +31,8 @@ public partial class App : System.Windows.Application
     private const string LightTheme = "Resources/Styles/Colors.Light.xaml";
     private const string DarkTheme = "Resources/Styles/Colors.Dark.xaml";
     private const string HighContrastTheme = "Resources/Styles/Colors.HighContrast.xaml";
+    private const string NormalSizes = "Resources/Styles/Sizes.Normal.xaml";
+    private const string CompactSizes = "Resources/Styles/Sizes.Compact.xaml";
 
     public static string GetLogFilePath() => LogFilePath;
 
@@ -53,7 +55,8 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<UploadingProgressPercentageProvider>();
                 services.AddSingleton<ErrorModelProvider>();
                 services.AddSingleton<LanguageProvider>(); // Add the LanguageProvider
-                services.AddSingleton<ValidatorResultsProvider>(); 
+                services.AddSingleton<CompactModeProvider>();
+                services.AddSingleton<ValidatorResultsProvider>();
 
                 // Register ViewModels
                 services.AddSingleton<MainPageViewModel>();
@@ -137,6 +140,18 @@ public partial class App : System.Windows.Application
 
         SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
         ApplyTheme();
+
+        // Apply compact mode from saved setting and subscribe to changes.
+        // Both App and CompactModeProvider are singletons, so the lambda
+        // subscription lives for the entire process — no unsubscribe needed.
+        var compactProvider = _host.Services.GetRequiredService<CompactModeProvider>();
+        BaseViewModel.InitializeCompactMode(compactProvider);
+        ApplyCompactMode(compactProvider.IsCompactMode);
+        compactProvider.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(CompactModeProvider.IsCompactMode))
+                Dispatcher.Invoke(() => ApplyCompactMode(compactProvider.IsCompactMode));
+        };
     }
 
     private void InitializeLanguage()
@@ -167,6 +182,32 @@ public partial class App : System.Windows.Application
         }
     }
 
+    private void ApplyCompactMode(bool isCompact)
+    {
+        string sizesToApply = isCompact ? CompactSizes : NormalSizes;
+        var dicts = Resources.MergedDictionaries;
+        for (int i = dicts.Count - 1; i >= 0; i--)
+        {
+            var src = dicts[i].Source?.ToString();
+            if (src == null) continue;
+            if (src.EndsWith(NormalSizes) || src.EndsWith(CompactSizes))
+                dicts.RemoveAt(i);
+        }
+        // Re-query the theme index after removals — the loop above may have shifted indices.
+        // Insert sizes immediately after the theme dictionary so colors resolve first, then sizes, then styles.
+        int insertAt = 0;
+        for (int i = 0; i < dicts.Count; i++)
+        {
+            var src = dicts[i].Source?.ToString();
+            if (src != null && (src.EndsWith(LightTheme) || src.EndsWith(DarkTheme) || src.EndsWith(HighContrastTheme)))
+            {
+                insertAt = i + 1;
+                break;
+            }
+        }
+        dicts.Insert(Math.Min(insertAt, dicts.Count), new ResourceDictionary { Source = new Uri(sizesToApply, UriKind.Relative) });
+    }
+
     private void ApplyTheme()
     {
         string themeToApply = GetSystemThemeResource();
@@ -178,6 +219,7 @@ public partial class App : System.Windows.Application
             if (src != null && (src.EndsWith(LightTheme) || src.EndsWith(DarkTheme) || src.EndsWith(HighContrastTheme)))
                 dicts.RemoveAt(i);
         }
+        // Theme always goes first (index 0)
         dicts.Insert(0, new ResourceDictionary { Source = new Uri(themeToApply, UriKind.Relative) });
     }
 

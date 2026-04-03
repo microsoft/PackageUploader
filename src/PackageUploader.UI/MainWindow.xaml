@@ -12,9 +12,11 @@
         Title="{x:Static strings:MainPage.ApplicationName}"
         Height="800"
         Width="1200"
+        MinHeight="400"
+        MinWidth="600"
         Background="{DynamicResource AppBackgroundBrush}"
         WindowStyle="None"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         AllowsTransparency="True"
         Icon="Resources/AppIcon/WindowsIcon.png">
     
@@ -89,6 +91,22 @@
 
                 <!-- Window Controls -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <!-- Compact mode toggle -->
+                    <Button x:Name="CompactModeButton"
+                            Width="46" Height="32"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Click="CompactModeButton_Click"
+                            Style="{StaticResource WindowControlButtonStyle}"
+                            AutomationProperties.HelpText="{x:Static strings:MainPage.CompactModeHelpText}"
+                            ToolTip="{x:Static strings:MainPage.CompactModeTooltipCompact}">
+                        <Path x:Name="CompactModeIcon"
+                              Data="M3,5 H13 M3,8 H13 M3,11 H13"
+                              Stroke="{StaticResource SecondaryTextBrush}"
+                              StrokeThickness="1"
+                              Width="14"
+                              Height="14"
+                              Stretch="Uniform"/>
+                    </Button>
                     <!-- Send feedback button -->
                     <Grid x:Name="HelpButtonGrid" Margin="0,0,5,0">
                         <Button x:Name="HelpButton"

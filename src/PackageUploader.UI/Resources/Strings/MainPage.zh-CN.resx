@@ -126,6 +126,15 @@
   <data name="CloseWindow" xml:space="preserve">
     <value>关闭</value>
   </data>
+  <data name="CompactModeHelpText" xml:space="preserve">
+    <value>切换紧凑模式</value>
+  </data>
+  <data name="CompactModeTooltipCompact" xml:space="preserve">
+    <value>切换到紧凑模式</value>
+  </data>
+  <data name="CompactModeTooltipExpand" xml:space="preserve">
+    <value>切换到标准模式</value>
+  </data>
   <data name="GitHubIssues" xml:space="preserve">
     <value>发送反馈...</value>
   </data>

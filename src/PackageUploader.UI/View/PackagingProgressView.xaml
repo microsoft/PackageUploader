@@ -35,21 +35,23 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Image Grid.Row="0"
-               Margin="0, 100, 0, 23"
+               Margin="{DynamicResource ProgressImageMargin}"
                Source="/Resources/Images/InProgress.png"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
-               Height="130"
-               Width="130"/>
+               Height="{DynamicResource StatusImageSize}"
+               Width="{DynamicResource StatusImageSize}"/>
         <TextBlock Grid.Row="1"
-                   Margin="0, 0, 0, 23"
+                   Margin="{DynamicResource ProgressHeadingMargin}"
                    Style="{StaticResource SubHeadline}"
                    Text="{x:Static strings:PackagingProgress.PackagingProgressTitleText}"
                    d:Text="Getting your package ready..."
                    Foreground="{DynamicResource PrimaryTextBrush}" />
         <!-- Loading Bar -->
         <Grid Grid.Row="2"
-              Margin="300, 0, 300, 23">
+              Margin="{DynamicResource ProgressSectionMargin}"
+              MaxWidth="{DynamicResource ProgressBarMaxWidth}"
+              HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -86,7 +88,7 @@
                          Height="3"/>
         </Grid>
         <!-- updating labels -->
-        <Grid Grid.Row="3" Margin="500, 0, 0, 0">
+        <Grid Grid.Row="3" HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>

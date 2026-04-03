@@ -150,4 +150,7 @@
   <data name="ValidatorFailuresTitleText" xml:space="preserve">
     <value>提交验证器错误</value>
   </data>
+  <data name="ValidatorMessagesExpanderText" xml:space="preserve">
+    <value>提交验证消息</value>
+  </data>
 </root>

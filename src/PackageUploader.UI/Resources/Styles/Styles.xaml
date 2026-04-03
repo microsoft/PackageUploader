@@ -4,6 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Global Font Family -->
+
+    <!-- Shared icon geometry for info tooltip buttons -->
+    <Geometry x:Key="InfoIconGeometry">M8,0 A8,8 0 1,0 8,16 A8,8 0 1,0 8,0 M8,3 L8,3.5 M8,6 L8,12</Geometry>
     <Style TargetType="{x:Type Window}">
         <Setter Property="FontFamily" Value="Segoe Sans" />
     </Style>
@@ -11,7 +14,7 @@
     <!-- TextBlock Styles -->
     <Style x:Key="Headline" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontSize" Value="{DynamicResource HeadlineFontSize}" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="TextAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -19,7 +22,7 @@
 
     <Style x:Key="SubHeadline" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontSize" Value="{DynamicResource SubHeadlineFontSize}" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="TextAlignment" Value="Center" />
     </Style>
@@ -30,8 +33,8 @@
         <Setter Property="Background" Value="{DynamicResource SecondaryButtonBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SecondaryButtonHoverBrush}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="14,8" />
-        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="{DynamicResource ButtonPadding}" />
+        <Setter Property="MinHeight" Value="{DynamicResource ControlMinHeight}" />
         <Setter Property="MinWidth" Value="34" />
         <Setter Property="Template">
             <Setter.Value>
@@ -66,8 +69,8 @@
         <Setter Property="Background" Value="{DynamicResource PrimaryButtonBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonHoverBrush}" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Padding" Value="14,8" />
-        <Setter Property="MinHeight" Value="34" />
+        <Setter Property="Padding" Value="{DynamicResource ButtonPadding}" />
+        <Setter Property="MinHeight" Value="{DynamicResource ControlMinHeight}" />
         <Setter Property="MinWidth" Value="34" />
         <Setter Property="Template">
             <Setter.Value>
@@ -102,7 +105,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Template">
@@ -127,7 +130,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Template">
@@ -210,8 +213,8 @@
     <Style TargetType="TextBox">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
+        <Setter Property="MinHeight" Value="{DynamicResource InputMinHeight}" />
         <Setter Property="MinWidth" Value="44" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BorderBrush" Value="{DynamicResource SecondaryTextBrush}" />
@@ -263,7 +266,7 @@
         <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource SecondaryTextBrush}" />
-        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="MinHeight" Value="{DynamicResource InputMinHeight}" />
         <Setter Property="MinWidth" Value="44" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">

@@ -150,4 +150,7 @@
   <data name="ValidatorFailuresTitleText" xml:space="preserve">
     <value>Submission Validator Errors</value>
   </data>
+  <data name="ValidatorMessagesExpanderText" xml:space="preserve">
+    <value>Submission Validator messages</value>
+  </data>
 </root>

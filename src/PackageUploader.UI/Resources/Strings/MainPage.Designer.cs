@@ -88,6 +88,33 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Toggle compact mode.
+        /// </summary>
+        public static string CompactModeHelpText {
+            get {
+                return ResourceManager.GetString("CompactModeHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Switch to compact mode.
+        /// </summary>
+        public static string CompactModeTooltipCompact {
+            get {
+                return ResourceManager.GetString("CompactModeTooltipCompact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Switch to standard mode.
+        /// </summary>
+        public static string CompactModeTooltipExpand {
+            get {
+                return ResourceManager.GetString("CompactModeTooltipExpand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Send feedback....
         /// </summary>
         public static string GitHubIssues {

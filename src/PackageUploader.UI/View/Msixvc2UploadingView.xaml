@@ -39,16 +39,16 @@
 
         <!-- Hero icon -->
         <Image Grid.Row="0"
-               Margin="0, 100, 0, 23"
+               Margin="{DynamicResource ProgressImageMargin}"
                Source="/Resources/Images/InProgress.png"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
-               Height="130"
-               Width="130" />
+               Height="{DynamicResource StatusImageSize}"
+               Width="{DynamicResource StatusImageSize}" />
 
         <!-- Title -->
         <TextBlock Grid.Row="1"
-                   Margin="0, 0, 0, 23"
+                   Margin="{DynamicResource ProgressHeadingMargin}"
                    Style="{StaticResource SubHeadline}"
                    Text="{x:Static strings:Msixvc2Uploading.TitleText}"
                    d:Text="Uploading package to Partner Center"
@@ -56,7 +56,9 @@
 
         <!-- Progress bar -->
         <Grid Grid.Row="2"
-              Margin="300, 0, 300, 10">
+              Margin="{DynamicResource ProgressSectionMargin}"
+              MaxWidth="{DynamicResource ProgressBarMaxWidth}"
+              HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -75,7 +77,8 @@
             <StackPanel Grid.Row="0"
                         Grid.Column="1"
                         Orientation="Horizontal"
-                        HorizontalAlignment="Right">
+                        HorizontalAlignment="Right"
+                        Margin="12,0,0,10">
                 <TextBlock Text="{Binding UploadPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                            Foreground="{DynamicResource PrimaryTextBrush}"/>
                 <TextBlock Text="{x:Static strings:Msixvc2Uploading.PercentCompleteText}"
@@ -95,12 +98,11 @@
 
         <!-- Upload stats (visible only during Uploading stage) -->
         <TextBlock Grid.Row="3"
-                   Margin="300, 0, 300, 23"
+                   HorizontalAlignment="Center"
                    Text="{Binding UploadStats}"
                    Foreground="{DynamicResource SecondaryTextBrush}"
                    Visibility="{Binding ShowUploadStats, Converter={StaticResource BooleanToVisibilityConverter}}"
-                   HorizontalAlignment="Left"
-                   FontSize="12"/>
+                   FontSize="{DynamicResource SmallFontSize}"/>
 
         <!-- Stage checkpoints -->
         <Grid Grid.Row="4" HorizontalAlignment="Center">

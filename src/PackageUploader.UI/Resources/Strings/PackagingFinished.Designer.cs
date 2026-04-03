@@ -142,6 +142,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Submission Validator messages.
+        /// </summary>
+        public static string ValidatorMessagesExpanderText {
+            get {
+                return ResourceManager.GetString("ValidatorMessagesExpanderText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View logs.
         /// </summary>
         public static string ViewLogsButtonContent {
