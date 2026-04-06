@@ -374,6 +374,54 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         }
     }
 
+    public async void RefreshBranchesAsync()
+    {
+        if (_gameProduct == null || string.IsNullOrEmpty(BigId) || BigId == "None")
+        {
+            return;
+        }
+
+        string previousSelection = BranchOrFlightDisplayName;
+
+        IsLoadingBranchesAndFlights = true;
+        BranchOrFlightErrorMessage = string.Empty;
+
+        try
+        {
+            _branchesAndFlights = await _uploaderService.GetPackageBranchesAsync(_gameProduct, CancellationToken.None);
+
+            List<string> displayNames = [];
+            foreach (var branch in _branchesAndFlights)
+            {
+                if (branch.BranchType == GamePackageBranchType.Branch)
+                    displayNames.Add("Branch: " + branch.Name);
+                else if (branch.BranchType == GamePackageBranchType.Flight)
+                    displayNames.Add("Flight: " + branch.Name);
+            }
+            BranchAndFlightNames = [.. displayNames];
+
+            if (!string.IsNullOrEmpty(previousSelection) && displayNames.Contains(previousSelection))
+            {
+                BranchOrFlightDisplayName = previousSelection;
+            }
+            else
+            {
+                string mainBranch = displayNames.FirstOrDefault(n => n.Equals("Branch: Main", StringComparison.OrdinalIgnoreCase), string.Empty);
+                BranchOrFlightDisplayName = !string.IsNullOrEmpty(mainBranch) ? mainBranch : BranchAndFlightNames.FirstOrDefault(string.Empty);
+            }
+            OnPropertyChanged(nameof(BranchOrFlightDisplayName));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error refreshing branches for BigId {BigId}.", BigId);
+            BranchOrFlightErrorMessage = $"Error refreshing branches: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingBranchesAndFlights = false;
+        }
+    }
+
     private async void UpdateMarketGroups()
     {
         if (_branchesAndFlights == null)
