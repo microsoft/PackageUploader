@@ -240,12 +240,28 @@
                                 Margin="6,0,0,0"
                                 VerticalAlignment="Center"
                                 Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                ToolTip="{x:Static strings:MainPage.Msixvc2BodyText}">
+                                ToolTip="{x:Static strings:MainPage.Msixvc2BodyTextWithLink}">
                             <Path Data="{StaticResource InfoIconGeometry}"
                                   Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
                                   Width="14" Height="14" Stretch="Uniform"/>
                         </Button>
                     </StackPanel>
+
+                    <TextBlock Margin="0, 2, 0, 0"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
+                               FontSize="12"
+                               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                        <Run Text="{x:Static strings:MainPage.Msixvc2SubtitleText}"
+                             d:Text="MSIXVC2 Preview"/>
+                        <Hyperlink Command="{Binding PackagingLearnMoreURL}"
+                                   CommandParameter="https://aka.ms/MSIXVC2">
+                            <TextBlock Text="{x:Static strings:MainPage.MakeAPackageBodyURLText}"
+                                       d:Text="(learn more)"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       TextDecorations="Underline"
+                                       FontSize="12"/>
+                        </Hyperlink>
+                    </TextBlock>
 
                     <TextBlock Margin="0, 10, 0, 0" TextWrapping="Wrap"
                        Text="{x:Static strings:MainPage.Msixvc2BodyText}"
@@ -347,7 +363,7 @@
                 <Button Grid.Column="1"
                         Style="{StaticResource WindowControlButtonStyle}"
                         Width="24" Height="24" Margin="6,0,0,0"
-                        ToolTip="{x:Static strings:MainPage.Msixvc2BodyText}">
+                        ToolTip="{x:Static strings:MainPage.Msixvc2BodyTextWithLink}">
                     <Path Data="{StaticResource InfoIconGeometry}"
                           Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
                           Width="14" Height="14" Stretch="Uniform"/>

@@ -19,7 +19,7 @@ namespace PackageUploader.UI.Resources.Strings {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class MainPage {
@@ -178,6 +178,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MSIXVC2 upload requires makepkg2 tools, available as a preview in the April 2026 GDK. Install the April 2026 GDK to get started..
+        /// </summary>
+        public static string MakePkg2NotFoundErrorMsg {
+            get {
+                return ResourceManager.GetString("MakePkg2NotFoundErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Maximize.
         /// </summary>
         public static string MaximizeWindow {
@@ -205,6 +214,16 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Point to your loose file directory containing a MicrosoftGame.config for your PC game. Your files will be packaged and uploaded using the MSIXVC2 format — no pre-built package required.
+        ///Learn more: https://aka.ms/MSIXVC2.
+        /// </summary>
+        public static string Msixvc2BodyTextWithLink {
+            get {
+                return ResourceManager.GetString("Msixvc2BodyTextWithLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Get started.
         /// </summary>
         public static string Msixvc2ButtonText {
@@ -214,11 +233,11 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to MSIXVC2 upload requires makepkg2 tools, available as a preview in the April 2026 GDK. Install the April 2026 GDK to get started..
+        ///   Looks up a localized string similar to MSIXVC2 Preview.
         /// </summary>
-        public static string MakePkg2NotFoundErrorMsg {
+        public static string Msixvc2SubtitleText {
             get {
-                return ResourceManager.GetString("MakePkg2NotFoundErrorMsg", resourceCulture);
+                return ResourceManager.GetString("Msixvc2SubtitleText", resourceCulture);
             }
         }
         
