@@ -14,7 +14,6 @@ public class CompactModeProvider : INotifyPropertyChanged
 
     public CompactModeProvider()
     {
-        // Read initial state from the shared settings cache (loaded once at startup by BaseViewModel).
         var stored = ViewModel.BaseViewModel.GetExternalSetting(SettingsKey);
         _isCompactMode = bool.TryParse(stored, out var result) && result;
     }
@@ -27,8 +26,6 @@ public class CompactModeProvider : INotifyPropertyChanged
             if (_isCompactMode != value)
             {
                 _isCompactMode = value;
-                // Route through the shared in-memory cache so BaseViewModel.SaveSettings()
-                // never overwrites this value with a stale copy.
                 ViewModel.BaseViewModel.SetExternalSetting(SettingsKey, value.ToString());
                 OnPropertyChanged();
             }

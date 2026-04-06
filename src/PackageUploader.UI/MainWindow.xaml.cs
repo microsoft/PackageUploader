@@ -42,6 +42,13 @@ namespace PackageUploader.UI
             // Set version display
             VersionText.Text = string.Format(UI.Resources.Strings.MainPage.VersionLabel, GetSimpleVersion());
 
+            // Set initial window size before Show() so it opens at the correct dimensions
+            if (_compactModeProvider.IsCompactMode)
+            {
+                Width = 600;
+                Height = 420;
+            }
+
             // Sync icons with initial state
             UpdateCompactModeIcon();
         }
