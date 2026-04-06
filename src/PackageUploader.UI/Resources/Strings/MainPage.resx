@@ -206,6 +206,13 @@
   <data name="Msixvc2ButtonText" xml:space="preserve">
     <value>Get started</value>
   </data>
+  <data name="Msixvc2SubtitleText" xml:space="preserve">
+    <value>MSIXVC2 Preview</value>
+  </data>
+  <data name="Msixvc2BodyTextWithLink" xml:space="preserve">
+    <value>Point to your loose file directory containing a MicrosoftGame.config for your PC game. Your files will be packaged and uploaded using the MSIXVC2 format — no pre-built package required.
+Learn more: https://aka.ms/MSIXVC2</value>
+  </data>
   <data name="MakePkg2NotFoundErrorMsg" xml:space="preserve">
     <value>MSIXVC2 upload requires makepkg2 tools, available as a preview in the April 2026 GDK. Install the April 2026 GDK to get started.</value>
   </data>

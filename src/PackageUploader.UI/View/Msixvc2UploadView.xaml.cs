@@ -17,7 +17,11 @@ public partial class Msixvc2UploadView : System.Windows.Controls.UserControl
         _viewModel = viewModel;
 
         // Register drag drop event handlers after control is initialized
-        this.Loaded += (s, e) => RegisterDragDropHandlers();
+        this.Loaded += (s, e) =>
+        {
+            RegisterDragDropHandlers();
+            _viewModel.RefreshBranchesAsync();
+        };
     }
 
     private void RegisterDragDropHandlers()
