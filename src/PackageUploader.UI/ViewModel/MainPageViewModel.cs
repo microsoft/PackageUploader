@@ -205,9 +205,19 @@ public partial class MainPageViewModel : BaseViewModel
             LoadAvailableTenants();
         });
 
-        NavigateToMsixvc2Command = new RelayCommand(() =>
+        NavigateToMsixvc2Command = new RelayCommand(async () =>
         {
-            windowService.NavigateTo(typeof(Msixvc2UploadView));
+            if (!IsUserLoggedIn)
+            {
+                SigninStarted = true;
+                await _authenticationService.SignInAsync();
+                SigninStarted = false;
+            }
+
+            if (IsUserLoggedIn)
+            {
+                windowService.NavigateTo(typeof(Msixvc2UploadView));
+            }
         });
 
         IsUserLoggedIn = false;
