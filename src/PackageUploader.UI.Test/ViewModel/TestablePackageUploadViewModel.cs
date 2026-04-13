@@ -43,7 +43,7 @@ namespace PackageUploader.UI.Test.ViewModel
             IWindowService windowService,
             UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
             ErrorModelProvider errorModelProvider)
-            : base(packageModelProvider, uploaderService, windowService, uploadingProgressPercentageProvider, errorModelProvider)
+            : base(packageModelProvider, uploaderService, windowService, uploadingProgressPercentageProvider, errorModelProvider, new PathConfigurationProvider())
         {
         }
 
