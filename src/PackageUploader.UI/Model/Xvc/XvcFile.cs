@@ -60,29 +60,82 @@ class XvcFile
         return (UInt32)((dataPages + divisor - 1) / divisor);
     }
 
+    private static readonly byte[] ZipLocalFileSignature = [0x50, 0x4B, 0x03, 0x04];
+    private static readonly byte[] ZipEocdSignature = [0x50, 0x4B, 0x05, 0x06];
+    private const int FirstReadSize = 4096;
+    private const int LastReadSize = 65 * 1024;
+    private const int MinFileNameOffset = 30;
+
     /// <summary>
-    /// Detects whether a .msixvc file was created by makepkg2 (MSIXVC2 format).
-    /// Attempts full XVC header parsing. If it fails with an ArgumentException
-    /// from the GUID constructor, the binary layout differs from MSIXVC v1.
+    /// Detects whether a .msixvc file is in MSIXVC2 format by checking for ZIP signatures.
+    /// MSIXVC2 packages are ZIP-based and contain standard ZIP headers, while MSIXVC1
+    /// packages use a proprietary binary format without ZIP signatures.
     /// </summary>
     public static bool IsLikelyMsixvc2Package(string packagePath)
     {
         try
         {
-            // If full parsing succeeds, this is a valid MSIXVC v1 package.
-            GetBuildAndKeyId(packagePath, out _, out _);
+            if (!packagePath.EndsWith(".msixvc", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            var fileInfo = new FileInfo(packagePath);
+            if (!fileInfo.Exists || fileInfo.Length < FirstReadSize)
+                return false;
+
+            using var stream = File.OpenRead(packagePath);
+
+            // Check first bytes for ZIP local file header at offset 0
+            var firstBuffer = new byte[Math.Min(FirstReadSize, fileInfo.Length)];
+            stream.ReadExactly(firstBuffer, 0, firstBuffer.Length);
+
+            if (firstBuffer.Length >= MinFileNameOffset &&
+                firstBuffer[0] == ZipLocalFileSignature[0] &&
+                firstBuffer[1] == ZipLocalFileSignature[1] &&
+                firstBuffer[2] == ZipLocalFileSignature[2] &&
+                firstBuffer[3] == ZipLocalFileSignature[3])
+            {
+                return true;
+            }
+
+            // Check last 65KB for ZIP End of Central Directory signature
+            long lastChunkStart = Math.Max(0, fileInfo.Length - LastReadSize);
+            int lastChunkSize = (int)(fileInfo.Length - lastChunkStart);
+            var lastBuffer = new byte[lastChunkSize];
+            stream.Position = lastChunkStart;
+            stream.ReadExactly(lastBuffer, 0, lastChunkSize);
+
+            if (LastIndexOfSignature(lastBuffer, ZipEocdSignature) >= 0)
+                return true;
+
             return false;
-        }
-        catch (ArgumentException)
-        {
-            // "Byte array for Guid must be exactly 16 bytes": MSIXVC2 binary layout
-            return true;
         }
         catch (Exception)
         {
-            // IO errors, corrupt files, etc. (not indicative of MSIXVC2)
             return false;
         }
+    }
+
+    private static int LastIndexOfSignature(byte[] buffer, byte[] signature)
+    {
+        if (buffer.Length < signature.Length)
+            return -1;
+
+        for (int i = buffer.Length - signature.Length; i >= 0; i--)
+        {
+            bool match = true;
+            for (int j = 0; j < signature.Length; j++)
+            {
+                if (buffer[i + j] != signature[j])
+                {
+                    match = false;
+                    break;
+                }
+            }
+            if (match)
+                return i;
+        }
+
+        return -1;
     }
 
     public static void GetBuildAndKeyId(string packagePath, out Guid buildId, out Guid keyId)

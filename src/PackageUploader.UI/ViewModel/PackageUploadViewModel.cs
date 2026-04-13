@@ -533,13 +533,6 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            // Fallback: if extraction fails with a GUID parsing error, it may be an MSIXVC2 package
-            if (ex is ArgumentException || ex.InnerException is ArgumentException)
-            {
-                Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the makepkg2 upload tool.";
-                return;
-            }
-
             PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorProcessingPackageErrMsg} {ex.Message}"; // "Error processing package. {ex.Message}";
         }
     }
