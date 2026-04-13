@@ -60,6 +60,31 @@ class XvcFile
         return (UInt32)((dataPages + divisor - 1) / divisor);
     }
 
+    /// <summary>
+    /// Detects whether a .msixvc file was created by makepkg2 (MSIXVC2 format).
+    /// Attempts full XVC header parsing. If it fails with an ArgumentException
+    /// from the GUID constructor, the binary layout differs from MSIXVC v1.
+    /// </summary>
+    public static bool IsLikelyMsixvc2Package(string packagePath)
+    {
+        try
+        {
+            // If full parsing succeeds, this is a valid MSIXVC v1 package.
+            GetBuildAndKeyId(packagePath, out _, out _);
+            return false;
+        }
+        catch (ArgumentException)
+        {
+            // "Byte array for Guid must be exactly 16 bytes": MSIXVC2 binary layout
+            return true;
+        }
+        catch (Exception)
+        {
+            // IO errors, corrupt files, etc. (not indicative of MSIXVC2)
+            return false;
+        }
+    }
+
     public static void GetBuildAndKeyId(string packagePath, out Guid buildId, out Guid keyId)
     {
         using FileStream stream = File.OpenRead(packagePath);

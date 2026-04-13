@@ -370,6 +370,13 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _packageErrorMessage, value);
     }
 
+    private string _msixvc2InfoMessage = string.Empty;
+    public string Msixvc2InfoMessage
+    {
+        get => _msixvc2InfoMessage;
+        set => SetProperty(ref _msixvc2InfoMessage, value);
+    }
+
     private string _branchOrFlightErrorMessage = string.Empty;
     public string BranchOrFlightErrorMessage
     {
@@ -511,7 +518,14 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             return;
         }
-        
+
+        // Detect MSIXVC2 packages (created by makepkg2) before attempting legacy extraction
+        if (XvcFile.IsLikelyMsixvc2Package(PackageFilePath))
+        {
+            Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the makepkg2 upload tool.";
+            return;
+        }
+
         try
         {            
             // Extract package information
@@ -519,6 +533,13 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
+            // Fallback: if extraction fails with a GUID parsing error, it may be an MSIXVC2 package
+            if (ex is ArgumentException || ex.InnerException is ArgumentException)
+            {
+                Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the makepkg2 upload tool.";
+                return;
+            }
+
             PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorProcessingPackageErrMsg} {ex.Message}"; // "Error processing package. {ex.Message}";
         }
     }
@@ -534,6 +555,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         MarketGroupName = string.Empty;
 
         PackageErrorMessage = string.Empty;
+        Msixvc2InfoMessage = string.Empty;
 
         ResetProductInfo();
     }

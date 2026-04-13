@@ -178,22 +178,31 @@
                                 Height="32"
                                 Margin="0,0,0,10"/>
 
-                        <StackPanel Grid.Row="4"
+                            <StackPanel Grid.Row="4"
                                     Grid.Column="0"
                                     Margin="0, 5, 0, 0"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Left"
                                     Visibility="{Binding PackageErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
-                            <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                <Image Source="/Resources/AppIcon/ErrorIcon.png"
                                    Width="16" 
                                    Height="16"
                                    VerticalAlignment="Top"
                                    Margin="0,0,5,0"/>
-                            <TextBlock Text="{Binding PackageErrorMessage}"
+                                <TextBlock Text="{Binding PackageErrorMessage}"
                                        Foreground="{DynamicResource PrimaryTextBrush}"
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
-                        </StackPanel>
+                            </StackPanel>
+                            <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Margin="0, 5, 0, 0"
+                                   Text="{Binding Msixvc2InfoMessage}"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                   HorizontalAlignment="Left"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding Msixvc2InfoMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"/>
+
                     </Grid>
                     <Expander Style="{StaticResource CustomExpanderStyle}" Margin="0,10,0,20">
                         <Expander.Header>
