@@ -505,7 +505,12 @@
                                 <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="{x:Static strings:PackageUpload.DestinationTitleText}"
                                                d:Text="Branch"
-                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+                                    <TextBlock Text="{x:Static strings:Msixvc2Upload.DestinationTitleText}"
+                                               d:Text="Destination"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     <TextBlock Text="{Binding BranchOrFlightDisplayName}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
@@ -520,11 +525,15 @@
                             <!-- Destination / Market — compact mode: stacked -->
                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,4"
                                         Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="{x:Static strings:PackageUpload.DestinationTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{x:Static strings:PackageUpload.DestinationTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"
+                                           Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+                                <TextBlock Text="{x:Static strings:Msixvc2Upload.DestinationTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"
+                                           Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <TextBlock Text="{Binding BranchOrFlightDisplayName}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                                 <TextBlock Text="{x:Static strings:PackageUpload.MarketTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding MarketGroupName}" Foreground="{DynamicResource PrimaryTextBrush}"/>
                             </StackPanel>
+                            <!-- File name (MSIXVC1) / Package Identity name (MSIXVC2) -->
                             <StackPanel Grid.Row="2"
                                         Grid.Column="1"
                                         Orientation="Vertical" 
@@ -532,10 +541,20 @@
                                         Margin="{DynamicResource PreviewItemMargin}">
                                 <TextBlock Text="{x:Static strings:PackageUpload.FileNameTitleText}"
                                            d:Text="File name"
-                                           Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+                                <TextBlock Text="{x:Static strings:Msixvc2Upload.PackageIdentityNameTitleText}"
+                                           d:Text="Package Identity name"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <TextBlock Text="{Binding PackageName}"
                                            Foreground="{DynamicResource PrimaryTextBrush}"
-                                           TextWrapping="Wrap"/>
+                                           TextWrapping="Wrap"
+                                           Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+                                <TextBlock Text="{Binding PackageIdentityName}"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           TextWrapping="Wrap"
+                                           Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             </StackPanel>
                             <!-- StoreID / Size / Family — standard mode: side by side -->
                             <Grid Grid.Row="3" Grid.Column="1"
@@ -555,7 +574,12 @@
                                 <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
                                     <TextBlock Text="{x:Static strings:PackageUpload.SizeTitleText}"
                                                d:Text="Size"
-                                               Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+                                    <TextBlock Text="{x:Static strings:Msixvc2Upload.FolderSizeTitleText}"
+                                               d:Text="Folder size"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     <TextBlock Text="{Binding PackageSize}" 
                                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                                 </StackPanel>
@@ -572,7 +596,10 @@
                                         Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="{x:Static strings:PackageUpload.StoreIdTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding BigId}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
-                                <TextBlock Text="{x:Static strings:PackageUpload.SizeTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
+                                <TextBlock Text="{x:Static strings:PackageUpload.SizeTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"
+                                           Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+                                <TextBlock Text="{x:Static strings:Msixvc2Upload.FolderSizeTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"
+                                           Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                 <TextBlock Text="{Binding PackageSize}" Foreground="{DynamicResource PrimaryTextBrush}" Margin="0,0,0,4"/>
                                 <TextBlock Text="{x:Static strings:PackageUpload.FamilyTitleText}" Foreground="{DynamicResource SecondaryTextBrush}"/>
                                 <TextBlock Text="{Binding PackageType}" Foreground="{DynamicResource PrimaryTextBrush}"/>

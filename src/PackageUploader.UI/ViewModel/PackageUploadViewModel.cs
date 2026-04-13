@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Windows.Input;
 using System.Xml;
 using PackageUploader.ClientApi;
@@ -377,6 +378,26 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _msixvc2InfoMessage, value);
     }
 
+    private bool _isMsixvc2Package = false;
+    public bool IsMsixvc2Package
+    {
+        get => _isMsixvc2Package;
+        set => SetProperty(ref _isMsixvc2Package, value);
+    }
+
+    public string PackageIdentityName
+    {
+        get => Package.PackageIdentityName;
+        set
+        {
+            if (Package.PackageIdentityName != value)
+            {
+                Package.PackageIdentityName = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     private string _branchOrFlightErrorMessage = string.Empty;
     public string BranchOrFlightErrorMessage
     {
@@ -522,7 +543,16 @@ public partial class PackageUploadViewModel : BaseViewModel
         // Detect MSIXVC2 packages (created by makepkg2) before attempting legacy extraction
         if (XvcFile.IsLikelyMsixvc2Package(PackageFilePath))
         {
+            IsMsixvc2Package = true;
             Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the makepkg2 upload tool.";
+            try
+            {
+                ExtractMsixvc2PackageInformation(PackageFilePath);
+            }
+            catch (Exception ex)
+            {
+                PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorExtractingInfoErrMsg} {ex.Message}";
+            }
             return;
         }
 
@@ -549,6 +579,8 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         PackageErrorMessage = string.Empty;
         Msixvc2InfoMessage = string.Empty;
+        IsMsixvc2Package = false;
+        PackageIdentityName = string.Empty;
 
         ResetProductInfo();
     }
@@ -665,6 +697,63 @@ public partial class PackageUploadViewModel : BaseViewModel
         catch (Exception ex)
         {
             PackageErrorMessage = Resources.Strings.PackageUpload.ErrorExtractingInfoErrMsg + " " + ex.Message;
+        }
+    }
+
+    private void ExtractMsixvc2PackageInformation(string packagePath)
+    {
+        long fileLength = GetFileSize(packagePath);
+        double bytesInMB = 1024.0 * 1024.0;
+        double bytesInGB = bytesInMB * 1024.0;
+        PackageSize = fileLength > bytesInGB
+            ? string.Format("{0:0.##} GB", fileLength / bytesInGB)
+            : string.Format("{0:0.##} MB", fileLength / bytesInMB);
+
+        string? tempConfigPath = null;
+        try
+        {
+            using var archive = ZipFile.OpenRead(packagePath);
+            var configEntry = archive.Entries.FirstOrDefault(e =>
+                e.Name.Equals("MicrosoftGame.config", StringComparison.OrdinalIgnoreCase));
+
+            if (configEntry == null)
+            {
+                PackageErrorMessage = "MicrosoftGame.config not found in MSIXVC2 package.";
+                return;
+            }
+
+            tempConfigPath = Path.GetTempFileName();
+            configEntry.ExtractToFile(tempConfigPath, overwrite: true);
+
+            var gameConfig = new PartialGameConfigModel(tempConfigPath);
+
+            PackageIdentityName = gameConfig.Identity.Name ?? string.Empty;
+
+            try
+            {
+                PackageType = gameConfig.GetDeviceFamily();
+            }
+            catch
+            {
+                // Device family not available
+            }
+
+            if (!string.IsNullOrEmpty(gameConfig.StoreId))
+            {
+                BigId = gameConfig.StoreId;
+                IsPackageMissingStoreId = false;
+            }
+            else
+            {
+                BigId = string.Empty;
+                IsPackageMissingStoreId = true;
+                PackageErrorMessage = Resources.Strings.PackageUpload.PackageHasNoBigIdConfigureMsftGameCfgErrMsg;
+            }
+        }
+        finally
+        {
+            if (tempConfigPath != null && File.Exists(tempConfigPath))
+                File.Delete(tempConfigPath);
         }
     }
 
