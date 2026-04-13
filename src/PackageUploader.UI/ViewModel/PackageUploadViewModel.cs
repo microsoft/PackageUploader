@@ -728,6 +728,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             var gameConfig = new PartialGameConfigModel(tempConfigPath);
 
             PackageIdentityName = gameConfig.Identity.Name ?? string.Empty;
+            PackagePreviewImage = new BitmapImage(new Uri("pack://application:,,,/Resources/Images/PackagePlaceholder.png"));
 
             try
             {
