@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.Application.Extensions;
 using System.CommandLine;
 
@@ -30,21 +31,11 @@ namespace PackageUploader.Application.Test
         }
         
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException), "Option must have at least one alias")]
         [Description("Tests that AddAliasesToSwitchMappings works when no aliases are present")]
         public void AddAliasesToSwitchMappings_WithEmptyAliases_DoesNotAddEntries()
         {
-            // Arrange
-            // Create option with an empty array of aliases
-            var option = new Option<string>([], "Empty aliases option");
-            var switchMappings = new Dictionary<string, string>();
-            var configPath = "TestConfig:TestValue";
-
-            // Act
-            option.AddAliasesToSwitchMappings(switchMappings, configPath);
-
             // Assert
-            Assert.AreEqual(0, switchMappings.Count, "Should not have added any entries");
+            Assert.Throws<ArgumentException>(() => new Option<string>([], "Empty aliases option"), "Option must have at least one alias");
         }
         
         [TestMethod]

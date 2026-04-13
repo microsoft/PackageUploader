@@ -134,7 +134,7 @@ namespace PackageUploader.Application.Test
             Assert.IsTrue(string.IsNullOrEmpty(authInfo.ClientSecret));
             
             // Act and Assert - verify exception is thrown due to missing ClientSecret
-            Assert.ThrowsException<ArgumentException>(() => 
+            Assert.Throws<ArgumentException>(() => 
             {
                 var tokenProvider = new AzureApplicationSecretAccessTokenProvider(
                     serviceProvider.GetRequiredService<IOptions<AccessTokenProviderConfig>>(),
