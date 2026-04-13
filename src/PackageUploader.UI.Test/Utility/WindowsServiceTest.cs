@@ -41,19 +41,23 @@ namespace PackageUploader.UI.Test.Utility
         }
 
         [WpfTestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void Constructor_WithNullContentControl_ThrowsArgumentNullException()
         {
-            // Act
-            _ = new WindowService(null, _mockServiceProvider.Object);
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                // Act
+                _ = new WindowService(null, _mockServiceProvider.Object);
+            });
         }
 
         [WpfTestMethod]
-        [ExpectedException(typeof(ArgumentNullException))] // That's pretty cool
         public void Constructor_WithNullServiceProvider_ThrowsArgumentNullException()
         {
-            // Act
-            _ = new WindowService(_mockContentControl.Object, null);
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            {
+                // Act
+                _ = new WindowService(_mockContentControl.Object, null);
+            });
         }
 
         #endregion
@@ -76,11 +80,13 @@ namespace PackageUploader.UI.Test.Utility
         #region NavigateTo(Type) Tests
 
         [WpfTestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void NavigateToType_WithNonUIElementType_ThrowsArgumentException()
         {
-            // Act
-            _windowService.NavigateTo(typeof(NonUIElementClass));
+            Assert.ThrowsExactly<ArgumentException>(() =>
+            {
+                // Act
+                _windowService.NavigateTo(typeof(NonUIElementClass));
+            });
         }
 
         [WpfTestMethod]
@@ -118,7 +124,6 @@ namespace PackageUploader.UI.Test.Utility
         }
 
         [WpfTestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void NavigateToType_WhenBothResolutionMethodsFail_ThrowsInvalidOperationException()
         {
             // Arrange
@@ -126,8 +131,11 @@ namespace PackageUploader.UI.Test.Utility
                 .Setup(sp => sp.GetService(typeof(NoParameterlessConstructorControl)))
                 .Returns(null);
 
-            // Act
-            _windowService.NavigateTo(typeof(NoParameterlessConstructorControl));
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
+            {
+                // Act
+                _windowService.NavigateTo(typeof(NoParameterlessConstructorControl));
+            });
         }
 
         #endregion
@@ -135,11 +143,13 @@ namespace PackageUploader.UI.Test.Utility
         #region ShowDialog Tests
 
         [WpfTestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShowDialog_WithNonWindowType_ThrowsInvalidOperationException()
         {
-            // Act
-            _windowService.ShowDialog<TestUserControl>();
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
+            {
+                // Act
+                _windowService.ShowDialog<TestUserControl>();
+            });
         }
 
         /*[WpfTestMethod]
@@ -214,7 +224,6 @@ namespace PackageUploader.UI.Test.Utility
         }*/
 
         [WpfTestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShowDialog_WhenBothResolutionMethodsFail_ThrowsInvalidOperationException()
         {
             // Arrange
@@ -222,8 +231,11 @@ namespace PackageUploader.UI.Test.Utility
                 .Setup(sp => sp.GetService(typeof(NoParameterlessWindow)))
                 .Returns(null);
 
-            // Act
-            _windowService.ShowDialog<NoParameterlessWindow>();
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
+            {
+                // Act
+                _windowService.ShowDialog<NoParameterlessWindow>();
+            });
         }
 
         #endregion

@@ -61,10 +61,12 @@ public class BooleanAndConverterTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(System.NotImplementedException))]
     public void TestMethod2()
     {
-        var converter = new BooleanAndConverter();
-        converter.ConvertBack(null, null, null, null);
+        Assert.ThrowsExactly<System.NotImplementedException>(() =>
+        {
+            var converter = new BooleanAndConverter();
+            converter.ConvertBack(null, null, null, null);
+        });
     }
 }

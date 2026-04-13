@@ -8,11 +8,13 @@ namespace PackageUploader.UI.Test.ViewModel;
 public class RelayCommandTest
 {
     [TestMethod]
-    [ExpectedException(typeof(ArgumentNullException))]
     public void Test_ThrowsException()
     {
-        _ = new RelayCommand(null);
-        Assert.Fail("Expected an ArgumentNullException to be thrown.");
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            _ = new RelayCommand(null);
+            Assert.Fail("Expected an ArgumentNullException to be thrown.");
+        });
     }
 
     [TestMethod]

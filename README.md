@@ -25,7 +25,7 @@ This ReadMe covers the following:
 
 The Package Uploader solution has two main projects.
 
-The first project is Package Uploader, a .NET 8.0-based cross-platform app and library that you can use to programmatically interact with Partner Center.
+The first project is Package Uploader, a .NET 10.0-based cross-platform app and library that you can use to programmatically interact with Partner Center.
 
 Package Uploader has a command-line tool and a dynamic-link library (DLL) that you can integrate into your build pipelines or other development workflows.
 
@@ -148,10 +148,10 @@ Alternately, the executables (both the GUI and CMD tools) are also available fro
 
 Furthermore, you can also build it.
 
-1. [Download the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
+1. [Download the .NET 10 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
 2. Open PowerShell, and then browse to the folder where you downloaded Package Uploader.
 3. Browse to the `src` folder, and then run `./publish.win-x64.ps1`.
-4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net8.0\win-x64\publish` directory.
+4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net10.0\win-x64\publish` directory.
 
 <a id="run-package-uploader"></a>
 

@@ -4,7 +4,7 @@
     <AssemblyName>PackageUploader</AssemblyName>
     <Copyright>© Microsoft Corporation</Copyright>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PublishAot>true</PublishAot>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>

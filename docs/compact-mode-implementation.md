@@ -88,7 +88,7 @@
 cd D:\PackageUploader\src
 dotnet restore PackageUploader.UI/PackageUploader.UI.csproj -r win-x64
 dotnet build PackageUploader.UI/PackageUploader.UI.csproj -c Debug -r win-x64
-# Exe: src\PackageUploader.UI\bin\Debug\net8.0-windows\win-x64\XboxGamePackageManager.exe
+# Exe: src\PackageUploader.UI\bin\Debug\net10.0-windows\win-x64\XboxGamePackageManager.exe
 ```
 
 **Note:** Requires Azure Artifacts Credential Provider for the `XboxPackageUploaderFeed` NuGet source. Install with:
