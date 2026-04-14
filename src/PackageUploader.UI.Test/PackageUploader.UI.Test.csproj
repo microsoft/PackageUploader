@@ -2,32 +2,25 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
-	<IsPackable>false</IsPackable>
-	<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <IsPackable>false</IsPackable>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ImplicitUsings>enable</ImplicitUsings>
+    <EnableMicrosoftTestingExtensionsCodeCoverage>true</EnableMicrosoftTestingExtensionsCodeCoverage>
+    <EnableMicrosoftTestingExtensionsTrxReport>true</EnableMicrosoftTestingExtensionsTrxReport>
   </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Moq" Version="4.20.72" />
-		<PackageReference Update="Microsoft.NET.Test.Sdk" Version="18.4.0" />
-		<PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="18.6.2" />
-		<PackageReference Update="Microsoft.Testing.Extensions.TrxReport" Version="2.2.1" />
-		<PackageReference Update="MSTest.TestFramework" Version="4.2.1" />
-		<PackageReference Update="MSTest.TestAdapter" Version="4.2.1" />
-		<PackageReference Include="coverlet.collector" Version="8.0.1">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Update="MSTest.Analyzers" Version="4.2.1">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="coverlet.collector" Version="8.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\PackageUploader.ClientApi\PackageUploader.ClientApi.csproj" />
-		<ProjectReference Include="..\PackageUploader.UI\PackageUploader.UI.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PackageUploader.ClientApi\PackageUploader.ClientApi.csproj" />
+    <ProjectReference Include="..\PackageUploader.UI\PackageUploader.UI.csproj" />
+  </ItemGroup>
 
 </Project>
