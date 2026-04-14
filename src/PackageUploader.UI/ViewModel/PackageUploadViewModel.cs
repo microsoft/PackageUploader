@@ -383,7 +383,20 @@ public partial class PackageUploadViewModel : BaseViewModel
     public bool IsMsixvc2Package
     {
         get => _isMsixvc2Package;
-        set => SetProperty(ref _isMsixvc2Package, value);
+        set
+        {
+            if (SetProperty(ref _isMsixvc2Package, value))
+            {
+                CheckCanExecuteUploadCommand();
+            }
+        }
+    }
+
+    private string _makePkg2UnavailableMessage = string.Empty;
+    public string MakePkg2UnavailableMessage
+    {
+        get => _makePkg2UnavailableMessage;
+        set => SetProperty(ref _makePkg2UnavailableMessage, value);
     }
 
     public string PackageIdentityName
@@ -471,6 +484,12 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private bool IsUploadReady()
     {
+        // MSIXVC2 packages require makepkg2 tools
+        if (IsMsixvc2Package && !string.IsNullOrEmpty(MakePkg2UnavailableMessage))
+        {
+            return false;
+        }
+
         return File.Exists(PackageFilePath) && 
             _gameProduct != null &&
             !string.IsNullOrEmpty(MarketGroupName) &&
@@ -548,6 +567,14 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             IsMsixvc2Package = true;
             Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the makepkg2 upload tool.";
+
+            // Check if makepkg2 tools are installed
+            string makePkg2Path = _pathConfigurationService.MakePkg2Path;
+            if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+            {
+                MakePkg2UnavailableMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+            }
+
             try
             {
                 ExtractMsixvc2PackageInformation(PackageFilePath);
@@ -582,6 +609,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         PackageErrorMessage = string.Empty;
         Msixvc2InfoMessage = string.Empty;
+        MakePkg2UnavailableMessage = string.Empty;
         IsMsixvc2Package = false;
         PackageIdentityName = string.Empty;
 

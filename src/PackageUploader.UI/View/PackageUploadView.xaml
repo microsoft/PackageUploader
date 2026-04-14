@@ -610,8 +610,8 @@
             </Grid>
 
             <!-- Button panel -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <Button Grid.Column="0"
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                    <Button Grid.Column="0"
                         d:Content="Cancel" 
                         Content="{x:Static strings:PackageUpload.CancelContentText}"
                         Command="{Binding CancelButtonCommand}"
@@ -623,7 +623,7 @@
                         AutomationProperties.HelpText="{x:Static strings:PackageUpload.CancelButtonHelpText}"
                         TabIndex="4" />
 
-                <Button Grid.Column="1"
+                    <Button Grid.Column="1"
                         d:Content="Upload Package" 
                         Content="{x:Static strings:PackageUpload.UploadButtonContentText}"
                         Command="{Binding UploadPackageCommand}"
@@ -634,7 +634,15 @@
                         d:AutomationProperties.HelpText="Start uploading the package"
                         AutomationProperties.HelpText="{x:Static strings:PackageUpload.UploadButtonHelpText}"
                         TabIndex="5" />
-            </StackPanel>
+                </StackPanel>
+            
+                <!-- makepkg2 unavailable warning for MSIXVC2 packages -->
+            <TextBlock Text="{Binding MakePkg2UnavailableMessage}"
+                       Foreground="{DynamicResource ErrorRedBrush}"
+                       Visibility="{Binding MakePkg2UnavailableMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
+                       TextWrapping="Wrap"
+                       HorizontalAlignment="Right"
+                       Margin="0,5,0,0" />
         </StackPanel>
         </ScrollViewer>
     </Grid>
