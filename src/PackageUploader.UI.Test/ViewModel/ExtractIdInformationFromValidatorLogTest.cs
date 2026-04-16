@@ -28,7 +28,7 @@ namespace PackageUploader.UI.Test.ViewModel
                 UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
                 ErrorModelProvider errorModelProvider,
                 string xmlContent) 
-                : base(packageModelProvider, uploaderService, windowService, uploadingProgressPercentageProvider, errorModelProvider)
+                : base(packageModelProvider, uploaderService, windowService, uploadingProgressPercentageProvider, errorModelProvider, new PathConfigurationProvider())
             {
                 _xmlContent = xmlContent;
                 TestSubValFilePath = Path.GetTempFileName();

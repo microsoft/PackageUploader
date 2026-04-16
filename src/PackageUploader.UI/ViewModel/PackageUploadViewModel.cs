@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Windows.Input;
 using System.Xml;
 using PackageUploader.ClientApi;
@@ -32,6 +33,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     private readonly IWindowService _windowService;
     public readonly UploadingProgressPercentageProvider _uploadingProgressPercentageProvider;
     private readonly ErrorModelProvider _errorModelProvider;
+    private readonly PathConfigurationProvider _pathConfigurationService;
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
@@ -370,6 +372,46 @@ public partial class PackageUploadViewModel : BaseViewModel
         set => SetProperty(ref _packageErrorMessage, value);
     }
 
+    private string _msixvc2InfoMessage = string.Empty;
+    public string Msixvc2InfoMessage
+    {
+        get => _msixvc2InfoMessage;
+        set => SetProperty(ref _msixvc2InfoMessage, value);
+    }
+
+    private bool _isMsixvc2Package = false;
+    public bool IsMsixvc2Package
+    {
+        get => _isMsixvc2Package;
+        set
+        {
+            if (SetProperty(ref _isMsixvc2Package, value))
+            {
+                CheckCanExecuteUploadCommand();
+            }
+        }
+    }
+
+    private string _makePkg2UnavailableMessage = string.Empty;
+    public string MakePkg2UnavailableMessage
+    {
+        get => _makePkg2UnavailableMessage;
+        set => SetProperty(ref _makePkg2UnavailableMessage, value);
+    }
+
+    public string PackageIdentityName
+    {
+        get => Package.PackageIdentityName;
+        set
+        {
+            if (Package.PackageIdentityName != value)
+            {
+                Package.PackageIdentityName = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     private string _branchOrFlightErrorMessage = string.Empty;
     public string BranchOrFlightErrorMessage
     {
@@ -411,13 +453,15 @@ public partial class PackageUploadViewModel : BaseViewModel
                                   IPackageUploaderService uploaderService,
                                   IWindowService windowService,
                                   UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
-                                  ErrorModelProvider errorModelProvider)
+                                  ErrorModelProvider errorModelProvider,
+                                  PathConfigurationProvider pathConfigurationService)
     {
         _packageModelService = packageModelService;
         _uploaderService = uploaderService;
         _windowService = windowService;
         _uploadingProgressPercentageProvider = uploadingProgressPercentageProvider;
         _errorModelProvider = errorModelProvider;
+        _pathConfigurationService = pathConfigurationService;
 
         // Initialize commands with RelayCommand
         UploadPackageCommand = new RelayCommand(UploadPackageProcessAsync, () => IsUploadReady());
@@ -440,6 +484,12 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private bool IsUploadReady()
     {
+        // MSIXVC2 packages require makepkg2 tools
+        if (IsMsixvc2Package && !string.IsNullOrEmpty(MakePkg2UnavailableMessage))
+        {
+            return false;
+        }
+
         return File.Exists(PackageFilePath) && 
             _gameProduct != null &&
             !string.IsNullOrEmpty(MarketGroupName) &&
@@ -511,7 +561,31 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             return;
         }
-        
+
+        // Detect MSIXVC2 packages (created by makepkg2) before attempting legacy extraction
+        if (XvcFile.IsLikelyMsixvc2Package(PackageFilePath))
+        {
+            IsMsixvc2Package = true;
+            Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the makepkg2 upload tool.";
+
+            // Check if makepkg2 tools are installed
+            string makePkg2Path = _pathConfigurationService.MakePkg2Path;
+            if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+            {
+                MakePkg2UnavailableMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+            }
+
+            try
+            {
+                ExtractMsixvc2PackageInformation(PackageFilePath);
+            }
+            catch (Exception ex)
+            {
+                PackageErrorMessage = $"{Resources.Strings.PackageUpload.ErrorExtractingInfoErrMsg} {ex.Message}";
+            }
+            return;
+        }
+
         try
         {            
             // Extract package information
@@ -534,6 +608,10 @@ public partial class PackageUploadViewModel : BaseViewModel
         MarketGroupName = string.Empty;
 
         PackageErrorMessage = string.Empty;
+        Msixvc2InfoMessage = string.Empty;
+        MakePkg2UnavailableMessage = string.Empty;
+        IsMsixvc2Package = false;
+        PackageIdentityName = string.Empty;
 
         ResetProductInfo();
     }
@@ -650,6 +728,64 @@ public partial class PackageUploadViewModel : BaseViewModel
         catch (Exception ex)
         {
             PackageErrorMessage = Resources.Strings.PackageUpload.ErrorExtractingInfoErrMsg + " " + ex.Message;
+        }
+    }
+
+    private void ExtractMsixvc2PackageInformation(string packagePath)
+    {
+        long fileLength = GetFileSize(packagePath);
+        double bytesInMB = 1024.0 * 1024.0;
+        double bytesInGB = bytesInMB * 1024.0;
+        PackageSize = fileLength > bytesInGB
+            ? string.Format("{0:0.##} GB", fileLength / bytesInGB)
+            : string.Format("{0:0.##} MB", fileLength / bytesInMB);
+
+        string? tempConfigPath = null;
+        try
+        {
+            using var archive = ZipFile.OpenRead(packagePath);
+            var configEntry = archive.Entries.FirstOrDefault(e =>
+                e.Name.Equals("MicrosoftGame.config", StringComparison.OrdinalIgnoreCase));
+
+            if (configEntry == null)
+            {
+                PackageErrorMessage = "MicrosoftGame.config not found in MSIXVC2 package.";
+                return;
+            }
+
+            tempConfigPath = Path.GetTempFileName();
+            configEntry.ExtractToFile(tempConfigPath, overwrite: true);
+
+            var gameConfig = new PartialGameConfigModel(tempConfigPath);
+
+            PackageIdentityName = gameConfig.Identity.Name ?? string.Empty;
+            PackagePreviewImage = new BitmapImage(new Uri("pack://application:,,,/Resources/Images/PackagePlaceholder.png"));
+
+            try
+            {
+                PackageType = gameConfig.GetDeviceFamily();
+            }
+            catch
+            {
+                // Device family not available
+            }
+
+            if (!string.IsNullOrEmpty(gameConfig.StoreId))
+            {
+                BigId = gameConfig.StoreId;
+                IsPackageMissingStoreId = false;
+            }
+            else
+            {
+                BigId = string.Empty;
+                IsPackageMissingStoreId = true;
+                PackageErrorMessage = Resources.Strings.PackageUpload.PackageHasNoBigIdConfigureMsftGameCfgErrMsg;
+            }
+        }
+        finally
+        {
+            if (tempConfigPath != null && File.Exists(tempConfigPath))
+                File.Delete(tempConfigPath);
         }
     }
 
@@ -818,6 +954,13 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private async void UploadPackageProcessAsync()
     {
+        // For MSIXVC2 packages, reroute to makepkg2 upload
+        if (IsMsixvc2Package)
+        {
+            StartMsixvc2Upload();
+            return;
+        }
+
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             _windowService.NavigateTo(typeof(PackageUploadingView));
@@ -958,6 +1101,72 @@ public partial class PackageUploadViewModel : BaseViewModel
     {
         // Navigate to the main page view
         _windowService.NavigateTo(typeof(MainPageView));
+    }
+
+    /// <summary>
+    /// Reroutes MSIXVC2 .msixvc package upload to makepkg2 upload tool.
+    /// Sets PackageModel properties and navigates to the MSIXVC2 uploading progress screen.
+    /// </summary>
+    private void StartMsixvc2Upload()
+    {
+        string makePkg2Path = _pathConfigurationService.MakePkg2Path;
+        if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+        {
+            SetErrorAndGoToErrorPage("makepkg2 Not Found",
+                "makepkg2.exe was not found. Please install the Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package.");
+            return;
+        }
+
+        string uploadArgs = BuildMsixvc2UploadArguments();
+
+        IGamePackageBranch? branchOrFlight = GetBranchOrFlightFromUISelection();
+
+        Package.BigId = BigId;
+        Package.PackageType = PackageType;
+        Package.PackagePreviewImage = PackagePreviewImage;
+        Package.PackageName = ProductName;
+        Package.Destination = BranchOrFlightDisplayName;
+        Package.Market = MarketGroupName;
+        Package.PackageIdentityName = PackageIdentityName;
+        Package.FolderSize = PackageSize;
+        Package.UploadArguments = uploadArgs;
+        Package.MakePkg2Path = makePkg2Path;
+        if (branchOrFlight != null)
+        {
+            Package.BranchId = branchOrFlight.CurrentDraftInstanceId;
+        }
+
+        _windowService.NavigateTo(typeof(Msixvc2UploadingView));
+    }
+
+    internal string BuildMsixvc2UploadArguments()
+    {
+        string packageDir = Path.GetDirectoryName(PackageFilePath) ?? string.Empty;
+        var args = $"upload /pd \"{packageDir}\"";
+
+        if (BranchOrFlightDisplayName.StartsWith("Branch: "))
+        {
+            string branchName = BranchOrFlightDisplayName[(BranchOrFlightDisplayName.IndexOf(':') + 2)..];
+            args += $" /branch \"{branchName}\"";
+        }
+        else if (BranchOrFlightDisplayName.StartsWith("Flight: "))
+        {
+            string flightName = BranchOrFlightDisplayName[(BranchOrFlightDisplayName.IndexOf(':') + 2)..];
+            args += $" /flight \"{flightName}\"";
+        }
+
+        if (!string.IsNullOrEmpty(MarketGroupName))
+        {
+            args += $" /market \"{MarketGroupName}\"";
+        }
+
+        if (!string.IsNullOrEmpty(BigId) && BigId != "None")
+        {
+            args += $" /storeid \"{BigId}\"";
+        }
+
+        args += " /auth CacheableBrowser";
+        return args;
     }
 
     private void SetErrorAndGoToErrorPage(string errorTitle, string errorDescription)

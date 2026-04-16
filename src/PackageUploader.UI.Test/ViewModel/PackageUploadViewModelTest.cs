@@ -63,7 +63,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockPackageUploaderService.Object,
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
-                _errorModelProvider
+                _errorModelProvider,
+                new PathConfigurationProvider()
             );
         }
 
@@ -87,8 +88,9 @@ namespace PackageUploader.UI.Test.ViewModel
                  _mockPackageUploaderService.Object,
                  _mockWindowService.Object,
                  _uploadingProgressPercentageProvider,
-                 _errorModelProvider
-             );
+                 _errorModelProvider,
+                new PathConfigurationProvider()
+            );
             viewModel2.BranchOrFlightDisplayName = "Test";
             Assert.AreEqual("Test", viewModel2.BranchOrFlightDisplayName);
         }
@@ -124,7 +126,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockPackageUploaderService.Object,
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
-                _errorModelProvider
+                _errorModelProvider,
+                new PathConfigurationProvider()
             );
 
             viewModel2.BranchAndFlightNames = names; // tests the former value is successfully retrieved
@@ -146,7 +149,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockPackageUploaderService.Object,
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
-                _errorModelProvider
+                _errorModelProvider,
+                new PathConfigurationProvider()
             );
 
             viewModel2.MarketGroupNames = names; // tests the former value is successfully retrieved
