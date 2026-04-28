@@ -11,7 +11,6 @@ using PackageUploader.Application.Operations;
 using PackageUploader.ClientApi;
 using PackageUploader.FileLogger;
 using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
