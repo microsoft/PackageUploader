@@ -8,7 +8,7 @@
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <PublishAot>true</PublishAot>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-    <DebugType>none</DebugType>
+    <DebugType>embedded</DebugType>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     
@@ -29,7 +29,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.5" />
-    <PackageReference Include="System.CommandLine.Hosting" Version="0.4.0-alpha.22272.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.7" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,35 +3,33 @@
 
 using Microsoft.Extensions.Configuration;
 using PackageUploader.Application.Config;
-using PackageUploader.Application.Extensions;
 using PackageUploader.Application.Operations;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Builder;
 using System.IO;
 
 namespace PackageUploader.Application
 {
-    internal class ParameterHelper
+    internal static class CommandLineHelper
     {
         // Options
-        internal static readonly Option<bool> DataOption = new(["-d", "--Data"], "Do not log on console and only return data");
-        internal static readonly Option<bool> VerboseOption = new(["-v", "--Verbose"], "Log verbose messages such as http calls");
-        internal static readonly Option<FileInfo> LogFileOption = new(["-l", "--LogFile"], "The location of the log file");
-        internal static readonly Option<string> ClientSecretOption = new(["-s", "--ClientSecret"], "The client secret of the AAD app (only for AppSecret)");
-        internal static readonly Option<string> TenantIdOption = new(["-t", "--TenantId"], "The Azure tenant ID to use for authentication (primarily for Browser authentication)");
-        internal static readonly Option<FileInfo> ConfigFileOption = new Option<FileInfo>(["-c", "--ConfigFile"], "The location of the config file").Required();
-        internal static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new(["-a", "--Authentication"], () => IngestionExtensions.AuthenticationMethod.AppSecret, "The authentication method");
-        internal static readonly Option<string> ProductIdOption = new(["-p", "--ProductId"], "Product ID, replaces config value productId if present");
-        internal static readonly Option<string> BigIdOption = new(["-b", "--BigId"], "Big ID, replaces config value bigId if present");
-        internal static readonly Option<string> BranchFriendlyNameOption = new(["-bf", "--BranchFriendlyName"], "Branch Friendly Name, replaces config value branchFriendlyName if present");
-        internal static readonly Option<string> FlightNameOption = new(["-f", "--FlightName"], "Flight Name, replaces config value flightName if present");
-        internal static readonly Option<string> MarketGroupNameOption = new(["-m", "--MarketGroupName"], "Market Group Name, replaces config value marketGroupName if present");
-        internal static readonly Option<string> DestinationSandboxName = new(["-ds", "--DestinationSandboxName"], "Destination Sandbox Name, replaces config value destinationSandboxName if present");
+        internal static readonly Option<bool> DataOption = new("--Data", "-d") { Description = "Do not log on console and only return data" };
+        internal static readonly Option<bool> VerboseOption = new("--Verbose", "-v") { Description = "Log verbose messages such as http calls", Recursive = true };
+        internal static readonly Option<FileInfo> LogFileOption = new("--LogFile", "-l") { Description = "The location of the log file", Recursive = true };
+        internal static readonly Option<string> ClientSecretOption = new("--ClientSecret", "-s") { Description = "The client secret of the AAD app (only for AppSecret)" };
+        internal static readonly Option<string> TenantIdOption = new("--TenantId", "-t") { Description = "The Azure tenant ID to use for authentication (primarily for Browser authentication)" };
+        internal static readonly Option<FileInfo> ConfigFileOption = new("--ConfigFile", "-c") { Description = "The location of the config file", Required = true };
+        internal static readonly Option<IngestionExtensions.AuthenticationMethod> AuthenticationMethodOption = new("--Authentication", "-a") { Description = "The authentication method", DefaultValueFactory = _ => IngestionExtensions.AuthenticationMethod.AppSecret };
+        internal static readonly Option<string> ProductIdOption = new("--ProductId", "-p") { Description = "Product ID, replaces config value productId if present" };
+        internal static readonly Option<string> BigIdOption = new("--BigId", "-b") { Description = "Big ID, replaces config value bigId if present" };
+        internal static readonly Option<string> BranchFriendlyNameOption = new("--BranchFriendlyName", "-bf") { Description = "Branch Friendly Name, replaces config value branchFriendlyName if present" };
+        internal static readonly Option<string> FlightNameOption = new("--FlightName", "-f") { Description = "Flight Name, replaces config value flightName if present" };
+        internal static readonly Option<string> MarketGroupNameOption = new("--MarketGroupName", "-m") { Description = "Market Group Name, replaces config value marketGroupName if present" };
+        internal static readonly Option<string> DestinationSandboxName = new("--DestinationSandboxName", "-ds") { Description = "Destination Sandbox Name, replaces config value destinationSandboxName if present" };
 
-        internal static CommandLineBuilder BuildCommandLine()
+        internal static RootCommand BuildRootCommand()
         {
             var rootCommand = new RootCommand
             {
@@ -64,14 +62,16 @@ namespace PackageUploader.Application
                     ConfigFileOption, ClientSecretOption, TenantIdOption, AuthenticationMethodOption, DataOption, ProductIdOption, BigIdOption, BranchFriendlyNameOption, FlightNameOption, MarketGroupNameOption
                 }.AddOperationHandler<GetPackagesOperation>(),
             };
-            rootCommand.AddGlobalOption(VerboseOption);
-            rootCommand.AddGlobalOption(LogFileOption);
+            rootCommand.Options.Add(VerboseOption);
+            rootCommand.Options.Add(LogFileOption);
+            rootCommand.TreatUnmatchedTokensAsErrors = true;
             rootCommand.Description = "Application that enables game developers to upload Xbox and PC game packages to Partner Center";
-            return new CommandLineBuilder(rootCommand);
+            return rootCommand;
         }
 
         internal static void ConfigureParameters(FileInfo configFile, IngestionExtensions.AuthenticationMethod authenticationMethod, IConfigurationBuilder builder, string[] args)
         {
+            builder.Sources.Clear();
             if (configFile is not null)
             {
                 builder.AddJsonFile(configFile.FullName, false, false);
@@ -91,15 +91,29 @@ namespace PackageUploader.Application
                 // Add client secret mapping for AppSecret auth (AadAuthInfo, NOT ClientSecretAuthInfo)
                 ClientSecretOption.AddAliasesToSwitchMappings(switchMappings, $"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}");
             }
-
-            // Add tenant ID mapping for browser authentication methods
-            if (authenticationMethod is IngestionExtensions.AuthenticationMethod.Browser or
-                                        IngestionExtensions.AuthenticationMethod.CacheableBrowser)
+            else if (authenticationMethod is IngestionExtensions.AuthenticationMethod.Browser 
+                                          or IngestionExtensions.AuthenticationMethod.CacheableBrowser)
             {
+                // Add tenant ID mapping for browser authentication methods
                 TenantIdOption.AddAliasesToSwitchMappings(switchMappings, $"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}");
             }
 
             builder.AddCommandLine(args, switchMappings);
+        }
+
+        public static Command AddOperationHandler<T>(this Command command) where T : Operation
+        {
+            command.Action = new OperationInvoker<T>();
+            return command;
+        }
+
+        public static void AddAliasesToSwitchMappings(this Option option, Dictionary<string, string> switchMappings, string configPath)
+        {
+            switchMappings[option.Name] = configPath;
+            foreach (var alias in option.Aliases)
+            {
+                switchMappings[alias] = configPath;
+            }
         }
     }
 }

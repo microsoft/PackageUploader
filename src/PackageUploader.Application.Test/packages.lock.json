@@ -541,26 +541,8 @@
       },
       "System.CommandLine": {
         "type": "Transitive",
-        "resolved": "2.0.0-beta4.22272.1",
-        "contentHash": "1uqED/q2H0kKoLJ4+hI2iPSBSEdTuhfCYADeJrAqERmiGQ2NNacYKRNEQ+gFbU4glgVyK8rxI+ZOe1onEtr/Pg=="
-      },
-      "System.CommandLine.Hosting": {
-        "type": "Transitive",
-        "resolved": "0.4.0-alpha.22272.1",
-        "contentHash": "x9JhHxBLxlKyCIZADFYC8q16L9yGHdTakrLFjHabwR7Tk0761aTexiGgMTIS744HGuhc8pk9MoLUzsr/TlRfMQ==",
-        "dependencies": {
-          "Microsoft.Extensions.Hosting": "6.0.0",
-          "System.CommandLine": "2.0.0-beta4.22272.1",
-          "System.CommandLine.NamingConventionBinder": "2.0.0-beta4.22272.1"
-        }
-      },
-      "System.CommandLine.NamingConventionBinder": {
-        "type": "Transitive",
-        "resolved": "2.0.0-beta4.22272.1",
-        "contentHash": "ux2eUA/syF+JtlpMDc/Lsd6PBIBuwjH3AvHnestoh5uD0WKT5b+wkQxDWVCqp9qgVjMBTLNhX19ZYFtenunt9A==",
-        "dependencies": {
-          "System.CommandLine": "2.0.0-beta4.22272.1"
-        }
+        "resolved": "2.0.7",
+        "contentHash": "ih4yNLLF2Ebz85xJJBaPeddLa4d1AekYId7Y1g8oSsEaBHHd/CtyeBJ+tDvQadqeXz7i591K5ry/td+4aaHnQA=="
       },
       "System.Diagnostics.EventLog": {
         "type": "Transitive",
@@ -604,7 +586,7 @@
           "Microsoft.Extensions.Options.DataAnnotations": "[10.0.5, )",
           "PackageUploader.ClientApi": "[1.0.0, )",
           "PackageUploader.FileLogger": "[1.0.0, )",
-          "System.CommandLine.Hosting": "[0.4.0-alpha.22272.1, )"
+          "System.CommandLine": "[2.0.7, )"
         }
       },
       "packageuploader.clientapi": {
