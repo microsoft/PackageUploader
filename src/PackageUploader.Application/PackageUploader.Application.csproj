@@ -11,7 +11,8 @@
     <DebugType>embedded</DebugType>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    
+    <Description>Application that enables game developers to upload Xbox and PC game packages to Partner Center</Description>
+	  
     <!-- Security settings -->
     <HighEntropyVA>true</HighEntropyVA>
     <ControlFlowGuard>Guard</ControlFlowGuard>

@@ -16,7 +16,7 @@ using System.Text.Json;
 namespace PackageUploader.Application.Test
 {
     [TestClass]
-    public class CommandLineHelperIntegrationTest
+    public class HostExtensionsIntegrationTest
     {
         private string? _tempJsonFilePath;
         private IConfigurationRoot? _configuration;
