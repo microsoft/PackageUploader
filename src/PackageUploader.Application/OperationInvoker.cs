@@ -25,8 +25,11 @@ namespace PackageUploader.Application
             var exitCode = 0;
             try
             {
-                var version = GetVersion();
-                logger.LogInformation("PackageUploader v.{version} is starting.", version);
+                if (logger.IsEnabled(LogLevel.Information))
+                { 
+                    var version = GetVersion();
+                    logger.LogInformation("PackageUploader v.{version} is starting.", version);
+                }
                 exitCode = await host.Services.GetRequiredService<T>().RunAsync(ct).ConfigureAwait(false);
             }
             catch (Exception e)
