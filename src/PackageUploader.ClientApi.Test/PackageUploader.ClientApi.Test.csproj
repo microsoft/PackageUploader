@@ -21,8 +21,4 @@
     <ProjectReference Include="..\PackageUploader.ClientApi\PackageUploader.ClientApi.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="Microsoft.Testing.Extensions.CodeCoverage" Version="18.6.2" />
-  </ItemGroup>
-
 </Project>
