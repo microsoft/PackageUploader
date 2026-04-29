@@ -19,7 +19,7 @@ namespace PackageUploader.Application.Test
     public class HostExtensionsIntegrationTest
     {
         private string? _tempJsonFilePath;
-        private IConfigurationRoot? _configuration;
+        private ConfigurationManager? _configuration;
         private RootCommand? _rootCommand;
 
         [TestInitialize]
@@ -71,7 +71,7 @@ namespace PackageUploader.Application.Test
             var result = _rootCommand.Parse(args);
 
             // Assert
-            Assert.AreEqual(1, result.Errors.Count);
+            Assert.HasCount(1, result.Errors);
             Assert.IsTrue(result.Errors[0].Message.Contains("--ConfigFile") || result.Errors[0].Message.Contains("-c"),
                 $"Expected error about ConfigFile option, got: {result.Errors[0].Message}");
         }

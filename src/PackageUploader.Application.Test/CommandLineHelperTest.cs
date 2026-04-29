@@ -30,17 +30,17 @@ namespace PackageUploader.Application.Test
 
             // Verify command names (7 commands)
             var commandNames = rootCommand.Subcommands.Select(c => c.Name).ToList();
-            Assert.IsTrue(commandNames.Contains("GetProduct"));
-            Assert.IsTrue(commandNames.Contains("UploadUwpPackage"));
-            Assert.IsTrue(commandNames.Contains("UploadXvcPackage"));
-            Assert.IsTrue(commandNames.Contains("RemovePackages"));
-            Assert.IsTrue(commandNames.Contains("ImportPackages"));
-            Assert.IsTrue(commandNames.Contains("PublishPackages"));
-            Assert.IsTrue(commandNames.Contains("GetPackages"));
+            Assert.Contains("GetProduct", commandNames);
+            Assert.Contains("UploadUwpPackage", commandNames);
+            Assert.Contains("UploadXvcPackage", commandNames);
+            Assert.Contains("RemovePackages", commandNames);
+            Assert.Contains("ImportPackages", commandNames);
+            Assert.Contains("PublishPackages", commandNames);
+            Assert.Contains("GetPackages", commandNames);
             
             // Verify global options
-            Assert.IsTrue(rootCommand.Options.Contains(CommandLineHelper.VerboseOption));
-            Assert.IsTrue(rootCommand.Options.Contains(CommandLineHelper.LogFileOption));
+            Assert.Contains(CommandLineHelper.VerboseOption, rootCommand.Options);
+            Assert.Contains(CommandLineHelper.LogFileOption, rootCommand.Options);
             Assert.AreEqual("Application that enables game developers to upload Xbox and PC game packages to Partner Center", rootCommand.Description);
         }
 

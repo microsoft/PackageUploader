@@ -22,7 +22,7 @@ namespace PackageUploader.Application.Test
             option.AddAliasesToSwitchMappings(switchMappings, configPath);
 
             // Assert
-            Assert.AreEqual(2, switchMappings.Count, "Should have added name and alias");
+            Assert.HasCount(2, switchMappings, "Should have added name and alias");
             Assert.IsTrue(switchMappings.ContainsKey("-t"), "Short alias should be in dictionary");
             Assert.IsTrue(switchMappings.ContainsKey("--TestOption"), "Name should be in dictionary");
             Assert.AreEqual(configPath, switchMappings["-t"], "Short alias should map to config path");
