@@ -1,12 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Extensions.Configuration;
-using PackageUploader.Application.Config;
 using PackageUploader.Application.Operations;
 using PackageUploader.ClientApi;
-using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
 
@@ -64,56 +60,14 @@ namespace PackageUploader.Application
             };
             rootCommand.Options.Add(VerboseOption);
             rootCommand.Options.Add(LogFileOption);
-            rootCommand.TreatUnmatchedTokensAsErrors = true;
             rootCommand.Description = "Application that enables game developers to upload Xbox and PC game packages to Partner Center";
             return rootCommand;
-        }
-
-        internal static void ConfigureParameters(FileInfo configFile, IngestionExtensions.AuthenticationMethod authenticationMethod, IConfigurationBuilder builder, string[] args)
-        {
-            builder.Sources.Clear();
-            if (configFile is not null)
-            {
-                builder.AddJsonFile(configFile.FullName, false, false);
-            }
-
-            var switchMappings = new Dictionary<string, string>();
-            ProductIdOption.AddAliasesToSwitchMappings(switchMappings, $"{nameof(BaseOperationConfig.ProductId)}");
-            BigIdOption.AddAliasesToSwitchMappings(switchMappings, $"{nameof(BaseOperationConfig.BigId)}");
-            BranchFriendlyNameOption.AddAliasesToSwitchMappings(switchMappings, $"{nameof(PackageBranchOperationConfig.BranchFriendlyName)}");
-            FlightNameOption.AddAliasesToSwitchMappings(switchMappings, $"{nameof(PackageBranchOperationConfig.FlightName)}");
-            MarketGroupNameOption.AddAliasesToSwitchMappings(switchMappings, "MarketGroupName");
-            DestinationSandboxName.AddAliasesToSwitchMappings(switchMappings, "DestinationSandboxName");
-
-            // Configure auth options based on the authentication method
-            if (authenticationMethod is IngestionExtensions.AuthenticationMethod.AppSecret)
-            {
-                // Add client secret mapping for AppSecret auth (AadAuthInfo, NOT ClientSecretAuthInfo)
-                ClientSecretOption.AddAliasesToSwitchMappings(switchMappings, $"{AadAuthInfo.ConfigName}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}");
-            }
-            else if (authenticationMethod is IngestionExtensions.AuthenticationMethod.Browser 
-                                          or IngestionExtensions.AuthenticationMethod.CacheableBrowser)
-            {
-                // Add tenant ID mapping for browser authentication methods
-                TenantIdOption.AddAliasesToSwitchMappings(switchMappings, $"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}");
-            }
-
-            builder.AddCommandLine(args, switchMappings);
         }
 
         public static Command AddOperationHandler<T>(this Command command) where T : Operation
         {
             command.Action = new OperationInvoker<T>();
             return command;
-        }
-
-        public static void AddAliasesToSwitchMappings(this Option option, Dictionary<string, string> switchMappings, string configPath)
-        {
-            switchMappings[option.Name] = configPath;
-            foreach (var alias in option.Aliases)
-            {
-                switchMappings[alias] = configPath;
-            }
         }
     }
 }

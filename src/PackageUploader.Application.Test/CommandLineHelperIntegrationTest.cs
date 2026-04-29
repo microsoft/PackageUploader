@@ -3,8 +3,10 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PackageUploader.Application.Extensions;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
@@ -79,18 +81,14 @@ namespace PackageUploader.Application.Test
         public void CommandLineParameter_OverridesConfigValue()
         {
             // Arrange
-            var configBuilder = new ConfigurationBuilder();
             var args = new[] { "GetProduct", "--ConfigFile", _tempJsonFilePath!, "--ProductId", "override-product-id" };
             Assert.IsNotNull(_rootCommand);
             var result = _rootCommand.Parse(args);
-            
-            // Get option values from parse result
-            var configFile = result.GetValue(CommandLineHelper.ConfigFileOption);
-            var authMethod = result.GetValue(CommandLineHelper.AuthenticationMethodOption);
 
             // Act
-            CommandLineHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("override-product-id", _configuration["ProductId"]);
@@ -189,17 +187,13 @@ namespace PackageUploader.Application.Test
                 "--Authentication", "Browser",
                 "--TenantId", "my-tenant-id" 
             };
-            var configBuilder = new ConfigurationBuilder();
             Assert.IsNotNull(_rootCommand);
             var result = _rootCommand.Parse(args);
 
-            // Get option values from parse result
-            var configFile = result.GetValue(CommandLineHelper.ConfigFileOption);
-            var authMethod = result.GetValue(CommandLineHelper.AuthenticationMethodOption);
-
             // Act
-            CommandLineHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("my-tenant-id", _configuration[$"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}"]);
@@ -216,17 +210,13 @@ namespace PackageUploader.Application.Test
                 "--Authentication", "CacheableBrowser",
                 "--TenantId", "my-cached-tenant-id" 
             };
-            var configBuilder = new ConfigurationBuilder();
             Assert.IsNotNull(_rootCommand);
             var result = _rootCommand.Parse(args);
 
-            // Get option values from parse result
-            var configFile = result.GetValue(CommandLineHelper.ConfigFileOption);
-            var authMethod = result.GetValue(CommandLineHelper.AuthenticationMethodOption);
-
             // Act
-            CommandLineHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("my-cached-tenant-id", _configuration[$"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}"]);
@@ -257,17 +247,13 @@ namespace PackageUploader.Application.Test
                 "--Authentication", "AppSecret"
             };
             
-            var configBuilder = new ConfigurationBuilder();
             Assert.IsNotNull(_rootCommand);
             var result = _rootCommand.Parse(args);
 
-            // Get option values from parse result
-            var configFile = result.GetValue(CommandLineHelper.ConfigFileOption);
-            var authMethod = result.GetValue(CommandLineHelper.AuthenticationMethodOption);
-
             // Act
-            CommandLineHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("product-from-config", _configuration["ProductId"]);
@@ -293,17 +279,13 @@ namespace PackageUploader.Application.Test
                 "--Verbose"
             };
             
-            var configBuilder = new ConfigurationBuilder();
             Assert.IsNotNull(_rootCommand);
             var result = _rootCommand.Parse(args);
 
-            // Get option values from parse result
-            var configFile = result.GetValue(CommandLineHelper.ConfigFileOption);
-            var authMethod = result.GetValue(CommandLineHelper.AuthenticationMethodOption);
-
             // Act
-            CommandLineHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("product-from-cmd", _configuration["ProductId"]);

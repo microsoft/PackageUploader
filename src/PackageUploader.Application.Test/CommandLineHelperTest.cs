@@ -3,6 +3,7 @@
 
 using PackageUploader.ClientApi;
 using System.CommandLine;
+using PackageUploader.Application.Extensions;
 
 namespace PackageUploader.Application.Test
 {
