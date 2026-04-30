@@ -241,7 +241,7 @@ For full documentation on each property of each operation, see the [operations d
 
 ## Example GetProduct operation
    
-**NOTE:** When using a certificate, you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information about other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates)](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-8.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
+**NOTE:** When using a certificate, you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information about other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates)](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-10.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
    
 ### Example GetProduct configuration file using certificate authorization
 
@@ -276,7 +276,7 @@ Product: {
 
 ### Example UploadXvcPackage configuration file using certificate authentication
 
-**NOTE:** When using a certificate, you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information about other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates)](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-8.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
+**NOTE:** When using a certificate, you need to include a few more values in the aadAuthInfo section. `certificateStore` represents the certificate location in the store on the machine. For information about other supported values, see [StoreName Enum (System.Security.Cryptography.X509Certificates)](https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.storename?view=net-10.0). <br>`certificateLocation` can be set to `LocalMachine` or `CurrentUser`.
 
 ```json
 {
