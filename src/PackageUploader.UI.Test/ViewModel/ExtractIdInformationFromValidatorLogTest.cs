@@ -149,47 +149,50 @@ namespace PackageUploader.UI.Test.ViewModel
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FileNotFoundException))]
         public void ExtractIdInformationFromValidatorLog_MissingFile_ThrowsException()
         {
-            // Arrange
-            var expectedBuildId = Guid.NewGuid();
-            string validXml = $@"<?xml version='1.0' encoding='utf-8'?>
+            Assert.ThrowsExactly<FileNotFoundException>(() =>
+            {
+                // Arrange
+                var expectedBuildId = Guid.NewGuid();
+                string validXml = $@"<?xml version='1.0' encoding='utf-8'?>
                 <project>
                     <BuildId>{expectedBuildId}</BuildId>
                 </project>";
 
-            using var viewModel = new TestableValidatorLogViewModel(
-                _packageModelProvider,
-                _mockPackageUploaderService.Object,
-                _mockWindowService.Object,
-                _uploadingProgressPercentageProvider,
-                _errorModelProvider,
-                validXml);
-            // Delete the file to simulate missing file scenario
-            if (File.Exists(viewModel.TestSubValFilePath))
-            {
-                File.Delete(viewModel.TestSubValFilePath);
-            }
+                using var viewModel = new TestableValidatorLogViewModel(
+                    _packageModelProvider,
+                    _mockPackageUploaderService.Object,
+                    _mockWindowService.Object,
+                    _uploadingProgressPercentageProvider,
+                    _errorModelProvider,
+                    validXml);
+                // Delete the file to simulate missing file scenario
+                if (File.Exists(viewModel.TestSubValFilePath))
+                {
+                    File.Delete(viewModel.TestSubValFilePath);
+                }
 
-            // Act - Should throw FileNotFoundException
-            viewModel.TestExtractIdInformationFromValidatorLog(
-                expectedBuildId,
-                out string type,
-                out string titleId,
-                out string storeId,
-                out string logoFilename);
+                // Act - Should throw FileNotFoundException
+                viewModel.TestExtractIdInformationFromValidatorLog(
+                    expectedBuildId,
+                    out string type,
+                    out string titleId,
+                    out string storeId,
+                    out string logoFilename);
+            });
         }
 
         [TestMethod]
-        [ExpectedException(typeof(Exception))]
         public void ExtractIdInformationFromValidatorLog_MismatchedBuildId_ThrowsException()
         {
-            // Arrange
-            var actualBuildId = Guid.NewGuid();
-            var differentBuildId = Guid.NewGuid(); // Different from the one in the XML
+            Assert.ThrowsExactly<Exception>(() =>
+            {
+                // Arrange
+                var actualBuildId = Guid.NewGuid();
+                var differentBuildId = Guid.NewGuid(); // Different from the one in the XML
             
-            string validXml = $@"<?xml version='1.0' encoding='utf-8'?>
+                string validXml = $@"<?xml version='1.0' encoding='utf-8'?>
                 <project>
                     <BuildId>{actualBuildId}</BuildId>
                     <Type>MSIXVC</Type>
@@ -202,20 +205,21 @@ namespace PackageUploader.UI.Test.ViewModel
                     </GameConfig>
                 </project>";
 
-            using var viewModel = new TestableValidatorLogViewModel(
-                _packageModelProvider,
-                _mockPackageUploaderService.Object,
-                _mockWindowService.Object,
-                _uploadingProgressPercentageProvider,
-                _errorModelProvider,
-                validXml);
-            // Act - Should throw exception due to build ID mismatch
-            viewModel.TestExtractIdInformationFromValidatorLog(
-                differentBuildId, // Different from XML
-                out string type,
-                out string titleId,
-                out string storeId,
-                out string logoFilename);
+                using var viewModel = new TestableValidatorLogViewModel(
+                    _packageModelProvider,
+                    _mockPackageUploaderService.Object,
+                    _mockWindowService.Object,
+                    _uploadingProgressPercentageProvider,
+                    _errorModelProvider,
+                    validXml);
+                // Act - Should throw exception due to build ID mismatch
+                viewModel.TestExtractIdInformationFromValidatorLog(
+                    differentBuildId, // Different from XML
+                    out string type,
+                    out string titleId,
+                    out string storeId,
+                    out string logoFilename);
+            });
         }
         
         [TestMethod]

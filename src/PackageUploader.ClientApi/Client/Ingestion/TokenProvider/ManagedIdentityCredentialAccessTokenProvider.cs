@@ -23,8 +23,9 @@ public class ManagedIdentityCredentialAccessTokenProvider : CredentialAccessToke
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
-        var azureCredentialOptions = SetTokenCredentialOptions(new ManagedIdentityCredentialOptions());
-        var azureCredential = new ManagedIdentityCredential(_managedIdentityAuthInfo.ClientId, azureCredentialOptions);
+        var managedIdentity = ManagedIdentityId.FromUserAssignedClientId(_managedIdentityAuthInfo.ClientId);
+        var azureCredentialOptions = SetTokenCredentialOptions(new ManagedIdentityCredentialOptions(managedIdentity));
+        var azureCredential = new ManagedIdentityCredential(azureCredentialOptions);
 
         return await GetIngestionAccessTokenAsync(azureCredential, ct).ConfigureAwait(false);
     }

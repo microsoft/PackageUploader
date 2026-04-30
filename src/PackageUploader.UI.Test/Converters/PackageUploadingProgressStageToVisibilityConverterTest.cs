@@ -117,9 +117,11 @@ public class PackageUploadingProgressStageToVisibilityConverterTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(NotImplementedException))]
     public void ConvertBack()
     {
-        _converter.ConvertBack(null, null, null, null);
+        Assert.ThrowsExactly<NotImplementedException>(() =>
+        {
+            _converter.ConvertBack(null, null, null, null);
+        });
     }
 }

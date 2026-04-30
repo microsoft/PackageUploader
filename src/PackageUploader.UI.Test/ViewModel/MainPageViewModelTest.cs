@@ -109,7 +109,7 @@ public class MainPageViewModelTest
         _mainPageViewModel.ShowTenantSelectionCommand.Execute(null);
 
         Assert.IsTrue(_mainPageViewModel.ShowTenantSelection);
-        Assert.AreEqual(_mainPageViewModel.AvailableTenants.Count, 1);
+        Assert.AreEqual(1, _mainPageViewModel.AvailableTenants.Count);
         _authenticationService.VerifySet(x => x.Tenant = tenant2, Times.Once);
     }
 
@@ -125,7 +125,7 @@ public class MainPageViewModelTest
         
         _mainPageViewModel.GetTenantsCommand.Execute(null);
         
-        Assert.AreEqual(_mainPageViewModel.AvailableTenants.Count, 1);
+        Assert.AreEqual(1, _mainPageViewModel.AvailableTenants.Count);
         _authenticationService.VerifySet(x => x.Tenant = tenant2, Times.Once);
     }
 

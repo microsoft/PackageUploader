@@ -1,4 +1,7 @@
-﻿using Azure.Identity;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using Azure.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client.Extensions.Msal;

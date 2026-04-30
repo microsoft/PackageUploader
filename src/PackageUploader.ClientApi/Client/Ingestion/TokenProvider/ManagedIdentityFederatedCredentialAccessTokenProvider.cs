@@ -24,8 +24,9 @@ public class ManagedIdentityFederatedCredentialAccessTokenProvider : CredentialA
 
     public async Task<IngestionAccessToken> GetTokenAsync(CancellationToken ct)
     {
-        var miCredentialOptions = SetTokenCredentialOptions(new ManagedIdentityCredentialOptions());
-        var miCredential = new ManagedIdentityCredential(_managedIdentityFederatedAuthInfo.ClientId, miCredentialOptions);
+        var managedIdentity = ManagedIdentityId.FromUserAssignedClientId(_managedIdentityFederatedAuthInfo.ClientId);
+        var miCredentialOptions = SetTokenCredentialOptions(new ManagedIdentityCredentialOptions(managedIdentity));
+        var miCredential = new ManagedIdentityCredential(miCredentialOptions);
         var tokenRequestContext = new TokenRequestContext(["api://AzureADTokenExchange/.default"]);
 
         var azureCredentialOptions = SetTokenCredentialOptions(new ClientAssertionCredentialOptions());

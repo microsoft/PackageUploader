@@ -44,14 +44,11 @@ public class ClientCertificateCredentialAccessTokenProvider : CredentialAccessTo
 
         if (!string.IsNullOrEmpty(_clientCertificateAuthInfo.CertificatePassword))
         {
-            certificate = new X509Certificate2(
-                _clientCertificateAuthInfo.CertificatePath,
-                _clientCertificateAuthInfo.CertificatePassword,
-                X509KeyStorageFlags.DefaultKeySet);
+            certificate = X509CertificateLoader.LoadPkcs12FromFile(_clientCertificateAuthInfo.CertificatePath, _clientCertificateAuthInfo.CertificatePassword);
         }
         else
         {
-            certificate = new X509Certificate2(_clientCertificateAuthInfo.CertificatePath);
+            certificate = X509CertificateLoader.LoadPkcs12FromFile(_clientCertificateAuthInfo.CertificatePath, null);
         }
 
         var azureCredentialOptions = SetTokenCredentialOptions(new ClientCertificateCredentialOptions());

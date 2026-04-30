@@ -228,25 +228,31 @@ public class ValidatorResultsTest
         Assert.AreEqual(xcapiVersion, component.XCAPI_Version);
     }
 
-    [ExpectedException(typeof(InvalidDataException))]
     [TestMethod]
     public void TestValidatorResultsParseFailNoSuchFile()
     {
-        _validator.Parse("helloWorld");
+        Assert.ThrowsExactly<InvalidDataException>(() =>
+        {
+            _validator.Parse("helloWorld");
+        });
     }
     
-    [ExpectedException(typeof(InvalidDataException))]
     [TestMethod]
     public void TestValidatorResultsParseFailNull()
     {
-        _validator.Parse(null);
+        Assert.ThrowsExactly<InvalidDataException>(() =>
+        {
+            _validator.Parse(null);
+        });
     }
 
-    [ExpectedException(typeof(InvalidDataException))]
     [TestMethod]
     public void TestValidatorResultsParseFailEmptyString()
     {
-        _validator.Parse("");
+        Assert.ThrowsExactly<InvalidDataException>(() =>
+        {
+            _validator.Parse("");
+        });
     }
 
     [TestMethod]
