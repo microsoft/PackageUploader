@@ -9,6 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 
     <!-- Display name -->
     <ApplicationTitle>XboxPackageTool</ApplicationTitle>

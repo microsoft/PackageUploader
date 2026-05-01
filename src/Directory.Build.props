@@ -3,5 +3,6 @@
     <!-- Enable security features by default for all projects in the solution -->
     <HighEntropyVA>true</HighEntropyVA>
     <Features>strict</Features>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 </Project>
