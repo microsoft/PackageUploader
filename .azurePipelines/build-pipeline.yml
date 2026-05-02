@@ -29,6 +29,13 @@ stages:
             value: "win-x64"
 
         steps:
+        - task: UseDotNet@2
+          displayName: 'Install .NET SDK'
+          inputs:
+            packageType: 'sdk'
+            useGlobalJson: true
+            workingDirectory: '$(Build.SourcesDirectory)/src'
+
         - task: NuGetAuthenticate@1
 
         - task: DotNetCoreCLI@2
@@ -36,7 +43,7 @@ stages:
           inputs:
             command: 'restore'
             projects: '$(projectPath)'
-            restoreArguments: '--locked-mode -r $(buildRuntime)'
+            restoreArguments: '--locked-mode'
             feedsToUse: 'config'
 
         - task: DotNetCoreCLI@2
@@ -75,6 +82,13 @@ stages:
             value: "linux-x64"
 
         steps:
+        - task: UseDotNet@2
+          displayName: 'Install .NET SDK'
+          inputs:
+            packageType: 'sdk'
+            useGlobalJson: true
+            workingDirectory: '$(Build.SourcesDirectory)/src'
+
         - task: NuGetAuthenticate@1
 
         - task: DotNetCoreCLI@2
@@ -82,7 +96,7 @@ stages:
           inputs:
             command: 'restore'
             projects: '$(projectPath)'
-            restoreArguments: '--locked-mode -r $(buildRuntime)'
+            restoreArguments: '--locked-mode'
             feedsToUse: 'config'
 
         - task: DotNetCoreCLI@2
