@@ -151,7 +151,7 @@ Furthermore, you can also build it.
 1. [Download the .NET 10 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
 2. Open PowerShell, and then browse to the folder where you downloaded Package Uploader.
 3. Browse to the `src` folder, and then run `./publish.win-x64.ps1`.
-4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\Release\net10.0\win-x64\publish` directory.
+4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\release\win-x64\publish` directory.
 
 <a id="run-package-uploader"></a>
 
