@@ -11,6 +11,8 @@ variables:
     value: "release"
   - name: version
     value: ${{ parameters.Version }}
+  - name: projectPath
+    value: "./src/PackageUploader.Application/PackageUploader.Application.csproj"
 
 stages:
   - stage: Build
@@ -32,17 +34,17 @@ stages:
         - task: DotNetCoreCLI@2
           displayName: 'dotnet restore (locked mode)'
           inputs:
-            command: 'custom'
-            custom: 'restore'
-            projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
-            arguments: '--locked-mode -r $(buildRuntime)'
+            command: 'restore'
+            projects: '$(projectPath)'
+            restoreArguments: '--locked-mode -r $(buildRuntime)'
+            feedsToUse: 'config'
 
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
             command: 'publish'
             publishWebProjects: false
-            projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
+            projects: '$(projectPath)'
             arguments: '--no-restore --self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
             zipAfterPublish: false
             modifyOutputPath: false
@@ -78,17 +80,17 @@ stages:
         - task: DotNetCoreCLI@2
           displayName: 'dotnet restore (locked mode)'
           inputs:
-            command: 'custom'
-            custom: 'restore'
-            projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
-            arguments: '--locked-mode -r $(buildRuntime)'
+            command: 'restore'
+            projects: '$(projectPath)'
+            restoreArguments: '--locked-mode -r $(buildRuntime)'
+            feedsToUse: 'config'
 
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
             command: 'publish'
             publishWebProjects: false
-            projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
+            projects: '$(projectPath)'
             arguments: '--no-restore --self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
             zipAfterPublish: false
             modifyOutputPath: false
