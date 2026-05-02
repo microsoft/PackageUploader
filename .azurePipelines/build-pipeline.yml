@@ -41,10 +41,11 @@ stages:
         - task: DotNetCoreCLI@2
           displayName: 'dotnet restore (locked mode)'
           inputs:
-            command: 'custom'
-            custom: 'restore'
+            command: 'restore'
             projects: '$(projectPath)'
-            arguments: '--locked-mode -r $(buildRuntime)'
+            restoreArguments: '--locked-mode'
+            feedsToUse: 'config'
+            nugetConfigPath: './src/NuGet.config'
 
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
@@ -94,10 +95,11 @@ stages:
         - task: DotNetCoreCLI@2
           displayName: 'dotnet restore (locked mode)'
           inputs:
-            command: 'custom'
-            custom: 'restore'
+            command: 'restore'
             projects: '$(projectPath)'
-            arguments: '--locked-mode -r $(buildRuntime)'
+            restoreArguments: '--locked-mode'
+            feedsToUse: 'config'
+            nugetConfigPath: './src/NuGet.config'
 
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
