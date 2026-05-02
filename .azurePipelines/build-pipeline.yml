@@ -30,12 +30,20 @@ stages:
         - task: NuGetAuthenticate@1
 
         - task: DotNetCoreCLI@2
+          displayName: 'dotnet restore (locked mode)'
+          inputs:
+            command: 'custom'
+            custom: 'restore'
+            projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
+            arguments: '--locked-mode -r $(buildRuntime)'
+
+        - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
             command: 'publish'
             publishWebProjects: false
             projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
-            arguments: '--self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
+            arguments: '--no-restore --self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
             zipAfterPublish: false
             modifyOutputPath: false
 
@@ -68,12 +76,20 @@ stages:
         - task: NuGetAuthenticate@1
 
         - task: DotNetCoreCLI@2
+          displayName: 'dotnet restore (locked mode)'
+          inputs:
+            command: 'custom'
+            custom: 'restore'
+            projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
+            arguments: '--locked-mode -r $(buildRuntime)'
+
+        - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
             command: 'publish'
             publishWebProjects: false
             projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
-            arguments: '--self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
+            arguments: '--no-restore --self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
             zipAfterPublish: false
             modifyOutputPath: false
 
