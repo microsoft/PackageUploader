@@ -45,6 +45,7 @@ stages:
             projects: '$(projectPath)'
             restoreArguments: '--locked-mode'
             feedsToUse: 'config'
+            nugetConfigPath: './src/NuGet.config'
 
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
@@ -98,6 +99,7 @@ stages:
             projects: '$(projectPath)'
             restoreArguments: '--locked-mode'
             feedsToUse: 'config'
+            nugetConfigPath: './src/NuGet.config'
 
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
