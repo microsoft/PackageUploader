@@ -90,12 +90,14 @@ public class PartialGameConfigModelTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(InvalidDataException))]
     public void TestInvalidConstructor()
     {
-        _ = new PartialGameConfigModel(null);
-        _ = new PartialGameConfigModel("");
-        _ = new PartialGameConfigModel("C:\\nonexistent\\path\\to\\MicrosoftGame.config");
+        Assert.ThrowsExactly<InvalidDataException>(() =>
+        {
+            _ = new PartialGameConfigModel(null);
+            _ = new PartialGameConfigModel("");
+            _ = new PartialGameConfigModel("C:\\nonexistent\\path\\to\\MicrosoftGame.config");
+        });
     }
 
     [TestMethod]

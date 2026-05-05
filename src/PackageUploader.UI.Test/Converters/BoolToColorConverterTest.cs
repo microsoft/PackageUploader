@@ -89,13 +89,14 @@ public class BoolToColorConverterTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(NotImplementedException))]
     public void ConvertBackTest()
     {
-        
-        var input = true;
-        var expectedOutput = "SomeColor";
+        Assert.ThrowsExactly<NotImplementedException>(() =>
+        {
+            var input = true;
+            var expectedOutput = "SomeColor";
 
-        var result = _converter.ConvertBack(input, typeof(string), expectedOutput, null);
+            var result = _converter.ConvertBack(input, typeof(string), expectedOutput, null);
+        });
     }
 }

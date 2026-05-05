@@ -8,17 +8,16 @@ using PackageUploader.Application.Extensions;
 using PackageUploader.Application.Models;
 using PackageUploader.ClientApi;
 using System;
-using System.CommandLine.Invocation;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace PackageUploader.Application.Operations;
 
-internal class GetProductOperation(IPackageUploaderService storeBrokerService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationConfig> config, InvocationContext invocationContext) : Operation(logger)
+internal class GetProductOperation(IPackageUploaderService storeBrokerService, ILogger<GetProductOperation> logger, IOptions<GetProductOperationConfig> config, DataOutputOptions dataOutputOptions) : Operation(logger)
 {
     private readonly IPackageUploaderService _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
     private readonly ILogger<GetProductOperation> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly bool _isData = invocationContext.GetOptionValue(ParameterHelper.DataOption);
+    private readonly bool _isData = dataOutputOptions.IsData;
     private readonly GetProductOperationConfig _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
 
     protected override async Task ProcessAsync(CancellationToken ct)

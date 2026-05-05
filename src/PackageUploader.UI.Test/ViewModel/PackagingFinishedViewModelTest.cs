@@ -148,7 +148,6 @@ namespace PackageUploader.UI.Test.ViewModel
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FileNotFoundException))]
         public void InstallGame_CreatesBatchFileAndStartsProcess_SafetyTest()
         {
             // Arrange
@@ -159,8 +158,11 @@ namespace PackageUploader.UI.Test.ViewModel
             _mockProcessStarterService.Setup(p => p.Start(It.IsAny<ProcessStartInfo>()))
                 .Returns(mockProcess.Object);
 
-            // Act
-            _viewModel.InstallGame();
+            Assert.ThrowsExactly<FileNotFoundException>(() =>
+            {
+                // Act
+                _viewModel.InstallGame();
+            });
         }
 
         [TestMethod]

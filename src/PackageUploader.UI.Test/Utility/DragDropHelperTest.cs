@@ -61,7 +61,7 @@ public class DragDropHelperTest
                                        false, null);
         dragEventArgs.RoutedEvent = System.Windows.UIElement.PreviewDragOverEvent;
         textBoxMoq.Object.RaiseEvent(dragEventArgs);
-        Assert.AreEqual(dragEventArgs.Effects, System.Windows.DragDropEffects.None);
+        Assert.AreEqual(System.Windows.DragDropEffects.None, dragEventArgs.Effects);
         Assert.IsTrue(dragEventArgs.Handled);
 
 
@@ -71,7 +71,7 @@ public class DragDropHelperTest
                                        true, new string[] {""});
         dragEventArgs.RoutedEvent = System.Windows.UIElement.PreviewDragOverEvent;
         textBoxMoq.Object.RaiseEvent(dragEventArgs);
-        Assert.AreEqual(dragEventArgs.Effects, System.Windows.DragDropEffects.Copy);
+        Assert.AreEqual(System.Windows.DragDropEffects.Copy, dragEventArgs.Effects);
         Assert.IsTrue(dragEventArgs.Handled);
 
 
@@ -127,7 +127,7 @@ public class DragDropHelperTest
                                        false, null);
         dragEventArgs.RoutedEvent = System.Windows.UIElement.PreviewDragOverEvent;
         textBoxMoq.Object.RaiseEvent(dragEventArgs);
-        Assert.AreEqual(dragEventArgs.Effects, System.Windows.DragDropEffects.None);
+        Assert.AreEqual(System.Windows.DragDropEffects.None, dragEventArgs.Effects);
         Assert.IsTrue(dragEventArgs.Handled);
 
 
@@ -137,7 +137,7 @@ public class DragDropHelperTest
                                        true, new string[] { "" });
         dragEventArgs.RoutedEvent = System.Windows.UIElement.PreviewDragOverEvent;
         textBoxMoq.Object.RaiseEvent(dragEventArgs);
-        Assert.AreEqual(dragEventArgs.Effects, System.Windows.DragDropEffects.Copy);
+        Assert.AreEqual(System.Windows.DragDropEffects.Copy, dragEventArgs.Effects);
         Assert.IsTrue(dragEventArgs.Handled);
 
 
@@ -193,7 +193,7 @@ public class DragDropHelperTest
                                        false, null);
         dragEventArgs.RoutedEvent = System.Windows.UIElement.PreviewDragOverEvent;
         textBoxMoq.Object.RaiseEvent(dragEventArgs);
-        Assert.AreEqual(dragEventArgs.Effects, System.Windows.DragDropEffects.None);
+        Assert.AreEqual(System.Windows.DragDropEffects.None, dragEventArgs.Effects);
         Assert.IsTrue(dragEventArgs.Handled);
     }
     [WpfTestMethod]
@@ -217,7 +217,7 @@ public class DragDropHelperTest
                                        true, new string[] { "" });
         dragEventArgs.RoutedEvent = System.Windows.UIElement.PreviewDragOverEvent;
         textBoxMoq.Object.RaiseEvent(dragEventArgs);
-        Assert.AreEqual(dragEventArgs.Effects, System.Windows.DragDropEffects.Copy);
+        Assert.AreEqual(System.Windows.DragDropEffects.Copy, dragEventArgs.Effects);
         Assert.IsTrue(dragEventArgs.Handled);
     }
     [WpfTestMethod]
@@ -347,7 +347,7 @@ public class DragDropHelperTest
                                        false, null);
         dragEventArgs.RoutedEvent = System.Windows.UIElement.PreviewDragOverEvent;
         textBoxMoq.Object.RaiseEvent(dragEventArgs);
-        Assert.AreEqual(dragEventArgs.Effects, System.Windows.DragDropEffects.None);
+        Assert.AreEqual(System.Windows.DragDropEffects.None, dragEventArgs.Effects);
         Assert.IsTrue(dragEventArgs.Handled);
     }
     [WpfTestMethod]
@@ -371,7 +371,7 @@ public class DragDropHelperTest
                                        true, new string[] { "" });
         dragEventArgs.RoutedEvent = System.Windows.UIElement.PreviewDragOverEvent;
         textBoxMoq.Object.RaiseEvent(dragEventArgs);
-        Assert.AreEqual(dragEventArgs.Effects, System.Windows.DragDropEffects.Copy);
+        Assert.AreEqual(System.Windows.DragDropEffects.Copy, dragEventArgs.Effects);
         Assert.IsTrue(dragEventArgs.Handled);
     }
     [WpfTestMethod]

@@ -9,7 +9,6 @@ using PackageUploader.Application.Models;
 using PackageUploader.ClientApi;
 using System;
 using System.Collections.Generic;
-using System.CommandLine.Invocation;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -17,11 +16,11 @@ using System.Threading.Tasks;
 
 namespace PackageUploader.Application.Operations;
 
-internal class GetPackagesOperation(IPackageUploaderService storeBrokerService, ILogger<GetPackagesOperation> logger, IOptions<GetPackagesOperationConfig> config, InvocationContext invocationContext) : Operation(logger)
+internal class GetPackagesOperation(IPackageUploaderService storeBrokerService, ILogger<GetPackagesOperation> logger, IOptions<GetPackagesOperationConfig> config, DataOutputOptions dataOutputOptions) : Operation(logger)
 {
     private readonly IPackageUploaderService _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
     private readonly ILogger<GetPackagesOperation> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly bool _isData = invocationContext.GetOptionValue(ParameterHelper.DataOption);
+    private readonly bool _isData = dataOutputOptions.IsData;
     private readonly GetPackagesOperationConfig _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
 
     protected override async Task ProcessAsync(CancellationToken ct)

@@ -11,6 +11,8 @@ variables:
     value: "release"
   - name: version
     value: ${{ parameters.Version }}
+  - name: projectPath
+    value: "./src/PackageUploader.Application/PackageUploader.Application.csproj"
 
 stages:
   - stage: Build
@@ -27,15 +29,31 @@ stages:
             value: "win-x64"
 
         steps:
+        - task: UseDotNet@2
+          displayName: 'Install .NET SDK'
+          inputs:
+            packageType: 'sdk'
+            useGlobalJson: true
+            workingDirectory: '$(Build.SourcesDirectory)/src'
+
         - task: NuGetAuthenticate@1
+
+        - task: DotNetCoreCLI@2
+          displayName: 'dotnet restore (locked mode)'
+          inputs:
+            command: 'restore'
+            projects: '$(projectPath)'
+            restoreArguments: '--locked-mode'
+            feedsToUse: 'config'
+            nugetConfigPath: './src/NuGet.config'
 
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
             command: 'publish'
             publishWebProjects: false
-            projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
-            arguments: '--self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
+            projects: '$(projectPath)'
+            arguments: '--no-restore --self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
             zipAfterPublish: false
             modifyOutputPath: false
 
@@ -65,15 +83,31 @@ stages:
             value: "linux-x64"
 
         steps:
+        - task: UseDotNet@2
+          displayName: 'Install .NET SDK'
+          inputs:
+            packageType: 'sdk'
+            useGlobalJson: true
+            workingDirectory: '$(Build.SourcesDirectory)/src'
+
         - task: NuGetAuthenticate@1
+
+        - task: DotNetCoreCLI@2
+          displayName: 'dotnet restore (locked mode)'
+          inputs:
+            command: 'restore'
+            projects: '$(projectPath)'
+            restoreArguments: '--locked-mode'
+            feedsToUse: 'config'
+            nugetConfigPath: './src/NuGet.config'
 
         - task: DotNetCoreCLI@2
           displayName: 'dotnet publish'
           inputs:
             command: 'publish'
             publishWebProjects: false
-            projects: './src/PackageUploader.Application/PackageUploader.Application.csproj'
-            arguments: '--self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
+            projects: '$(projectPath)'
+            arguments: '--no-restore --self-contained -o $(Build.BinariesDirectory) -p:Version=$(version) -r $(buildRuntime) -c $(buildConfiguration)'
             zipAfterPublish: false
             modifyOutputPath: false
 

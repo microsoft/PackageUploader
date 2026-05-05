@@ -79,10 +79,12 @@ public class ProgressToVisibilityConverterTest
     }
 
     [TestMethod]
-    [ExpectedException(typeof(NotImplementedException))]
     public void TestConvertBack()
     {
-        // Act
-        _converter.ConvertBack(null, null, null, null);
+        Assert.ThrowsExactly<NotImplementedException>(() =>
+        {
+            // Act
+            _converter.ConvertBack(null, null, null, null);
+        });
     }
 }

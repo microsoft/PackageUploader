@@ -3,24 +3,24 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PackageUploader.Application.Extensions;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Config;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
-using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
+using System.CommandLine;
 using System.Text.Json;
 
 namespace PackageUploader.Application.Test
 {
     [TestClass]
-    public class ParameterHelperIntegrationTest
+    public class HostExtensionsIntegrationTest
     {
         private string? _tempJsonFilePath;
-        private IConfigurationRoot? _configuration;
-        private Parser? _parser;
+        private ConfigurationManager? _configuration;
+        private RootCommand? _rootCommand;
 
         [TestInitialize]
         public void Initialize()
@@ -45,8 +45,8 @@ namespace PackageUploader.Application.Test
 
             File.WriteAllText(_tempJsonFilePath, JsonSerializer.Serialize(configJson));
 
-            // Set up parser
-            _parser = ParameterHelper.BuildCommandLine().Build();
+            // Set up root command
+            _rootCommand = CommandLineHelper.BuildRootCommand();
         }
 
         [TestCleanup]
@@ -67,12 +67,13 @@ namespace PackageUploader.Application.Test
             var args = new[] { "GetProduct" };
 
             // Act
-            Assert.IsNotNull(_parser);
-            var result = _parser.Parse(args);
+            Assert.IsNotNull(_rootCommand);
+            var result = _rootCommand.Parse(args);
 
             // Assert
-            Assert.AreEqual(1, result.Errors.Count);
-            Assert.IsTrue(result.Errors[0].Message.Contains("Option '-c' is required."));
+            Assert.HasCount(1, result.Errors);
+            Assert.IsTrue(result.Errors[0].Message.Contains("--ConfigFile") || result.Errors[0].Message.Contains("-c"),
+                $"Expected error about ConfigFile option, got: {result.Errors[0].Message}");
         }
 
         [TestMethod]
@@ -80,19 +81,14 @@ namespace PackageUploader.Application.Test
         public void CommandLineParameter_OverridesConfigValue()
         {
             // Arrange
-            var configBuilder = new ConfigurationBuilder();
             var args = new[] { "GetProduct", "--ConfigFile", _tempJsonFilePath!, "--ProductId", "override-product-id" };
-            Assert.IsNotNull(_parser);
-            var result = _parser.Parse(args);
-            
-            // Mock the invocation context to get the option value
-            InvocationContext invocationContext = new(result);
-            var configFile = invocationContext.GetOptionValue(ParameterHelper.ConfigFileOption);
-            var authMethod = invocationContext.GetOptionValue(ParameterHelper.AuthenticationMethodOption);
+            Assert.IsNotNull(_rootCommand);
+            var result = _rootCommand.Parse(args);
 
             // Act
-            ParameterHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("override-product-id", _configuration["ProductId"]);
@@ -134,7 +130,7 @@ namespace PackageUploader.Application.Test
             Assert.IsTrue(string.IsNullOrEmpty(authInfo.ClientSecret));
             
             // Act and Assert - verify exception is thrown due to missing ClientSecret
-            Assert.ThrowsException<ArgumentException>(() => 
+            Assert.Throws<ArgumentException>(() => 
             {
                 var tokenProvider = new AzureApplicationSecretAccessTokenProvider(
                     serviceProvider.GetRequiredService<IOptions<AccessTokenProviderConfig>>(),
@@ -191,18 +187,13 @@ namespace PackageUploader.Application.Test
                 "--Authentication", "Browser",
                 "--TenantId", "my-tenant-id" 
             };
-            var configBuilder = new ConfigurationBuilder();
-            Assert.IsNotNull(_parser);
-            var result = _parser.Parse(args);
-
-            // Mock the invocation context to get the option value
-            InvocationContext invocationContext = new(result);
-            var configFile = invocationContext.GetOptionValue(ParameterHelper.ConfigFileOption);
-            var authMethod = invocationContext.GetOptionValue(ParameterHelper.AuthenticationMethodOption);
+            Assert.IsNotNull(_rootCommand);
+            var result = _rootCommand.Parse(args);
 
             // Act
-            ParameterHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("my-tenant-id", _configuration[$"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}"]);
@@ -219,18 +210,13 @@ namespace PackageUploader.Application.Test
                 "--Authentication", "CacheableBrowser",
                 "--TenantId", "my-cached-tenant-id" 
             };
-            var configBuilder = new ConfigurationBuilder();
-            Assert.IsNotNull(_parser);
-            var result = _parser.Parse(args);
-
-            // Mock the invocation context to get the option value
-            InvocationContext invocationContext = new(result);
-            var configFile = invocationContext.GetOptionValue(ParameterHelper.ConfigFileOption);
-            var authMethod = invocationContext.GetOptionValue(ParameterHelper.AuthenticationMethodOption);
+            Assert.IsNotNull(_rootCommand);
+            var result = _rootCommand.Parse(args);
 
             // Act
-            ParameterHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("my-cached-tenant-id", _configuration[$"{BrowserAuthInfo.ConfigName}:{nameof(BrowserAuthInfo.TenantId)}"]);
@@ -261,18 +247,13 @@ namespace PackageUploader.Application.Test
                 "--Authentication", "AppSecret"
             };
             
-            var configBuilder = new ConfigurationBuilder();
-            Assert.IsNotNull(_parser);
-            var result = _parser.Parse(args);
-
-            // Mock the invocation context to get the option value
-            InvocationContext invocationContext = new(result);
-            var configFile = invocationContext.GetOptionValue(ParameterHelper.ConfigFileOption);
-            var authMethod = invocationContext.GetOptionValue(ParameterHelper.AuthenticationMethodOption);
+            Assert.IsNotNull(_rootCommand);
+            var result = _rootCommand.Parse(args);
 
             // Act
-            ParameterHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("product-from-config", _configuration["ProductId"]);
@@ -298,18 +279,13 @@ namespace PackageUploader.Application.Test
                 "--Verbose"
             };
             
-            var configBuilder = new ConfigurationBuilder();
-            Assert.IsNotNull(_parser);
-            var result = _parser.Parse(args);
-
-            // Mock the invocation context to get the option value
-            InvocationContext invocationContext = new(result);
-            var configFile = invocationContext.GetOptionValue(ParameterHelper.ConfigFileOption);
-            var authMethod = invocationContext.GetOptionValue(ParameterHelper.AuthenticationMethodOption);
+            Assert.IsNotNull(_rootCommand);
+            var result = _rootCommand.Parse(args);
 
             // Act
-            ParameterHelper.ConfigureParameters(configFile, authMethod, configBuilder, args);
-            _configuration = configBuilder.Build();
+            var hostBuilder = Host.CreateEmptyApplicationBuilder(null);
+            hostBuilder.ConfigureAppConfiguration(result);
+            _configuration = hostBuilder.Configuration;
 
             // Assert
             Assert.AreEqual("product-from-cmd", _configuration["ProductId"]);
