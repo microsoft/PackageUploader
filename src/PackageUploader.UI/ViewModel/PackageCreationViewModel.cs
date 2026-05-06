@@ -667,19 +667,32 @@ public partial class PackageCreationViewModel : BaseViewModel
             return;
         }
 
-        string cmdFormat = "pack /v /f \"{0}\" /d \"{1}\" /pd \"{2}\"";
-        string arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, buildPath);
+        string arguments;
+        string executablePath;
 
-        // Populate our arguments for SubVal validation.
-        if (!PopulateSubValArgs(_settingsFolder, ref arguments))
+        if (UseMsixvc2)
         {
-            return;
+            // Argument order matches the makepkg2 script convention: /f /pd /d /msixvc2.
+            string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2";
+            arguments = string.Format(msixvc2CmdFormat, MappingDataXmlPath, buildPath, GameDataPath);
+            executablePath = _pathConfigurationService.MakePkg2Path;
+        }
+        else
+        {
+            string cmdFormat = "pack /v /f \"{0}\" /d \"{1}\" /pd \"{2}\"";
+            arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, buildPath);
+            executablePath = _pathConfigurationService.MakePkgPath;
+
+            if (!PopulateSubValArgs(_settingsFolder, ref arguments))
+            {
+                return;
+            }
         }
 
         SetConsoleCtrlHandler(null, false);
 
         _makePackageProcess = new Process();
-        _makePackageProcess.StartInfo.FileName = _pathConfigurationService.MakePkgPath;
+        _makePackageProcess.StartInfo.FileName = executablePath;
         _makePackageProcess.StartInfo.Arguments = arguments;
         _makePackageProcess.StartInfo.RedirectStandardOutput = true;
         _makePackageProcess.StartInfo.RedirectStandardError = true;
