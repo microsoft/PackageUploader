@@ -322,6 +322,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
+    private bool _useMsixvc2 = false;
+    public bool UseMsixvc2
+    {
+        get => _useMsixvc2;
+        set => SetProperty(ref _useMsixvc2, value);
+    }
+
+    private bool _isMakePkg2Available = false;
+    public bool IsMakePkg2Available
+    {
+        get => _isMakePkg2Available;
+        set => SetProperty(ref _isMakePkg2Available, value);
+    }
+
     public ICommand MakePackageCommand { get; }
     public ICommand GameDataPathDroppedCommand { get; }
     public ICommand BrowseGameDataPathCommand { get; }
@@ -370,6 +384,9 @@ public partial class PackageCreationViewModel : BaseViewModel
 
             // Future options can also be checked here to enable new features.
         }
+
+        var makePkg2Path = _pathConfigurationService.MakePkg2Path;
+        _isMakePkg2Available = !string.IsNullOrEmpty(makePkg2Path) && File.Exists(makePkg2Path);
 
         MakePackageCommand = new RelayCommand(StartMakePackageProcess, CanCreatePackage);
         GameDataPathDroppedCommand = new RelayCommand<string>(OnGameDataPathDropped);
