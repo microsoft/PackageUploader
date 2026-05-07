@@ -406,6 +406,7 @@
                             <RowDefinition />
                             <RowDefinition />
                             <RowDefinition />
+                            <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -506,6 +507,16 @@
                                        HorizontalAlignment="Left"
                                        TextWrapping="Wrap"/>
                         </StackPanel>
+
+                        <CheckBox Grid.Row="5" Grid.Column="0"
+                                  Content="{x:Static strings:PackageCreation.UseMsixvc2Text}"
+                                  d:Content="Package as MSIXVC2 (.msixvc)"
+                                  IsChecked="{Binding UseMsixvc2}"
+                                  Visibility="{Binding IsMakePkg2Available, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                  Foreground="{DynamicResource PrimaryTextBrush}"
+                                  HorizontalAlignment="Left"
+                                  VerticalContentAlignment="Center"
+                                  Margin="0,10,0,0"/>
                     </Grid>
                 </StackPanel>
                 <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="1" Fill="{DynamicResource BorderBrush}" Margin="10,0" />

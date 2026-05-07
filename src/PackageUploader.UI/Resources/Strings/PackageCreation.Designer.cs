@@ -419,5 +419,14 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("ValidatorPathTitleText", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package as MSIXVC2 (.msixvc).
+        /// </summary>
+        public static string UseMsixvc2Text {
+            get {
+                return ResourceManager.GetString("UseMsixvc2Text", resourceCulture);
+            }
+        }
     }
 }
