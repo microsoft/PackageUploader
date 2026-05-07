@@ -796,6 +796,8 @@ public partial class PackageCreationViewModel : BaseViewModel
         ProgressValue = 0;
         IsCreationInProgress = true;
 
+        _packingProgressPercentageProvider.IsIndeterminate = UseMsixvc2;
+
         _logger.LogInformation("Calling '{Command}'", _makePackageProcess.StartInfo.FileName + " " + _makePackageProcess.StartInfo.Arguments);
         _makePackageProcess.Start();
         _makePackageProcess.BeginOutputReadLine();

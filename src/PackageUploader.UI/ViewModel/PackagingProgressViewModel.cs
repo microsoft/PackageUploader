@@ -30,6 +30,8 @@ namespace PackageUploader.UI.ViewModel
             }
         }
 
+        public bool IsIndeterminate => _packingProgressPercentageProvider.IsIndeterminate;
+
         public ICommand ViewLogsCommand { get; }
         public ICommand CancelCreationCommand { get; }
 

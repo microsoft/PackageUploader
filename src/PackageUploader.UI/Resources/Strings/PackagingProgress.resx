@@ -138,4 +138,7 @@
   <data name="VerifyingPackageContentsText" xml:space="preserve">
     <value>Verifying package contents...</value>
   </data>
+  <data name="PackingMsixvc2Text" xml:space="preserve">
+    <value>Packaging using MSIXVC2...</value>
+  </data>
 </root>

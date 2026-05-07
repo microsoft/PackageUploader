@@ -30,10 +30,22 @@ namespace PackageUploader.UI.Providers
             }
         }
 
+        private bool _isIndeterminate;
+        public bool IsIndeterminate
+        {
+            get => _isIndeterminate;
+            set
+            {
+                _isIndeterminate = value;
+                OnPropertyChanged(nameof(IsIndeterminate));
+            }
+        }
+
         public PackingProgressPercentageProvider()
         {
             _packingProgressPercentage = 0;
             _packingCancelled = false;
+            _isIndeterminate = false;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

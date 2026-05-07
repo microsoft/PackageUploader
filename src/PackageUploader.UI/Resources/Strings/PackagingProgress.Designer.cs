@@ -106,6 +106,15 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Packaging using MSIXVC2....
+        /// </summary>
+        public static string PackingMsixvc2Text {
+            get {
+                return ResourceManager.GetString("PackingMsixvc2Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Validating files....
         /// </summary>
         public static string ValidatingFilesText {
