@@ -14,6 +14,7 @@ internal static class GamePackageAssetTypeExtensions
             GamePackageAssetType.SubmissionValidatorLog => "EraSubmissionValidatorLog",
             GamePackageAssetType.SymbolsZip => "EraSymbolFile",
             GamePackageAssetType.DiscLayoutFile => "EraSubsetFile",
+            GamePackageAssetType.SodbFile => "SodbBinary",
             _ => string.Empty,
         };
 }

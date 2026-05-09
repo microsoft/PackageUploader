@@ -18,7 +18,8 @@
     "ekbFilePath": "{{ required }}",
     "subValFilePath": "{{ required }}",
     "symbolsFilePath": "{{ optional }}",
-    "discLayoutFilePath": "{{ optional }}"
+    "discLayoutFilePath": "{{ optional }}",
+    "sodbFilePath": "{{ optional }}"
   },
   "minutesToWaitForProcessing": 60,
 

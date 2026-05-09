@@ -89,6 +89,7 @@
   - **subValFilePath**: required - path to the SubVal File
   - **symbolsFilePath**: optional - path to the Symbols File
   - **discLayoutFilePath**: optional - path to the Disc Layout File
+  - **sodbFilePath**: optional - path to the SODB (Shader Object Database) file
 - **minutesToWaitForProcessing**: optional (default 30) - it will check the package processing status every minute for this long, until it succeeds or fails
 - **availabilityDate**: optional - if informed it will configure custom availability date for your XVC/MSIXVC packages [Learn more](http://go.microsoft.com/fwlink/?LinkId=825239)
    - **isEnabled**: optional (default false) - it will enable/disable custom availability date

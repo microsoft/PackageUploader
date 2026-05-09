@@ -16,4 +16,6 @@ public class GameAssets
     public string SymbolsFilePath { get; set; }
 
     public string DiscLayoutFilePath { get; set; }
+
+    public string SodbFilePath { get; set; }
 }
