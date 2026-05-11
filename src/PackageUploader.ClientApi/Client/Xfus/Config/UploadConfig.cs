@@ -12,6 +12,16 @@ public partial class UploadConfigValidator : IValidateOptions<UploadConfig>
 
 public class UploadConfig
 {
+    /// <summary>
+    /// Per-request timeout in milliseconds for non-upload XFUS HTTP calls
+    /// (e.g., initialize, continue, status checks).
+    /// Must be high enough to accommodate XVC initialize, which involves
+    /// multiple sequential storage calls and can take 2-6s cross-region.
+    /// A value that is too low (e.g., 5000ms) will cause intermittent
+    /// <see cref="System.Threading.Tasks.TaskCanceledException"/> failures
+    /// for clients in distant regions. Default is 300000ms (5 minutes).
+    /// The README example recommends 60000ms (60s) as a reasonable override.
+    /// </summary>
     [Required]
     public int HttpTimeoutMs { get; set; } = 300000;
 
