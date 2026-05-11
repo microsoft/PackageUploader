@@ -305,7 +305,7 @@ Product: {
   },
 
   "uploadConfig": {
-    "httpTimeoutMs": 5000,
+    "httpTimeoutMs": 60000,
     "httpUploadTimeoutMs": 300000,
     "maxParallelism": 24,
     "defaultConnectionLimit": -1,

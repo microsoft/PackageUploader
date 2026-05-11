@@ -29,6 +29,18 @@ internal class XfusUploader : IXfusUploader
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _uploadConfig = uploadConfig?.Value ?? throw new ArgumentNullException(nameof(uploadConfig));
+
+        _logger.LogInformation(
+            "UploadConfig: HttpTimeoutMs={HttpTimeoutMs}, HttpUploadTimeoutMs={HttpUploadTimeoutMs}, " +
+            "MaxParallelism={MaxParallelism}, DefaultConnectionLimit={DefaultConnectionLimit}, " +
+            "Expect100Continue={Expect100Continue}, UseNagleAlgorithm={UseNagleAlgorithm}, RetryCount={RetryCount}",
+            _uploadConfig.HttpTimeoutMs,
+            _uploadConfig.HttpUploadTimeoutMs,
+            _uploadConfig.MaxParallelism,
+            _uploadConfig.DefaultConnectionLimit,
+            _uploadConfig.Expect100Continue,
+            _uploadConfig.UseNagleAlgorithm,
+            _uploadConfig.RetryCount);
     }
 
     public Task UploadFileToXfusAsync(FileInfo uploadFile, XfusUploadInfo xfusUploadInfo, bool deltaUpload, CancellationToken ct)
