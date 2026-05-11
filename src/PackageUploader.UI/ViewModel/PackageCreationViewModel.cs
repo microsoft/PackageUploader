@@ -1024,6 +1024,9 @@ public partial class PackageCreationViewModel : BaseViewModel
     [GeneratedRegex(@"See the Submission Validator log file at '(?<PackagePath>.*?Validator.*?\.xml)'")]
     private static partial Regex ValidatorResultsPathRegex();
 
+    [GeneratedRegex(@"Submission Validator log path:\s*(?<PackagePath>.*?Validator.*?\.xml)")]
+    private static partial Regex ValidatorResultsPathRegex2();
+
     private void ProcessMakePackageOutput(string outputString)
     {
         // Package Path for XVC
@@ -1053,8 +1056,12 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
         Package.GameConfigFilePath = Path.Combine(GameDataPath, "MicrosoftGame.config");
 
-        // Validator Results Path
+        // Validator Results Path — try legacy makepkg format first, then makepkg2 format
         MatchCollection validatorResultsPathMatchCollection = ValidatorResultsPathRegex().Matches(outputString);
+        if (validatorResultsPathMatchCollection.Count == 0)
+        {
+            validatorResultsPathMatchCollection = ValidatorResultsPathRegex2().Matches(outputString);
+        }
         for (int i = 0; i < validatorResultsPathMatchCollection.Count; i++)
         {
             string validatorResultsPathValue = validatorResultsPathMatchCollection[i].Groups["PackagePath"].Value;
