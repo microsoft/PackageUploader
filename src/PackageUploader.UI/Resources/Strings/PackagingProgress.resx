@@ -141,4 +141,7 @@
   <data name="PackingMsixvc2Text" xml:space="preserve">
     <value>Packaging using MSIXVC2...</value>
   </data>
+  <data name="PackagingDataText" xml:space="preserve">
+    <value>Packaging data...</value>
+  </data>
 </root>

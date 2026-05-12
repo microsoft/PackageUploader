@@ -30,14 +30,14 @@ namespace PackageUploader.UI.Providers
             }
         }
 
-        private bool _isIndeterminate;
-        public bool IsIndeterminate
+        private bool _isMsixvc2;
+        public bool IsMsixvc2
         {
-            get => _isIndeterminate;
+            get => _isMsixvc2;
             set
             {
-                _isIndeterminate = value;
-                OnPropertyChanged(nameof(IsIndeterminate));
+                _isMsixvc2 = value;
+                OnPropertyChanged(nameof(IsMsixvc2));
             }
         }
 
@@ -45,7 +45,7 @@ namespace PackageUploader.UI.Providers
         {
             _packingProgressPercentage = 0;
             _packingCancelled = false;
-            _isIndeterminate = false;
+            _isMsixvc2 = false;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

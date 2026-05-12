@@ -60,7 +60,7 @@
                            Text="{x:Static strings:PackagingProgress.PackingText}"
                            Foreground="{DynamicResource PrimaryTextBrush}" 
                            HorizontalAlignment="Left"
-                           Visibility="{Binding IsIndeterminate, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+                           Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
                            Margin="0, 0, 0, 10"
@@ -68,12 +68,11 @@
                            Text="{x:Static strings:PackagingProgress.PackingMsixvc2Text}"
                            Foreground="{DynamicResource PrimaryTextBrush}" 
                            HorizontalAlignment="Left"
-                           Visibility="{Binding IsIndeterminate, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                           Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 <StackPanel Grid.Row="0"
                             Grid.Column="1"
                             Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Visibility="{Binding IsIndeterminate, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                            HorizontalAlignment="Right">
                     <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                     <TextBlock Text="{x:Static strings:PackagingProgress.PercentComplete}"
@@ -86,15 +85,12 @@
                              Minimum="0"
                              Maximum="100"
                              Value="{Binding PackingProgressPercentage}"
-                             IsIndeterminate="{Binding IsIndeterminate}"
                              HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch"
                              Height="3"/>
             </Grid>
-            <!-- Updating labels
-                 The entire section is collapsed when IsIndeterminate is true. -->
-            <Grid HorizontalAlignment="Center"
-                  Visibility="{Binding IsIndeterminate, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+            <!-- Updating labels -->
+            <Grid HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -180,7 +176,16 @@
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Bottom"
-                       Margin="0, 30, 0, 0"/>
+                       Margin="0, 30, 0, 0"
+                       Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+            <TextBlock Grid.Row="1" Grid.Column="1"
+                       Text="{x:Static strings:PackagingProgress.PackagingDataText}"
+                       d:Text="Packaging data..."
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Bottom"
+                       Margin="0, 30, 0, 0"
+                       Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <!-- Row 3 -->
             <ContentControl Grid.Row="2"
                            Grid.Column="0"

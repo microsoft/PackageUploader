@@ -673,7 +673,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         if (UseMsixvc2)
         {
             // Argument order matches the makepkg2 script convention: /f /pd /d /msixvc2.
-            string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2";
+            string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2 /updatesubval";
             arguments = string.Format(msixvc2CmdFormat, MappingDataXmlPath, buildPath, GameDataPath);
             executablePath = _pathConfigurationService.MakePkg2Path;
         }
@@ -706,12 +706,20 @@ public partial class PackageCreationViewModel : BaseViewModel
             {
                 processOutput.Add(args.Data);
 
-                // Check for encryption progress messages
+                // Check for encryption progress messages (makepkg legacy)
                 var match = EncryptionProgressRegex().Match(args.Data);
                 if (match.Success && int.TryParse(match.Groups[1].Value, out int percentComplete))
                 {
                     // Map the 0-100 range to 5-95 to allow for setup and validation
                     ProgressValue = (int)(percentComplete * 0.9 + 5);
+                }
+
+                // Check for makepkg2 written progress messages
+                var msixvc2Match = Msixvc2WrittenProgressRegex().Match(args.Data);
+                if (msixvc2Match.Success && double.TryParse(msixvc2Match.Groups[1].Value, out double writtenPercent))
+                {
+                    // Map 0-100% written to 0-95%, reserving the last 5% for SubmissionValidator
+                    ProgressValue = (int)(writtenPercent * 0.95);
                 }
             }
         };
@@ -796,7 +804,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         ProgressValue = 0;
         IsCreationInProgress = true;
 
-        _packingProgressPercentageProvider.IsIndeterminate = UseMsixvc2;
+        _packingProgressPercentageProvider.IsMsixvc2 = UseMsixvc2;
 
         _logger.LogInformation("Calling '{Command}'", _makePackageProcess.StartInfo.FileName + " " + _makePackageProcess.StartInfo.Arguments);
         _makePackageProcess.Start();
@@ -1020,6 +1028,9 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     [GeneratedRegex(@"Encrypted (\d+) %")]
     private static partial Regex EncryptionProgressRegex();
+
+    [GeneratedRegex(@"written \((\d+(?:\.\d+)?)%\)")]
+    private static partial Regex Msixvc2WrittenProgressRegex();
 
     [GeneratedRegex(@"See the Submission Validator log file at '(?<PackagePath>.*?Validator.*?\.xml)'")]
     private static partial Regex ValidatorResultsPathRegex();

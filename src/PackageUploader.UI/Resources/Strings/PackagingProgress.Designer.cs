@@ -131,5 +131,14 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("VerifyingPackageContentsText", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packaging data....
+        /// </summary>
+        public static string PackagingDataText {
+            get {
+                return ResourceManager.GetString("PackagingDataText", resourceCulture);
+            }
+        }
     }
 }
