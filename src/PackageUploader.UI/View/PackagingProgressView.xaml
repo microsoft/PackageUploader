@@ -72,7 +72,8 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="1"
                             Orientation="Horizontal"
-                            HorizontalAlignment="Right">
+                            HorizontalAlignment="Right"
+                            Margin="5, 0, 0, 0">
                     <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                Foreground="{DynamicResource PrimaryTextBrush}"/>
                     <TextBlock Text="{x:Static strings:PackagingProgress.PercentComplete}"
