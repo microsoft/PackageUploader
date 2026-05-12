@@ -672,9 +672,8 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         if (UseMsixvc2)
         {
-            // Argument order matches the makepkg2 script convention: /f /pd /d /msixvc2.
-            string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2 /updatesubval";
-            arguments = string.Format(msixvc2CmdFormat, MappingDataXmlPath, buildPath, GameDataPath);
+            string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2 /updatesubval /validationpath \"{3}\"";
+            arguments = string.Format(msixvc2CmdFormat, MappingDataXmlPath, buildPath, GameDataPath, _settingsFolder);
             executablePath = _pathConfigurationService.MakePkg2Path;
         }
         else
