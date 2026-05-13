@@ -34,7 +34,7 @@ stages:
           inputs:
             packageType: 'sdk'
             useGlobalJson: true
-            workingDirectory: '$(Build.SourcesDirectory)/src'
+            workingDirectory: '$(Build.SourcesDirectory)'
 
         - task: NuGetAuthenticate@1
 
@@ -88,7 +88,7 @@ stages:
           inputs:
             packageType: 'sdk'
             useGlobalJson: true
-            workingDirectory: '$(Build.SourcesDirectory)/src'
+            workingDirectory: '$(Build.SourcesDirectory)'
 
         - task: NuGetAuthenticate@1
 
