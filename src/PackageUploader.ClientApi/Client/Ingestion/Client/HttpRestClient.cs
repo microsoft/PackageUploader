@@ -31,12 +31,15 @@ internal abstract class HttpRestClient : IHttpRestClient
     private static readonly MediaTypeHeaderValue JsonMediaTypeHeaderValue = new (MediaTypeNames.Application.Json);
     private const LogLevel VerboseLogLevel = LogLevel.Trace;
     private readonly string _sdkVersion;
+    private readonly string _uploadSource;
 
-    protected HttpRestClient(ILogger logger, HttpClient httpClient, IngestionSdkVersion ingestionSdkVersion)
+    protected HttpRestClient(ILogger logger, HttpClient httpClient, IngestionSdkVersion ingestionSdkVersion, UploadSourceConfig uploadSourceConfig)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _sdkVersion = ingestionSdkVersion?.SdkVersion ?? "SDK-V1.0.0";
+        var candidateSource = uploadSourceConfig?.UploadSource?.Trim();
+        _uploadSource = UploadSourceConfig.IsAllowedValue(candidateSource) ? candidateSource! : UploadSourceConfig.PackageUploaderSource;
     }
 
     public async Task<T> GetAsync<T>(string subUrl, JsonTypeInfo<T> jsonTypeInfo, CancellationToken ct)
@@ -202,6 +205,7 @@ internal abstract class HttpRestClient : IHttpRestClient
         }
         request.Headers.Add("Request-ID", Guid.NewGuid().ToString());
         request.Headers.Add("MethodOfAccess", _sdkVersion);
+        request.Headers.Add("UploadSource", _uploadSource);
 
         if (customHeaders is not null && customHeaders.Any())
         {
