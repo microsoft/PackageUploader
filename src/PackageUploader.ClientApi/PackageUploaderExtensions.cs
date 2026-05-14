@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using PackageUploader.ClientApi.Client.Ingestion;
+using PackageUploader.ClientApi.Client.Ingestion.Client;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
 using PackageUploader.ClientApi.Client.Xfus;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,8 +28,10 @@ public static class IngestionExtensions
     }
 
     public static IServiceCollection AddPackageUploaderService(this IServiceCollection services,
-        AuthenticationMethod authenticationMethod = AuthenticationMethod.Default) =>
+        AuthenticationMethod authenticationMethod = AuthenticationMethod.Default,
+        string uploadSource = UploadSourceConfig.PackageUploaderSource) =>
         services
+            .AddSingleton(new UploadSourceConfig { UploadSource = uploadSource })
             .AddScoped<IPackageUploaderService, PackageUploaderService>()
             .AddScoped<IAuthenticationResetService, AuthenticationResetService>()
             .AddIngestionService()
