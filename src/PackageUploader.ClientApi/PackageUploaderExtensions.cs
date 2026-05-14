@@ -11,6 +11,9 @@ namespace PackageUploader.ClientApi;
 
 public static class IngestionExtensions
 {
+    /// <summary>UploadSource value for the Xbox Game Package Manager (XGPM) UI.</summary>
+    public const string XgpmUploadSource = UploadSourceConfig.XgpmSource;
+
     public enum AuthenticationMethod 
     {
         AppSecret,
