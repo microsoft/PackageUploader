@@ -211,9 +211,17 @@ public class PackageUploaderService : IPackageUploaderService
             {
                 throw new FileNotFoundException("Disc Layout file not found.", gameAssets.DiscLayoutFilePath);
             }
-            if (!string.IsNullOrEmpty(gameAssets.SodbFilePath) && !File.Exists(gameAssets.SodbFilePath))
+            if (!string.IsNullOrEmpty(gameAssets.SodbFilePath))
             {
-                throw new FileNotFoundException("SODB file not found.", gameAssets.SodbFilePath);
+                if (!packageFilePath.EndsWith(".msixvc", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        $"SODB asset is only supported for MSIXVC packages (.msixvc). Package file '{Path.GetFileName(packageFilePath)}' is not an MSIXVC package.");
+                }
+                if (!File.Exists(gameAssets.SodbFilePath))
+                {
+                    throw new FileNotFoundException("SODB file not found.", gameAssets.SodbFilePath);
+                }
             }
         }
 
