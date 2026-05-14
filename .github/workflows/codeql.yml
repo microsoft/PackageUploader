@@ -73,10 +73,10 @@ jobs:
 
     - uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '10.0.x'
+        global-json-file: global.json
 
     - name: Restore dependencies
-      run: dotnet restore src/PackageUploader.sln
+      run: dotnet restore src/PackageUploader.sln --locked-mode
 
     - name: Build solution
       run: dotnet build src/PackageUploader.sln --configuration Release --no-restore

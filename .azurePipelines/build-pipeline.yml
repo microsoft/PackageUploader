@@ -1,5 +1,10 @@
 trigger: none
 
+pr:
+  branches:
+    include:
+      - main
+
 parameters:
   - name: Version
     default: '1.0.0'
