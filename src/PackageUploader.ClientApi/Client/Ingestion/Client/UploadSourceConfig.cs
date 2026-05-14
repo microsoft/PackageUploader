@@ -18,10 +18,14 @@ internal class UploadSourceConfig
     /// Default header value used by the Package Uploader CLI.
     public const string PackageUploaderSource = "PackageUploader";
 
+    /// Header value used by the Xbox Game Package Manager (XGPM) UI.
+    public const string XgpmSource = "XGPM";
+
     /// Case-insensitive set of permitted UploadSource values.
     private static readonly HashSet<string> AllowedValues = new(StringComparer.OrdinalIgnoreCase)
     {
         PackageUploaderSource,
+        XgpmSource,
     };
 
     /// The UploadSource value to send. Defaults to PackageUploaderSource.

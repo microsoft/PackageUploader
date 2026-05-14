@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using PackageUploader.ClientApi.Client.Ingestion;
@@ -321,8 +321,6 @@ public class PackageUploaderServiceTest
     }
 
     [TestMethod]
-    [DataRow("XGPM", DisplayName = "XGPM not in allowlist")]
-    [DataRow("xgpm", DisplayName = "XGPM lowercase not in allowlist")]
     [DataRow("PackageUploader2", DisplayName = "Suffix digit")]
     [DataRow("XPackageUploader", DisplayName = "Prefix char")]
     [DataRow("XGPM_Extended", DisplayName = "Underscore extension")]
@@ -404,6 +402,57 @@ public class PackageUploaderServiceTest
         Assert.AreEqual("PackageUploader", GetUploadSourceValue(request));
     }
 
+
+    [TestMethod]
+    public void UploadSourceHeader_XgpmValue_IsAccepted()
+    {
+        var request = MakeRequestWithUploadSource("XGPM");
+        Assert.IsNotNull(request);
+        Assert.AreEqual("XGPM", GetUploadSourceValue(request),
+            "XGPM should be accepted by the allowlist");
+    }
+
+    [TestMethod]
+    [DataRow("XGPM", DisplayName = "XGPM uppercase")]
+    [DataRow("xgpm", DisplayName = "XGPM lowercase")]
+    [DataRow("Xgpm", DisplayName = "XGPM mixed case")]
+    [DataRow("xGpM", DisplayName = "XGPM random case")]
+    public void UploadSourceHeader_XgpmCaseVariants_AreAccepted(string caseVariant)
+    {
+        var request = MakeRequestWithUploadSource(caseVariant);
+        Assert.IsNotNull(request);
+        Assert.AreEqual(caseVariant, GetUploadSourceValue(request),
+            $"Case variant '{caseVariant}' should be accepted (OrdinalIgnoreCase)");
+    }
+
+    [TestMethod]
+    public void UploadSourceHeader_XgpmFlowsThroughDI()
+    {
+        // Verify XGPM header flows end-to-end through IngestionHttpClient
+        var config = new UploadSourceConfig { UploadSource = "XGPM" };
+        HttpRequestMessage capturedRequest = null;
+        var handler = new Mock<HttpMessageHandler>();
+        handler.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => capturedRequest = req)
+            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = JsonContent.Create(new IngestionGameProduct { Id = TestProductId })
+            });
+
+        var httpClient = new HttpClient(handler.Object) { BaseAddress = new Uri("https://test.example.com/") };
+        var logger = new NullLogger<IngestionHttpClient>();
+        var client = new IngestionHttpClient(logger, httpClient, null, config);
+
+        try { client.GetGameProductByLongIdAsync(TestProductId, CancellationToken.None).GetAwaiter().GetResult(); } catch { }
+
+        Assert.IsNotNull(capturedRequest);
+        var values = capturedRequest.Headers.GetValues("UploadSource").ToArray();
+        Assert.AreEqual(1, values.Length);
+        Assert.AreEqual("XGPM", values[0], "XGPM value should flow through to the HTTP header");
+    }
     #endregion
 
     [TestMethod]
