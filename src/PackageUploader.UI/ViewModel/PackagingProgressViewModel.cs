@@ -30,6 +30,8 @@ namespace PackageUploader.UI.ViewModel
             }
         }
 
+        public bool IsMsixvc2 => _packingProgressPercentageProvider.IsMsixvc2;
+
         public ICommand ViewLogsCommand { get; }
         public ICommand CancelCreationCommand { get; }
 

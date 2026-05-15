@@ -23,72 +23,75 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <!-- picture -->
-            <RowDefinition Height="Auto"/>
-            <!-- heading -->
-            <RowDefinition Height="Auto"/>
-            <!-- progress bars bundle-->
-            <RowDefinition Height="Auto"/>
-            <!-- updating labels -->
-            <RowDefinition Height="Auto"/>
-            <!-- cancel button? -->
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Image Grid.Row="0"
-               Margin="{DynamicResource ProgressImageMargin}"
-               Source="/Resources/Images/InProgress.png"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Height="{DynamicResource StatusImageSize}"
-               Width="{DynamicResource StatusImageSize}"/>
-        <TextBlock Grid.Row="1"
-                   Margin="{DynamicResource ProgressHeadingMargin}"
-                   Style="{StaticResource SubHeadline}"
-                   Text="{x:Static strings:PackagingProgress.PackagingProgressTitleText}"
-                   d:Text="Getting your package ready..."
-                   Foreground="{DynamicResource PrimaryTextBrush}" />
-        <!-- Loading Bar -->
-        <Grid Grid.Row="2"
-              Margin="{DynamicResource ProgressSectionMargin}"
-              MaxWidth="{DynamicResource ProgressBarMaxWidth}"
-              HorizontalAlignment="Center">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0"
-                       Grid.Column="0"
-                       Margin="0, 0, 0, 10"
-                       d:Text="Packaging..."
-                       Text="{x:Static strings:PackagingProgress.PackingText}"
-                       Foreground="{DynamicResource PrimaryTextBrush}" 
-                       HorizontalAlignment="Left"/>
-            <StackPanel Grid.Row="0"
-                        Grid.Column="1"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right">
-                <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                           Foreground="{DynamicResource PrimaryTextBrush}"/>
-                <TextBlock Text="{x:Static strings:PackagingProgress.PercentComplete}"
-                           d:Text="% complete"
-                           Foreground="{DynamicResource PrimaryTextBrush}" />
-            </StackPanel>
-            <ProgressBar Grid.Row="1"
-                         Grid.ColumnSpan="2"
-                         Margin="0, 0, 0, 23"
-                         Minimum="0"
-                         Maximum="100"
-                         Value="{Binding PackingProgressPercentage}"
-                         HorizontalAlignment="Stretch"
-                         VerticalAlignment="Stretch"
-                         Height="3"/>
-        </Grid>
-        <!-- updating labels -->
-        <Grid Grid.Row="3" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <Image Margin="{DynamicResource ProgressImageMargin}"
+                   Source="/Resources/Images/InProgress.png"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Height="{DynamicResource StatusImageSize}"
+                   Width="{DynamicResource StatusImageSize}"/>
+            <TextBlock Margin="{DynamicResource ProgressHeadingMargin}"
+                       Style="{StaticResource SubHeadline}"
+                       Text="{x:Static strings:PackagingProgress.PackagingProgressTitleText}"
+                       d:Text="Getting your package ready..."
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource PrimaryTextBrush}" />
+            <!-- Loading Bar -->
+            <Grid Margin="{DynamicResource ProgressSectionMargin}"
+                  MaxWidth="{DynamicResource ProgressBarMaxWidth}"
+                  HorizontalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Margin="0, 0, 0, 10"
+                           d:Text="Packaging..."
+                           Text="{x:Static strings:PackagingProgress.PackingText}"
+                           Foreground="{DynamicResource PrimaryTextBrush}" 
+                           HorizontalAlignment="Left"
+                           Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Margin="0, 0, 0, 10"
+                           d:Text="Packaging using MSIXVC2..."
+                           Text="{x:Static strings:PackagingProgress.PackingMsixvc2Text}"
+                           Foreground="{DynamicResource PrimaryTextBrush}" 
+                           HorizontalAlignment="Left"
+                           Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <StackPanel Grid.Row="0"
+                            Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="5, 0, 0, 0">
+                    <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+                               Foreground="{DynamicResource PrimaryTextBrush}"/>
+                    <TextBlock Text="{x:Static strings:PackagingProgress.PercentComplete}"
+                               d:Text="% complete"
+                               Foreground="{DynamicResource PrimaryTextBrush}" />
+                </StackPanel>
+                <ProgressBar Grid.Row="1"
+                             Grid.ColumnSpan="2"
+                             Margin="0, 0, 0, 23"
+                             Minimum="0"
+                             Maximum="100"
+                             Value="{Binding PackingProgressPercentage}"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             Height="3"/>
+            </Grid>
+            <!-- Updating labels -->
+            <Grid HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
@@ -174,7 +177,16 @@
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Bottom"
-                       Margin="0, 30, 0, 0"/>
+                       Margin="0, 30, 0, 0"
+                       Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
+            <TextBlock Grid.Row="1" Grid.Column="1"
+                       Text="{x:Static strings:PackagingProgress.PackagingDataText}"
+                       d:Text="Packaging data..."
+                       Foreground="{DynamicResource PrimaryTextBrush}"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Bottom"
+                       Margin="0, 30, 0, 0"
+                       Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <!-- Row 3 -->
             <ContentControl Grid.Row="2"
                            Grid.Column="0"
@@ -219,8 +231,9 @@
                        HorizontalAlignment="Left"
                        VerticalAlignment="Bottom"
                        Margin="0, 30, 0, 0"/>
-        </Grid>
-        <StackPanel Grid.Row="4"
+            </Grid>
+        </StackPanel>
+        <StackPanel Grid.Row="1"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
             <Button Content="{x:Static strings:PackagingProgress.CancelPackagingButtonContentText}"

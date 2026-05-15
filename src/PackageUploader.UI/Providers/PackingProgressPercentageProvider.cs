@@ -30,10 +30,22 @@ namespace PackageUploader.UI.Providers
             }
         }
 
+        private bool _isMsixvc2;
+        public bool IsMsixvc2
+        {
+            get => _isMsixvc2;
+            set
+            {
+                _isMsixvc2 = value;
+                OnPropertyChanged(nameof(IsMsixvc2));
+            }
+        }
+
         public PackingProgressPercentageProvider()
         {
             _packingProgressPercentage = 0;
             _packingCancelled = false;
+            _isMsixvc2 = false;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

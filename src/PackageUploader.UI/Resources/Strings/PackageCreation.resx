@@ -237,4 +237,7 @@
   <data name="ValidatorPathTitleText" xml:space="preserve">
     <value>Folder path for SubmissionValidator.dll</value>
   </data>
+  <data name="UseMsixvc2Text" xml:space="preserve">
+    <value>Package as MSIXVC2 (.msixvc)</value>
+  </data>
 </root>

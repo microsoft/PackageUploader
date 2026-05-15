@@ -322,6 +322,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
     }
 
+    private bool _useMsixvc2 = false;
+    public bool UseMsixvc2
+    {
+        get => _useMsixvc2;
+        set => SetProperty(ref _useMsixvc2, value);
+    }
+
+    private bool _isMakePkg2Available = false;
+    public bool IsMakePkg2Available
+    {
+        get => _isMakePkg2Available;
+        set => SetProperty(ref _isMakePkg2Available, value);
+    }
+
     public ICommand MakePackageCommand { get; }
     public ICommand GameDataPathDroppedCommand { get; }
     public ICommand BrowseGameDataPathCommand { get; }
@@ -370,6 +384,9 @@ public partial class PackageCreationViewModel : BaseViewModel
 
             // Future options can also be checked here to enable new features.
         }
+
+        var makePkg2Path = _pathConfigurationService.MakePkg2Path;
+        _isMakePkg2Available = !string.IsNullOrEmpty(makePkg2Path) && File.Exists(makePkg2Path);
 
         MakePackageCommand = new RelayCommand(StartMakePackageProcess, CanCreatePackage);
         GameDataPathDroppedCommand = new RelayCommand<string>(OnGameDataPathDropped);
@@ -650,19 +667,31 @@ public partial class PackageCreationViewModel : BaseViewModel
             return;
         }
 
-        string cmdFormat = "pack /v /f \"{0}\" /d \"{1}\" /pd \"{2}\"";
-        string arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, buildPath);
+        string arguments;
+        string executablePath;
 
-        // Populate our arguments for SubVal validation.
-        if (!PopulateSubValArgs(_settingsFolder, ref arguments))
+        if (UseMsixvc2)
         {
-            return;
+            string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2 /updatesubval /validationpath \"{3}\"";
+            arguments = string.Format(msixvc2CmdFormat, MappingDataXmlPath, buildPath, GameDataPath, _settingsFolder);
+            executablePath = _pathConfigurationService.MakePkg2Path;
+        }
+        else
+        {
+            string cmdFormat = "pack /v /f \"{0}\" /d \"{1}\" /pd \"{2}\"";
+            arguments = string.Format(cmdFormat, MappingDataXmlPath, GameDataPath, buildPath);
+            executablePath = _pathConfigurationService.MakePkgPath;
+
+            if (!PopulateSubValArgs(_settingsFolder, ref arguments))
+            {
+                return;
+            }
         }
 
         SetConsoleCtrlHandler(null, false);
 
         _makePackageProcess = new Process();
-        _makePackageProcess.StartInfo.FileName = _pathConfigurationService.MakePkgPath;
+        _makePackageProcess.StartInfo.FileName = executablePath;
         _makePackageProcess.StartInfo.Arguments = arguments;
         _makePackageProcess.StartInfo.RedirectStandardOutput = true;
         _makePackageProcess.StartInfo.RedirectStandardError = true;
@@ -676,12 +705,20 @@ public partial class PackageCreationViewModel : BaseViewModel
             {
                 processOutput.Add(args.Data);
 
-                // Check for encryption progress messages
+                // Check for encryption progress messages (makepkg legacy)
                 var match = EncryptionProgressRegex().Match(args.Data);
                 if (match.Success && int.TryParse(match.Groups[1].Value, out int percentComplete))
                 {
                     // Map the 0-100 range to 5-95 to allow for setup and validation
                     ProgressValue = (int)(percentComplete * 0.9 + 5);
+                }
+
+                // Check for makepkg2 written progress messages
+                var msixvc2Match = Msixvc2WrittenProgressRegex().Match(args.Data);
+                if (msixvc2Match.Success && double.TryParse(msixvc2Match.Groups[1].Value, out double writtenPercent))
+                {
+                    // Map 0-100% written to 0-95%, reserving the last 5% for SubmissionValidator
+                    ProgressValue = (int)(writtenPercent * 0.95);
                 }
             }
         };
@@ -765,6 +802,8 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         ProgressValue = 0;
         IsCreationInProgress = true;
+
+        _packingProgressPercentageProvider.IsMsixvc2 = UseMsixvc2;
 
         _logger.LogInformation("Calling '{Command}'", _makePackageProcess.StartInfo.FileName + " " + _makePackageProcess.StartInfo.Arguments);
         _makePackageProcess.Start();
@@ -989,8 +1028,14 @@ public partial class PackageCreationViewModel : BaseViewModel
     [GeneratedRegex(@"Encrypted (\d+) %")]
     private static partial Regex EncryptionProgressRegex();
 
+    [GeneratedRegex(@"written \((\d+(?:\.\d+)?)%\)")]
+    private static partial Regex Msixvc2WrittenProgressRegex();
+
     [GeneratedRegex(@"See the Submission Validator log file at '(?<PackagePath>.*?Validator.*?\.xml)'")]
     private static partial Regex ValidatorResultsPathRegex();
+
+    [GeneratedRegex(@"Submission Validator log path:\s*(?<PackagePath>.*?Validator.*?\.xml)")]
+    private static partial Regex ValidatorResultsPathRegex2();
 
     private void ProcessMakePackageOutput(string outputString)
     {
@@ -1021,8 +1066,12 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
         Package.GameConfigFilePath = Path.Combine(GameDataPath, "MicrosoftGame.config");
 
-        // Validator Results Path
+        // Validator Results Path — try legacy makepkg format first, then makepkg2 format
         MatchCollection validatorResultsPathMatchCollection = ValidatorResultsPathRegex().Matches(outputString);
+        if (validatorResultsPathMatchCollection.Count == 0)
+        {
+            validatorResultsPathMatchCollection = ValidatorResultsPathRegex2().Matches(outputString);
+        }
         for (int i = 0; i < validatorResultsPathMatchCollection.Count; i++)
         {
             string validatorResultsPathValue = validatorResultsPathMatchCollection[i].Groups["PackagePath"].Value;
