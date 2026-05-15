@@ -1,6 +1,7 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -623,6 +624,53 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         _windowService.NavigateTo(typeof(Msixvc2UploadingView));
     }
 
+    /// <summary>
+    /// Probes makepkg2.exe to check if it supports the /uploadsource flag.
+    /// Runs: makepkg2 supports uploadsource  (exit 0 = supported, non-zero = not)
+    /// Probed on every upload to handle in-place binary updates.
+    /// </summary>
+    internal bool SupportsUploadSourceFlag()
+    {
+        string makePkg2Path = _pathConfigurationService.MakePkg2Path;
+        if (string.IsNullOrEmpty(makePkg2Path))
+        {
+            return false;
+        }
+
+        try
+        {
+            using var process = new Process();
+            process.StartInfo = new ProcessStartInfo
+            {
+                FileName = makePkg2Path,
+                Arguments = "supports uploadsource",
+                UseShellExecute = false,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false,
+                CreateNoWindow = true
+            };
+            process.Start();
+            if (process.WaitForExit(5000))
+            {
+                bool supported = process.ExitCode == 0;
+                _logger.LogInformation("makepkg2 /uploadsource probe: {Result} (exit code {ExitCode})",
+                    supported ? "supported" : "not supported", process.ExitCode);
+                return supported;
+            }
+            else
+            {
+                try { process.Kill(); } catch { /* best effort */ }
+                _logger.LogWarning("makepkg2 uploadsource probe timed out after 5s.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to probe makepkg2 for /uploadsource support.");
+        }
+
+        return false;
+    }
+
     internal string BuildUploadArguments()
     {
         var args = $"upload /d \"{ContentPath}\" /msixvc2";
@@ -646,6 +694,11 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         if (!string.IsNullOrEmpty(BigId) && BigId != "None")
         {
             args += $" /storeid \"{BigId}\"";
+        }
+
+        if (SupportsUploadSourceFlag())
+        {
+            args += $" /uploadsource {IngestionExtensions.XgpmUploadSource}";
         }
 
         args += " /auth CacheableBrowser";
