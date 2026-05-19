@@ -672,6 +672,7 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         if (UseMsixvc2)
         {
+            // According to the SubmissionValidator development team, an upcoming version will no longer have this dependency and this workaround will be removable
             CopyXsapiDllToSettingsFolder(_settingsFolder);
 
             string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2 /updatesubval /validationpath \"{3}\"";
