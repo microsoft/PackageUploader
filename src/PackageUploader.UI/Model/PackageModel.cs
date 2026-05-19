@@ -27,4 +27,5 @@ public class PackageModel
     public string FolderSize { get; set; } = string.Empty;
     public string UploadArguments { get; set; } = string.Empty;
     public string MakePkg2Path { get; set; } = string.Empty;
+    public Type? UploadOriginPage { get; set; } = null;
 }

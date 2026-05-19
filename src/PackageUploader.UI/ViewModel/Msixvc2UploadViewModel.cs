@@ -616,6 +616,7 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         _packageModelProvider.Package.FolderSize = EstimatedFolderSize;
         _packageModelProvider.Package.UploadArguments = uploadArgs;
         _packageModelProvider.Package.MakePkg2Path = makePkg2Path;
+        _packageModelProvider.Package.UploadOriginPage = typeof(Msixvc2UploadView);
         if (branchOrFlight != null)
         {
             _packageModelProvider.Package.BranchId = branchOrFlight.CurrentDraftInstanceId;

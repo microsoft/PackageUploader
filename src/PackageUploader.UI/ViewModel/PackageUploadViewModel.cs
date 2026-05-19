@@ -1131,6 +1131,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         Package.FolderSize = PackageSize;
         Package.UploadArguments = uploadArgs;
         Package.MakePkg2Path = makePkg2Path;
+        Package.UploadOriginPage = typeof(PackageUploadView);
         if (branchOrFlight != null)
         {
             Package.BranchId = branchOrFlight.CurrentDraftInstanceId;
