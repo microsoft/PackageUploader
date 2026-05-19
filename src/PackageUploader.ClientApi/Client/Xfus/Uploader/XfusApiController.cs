@@ -159,9 +159,8 @@ internal class XfusApiController
             };
 
             using var req = CreateJsonRequest(HttpMethod.Post, $"{assetId}/initialize", deltaUpload, properties, XfusJsonSerializerContext.Default.UploadProperties);
-            using var cts = new CancellationTokenSource(_uploadConfig.HttpTimeoutMs);
 
-            var response = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
+            var response = await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
