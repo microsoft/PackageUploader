@@ -672,6 +672,8 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         if (UseMsixvc2)
         {
+            CopyXsapiDllToSettingsFolder(_settingsFolder);
+
             string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2 /updatesubval /validationpath \"{3}\"";
             arguments = string.Format(msixvc2CmdFormat, MappingDataXmlPath, buildPath, GameDataPath, _settingsFolder);
             executablePath = _pathConfigurationService.MakePkg2Path;
@@ -898,6 +900,40 @@ public partial class PackageCreationViewModel : BaseViewModel
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Copies XSAPI.dll from the GDK bin folder to the settings folder if it exists.
+    /// SubmissionValidator.dll has a native dependency on XSAPI.dll, and when makepkg2 downloads
+    /// a fresh validator via /updatesubval, XSAPI.dll must be in the same directory for it to load.
+    /// </summary>
+    private void CopyXsapiDllToSettingsFolder(string settingsFolder)
+    {
+        try
+        {
+            string? gdkBinDir = Path.GetDirectoryName(_pathConfigurationService.BaseSubValPath);
+            if (string.IsNullOrEmpty(gdkBinDir))
+            {
+                return;
+            }
+
+            string sourceXsapi = Path.Combine(gdkBinDir, "xsapi.dll");
+            if (!File.Exists(sourceXsapi))
+            {
+                return;
+            }
+
+            string destXsapi = Path.Combine(settingsFolder, "xsapi.dll");
+            if (!File.Exists(destXsapi))
+            {
+                File.Copy(sourceXsapi, destXsapi, overwrite: false);
+                _logger.LogInformation("Copied xsapi.dll to settings folder for SubmissionValidator dependency.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Failed to copy xsapi.dll to settings folder: {message}", ex.Message);
+        }
     }
 
     private async Task GenerateMappingFile(string tempBuildPath)
