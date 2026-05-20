@@ -293,7 +293,7 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
 
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
-            _windowService.NavigateTo(typeof(Msixvc2UploadView));
+            _windowService.NavigateTo(_packageModelProvider.Package.UploadOriginPage ?? typeof(Msixvc2UploadView));
         });
     }
 
@@ -346,7 +346,7 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
     {
         _errorModelProvider.Error.MainMessage = title;
         _errorModelProvider.Error.DetailMessage = detail;
-        _errorModelProvider.Error.OriginPage = typeof(Msixvc2UploadView);
+        _errorModelProvider.Error.OriginPage = _packageModelProvider.Package.UploadOriginPage ?? typeof(Msixvc2UploadView);
         _errorModelProvider.Error.LogsPath = _lastLogFilePath;
 
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
