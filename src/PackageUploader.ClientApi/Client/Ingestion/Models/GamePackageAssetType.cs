@@ -9,4 +9,5 @@ public enum GamePackageAssetType
     SubmissionValidatorLog,
     SymbolsZip,
     DiscLayoutFile,
+    SodbFile,
 }

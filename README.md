@@ -172,7 +172,7 @@ The following table has important arguments for running Package Uploader.
 | **[GetProduct](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetProduct)** | Gets metadata for the product. This is useful for getting the productId, BigId, and product name that's used in all configuration files. This also gets a list of the BranchFriendlyNames and FlightNames of the product. |
 | **[GetPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetPackages)** | Gets a list of the packages in a branch or flight. |
 | **[UploadUwpPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadUwpPackage)** | Uploads a UWP game package. |
-| **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads an XVC game package and assets, including EKB, SubVal, and layout files. |
+| **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads an XVC game package and assets, including EKB, SubVal, layout, and SODB files. |
 | **[RemovePackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#RemovePackages)** | Removes game packages and assets from a branch. We recommend keeping only your 10 most recent packages to ensure optimal performance. |
 | **[ImportPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#ImportPackages)** | Imports all game packages from a branch to a destination branch. Use this operation to copy your previously uploaded and published packages from one branch to another. |
 | **[PublishPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#PublishPackages)** | Publishes all game packages from a branch or flight to a destination sandbox or flight. You can set specific availability times in the configuration file. |
@@ -295,7 +295,8 @@ Product: {
     "ekbFilePath": "C:\\Users\\someone\\Desktop\\StubPackage\\Builds\\ TestPublisher.SomeDemoProductName_0.9.1.0_x64__fjtqkg6rpm1hy_Full_33ec8436-5a0e-4f0d-b1ce-3f29c3955039.ekb",
     "subValFilePath": "C:\\Users\\someone\\Desktop\\StubPackage\\Builds\\Validator_ TestPublisher.SomeDemoProductName_0.9.1.0_x64__fjtqkg6rpm1hy.xml",
     "symbolsFilePath": "",
-    "discLayoutFilePath": ""
+    "discLayoutFilePath": "",
+    "sodbFilePath": ""
   },
   "minutesToWaitForProcessing": 60,
 

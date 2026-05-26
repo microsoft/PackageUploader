@@ -211,6 +211,18 @@ public class PackageUploaderService : IPackageUploaderService
             {
                 throw new FileNotFoundException("Disc Layout file not found.", gameAssets.DiscLayoutFilePath);
             }
+            if (!string.IsNullOrEmpty(gameAssets.SodbFilePath))
+            {
+                if (!packageFilePath.EndsWith(".msixvc", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        $"SODB asset is only supported for MSIXVC packages (.msixvc). Package file '{Path.GetFileName(packageFilePath)}' is not an MSIXVC package.");
+                }
+                if (!File.Exists(gameAssets.SodbFilePath))
+                {
+                    throw new FileNotFoundException("SODB file not found.", gameAssets.SodbFilePath);
+                }
+            }
         }
 
         // Calculate total size of all files to be uploaded
@@ -232,6 +244,10 @@ public class PackageUploaderService : IPackageUploaderService
             if (!string.IsNullOrEmpty(gameAssets.DiscLayoutFilePath) && File.Exists(gameAssets.DiscLayoutFilePath))
             {
                 files.Add(new FileInfo(gameAssets.DiscLayoutFilePath));
+            }
+            if (!string.IsNullOrEmpty(gameAssets.SodbFilePath) && File.Exists(gameAssets.SodbFilePath))
+            {
+                files.Add(new FileInfo(gameAssets.SodbFilePath));
             }
         }
         currentProgress.Stage = PackageUploadingProgressStage.ComputingDeltas;
@@ -323,6 +339,7 @@ public class PackageUploaderService : IPackageUploaderService
                 await UploadAssetAsync(product, package, gameAssets.SymbolsFilePath, GamePackageAssetType.SymbolsZip, bytesProgress, ct);
                 await UploadAssetAsync(product, package, gameAssets.SubValFilePath, GamePackageAssetType.SubmissionValidatorLog, bytesProgress, ct);
                 await UploadAssetAsync(product, package, gameAssets.DiscLayoutFilePath, GamePackageAssetType.DiscLayoutFile, bytesProgress, ct);
+                await UploadAssetAsync(product, package, gameAssets.SodbFilePath, GamePackageAssetType.SodbFile, bytesProgress, ct);
             }
 
             // Set progress to 100% when complete

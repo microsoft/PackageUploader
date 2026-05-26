@@ -338,6 +338,10 @@
               "discLayoutFilePath": {
                 "description": "path to the Disc Layout File",
                 "type": "string"
+              },
+              "sodbFilePath": {
+                "description": "path to the SODB (Shader Object Database) file",
+                "type": "string"
               }
             },
             "required": [
