@@ -13,8 +13,18 @@ internal sealed class MockHttpMessageHandler : HttpMessageHandler
 {
     private readonly List<Responder> _responders = [];
     private readonly List<RecordedRequest> _received = [];
+    private readonly Lock _receivedLock = new();
 
-    public IReadOnlyList<RecordedRequest> ReceivedRequests => _received;
+    public IReadOnlyList<RecordedRequest> ReceivedRequests
+    {
+        get
+        {
+            lock (_receivedLock)
+            {
+                return _received.ToArray();
+            }
+        }
+    }
 
     public MockHttpMessageHandler When(HttpMethod method, string pathContains,
         Func<HttpRequestMessage, HttpResponseMessage> respond)
@@ -41,17 +51,21 @@ internal sealed class MockHttpMessageHandler : HttpMessageHandler
             ? null
             : await request.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _received.Add(new RecordedRequest(
-            request.Method,
-            request.RequestUri!,
-            CloneHeaders(request.Headers),
-            body));
+        lock (_receivedLock)
+        {
+            _received.Add(new RecordedRequest(
+                request.Method,
+                request.RequestUri!,
+                CloneHeaders(request.Headers),
+                body));
+        }
 
         var responder = _responders.FirstOrDefault(r => r.Matches(request));
         if (responder is null)
         {
-            // Fail loudly so a missing stub is obvious rather than a silent default response.
-            return new HttpResponseMessage(HttpStatusCode.NotImplemented)
+            // Return a non-transient 4xx so a missing stub fails fast: the Ingestion pipeline's Polly
+            // policy retries on >=500, which would otherwise turn a missing stub into slow retries.
+            return new HttpResponseMessage(HttpStatusCode.BadRequest)
             {
                 RequestMessage = request,
                 Content = new StringContent(

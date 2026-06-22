@@ -20,6 +20,7 @@ internal sealed class PackageUploaderTestHost : IDisposable
     private const string IngestionHttpClientName = "IIngestionHttpClient";
 
     private readonly ServiceProvider _provider;
+    private readonly IServiceScope _scope;
 
     public MockHttpMessageHandler IngestionHandler { get; }
 
@@ -51,9 +52,16 @@ internal sealed class PackageUploaderTestHost : IDisposable
         services.AddHttpClient(IngestionHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => IngestionHandler);
 
-        _provider = services.BuildServiceProvider();
-        Service = _provider.GetRequiredService<IPackageUploaderService>();
+        // IPackageUploaderService and the Ingestion auth handler are scoped; resolve them from an
+        // explicit scope (with scope validation on) rather than the root provider.
+        _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        _scope = _provider.CreateScope();
+        Service = _scope.ServiceProvider.GetRequiredService<IPackageUploaderService>();
     }
 
-    public void Dispose() => _provider.Dispose();
+    public void Dispose()
+    {
+        _scope.Dispose();
+        _provider.Dispose();
+    }
 }

@@ -52,7 +52,7 @@ internal sealed class SyntheticPackageFile : IDisposable
                 File.Delete(Path);
             }
         }
-        catch (IOException)
+        catch (Exception)
         {
             // Best-effort cleanup; a leaked temp file must never fail a test.
         }
