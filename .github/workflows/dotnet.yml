@@ -1,7 +1,7 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: Run Unittests on PR
+name: Run tests on PR
 
 on:
   push:
@@ -26,6 +26,13 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
       working-directory: ./src
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    # Unit and integration tests are separated by the "Integration" test category so each is
+    # reported as its own step; both gate the PR. --ignore-exit-code 8 absorbs the exit code
+    # Microsoft.Testing.Platform returns when a project in the solution matches zero tests under
+    # the filter (e.g. the integration project during the unit run, and vice versa).
+    - name: Run unit tests
+      run: dotnet test --no-build --verbosity normal -- --filter "TestCategory!=Integration" --ignore-exit-code 8
+      working-directory: ./src
+    - name: Run integration tests
+      run: dotnet test --no-build --verbosity normal -- --filter "TestCategory=Integration" --ignore-exit-code 8
       working-directory: ./src
