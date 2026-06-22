@@ -14,9 +14,6 @@ namespace PackageUploader.IntegrationTest.Infrastructure;
 /// <summary>Composes the real <see cref="IPackageUploaderService"/> with the Ingestion network handler and access-token provider replaced by test doubles.</summary>
 internal sealed class PackageUploaderTestHost : IDisposable
 {
-    // Logical name HttpClientFactory assigns to AddHttpClient<IIngestionHttpClient, IngestionHttpClient>().
-    // Configuring the primary handler by this name overrides the production one without needing access
-    // to the internal IIngestionHttpClient/IngestionHttpClient types.
     private const string IngestionHttpClientName = "IIngestionHttpClient";
 
     private readonly ServiceProvider _provider;
