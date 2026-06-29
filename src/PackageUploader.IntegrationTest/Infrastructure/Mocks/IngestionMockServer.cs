@@ -71,8 +71,28 @@ internal sealed class IngestionMockServer : IDisposable
 
     // ---- CreatePackageRequest: POST /products/{id}/packages ----
 
-    public IngestionMockServer StubCreatePackage(string productId, string packageId, string fileName = "test.xvc")
+    public IngestionMockServer StubCreatePackage(
+        string productId,
+        string packageId,
+        string fileName = "test.xvc",
+        string? xfusUploadDomain = null,
+        string? xfusId = null,
+        string xfusTenant = "DCE",
+        string xfusToken = "fake-xfus-token")
     {
+        // When an XFUS upload domain is supplied, embed the upload info so the client uploads to the
+        // XFUS mock; xfusId must be a valid GUID because the client maps it to a Guid.
+        object uploadInfo = xfusUploadDomain is null
+            ? new { }
+            : new
+            {
+                fileName,
+                xfusId = xfusId ?? Guid.NewGuid().ToString(),
+                token = xfusToken,
+                uploadDomain = xfusUploadDomain,
+                xfusTenant,
+            };
+
         _server
             .Given(Request.Create().WithPath($"/products/{productId}/packages").UsingPost())
             .RespondWith(JsonResponse(new
@@ -81,7 +101,7 @@ internal sealed class IngestionMockServer : IDisposable
                 id = packageId,
                 state = "PendingUpload",
                 fileName,
-                uploadInfo = new { },
+                uploadInfo,
             }));
         return this;
     }
