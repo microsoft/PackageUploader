@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+// CI re-run trigger placeholder.
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.IntegrationTest.Infrastructure;
