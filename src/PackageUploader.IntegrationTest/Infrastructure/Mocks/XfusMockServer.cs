@@ -79,7 +79,8 @@ internal sealed class XfusMockServer : IDisposable
     /// <summary>
     /// Returns the given continue-progress bodies in order across successive calls, then stays on the
     /// final one — used to simulate the server working through the upload (e.g. Busy then Completed)
-    /// or the multi-step delta plan.
+    /// or the multi-step delta plan. The progression is keyed per server instance, so it assumes a
+    /// single asset upload per <see cref="XfusMockServer"/> (the usual one-upload-per-test pattern).
     /// </summary>
     public XfusMockServer StubContinueProgression(params object[] uploadProgressBodies)
     {
@@ -126,6 +127,12 @@ internal sealed class XfusMockServer : IDisposable
     {
         var request = Request.Create().WithPath($"{AssetsRoot}/*/blocks/*/source/payload").UsingPut();
         var scenario = $"xfus-block-{_id}";
+
+        if (failures <= 0)
+        {
+            _server.Given(request).RespondWith(Response.Create().WithStatusCode((int)HttpStatusCode.OK));
+            return this;
+        }
 
         for (int i = 0; i < failures; i++)
         {

@@ -85,9 +85,11 @@ internal sealed class IngestionMockServer : IDisposable
         string xfusToken = "fake-xfus-token")
     {
         // When an XFUS upload domain is supplied, embed the upload info so the client uploads to the
-        // XFUS mock; xfusId must be a valid GUID because the client maps it to a Guid.
-        object uploadInfo = xfusUploadDomain is null
-            ? new { }
+        // XFUS mock; xfusId must be a valid GUID because the client maps it to a Guid. When absent,
+        // use null (not new {}) so the field is omitted entirely — an empty object would deserialize
+        // into a non-null upload info with a null XfusId and crash the client's Guid mapping.
+        object? uploadInfo = xfusUploadDomain is null
+            ? null
             : new
             {
                 fileName,
@@ -274,6 +276,12 @@ internal sealed class IngestionMockServer : IDisposable
     {
         var request = Request.Create().WithPath(path).UsingMethod(method);
         var scenario = $"retry-{method}-{path}-{_id}";
+
+        if (failures <= 0)
+        {
+            _server.Given(request).RespondWith(JsonResponse(successBody));
+            return this;
+        }
 
         for (int i = 0; i < failures; i++)
         {

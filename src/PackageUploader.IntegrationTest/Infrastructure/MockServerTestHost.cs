@@ -38,29 +38,38 @@ internal sealed class MockServerTestHost : IDisposable
     {
         Ingestion = new IngestionMockServer();
         Xfus = new XfusMockServer();
+        try
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    // Trailing slash so the client's relative paths (e.g. "products/{id}") resolve under it.
+                    ["IngestionConfig:BaseAddress"] = $"{Ingestion.Url}/",
+                    ["IngestionConfig:MedianFirstRetryDelayMs"] = "1",
+                    ["IngestionConfig:RetryCount"] = "3",
+                })
+                .Build();
 
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                // Trailing slash so the client's relative paths (e.g. "products/{id}") resolve under it.
-                ["IngestionConfig:BaseAddress"] = $"{Ingestion.Url}/",
-                ["IngestionConfig:MedianFirstRetryDelayMs"] = "1",
-                ["IngestionConfig:RetryCount"] = "3",
-            })
-            .Build();
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(configuration);
+            services.AddLogging(builder => builder.AddProvider(NullLoggerProvider.Instance));
 
-        var services = new ServiceCollection();
-        services.AddSingleton<IConfiguration>(configuration);
-        services.AddLogging(builder => builder.AddProvider(NullLoggerProvider.Instance));
+            services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.Default);
 
-        services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.Default);
+            services.RemoveAll<IAccessTokenProvider>();
+            services.AddScoped<IAccessTokenProvider, FakeAccessTokenProvider>();
 
-        services.RemoveAll<IAccessTokenProvider>();
-        services.AddScoped<IAccessTokenProvider, FakeAccessTokenProvider>();
-
-        _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
-        _scope = _provider.CreateScope();
-        Service = _scope.ServiceProvider.GetRequiredService<IPackageUploaderService>();
+            _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+            _scope = _provider.CreateScope();
+            Service = _scope.ServiceProvider.GetRequiredService<IPackageUploaderService>();
+        }
+        catch
+        {
+            // Avoid leaking the started WireMock servers if composition fails.
+            Xfus.Dispose();
+            Ingestion.Dispose();
+            throw;
+        }
     }
 
     /// <summary>The XFUS server's base URL, for use as the upload domain in a stubbed package response.</summary>

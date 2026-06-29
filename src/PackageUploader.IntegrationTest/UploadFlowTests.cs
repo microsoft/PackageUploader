@@ -53,7 +53,11 @@ public sealed class UploadFlowTests : IntegrationTestBase
         Assert.IsNotNull(result);
         Assert.AreEqual(GamePackageState.Processed, result.State);
 
-        // The file was actually uploaded to the XFUS fake (initialize + at least one block + continue).
-        Assert.IsTrue(host.Xfus.Server.LogEntries.Any(), "XFUS fake should have received upload requests");
+        // The file was actually uploaded to the XFUS fake: a block payload PUT must have occurred.
+        Assert.IsTrue(
+            host.Xfus.Server.LogEntries.Any(e =>
+                e.RequestMessage!.Method == "PUT" &&
+                e.RequestMessage.Path.Contains("/source/payload")),
+            "XFUS fake should have received a block payload PUT");
     }
 }
