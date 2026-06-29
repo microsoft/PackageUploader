@@ -66,6 +66,10 @@ internal sealed class IngestionMockServer : IDisposable
         _server
             .Given(Request.Create().WithPath("/products/" + productId + "/branches/getByModule*").UsingGet())
             .RespondWith(JsonResponse(new { value = values }));
+
+        _server
+            .Given(Request.Create().WithPath($"/products/{productId}/flights").UsingGet())
+            .RespondWith(JsonResponse(new { value = Array.Empty<object>() }));
         return this;
     }
 
@@ -150,7 +154,12 @@ internal sealed class IngestionMockServer : IDisposable
 
     // ---- GetPackageConfig: GET /products/{id}/packageConfigurations/getByInstanceID(...) and GET/PUT by id ----
 
-    public IngestionMockServer StubPackageConfiguration(string productId, string instanceId, string configId)
+    public IngestionMockServer StubPackageConfiguration(
+        string productId,
+        string instanceId,
+        string configId,
+        string marketGroupId = "default",
+        string marketGroupName = "default")
     {
         var body = JsonResponse(new
         {
@@ -161,7 +170,15 @@ internal sealed class IngestionMockServer : IDisposable
             .Given(Request.Create().WithPath("/products/" + productId + "/packageConfigurations/getByInstanceID*").UsingGet())
             .RespondWith(body);
 
-        var single = JsonResponse(new { resourceType = "PackageConfiguration", id = configId });
+        var single = JsonResponse(new
+        {
+            resourceType = "PackageConfiguration",
+            id = configId,
+            marketGroupPackages = new[]
+            {
+                new { marketGroupId, name = marketGroupName, packageIds = Array.Empty<string>() },
+            },
+        });
         _server
             .Given(Request.Create().WithPath($"/products/{productId}/packageConfigurations/{configId}").UsingGet())
             .RespondWith(single);
@@ -171,19 +188,28 @@ internal sealed class IngestionMockServer : IDisposable
         return this;
     }
 
+    // ---- ProcessPackage: PUT /products/{id}/packages/{packageId} ----
+
+    public IngestionMockServer StubProcessPackage(string productId, string packageId, string state = "Uploaded")
+    {
+        _server
+            .Given(Request.Create().WithPath($"/products/{productId}/packages/{packageId}").UsingPut())
+            .RespondWith(JsonResponse(new
+            {
+                resourceType = "GamePackage",
+                id = packageId,
+                state,
+            }));
+        return this;
+    }
+
     // ---- CreateSubmission: POST /products/{id}/submissions ----
 
     public IngestionMockServer StubCreateSubmission(string productId, string submissionId)
     {
         _server
             .Given(Request.Create().WithPath($"/products/{productId}/submissions").UsingPost())
-            .RespondWith(JsonResponse(new
-            {
-                resourceType = "Submission",
-                id = submissionId,
-                state = "InProgress",
-                substate = "Submitted",
-            }));
+            .RespondWith(JsonResponse(SubmissionBody(submissionId, "InProgress", "Submitted")));
         return this;
     }
 
@@ -202,13 +228,7 @@ internal sealed class IngestionMockServer : IDisposable
         for (int i = 0; i < steps.Length; i++)
         {
             bool isLast = i == steps.Length - 1;
-            var body = JsonResponse(new
-            {
-                resourceType = "Submission",
-                id = submissionId,
-                state = steps[i].State,
-                substate = steps[i].Substate,
-            });
+            var body = JsonResponse(SubmissionBody(submissionId, steps[i].State, steps[i].Substate));
 
             var builder = _server.Given(request).InScenario(scenario);
             if (i > 0)
@@ -275,6 +295,15 @@ internal sealed class IngestionMockServer : IDisposable
     public void Dispose() => _server.Stop();
 
     // ---- helpers ----
+
+    private static object SubmissionBody(string submissionId, string state, string substate) => new
+    {
+        resourceType = "Submission",
+        id = submissionId,
+        state,
+        substate,
+        pendingUpdateInfo = new { status = "Completed" },
+    };
 
     private static string StateName(int index) => $"step-{index}";
 

@@ -44,6 +44,8 @@ internal sealed class MockServerTestHost : IDisposable
             {
                 // Trailing slash so the client's relative paths (e.g. "products/{id}") resolve under it.
                 ["IngestionConfig:BaseAddress"] = $"{Ingestion.Url}/",
+                ["IngestionConfig:MedianFirstRetryDelayMs"] = "1",
+                ["IngestionConfig:RetryCount"] = "3",
             })
             .Build();
 
