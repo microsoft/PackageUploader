@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.IntegrationTest.Fixtures;
 using PackageUploader.IntegrationTest.Infrastructure;
+using System.Linq;
+using System.Net.Http;
 using System.Threading;
 
 namespace PackageUploader.IntegrationTest;
@@ -55,9 +57,9 @@ public sealed class UploadFlowTests : IntegrationTestBase
 
         // The file was actually uploaded to the XFUS fake: a block payload PUT must have occurred.
         Assert.IsTrue(
-            host.Xfus.Server.LogEntries.Any(e =>
-                e.RequestMessage!.Method == "PUT" &&
-                e.RequestMessage.Path.Contains("/source/payload")),
+            host.Xfus.ReceivedRequests.Any(r =>
+                r.Method == HttpMethod.Put &&
+                r.Uri.AbsolutePath.Contains("/source/payload")),
             "XFUS fake should have received a block payload PUT");
     }
 }
