@@ -11,6 +11,6 @@ public abstract class IntegrationTestBase
 {
     public const string Category = "Integration";
 
-    private protected static PackageUploaderTestHost CreateHost(
-        Action<MockHttpMessageHandler>? configureIngestion = null) => new(configureIngestion);
+    /// <summary>Creates a host wired to live WireMock.Net fakes of the Ingestion API and XFUS.</summary>
+    private protected static MockServerTestHost CreateMockServerHost() => new();
 }
