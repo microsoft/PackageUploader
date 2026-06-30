@@ -95,8 +95,10 @@ public sealed class IngestionScenarioStore : ScenarioStore
         return this;
     }
 
-    public IngestionScenarioStore StubProcessPackage(string productId, string packageId, string state = "Uploaded")
+    public IngestionScenarioStore StubProcessPackage(string productId, string packageId, string state = "Processed")
     {
+        // Note: WaitForPackageProcessingAsync returns this PUT result, so this 'state' is the package
+        // state surfaced by UploadGamePackageAsync (the GET poll state only governs loop timing).
         On(HttpMethod.Put, $"/products/{productId}/packages/{packageId}", () => new FakeResponse(200, new
         {
             resourceType = "GamePackage",
@@ -113,19 +115,23 @@ public sealed class IngestionScenarioStore : ScenarioStore
         string marketGroupId = "default",
         string marketGroupName = "default")
     {
+        var marketGroupPackages = new[]
+        {
+            new { marketGroupId, name = marketGroupName, packageIds = Array.Empty<string>() },
+        };
+
+        // Include marketGroupPackages so the service treats the config as already-initialized (the
+        // common path) rather than entering first-time initialization.
         On(HttpMethod.Get, $"/products/{productId}/packageConfigurations/getByInstanceID*", () => new FakeResponse(200, new
         {
-            value = new[] { new { resourceType = "PackageConfiguration", id = configId } },
+            value = new[] { new { resourceType = "PackageConfiguration", id = configId, marketGroupPackages } },
         }));
 
         Func<FakeResponse> single = () => new FakeResponse(200, new
         {
             resourceType = "PackageConfiguration",
             id = configId,
-            marketGroupPackages = new[]
-            {
-                new { marketGroupId, name = marketGroupName, packageIds = Array.Empty<string>() },
-            },
+            marketGroupPackages,
         });
         On(HttpMethod.Get, $"/products/{productId}/packageConfigurations/{configId}", single);
         On(HttpMethod.Put, $"/products/{productId}/packageConfigurations/{configId}", single);

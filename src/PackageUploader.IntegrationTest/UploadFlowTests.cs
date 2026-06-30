@@ -61,5 +61,13 @@ public sealed class UploadFlowTests : IntegrationTestBase
                 r.Method == HttpMethod.Put &&
                 r.Path.Contains("/source/payload")),
             "XFUS fake should have received a block payload PUT");
+
+        // The package processing poll was actually issued (a GET on the package), so the polling
+        // stub is load-bearing rather than incidentally satisfied by the process (PUT) result.
+        Assert.IsTrue(
+            host.Ingestion.ReceivedRequests.Any(r =>
+                r.Method == HttpMethod.Get &&
+                r.Path.Contains($"/packages/{packageId}")),
+            "Ingestion fake should have received the package processing poll");
     }
 }

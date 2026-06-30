@@ -18,8 +18,19 @@ public abstract class FakeApiControllerBase : ControllerBase
         string? body = null;
         if (Request.ContentLength is > 0)
         {
-            using var reader = new StreamReader(Request.Body, leaveOpen: true);
-            body = await reader.ReadToEndAsync();
+            // Only decode textual bodies; binary payloads (e.g. XFUS octet-stream block uploads)
+            // would be corrupted by a UTF-8 text read, so record their size instead.
+            var contentType = Request.ContentType ?? string.Empty;
+            if (contentType.Contains("json", StringComparison.OrdinalIgnoreCase) ||
+                contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase))
+            {
+                using var reader = new StreamReader(Request.Body, leaveOpen: true);
+                body = await reader.ReadToEndAsync();
+            }
+            else
+            {
+                body = $"<{Request.ContentLength} binary bytes>";
+            }
         }
 
         var headers = Request.Headers.ToDictionary(

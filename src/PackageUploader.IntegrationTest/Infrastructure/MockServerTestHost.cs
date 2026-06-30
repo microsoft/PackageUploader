@@ -50,31 +50,40 @@ internal sealed class MockServerTestHost : IDisposable
 
         _app = BuildFakeApp(Ingestion, Xfus);
         _app.StartAsync().GetAwaiter().GetResult();
-        XfusUploadDomain = _app.Services.GetRequiredService<IServer>()
-            .Features.Get<IServerAddressesFeature>()!.Addresses.First();
+        try
+        {
+            XfusUploadDomain = _app.Services.GetRequiredService<IServer>()
+                .Features.Get<IServerAddressesFeature>()!.Addresses.First();
 
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["IngestionConfig:BaseAddress"] = $"{XfusUploadDomain}/",
-                // Keep retry/timeout fast so retry-scenario tests don't sleep on real backoffs.
-                ["IngestionConfig:MedianFirstRetryDelayMs"] = "1",
-                ["IngestionConfig:RetryCount"] = "3",
-            })
-            .Build();
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["IngestionConfig:BaseAddress"] = $"{XfusUploadDomain}/",
+                    // Keep retry/timeout fast so retry-scenario tests don't sleep on real backoffs.
+                    ["IngestionConfig:MedianFirstRetryDelayMs"] = "1",
+                    ["IngestionConfig:RetryCount"] = "3",
+                })
+                .Build();
 
-        var services = new ServiceCollection();
-        services.AddSingleton<IConfiguration>(configuration);
-        services.AddLogging(builder => builder.AddProvider(NullLoggerProvider.Instance));
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(configuration);
+            services.AddLogging(builder => builder.AddProvider(NullLoggerProvider.Instance));
 
-        services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.Default);
+            services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.Default);
 
-        services.RemoveAll<IAccessTokenProvider>();
-        services.AddScoped<IAccessTokenProvider, FakeAccessTokenProvider>();
+            services.RemoveAll<IAccessTokenProvider>();
+            services.AddScoped<IAccessTokenProvider, FakeAccessTokenProvider>();
 
-        _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
-        _scope = _provider.CreateScope();
-        Service = _scope.ServiceProvider.GetRequiredService<IPackageUploaderService>();
+            _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+            _scope = _provider.CreateScope();
+            Service = _scope.ServiceProvider.GetRequiredService<IPackageUploaderService>();
+        }
+        catch
+        {
+            // Avoid leaking the started Kestrel listener if composition fails.
+            StopApp();
+            throw;
+        }
     }
 
     private static WebApplication BuildFakeApp(IngestionScenarioStore ingestion, XfusScenarioStore xfus)
@@ -94,8 +103,13 @@ internal sealed class MockServerTestHost : IDisposable
 
     public void Dispose()
     {
-        _scope.Dispose();
-        _provider.Dispose();
+        _scope?.Dispose();
+        _provider?.Dispose();
+        StopApp();
+    }
+
+    private void StopApp()
+    {
         _app.StopAsync().GetAwaiter().GetResult();
         ((IAsyncDisposable)_app).DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
