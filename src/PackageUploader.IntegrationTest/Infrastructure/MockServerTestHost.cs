@@ -1,85 +1,102 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
-using PackageUploader.IntegrationTest.Infrastructure.Mocks;
+using PackageUploader.IntegrationTest.FakeApi;
 
 namespace PackageUploader.IntegrationTest.Infrastructure;
 
 /// <summary>
-/// Composes the real <see cref="IPackageUploaderService"/> wired to live WireMock.Net fakes of the
-/// Ingestion API and XFUS. The Ingestion base address points at the <see cref="Ingestion"/> server;
-/// XFUS is reached via the upload domain returned in a stubbed package response (see
-/// <see cref="IngestionMockServer.StubCreatePackage"/> and <see cref="Xfus"/>). Authentication uses
-/// <see cref="FakeAccessTokenProvider"/>. Everything else (auth handler, Polly policies,
-/// serialization, mappers) runs for real. Dispose to stop both servers and the provider.
+/// Hosts a fake-API ASP.NET Core app (Ingestion + XFUS controllers) on a random loopback port via
+/// Kestrel, then composes the real <see cref="IPackageUploaderService"/> pointed at it. The client
+/// makes real HTTP calls over a loopback socket — its full pipeline (auth handler, Polly policies,
+/// the XFUS <c>SocketsHttpHandler</c>, serialization, mappers) runs for real against the fake app.
+/// Authentication uses <see cref="FakeAccessTokenProvider"/>. Uses only the ASP.NET Core shared
+/// framework — no third-party package.
 /// </summary>
 internal sealed class MockServerTestHost : IDisposable
 {
+    private readonly WebApplication _app;
     private readonly ServiceProvider _provider;
     private readonly IServiceScope _scope;
 
     /// <summary>The fake Ingestion API. Configure stubs before exercising the service.</summary>
-    public IngestionMockServer Ingestion { get; }
+    public IngestionScenarioStore Ingestion { get; }
 
     /// <summary>The fake XFUS upload service. Configure stubs before exercising the service.</summary>
-    public XfusMockServer Xfus { get; }
+    public XfusScenarioStore Xfus { get; }
 
-    /// <summary>The fully composed, public service under test, wired to the fakes.</summary>
+    /// <summary>The fully composed, public service under test, wired to the fake app.</summary>
     public IPackageUploaderService Service { get; }
+
+    /// <summary>The fake app's base URL, also used as the XFUS upload domain in package responses.</summary>
+    public string XfusUploadDomain { get; }
 
     public MockServerTestHost()
     {
-        Ingestion = new IngestionMockServer();
-        Xfus = new XfusMockServer();
-        try
-        {
-            var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    // Trailing slash so the client's relative paths (e.g. "products/{id}") resolve under it.
-                    ["IngestionConfig:BaseAddress"] = $"{Ingestion.Url}/",
-                    ["IngestionConfig:MedianFirstRetryDelayMs"] = "1",
-                    ["IngestionConfig:RetryCount"] = "3",
-                })
-                .Build();
+        Ingestion = new IngestionScenarioStore();
+        Xfus = new XfusScenarioStore();
 
-            var services = new ServiceCollection();
-            services.AddSingleton<IConfiguration>(configuration);
-            services.AddLogging(builder => builder.AddProvider(NullLoggerProvider.Instance));
+        _app = BuildFakeApp(Ingestion, Xfus);
+        _app.StartAsync().GetAwaiter().GetResult();
+        XfusUploadDomain = _app.Services.GetRequiredService<IServer>()
+            .Features.Get<IServerAddressesFeature>()!.Addresses.First();
 
-            services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.Default);
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["IngestionConfig:BaseAddress"] = $"{XfusUploadDomain}/",
+                // Keep retry/timeout fast so retry-scenario tests don't sleep on real backoffs.
+                ["IngestionConfig:MedianFirstRetryDelayMs"] = "1",
+                ["IngestionConfig:RetryCount"] = "3",
+            })
+            .Build();
 
-            services.RemoveAll<IAccessTokenProvider>();
-            services.AddScoped<IAccessTokenProvider, FakeAccessTokenProvider>();
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(configuration);
+        services.AddLogging(builder => builder.AddProvider(NullLoggerProvider.Instance));
 
-            _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
-            _scope = _provider.CreateScope();
-            Service = _scope.ServiceProvider.GetRequiredService<IPackageUploaderService>();
-        }
-        catch
-        {
-            // Avoid leaking the started WireMock servers if composition fails.
-            Xfus.Dispose();
-            Ingestion.Dispose();
-            throw;
-        }
+        services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.Default);
+
+        services.RemoveAll<IAccessTokenProvider>();
+        services.AddScoped<IAccessTokenProvider, FakeAccessTokenProvider>();
+
+        _provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
+        _scope = _provider.CreateScope();
+        Service = _scope.ServiceProvider.GetRequiredService<IPackageUploaderService>();
     }
 
-    /// <summary>The XFUS server's base URL, for use as the upload domain in a stubbed package response.</summary>
-    public string XfusUploadDomain => Xfus.Url;
+    private static WebApplication BuildFakeApp(IngestionScenarioStore ingestion, XfusScenarioStore xfus)
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.Logging.ClearProviders();
+        builder.WebHost.UseUrls("http://127.0.0.1:0");
+
+        builder.Services.AddSingleton(ingestion);
+        builder.Services.AddSingleton(xfus);
+        builder.Services.AddControllers().AddApplicationPart(typeof(IngestionController).Assembly);
+
+        var app = builder.Build();
+        app.MapControllers();
+        return app;
+    }
 
     public void Dispose()
     {
         _scope.Dispose();
         _provider.Dispose();
-        Ingestion.Dispose();
-        Xfus.Dispose();
+        _app.StopAsync().GetAwaiter().GetResult();
+        ((IAsyncDisposable)_app).DisposeAsync().AsTask().GetAwaiter().GetResult();
     }
 }

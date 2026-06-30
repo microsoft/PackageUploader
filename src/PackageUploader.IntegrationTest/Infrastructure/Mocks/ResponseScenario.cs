@@ -4,7 +4,7 @@
 namespace PackageUploader.IntegrationTest.Infrastructure.Mocks;
 
 /// <summary>How a stubbed endpoint should behave for a single, non-stateful response.</summary>
-internal enum ResponseScenario
+public enum ResponseScenario
 {
     /// <summary>Return a normal 2xx response with a valid body.</summary>
     Success,

@@ -3,20 +3,19 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.IntegrationTest.Infrastructure;
-using System.Linq;
 
 namespace PackageUploader.IntegrationTest;
 
 /// <summary>
 /// Smoke test that validates the integration project is discovered, builds, and that the mock-server
-/// host routes a public service call over real HTTP to the WireMock Ingestion fake with the fake
-/// auth token attached.
+/// host routes a public service call over real HTTP to the fake Ingestion API with the fake auth
+/// token attached.
 /// </summary>
 [TestClass]
 public sealed class SmokeTest : IntegrationTestBase
 {
     [TestMethod]
-    public async Task TestHost_RoutesProductLookup_ThroughWireMockWithFakeAuth()
+    public async Task TestHost_RoutesProductLookup_ThroughFakeApiWithFakeAuth()
     {
         using var host = CreateMockServerHost();
         host.Ingestion.StubGetProduct("smoke-test-product");
@@ -26,12 +25,12 @@ public sealed class SmokeTest : IntegrationTestBase
         Assert.IsNotNull(product);
         Assert.AreEqual("smoke-test-product", product.ProductId);
 
-        var logs = host.Ingestion.Server.LogEntries.ToList();
-        Assert.AreEqual(1, logs.Count);
+        var requests = host.Ingestion.ReceivedRequests;
+        Assert.AreEqual(1, requests.Count);
 
-        var headers = logs[0].RequestMessage!.Headers!;
+        var headers = requests[0].Headers;
         Assert.IsTrue(headers.ContainsKey("Authorization"));
-        StringAssert.Contains(string.Join(" ", headers["Authorization"]!), FakeAccessTokenProvider.FakeToken);
+        StringAssert.Contains(headers["Authorization"], FakeAccessTokenProvider.FakeToken);
     }
 
     public TestContext TestContext { get; set; } = null!;
