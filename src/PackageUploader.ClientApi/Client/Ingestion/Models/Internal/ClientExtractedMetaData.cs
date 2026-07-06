@@ -6,6 +6,7 @@ namespace PackageUploader.ClientApi.Client.Ingestion.Models.Internal;
 public class ClientExtractedMetaData
 {
     public XvcReader XvcReader { get; set; }
+    public string UploadSource { get; set; }
 }
 
 public class XvcReader
