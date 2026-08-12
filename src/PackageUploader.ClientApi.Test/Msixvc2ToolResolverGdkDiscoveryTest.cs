@@ -12,12 +12,13 @@ using PackageUploader.ClientApi.Tools;
 namespace PackageUploader.ClientApi.Test;
 
 /// <summary>
-/// Covers GDK-based discovery of the MSIXVC2 packaging tools. The GDK ships both MakePkg.exe and
-/// makepkg2.exe in its bin directory, so discovery must serve both.
+/// Covers the probe and fallback chain over GDK-discovered tools. The GDK ships both MakePkg.exe and
+/// makepkg2.exe in its bin directory, so the resolver must probe them in order and pick the capable one.
 /// </summary>
 /// <remarks>
-/// These tests never require an installed GDK: the GDK root lookup is seamed, and PATH is replaced
-/// with a controlled directory for the duration of each test.
+/// Discovery itself is covered by <c>ToolPathResolverTest</c>. These tests drive the layer above it:
+/// the GDK root lookup is seamed and PATH is replaced with a controlled directory, so they never
+/// require an installed GDK.
 /// </remarks>
 [TestClass]
 public class Msixvc2ToolResolverGdkDiscoveryTest
@@ -97,45 +98,6 @@ public class Msixvc2ToolResolverGdkDiscoveryTest
     }
 
     [TestMethod]
-    public void Resolve_PrefersTheGdkOverPath()
-    {
-        // The UI resolves GDK before PATH; the command line must agree or the two hosts could run
-        // different binaries on the same machine.
-        var gdkRoot = CreateGdkRoot("gdk", "MakePkg.exe");
-        var pathDirectory = CreateDirectoryWith("on-path", "MakePkg.exe");
-        Environment.SetEnvironmentVariable("PATH", pathDirectory);
-
-        var gdkCandidate = Path.Combine(gdkRoot, "bin", "MakePkg.exe");
-
-        // Both candidates would satisfy the probe, so the winner is decided purely by search order.
-        var resolver = CreateResolver(_ => new ToolProbeResult(true, 0), FakeLocator(gdkRoot));
-
-        var tool = resolver.Resolve();
-
-        Assert.IsNotNull(tool);
-        Assert.AreEqual(gdkCandidate, tool.ExecutablePath);
-    }
-
-    [TestMethod]
-    public void Resolve_FallsThroughToPath_WhenTheGdkBinDirectoryDoesNotHaveTheTool()
-    {
-        // A GDK root that exists but predates the MSIXVC2 tools must not stop the search.
-        var gdkRoot = CreateGdkRoot("gdk");
-        var pathDirectory = CreateDirectoryWith("on-path", "makepkg2.exe");
-        Environment.SetEnvironmentVariable("PATH", pathDirectory);
-
-        var expected = Path.Combine(pathDirectory, "makepkg2.exe");
-
-        var resolver = CreateResolver(Succeeds(expected), FakeLocator(gdkRoot));
-
-        var tool = resolver.Resolve();
-
-        Assert.IsNotNull(tool);
-        Assert.AreEqual(expected, tool.ExecutablePath);
-        Assert.IsTrue(tool.IsMakePkg2Fallback);
-    }
-
-    [TestMethod]
     public void Resolve_ReturnsNull_WhenNoGdkIsInstalledAndNothingIsOnPath()
     {
         var resolver = CreateResolver(_ => ToolProbeResult.Failed, FakeLocator());
@@ -145,71 +107,42 @@ public class Msixvc2ToolResolverGdkDiscoveryTest
     }
 
     [TestMethod]
-    public void GdkRootLocator_PrefersTheEnvironmentVariableOverTheRegistry()
+    public void Resolve_UsesTheInjectedToolPathResolverForDiscovery()
     {
-        var locator = new GdkRootLocator(
-            _ => @"C:\from-env",
-            key => key == GdkRootLocator.GdkRegistryKey ? @"C:\from-registry" : null);
+        // Discovery is delegated, so a host that supplies its own IToolPathResolver controls which
+        // binaries are probed. This is the seam CHANGE 2's command line adapter inherits.
+        var stubPath = Path.Combine(_testRoot, "elsewhere", "MakePkg.exe");
+        Directory.CreateDirectory(Path.GetDirectoryName(stubPath));
+        File.WriteAllText(stubPath, string.Empty);
 
-        var roots = locator.GetGdkRoots();
+        var pathResolver = new RecordingToolPathResolver(stubPath);
+        var resolver = new Msixvc2ToolResolver(null, new FakeProbeRunner(Succeeds(stubPath)), TimeSpan.FromSeconds(1), pathResolver);
 
-        Assert.AreEqual(@"C:\from-env", roots[0]);
-        CollectionAssert.Contains(roots.ToList(), @"C:\from-registry");
+        var tool = resolver.Resolve();
+
+        Assert.IsNotNull(tool);
+        Assert.AreEqual(stubPath, tool.ExecutablePath);
+        CollectionAssert.Contains(pathResolver.RequestedFileNames, "MakePkg.exe");
     }
 
     [TestMethod]
-    public void GdkRootLocator_FallsBackToTheRegistry_WhenTheEnvironmentVariableIsNotSet()
+    public void Resolve_PrefersAnExplicitPathOverDiscovery()
     {
-        var locator = new GdkRootLocator(
-            _ => null,
-            key => key == GdkRootLocator.GdkRegistryKey ? @"C:\from-registry" : null);
+        // A non-null hint is authoritative and must suppress discovery entirely, which is how the
+        // desktop app avoids searching twice for a tool it has already located.
+        var explicitPath = Path.Combine(_testRoot, "explicit", "makepkg2.exe");
+        Directory.CreateDirectory(Path.GetDirectoryName(explicitPath));
+        File.WriteAllText(explicitPath, string.Empty);
 
-        var roots = locator.GetGdkRoots();
+        var pathResolver = new RecordingToolPathResolver(null);
+        var resolver = new Msixvc2ToolResolver(null, new FakeProbeRunner(Succeeds(explicitPath)), TimeSpan.FromSeconds(1), pathResolver);
 
-        Assert.AreEqual(1, roots.Count);
-        Assert.AreEqual(@"C:\from-registry", roots[0]);
-    }
+        var tool = resolver.Resolve(string.Empty, explicitPath);
 
-    [TestMethod]
-    public void GdkRootLocator_FallsBackToTheWow6432NodeMirror()
-    {
-        var locator = new GdkRootLocator(
-            _ => null,
-            key => key == GdkRootLocator.GdkWow6432RegistryKey ? @"C:\from-wow6432" : null);
-
-        var roots = locator.GetGdkRoots();
-
-        Assert.AreEqual(1, roots.Count);
-        Assert.AreEqual(@"C:\from-wow6432", roots[0]);
-    }
-
-    [TestMethod]
-    public void GdkRootLocator_ReturnsEmpty_WhenNoSourceHasAGdk()
-    {
-        var locator = new GdkRootLocator(_ => null, _ => null);
-
-        Assert.AreEqual(0, locator.GetGdkRoots().Count);
-    }
-
-    [TestMethod]
-    public void GdkRootLocator_DoesNotThrow_WhenASourceFails()
-    {
-        // Access-denied or a malformed value must never escape into tool resolution.
-        var locator = new GdkRootLocator(
-            _ => throw new InvalidOperationException("environment blew up"),
-            _ => throw new UnauthorizedAccessException("registry blew up"));
-
-        Assert.AreEqual(0, locator.GetGdkRoots().Count);
-    }
-
-    [TestMethod]
-    public void GdkRootLocator_DefaultSourcesDoNotThrow()
-    {
-        // Exercises the real environment and registry readers. On a non-Windows host the registry
-        // read is skipped by the OperatingSystem.IsWindows() guard rather than throwing.
-        var roots = new GdkRootLocator().GetGdkRoots();
-
-        Assert.IsNotNull(roots);
+        Assert.IsNotNull(tool);
+        Assert.AreEqual(explicitPath, tool.ExecutablePath);
+        Assert.IsTrue(tool.IsMakePkg2Fallback);
+        Assert.AreEqual(0, pathResolver.RequestedFileNames.Count, "An explicit path must not trigger discovery.");
     }
 
     [TestMethod]
@@ -232,7 +165,7 @@ public class Msixvc2ToolResolverGdkDiscoveryTest
     }
 
     private static Msixvc2ToolResolver CreateResolver(Func<string, ToolProbeResult> probe, IGdkRootLocator locator) =>
-        new(null, new FakeProbeRunner(probe), TimeSpan.FromSeconds(1), locator);
+        new(null, new FakeProbeRunner(probe), TimeSpan.FromSeconds(1), new ToolPathResolver(locator));
 
     private static Func<string, ToolProbeResult> Succeeds(string supportedPath) =>
         executablePath => string.Equals(executablePath, supportedPath, StringComparison.OrdinalIgnoreCase)
@@ -255,19 +188,6 @@ public class Msixvc2ToolResolverGdkDiscoveryTest
         return root;
     }
 
-    private string CreateDirectoryWith(string name, params string[] fileNames)
-    {
-        var directory = Path.Combine(_testRoot, name);
-        Directory.CreateDirectory(directory);
-
-        foreach (var fileName in fileNames)
-        {
-            File.WriteAllText(Path.Combine(directory, fileName), string.Empty);
-        }
-
-        return directory;
-    }
-
     private sealed class StubGdkRootLocator : IGdkRootLocator
     {
         private readonly IReadOnlyList<string> _roots;
@@ -275,6 +195,25 @@ public class Msixvc2ToolResolverGdkDiscoveryTest
         public StubGdkRootLocator(IReadOnlyList<string> roots) => _roots = roots;
 
         public IReadOnlyList<string> GetGdkRoots() => _roots;
+    }
+
+    /// <summary>
+    /// Returns a fixed path for any request and records what was asked for, so a test can assert
+    /// whether discovery ran at all.
+    /// </summary>
+    private sealed class RecordingToolPathResolver : IToolPathResolver
+    {
+        private readonly string _result;
+
+        public RecordingToolPathResolver(string result) => _result = result;
+
+        public List<string> RequestedFileNames { get; } = new();
+
+        public string Find(string fileName)
+        {
+            RequestedFileNames.Add(fileName);
+            return _result;
+        }
     }
 
     private sealed class FakeProbeRunner : IToolProbeRunner

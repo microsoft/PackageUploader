@@ -55,7 +55,36 @@ public class Msixvc2ToolResolverExtensionsTest
 
         Assert.AreEqual(1, services.Count(d => d.ServiceType == typeof(IMsixvc2ToolResolver)));
         Assert.AreEqual(1, services.Count(d => d.ServiceType == typeof(IToolProbeRunner)));
+        Assert.AreEqual(1, services.Count(d => d.ServiceType == typeof(IToolPathResolver)));
         Assert.IsNotNull(provider.GetRequiredService<IMsixvc2ToolResolver>());
+    }
+
+    [TestMethod]
+    public void AddMsixvc2ToolResolver_RegistersTheSharedToolPathResolver()
+    {
+        // The desktop app injects this directly for tools that have nothing to do with MSIXVC2,
+        // so registering the MSIXVC2 resolver must make discovery available on its own.
+        var services = new ServiceCollection();
+        services.AddMsixvc2ToolResolver();
+
+        using var provider = services.BuildServiceProvider(validateScopes: true);
+
+        var pathResolver = provider.GetRequiredService<IToolPathResolver>();
+
+        Assert.IsInstanceOfType<ToolPathResolver>(pathResolver);
+        Assert.AreSame(pathResolver, provider.GetRequiredService<IToolPathResolver>());
+    }
+
+    [TestMethod]
+    public void AddMsixvc2ToolResolver_HonoursAPreRegisteredToolPathResolver()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IToolPathResolver, StubToolPathResolver>();
+        services.AddMsixvc2ToolResolver();
+
+        using var provider = services.BuildServiceProvider(validateScopes: true);
+
+        Assert.IsInstanceOfType<StubToolPathResolver>(provider.GetRequiredService<IToolPathResolver>());
     }
 
     [TestMethod]
@@ -99,5 +128,10 @@ public class Msixvc2ToolResolverExtensionsTest
     {
         public ToolProbeResult Run(string executablePath, string arguments, TimeSpan timeout) =>
             ToolProbeResult.Failed;
+    }
+
+    private sealed class StubToolPathResolver : IToolPathResolver
+    {
+        public string Find(string fileName) => null;
     }
 }

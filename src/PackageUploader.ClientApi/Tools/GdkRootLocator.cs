@@ -11,7 +11,8 @@ namespace PackageUploader.ClientApi.Tools;
 /// Supplies the installation roots of the Microsoft GDK, under which packaging tools live in <c>bin</c>.
 /// </summary>
 /// <remarks>
-/// Seamed so <see cref="Msixvc2ToolResolver"/> can be tested without a GDK installed.
+/// Seamed so <see cref="ToolPathResolver"/> can be tested without a GDK installed. This stays internal:
+/// only the path-resolution contract is public, not the environment and registry sources behind it.
 /// </remarks>
 internal interface IGdkRootLocator
 {

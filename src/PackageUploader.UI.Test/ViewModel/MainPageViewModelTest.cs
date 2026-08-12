@@ -9,6 +9,8 @@ using PackageUploader.UI.View;
 using PackageUploader.UI.ViewModel;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,8 +24,27 @@ public class MainPageViewModelTest
     private Mock<IAuthenticationService> _authenticationService;
     private Mock<IWindowService> _windowService;
     private Mock<ILogger<MainPageViewModel>> _logger;
+    private readonly List<string> _tempDirectories = new();
 
     private MainPageViewModel _mainPageViewModel;
+
+    [TestCleanup]
+    public void Cleanup()
+    {
+        foreach (var directory in _tempDirectories)
+        {
+            try
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+            catch (IOException)
+            {
+                // Temp cleanup is best effort.
+            }
+        }
+
+        _tempDirectories.Clear();
+    }
 
     [TestInitialize]
     public void Initialize()
@@ -47,8 +68,90 @@ public class MainPageViewModelTest
             _authenticationService.Object, 
             _windowService.Object,
             new Msixvc2ToolResolver(),
+            new ToolPathResolver(),
             _logger.Object
         );
+    }
+
+    [TestMethod]
+    public void TestToolPathsComeFromTheSharedResolver()
+    {
+        // Tool discovery is shared with the command line so both hosts resolve the same binaries.
+        // Injecting a stub proves the view model asks for each tool by name and stores what it gets,
+        // rather than searching for them itself.
+        var pathConfiguration = new Mock<PathConfigurationProvider>();
+        var pathResolver = new StubToolPathResolver
+        {
+            Results =
+            {
+                ["MakePkg.exe"] = CreateTempFile("MakePkg.exe"),
+                ["SubmissionValidator.dll"] = CreateTempFile("SubmissionValidator.dll"),
+                ["makepkg2.exe"] = CreateTempFile("makepkg2.exe"),
+            }
+        };
+
+        var viewModel = new MainPageViewModel(
+            pathConfiguration.Object,
+            new UserLoggedInProvider(),
+            _authenticationService.Object,
+            _windowService.Object,
+            new Msixvc2ToolResolver(),
+            pathResolver,
+            _logger.Object);
+
+        CollectionAssert.AreEquivalent(
+            new[] { "MakePkg.exe", "SubmissionValidator.dll", "makepkg2.exe" },
+            pathResolver.RequestedFileNames.Distinct().ToArray());
+
+        Assert.AreEqual(pathResolver.Results["MakePkg.exe"], pathConfiguration.Object.MakePkgPath);
+        Assert.AreEqual(pathResolver.Results["SubmissionValidator.dll"], pathConfiguration.Object.BaseSubValPath);
+        Assert.AreEqual(pathResolver.Results["makepkg2.exe"], pathConfiguration.Object.MakePkg2Path);
+        Assert.IsTrue(viewModel.IsMakePkgEnabled);
+    }
+
+    [TestMethod]
+    public void TestMissingToolsLeaveMakePkgDisabled()
+    {
+        // The shared resolver reports a miss as null. The view model must treat that as "not found"
+        // rather than storing it or throwing.
+        var pathConfiguration = new Mock<PathConfigurationProvider>();
+        var pathResolver = new StubToolPathResolver();
+
+        var viewModel = new MainPageViewModel(
+            pathConfiguration.Object,
+            new UserLoggedInProvider(),
+            _authenticationService.Object,
+            _windowService.Object,
+            new Msixvc2ToolResolver(),
+            pathResolver,
+            _logger.Object);
+
+        Assert.IsFalse(viewModel.IsMakePkgEnabled);
+        Assert.IsFalse(string.IsNullOrEmpty(viewModel.MakePkgUnavailableErrorMessage));
+    }
+
+    private string CreateTempFile(string fileName)
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "MainPageVmTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        _tempDirectories.Add(directory);
+
+        var path = Path.Combine(directory, fileName);
+        File.WriteAllText(path, string.Empty);
+        return path;
+    }
+
+    private sealed class StubToolPathResolver : IToolPathResolver
+    {
+        public Dictionary<string, string> Results { get; } = new();
+
+        public List<string> RequestedFileNames { get; } = new();
+
+        public string Find(string fileName)
+        {
+            RequestedFileNames.Add(fileName);
+            return Results.TryGetValue(fileName, out var path) ? path : null;
+        }
     }
 
     [TestMethod]
@@ -143,6 +246,7 @@ public class MainPageViewModelTest
             _authenticationService.Object,
             _windowService.Object,
             resolver,
+            new ToolPathResolver(),
             _logger.Object);
 
     [TestMethod]

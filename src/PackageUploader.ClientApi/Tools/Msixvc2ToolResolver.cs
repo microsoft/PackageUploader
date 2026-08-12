@@ -26,7 +26,7 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     private readonly IToolProbeRunner _probeRunner;
     private readonly ILogger _logger;
     private readonly TimeSpan _probeTimeout;
-    private readonly IGdkRootLocator _gdkRootLocator;
+    private readonly IToolPathResolver _toolPathResolver;
 
     public Msixvc2ToolResolver()
         : this(null, null, null)
@@ -43,16 +43,19 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     {
     }
 
+    /// <remarks>
+    /// Discovery is seamed separately from probing so tests can drive either layer in isolation.
+    /// </remarks>
     internal Msixvc2ToolResolver(
         ILogger<Msixvc2ToolResolver> logger,
         IToolProbeRunner probeRunner,
         TimeSpan? probeTimeout,
-        IGdkRootLocator gdkRootLocator)
+        IToolPathResolver toolPathResolver)
     {
         _logger = logger ?? (ILogger)NullLogger<Msixvc2ToolResolver>.Instance;
         _probeRunner = probeRunner ?? new ProcessToolProbeRunner();
         _probeTimeout = probeTimeout is { } timeout && timeout > TimeSpan.Zero ? timeout : DefaultProbeTimeout;
-        _gdkRootLocator = gdkRootLocator ?? new GdkRootLocator();
+        _toolPathResolver = toolPathResolver ?? new ToolPathResolver();
     }
 
     /// <inheritdoc />
@@ -119,65 +122,13 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     }
 
     /// <summary>
-    /// Looks for <paramref name="fileName"/> next to the running application, in the current directory,
-    /// under any installed GDK, and finally on PATH.
+    /// Looks for <paramref name="fileName"/> using the shared tool discovery.
     /// </summary>
     /// <remarks>
-    /// The order mirrors the WPF host's own resolution so the command line and the UI agree on which
-    /// tool they will run. The GDK ships both MakePkg.exe and makepkg2.exe in its <c>bin</c> directory,
-    /// so the same discovery serves both.
+    /// Discovery lives in <see cref="IToolPathResolver"/> so the desktop app and the command line
+    /// search identically. The GDK ships both MakePkg.exe and makepkg2.exe in its <c>bin</c>
+    /// directory, so one search serves both.
     /// </remarks>
     /// <returns>The full path to the tool, or <see langword="null"/> when it was not found. Never throws.</returns>
-    private string Discover(string fileName)
-    {
-        try
-        {
-            string appDirectoryCandidate = Path.Combine(AppContext.BaseDirectory, fileName);
-            if (File.Exists(appDirectoryCandidate))
-            {
-                return appDirectoryCandidate;
-            }
-
-            string currentDirectoryCandidate = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-            if (File.Exists(currentDirectoryCandidate))
-            {
-                return currentDirectoryCandidate;
-            }
-
-            foreach (string gdkRoot in _gdkRootLocator.GetGdkRoots())
-            {
-                string gdkCandidate = Path.Combine(gdkRoot, "bin", fileName);
-                if (File.Exists(gdkCandidate))
-                {
-                    return gdkCandidate;
-                }
-            }
-
-            string pathValue = Environment.GetEnvironmentVariable("PATH");
-            if (string.IsNullOrEmpty(pathValue))
-            {
-                return null;
-            }
-
-            foreach (string directory in pathValue.Split(Path.PathSeparator))
-            {
-                if (string.IsNullOrWhiteSpace(directory))
-                {
-                    continue;
-                }
-
-                string candidate = Path.Combine(directory, fileName);
-                if (File.Exists(candidate))
-                {
-                    return candidate;
-                }
-            }
-        }
-        catch (Exception)
-        {
-            // Malformed PATH entries and inaccessible directories must not break resolution.
-        }
-
-        return null;
-    }
+    private string Discover(string fileName) => _toolPathResolver.Find(fileName);
 }
