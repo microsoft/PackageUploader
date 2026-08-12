@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PackageUploader.Application.Config;
 using PackageUploader.Application.Operations;
+using PackageUploader.Application.Tools;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using PackageUploader.FileLogger;
@@ -72,6 +73,14 @@ namespace PackageUploader.Application.Extensions
             hostAppBuilder.Services.AddLogging();
             hostAppBuilder.Services.AddSingleton(new DataOutputOptions(isData));
             hostAppBuilder.Services.AddPackageUploaderService(parseResult.GetValue(CommandLineHelper.AuthenticationMethodOption));
+
+            hostAppBuilder.Services.AddSingleton(new Msixvc2CommandLineContext(
+                parseResult.GetValue(CommandLineHelper.AuthenticationMethodOption),
+                parseResult.GetValue(CommandLineHelper.TenantIdOption)));
+            hostAppBuilder.Services.AddSingleton<IMsixvc2ProcessRunner, Msixvc2ProcessRunner>();
+            // TODO(GDK-release): swap Msixvc2CapabilityPlaceholder for an adapter over
+            // PackageUploader.ClientApi.Tools.IMsixvc2ToolResolver once PR #<change-1> merges.
+            hostAppBuilder.Services.AddSingleton<IMsixvc2UploadToolProvider, Msixvc2CapabilityPlaceholder>();
 
             hostAppBuilder.Services
                 .AddScoped<GetProductOperation>()

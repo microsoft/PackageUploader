@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Options;
 using PackageUploader.ClientApi.Models;
+using PackageUploader.ClientApi.Packaging;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -15,7 +16,9 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
 {
     internal override string GetOperationName() => "UploadXvcPackage";
 
-    [Required]
+    // Not [Required] at the attribute level: MSIXVC2 packages are uploaded by MakePkg.exe, which has no
+    // concept of EKB/submission-validator assets. Requiredness is enforced in Validate() for every
+    // non-MSIXVC2 package, so XVC1 behaviour is unchanged.
     [ValidateObjectMembers]
     public GameAssets GameAssets { get; set; }
 
@@ -27,6 +30,11 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
     {
         foreach (var validationResult in base.Validate(validationContext))
             yield return validationResult;
+
+        if (GameAssets is null && !PackageFormatDetector.IsLikelyMsixvc2Package(PackageFilePath))
+        {
+            yield return new ValidationResult($"The {nameof(GameAssets)} field is required.", [nameof(GameAssets)]);
+        }
 
         if (PreDownloadDate is { IsEnabled: true, EffectiveDate: null })
         {

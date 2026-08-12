@@ -83,4 +83,39 @@ public class UploadXvcPackageOperationConfigTest
 
         Assert.DoesNotContain(r => r.MemberNames.Contains("PreDownloadDate"), results);
     }
+
+    [TestMethod]
+    public void Validate_NonMsixvc2PackageWithoutGameAssets_ReturnsError()
+    {
+        var config = new TestUploadXvcPackageOperationConfig
+        {
+            OperationName = "UploadXvcPackage",
+            ProductId = "product-123",
+            BranchFriendlyName = "main",
+            PackageFilePath = "test.msixvc",
+            GameAssets = null,
+        };
+
+        var results = ConfigTestHelper.ValidateConfig(config);
+
+        Assert.Contains(r => r.MemberNames.Contains("GameAssets"), results);
+    }
+
+    [TestMethod]
+    public void Validate_Msixvc2PackageWithoutGameAssets_NoGameAssetsError()
+    {
+        using var package = Test.Tools.TempPackageFile.CreateMsixvc2();
+        var config = new TestUploadXvcPackageOperationConfig
+        {
+            OperationName = "UploadXvcPackage",
+            ProductId = "product-123",
+            BranchFriendlyName = "main",
+            PackageFilePath = package.Path,
+            GameAssets = null,
+        };
+
+        var results = ConfigTestHelper.ValidateConfig(config);
+
+        Assert.DoesNotContain(r => r.MemberNames.Contains("GameAssets"), results);
+    }
 }

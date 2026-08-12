@@ -12,6 +12,7 @@ This ReadMe covers the following:
 * [Service creation and authentication](#service-creation-and-authentication)
 * [Get Package Uploader](#get-package-uploader)
 * [Run Package Uploader](#run-package-uploader)
+* [MSIXVC2 packages](#msixvc2-packages)
 * [Putting it all together](#putting-it-all-together)
 * [Example GetProduct operation](#example-getproduct-operation)
 * [Example UploadXvcPackage operation](#example-uploadxvcpackage-operation)
@@ -176,12 +177,33 @@ The following table has important arguments for running Package Uploader.
 | **[GetProduct](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetProduct)** | Gets metadata for the product. This is useful for getting the productId, BigId, and product name that's used in all configuration files. This also gets a list of the BranchFriendlyNames and FlightNames of the product. |
 | **[GetPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetPackages)** | Gets a list of the packages in a branch or flight. |
 | **[UploadUwpPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadUwpPackage)** | Uploads a UWP game package. |
-| **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads an XVC game package and assets, including EKB, SubVal, layout, and SODB files. |
+| **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads an XVC game package and assets, including EKB, SubVal, layout, and SODB files. MSIXVC2 packages are detected automatically and uploaded through MakePkg.exe — see [MSIXVC2 packages](#msixvc2-packages). |
 | **[RemovePackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#RemovePackages)** | Removes game packages and assets from a branch. We recommend keeping only your 10 most recent packages to ensure optimal performance. |
 | **[ImportPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#ImportPackages)** | Imports all game packages from a branch to a destination branch. Use this operation to copy your previously uploaded and published packages from one branch to another. |
 | **[PublishPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#PublishPackages)** | Publishes all game packages from a branch or flight to a destination sandbox or flight. You can set specific availability times in the configuration file. |
 
 For more information about operation parameters, see [Operations](https://github.com/microsoft/PackageUploader/blob/main/Operations.md).
+
+### MSIXVC2 packages
+
+`UploadXvcPackage` detects the package format from the file you point `packageFilePath` at. When the package is an
+MSIXVC2 package, PackageUploader delegates the upload to the MSIXVC2-capable `MakePkg.exe` that ships with the Microsoft
+GDK, because MakePkg.exe owns the MSIXVC2 upload protocol. There is no separate operation name and no new configuration
+switch — an XVC1/MSIXVC1 package continues to be uploaded by PackageUploader itself, exactly as before.
+
+The following configuration options behave differently on the MSIXVC2 path:
+
+| Option | Behavior |
+| --- | --- |
+| `gameAssets` | Not required. MakePkg.exe picks the assets up from the folder that contains the package. If the paths you supply resolve to that same folder they are ignored with a warning; if they point elsewhere the operation fails so an asset is never silently dropped. |
+| `minutesToWaitForProcessing` | Ignored with a warning. MakePkg.exe manages its own processing wait. |
+| `deltaUpload` | Ignored with a warning. |
+| `availabilityDate` / `preDownloadDate` | Not supported. MakePkg.exe does not report back the identity of the package it uploaded, so the post-upload XVC configuration step cannot target it. Set these dates with a separate `PublishPackages` or configuration invocation. |
+| `productId` | Supported. It is resolved to the corresponding Big ID, which is what MakePkg.exe requires. |
+| Authentication | MakePkg.exe performs its own interactive, cached sign-in. Only `CacheableBrowser` is supported; other `--Authentication` values and `--TenantId` fail with an explicit error rather than being silently ignored. |
+
+If no MSIXVC2-capable `MakePkg.exe` is available, the operation fails with an actionable error instead of attempting an
+upload that cannot succeed.
 
 ### Available parameters
 
