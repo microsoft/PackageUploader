@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#nullable enable
-
 using System;
 using System.IO;
 using Microsoft.Extensions.Logging;
@@ -35,21 +33,21 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     {
     }
 
-    public Msixvc2ToolResolver(ILogger<Msixvc2ToolResolver>? logger)
+    public Msixvc2ToolResolver(ILogger<Msixvc2ToolResolver> logger)
         : this(logger, null, null)
     {
     }
 
-    public Msixvc2ToolResolver(ILogger<Msixvc2ToolResolver>? logger, IToolProbeRunner? probeRunner, TimeSpan? probeTimeout)
+    public Msixvc2ToolResolver(ILogger<Msixvc2ToolResolver> logger, IToolProbeRunner probeRunner, TimeSpan? probeTimeout)
         : this(logger, probeRunner, probeTimeout, null)
     {
     }
 
     internal Msixvc2ToolResolver(
-        ILogger<Msixvc2ToolResolver>? logger,
-        IToolProbeRunner? probeRunner,
+        ILogger<Msixvc2ToolResolver> logger,
+        IToolProbeRunner probeRunner,
         TimeSpan? probeTimeout,
-        IGdkRootLocator? gdkRootLocator)
+        IGdkRootLocator gdkRootLocator)
     {
         _logger = logger ?? (ILogger)NullLogger<Msixvc2ToolResolver>.Instance;
         _probeRunner = probeRunner ?? new ProcessToolProbeRunner();
@@ -58,24 +56,28 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     }
 
     /// <inheritdoc />
-    public Msixvc2Tool? Resolve() => Resolve(null, null);
+    public Msixvc2Tool Resolve() => Resolve(null, null);
 
     /// <inheritdoc />
     /// <remarks>
     /// A non-null argument (including an empty string) is treated as authoritative and disables
     /// self-discovery for that tool, so hosts that already resolve paths get deterministic behavior.
     /// </remarks>
-    public Msixvc2Tool? Resolve(string? makePkgPath, string? makePkg2Path)
+    /// <returns>
+    /// The resolved tool, or <see langword="null"/> when no MSIXVC2-capable tool is available.
+    /// Never throws.
+    /// </returns>
+    public Msixvc2Tool Resolve(string makePkgPath, string makePkg2Path)
     {
         // 1. The current GDK's MakePkg.exe absorbed the makepkg2 capabilities.
-        string? makePkgCandidate = makePkgPath is null ? Discover(MakePkgFileName) : NormalizeCandidate(makePkgPath);
+        string makePkgCandidate = makePkgPath is null ? Discover(MakePkgFileName) : NormalizeCandidate(makePkgPath);
         if (makePkgCandidate is not null && ProbeSupportsUploadSource(makePkgCandidate, MakePkgFileName))
         {
             return new Msixvc2Tool(makePkgCandidate, IsMakePkg2Fallback: false);
         }
 
         // 2. Fall back to the standalone makepkg2.exe, which the GDK also ships in its bin directory.
-        string? makePkg2Candidate = makePkg2Path is null ? Discover(MakePkg2FileName) : NormalizeCandidate(makePkg2Path);
+        string makePkg2Candidate = makePkg2Path is null ? Discover(MakePkg2FileName) : NormalizeCandidate(makePkg2Path);
         if (makePkg2Candidate is not null && ProbeSupportsUploadSource(makePkg2Candidate, MakePkg2FileName))
         {
             return new Msixvc2Tool(makePkg2Candidate, IsMakePkg2Fallback: true);
@@ -89,9 +91,13 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     public bool IsMsixvc2Supported() => Resolve() is not null;
 
     /// <inheritdoc />
-    public bool IsMsixvc2Supported(string? makePkgPath, string? makePkg2Path) => Resolve(makePkgPath, makePkg2Path) is not null;
+    public bool IsMsixvc2Supported(string makePkgPath, string makePkg2Path) => Resolve(makePkgPath, makePkg2Path) is not null;
 
-    private static string? NormalizeCandidate(string path) =>
+    /// <summary>
+    /// Accepts a caller-supplied path only when it points at an existing file.
+    /// </summary>
+    /// <returns>The path, or <see langword="null"/> when it is blank or does not exist.</returns>
+    private static string NormalizeCandidate(string path) =>
         !string.IsNullOrWhiteSpace(path) && File.Exists(path) ? path : null;
 
     private bool ProbeSupportsUploadSource(string executablePath, string toolDisplayName)
@@ -121,7 +127,8 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     /// tool they will run. The GDK ships both MakePkg.exe and makepkg2.exe in its <c>bin</c> directory,
     /// so the same discovery serves both.
     /// </remarks>
-    private string? Discover(string fileName)
+    /// <returns>The full path to the tool, or <see langword="null"/> when it was not found. Never throws.</returns>
+    private string Discover(string fileName)
     {
         try
         {
@@ -146,7 +153,7 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
                 }
             }
 
-            string? pathValue = Environment.GetEnvironmentVariable("PATH");
+            string pathValue = Environment.GetEnvironmentVariable("PATH");
             if (string.IsNullOrEmpty(pathValue))
             {
                 return null;

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using Microsoft.Win32;
@@ -18,8 +16,11 @@ namespace PackageUploader.ClientApi.Tools;
 internal interface IGdkRootLocator
 {
     /// <summary>
-    /// Returns candidate GDK installation roots in priority order. Never throws and never returns null.
+    /// Returns candidate GDK installation roots in priority order.
     /// </summary>
+    /// <returns>
+    /// The roots, or an empty list when no GDK could be located. Never <see langword="null"/>, never throws.
+    /// </returns>
     IReadOnlyList<string> GetGdkRoots();
 }
 
@@ -38,15 +39,15 @@ internal sealed class GdkRootLocator : IGdkRootLocator
     internal const string GdkRegistryKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\GDK\Installed Roots";
     internal const string GdkWow6432RegistryKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\GDK\Installed Roots";
 
-    private readonly Func<string, string?> _environmentVariableReader;
-    private readonly Func<string, string?> _registryValueReader;
+    private readonly Func<string, string> _environmentVariableReader;
+    private readonly Func<string, string> _registryValueReader;
 
     public GdkRootLocator()
         : this(null, null)
     {
     }
 
-    internal GdkRootLocator(Func<string, string?>? environmentVariableReader, Func<string, string?>? registryValueReader)
+    internal GdkRootLocator(Func<string, string> environmentVariableReader, Func<string, string> registryValueReader)
     {
         _environmentVariableReader = environmentVariableReader ?? Environment.GetEnvironmentVariable;
         _registryValueReader = registryValueReader ?? ReadGdkInstallPath;
@@ -66,7 +67,7 @@ internal sealed class GdkRootLocator : IGdkRootLocator
         return roots;
     }
 
-    private static string? Read(Func<string, string?> reader, string key)
+    private static string Read(Func<string, string> reader, string key)
     {
         try
         {
@@ -79,7 +80,7 @@ internal sealed class GdkRootLocator : IGdkRootLocator
         }
     }
 
-    private static void AddRoot(List<string> roots, string? root)
+    private static void AddRoot(List<string> roots, string root)
     {
         if (!string.IsNullOrWhiteSpace(root) && !roots.Contains(root))
         {
@@ -87,7 +88,7 @@ internal sealed class GdkRootLocator : IGdkRootLocator
         }
     }
 
-    private static string? ReadGdkInstallPath(string registryKey)
+    private static string ReadGdkInstallPath(string registryKey)
     {
         if (!OperatingSystem.IsWindows())
         {
