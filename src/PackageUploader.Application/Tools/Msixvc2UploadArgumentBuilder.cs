@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#nullable enable
-
 using Microsoft.Extensions.Logging;
 using PackageUploader.Application.Config;
 using PackageUploader.ClientApi;
@@ -207,7 +205,11 @@ internal static class Msixvc2UploadArgumentBuilder
                 "ManagedIdentityFederated, Environment, AzurePipelines, ClientSecret, ClientCertificate."),
         };
 
-    private static void RequireCredential(string? value, string flag, string description, string configPath)
+    /// <summary>
+    /// Throws when a credential MakePkg.exe requires for the chosen method is missing.
+    /// <paramref name="value"/> may be null or empty — that is precisely the condition being detected.
+    /// </summary>
+    private static void RequireCredential(string value, string flag, string description, string configPath)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -278,7 +280,11 @@ internal static class Msixvc2UploadArgumentBuilder
             packageDirectory);
     }
 
-    private static void RequireInPackageDirectory(string propertyName, string? assetPath, string packageDirectory)
+    /// <summary>
+    /// Fails when a configured asset path sits outside the package directory.
+    /// <paramref name="assetPath"/> may be null or empty, in which case the asset is simply not configured.
+    /// </summary>
+    private static void RequireInPackageDirectory(string propertyName, string assetPath, string packageDirectory)
     {
         if (string.IsNullOrWhiteSpace(assetPath))
         {

@@ -134,7 +134,10 @@ public class UploadXvcPackageOperationMsixvc2Test
     {
         using var package = TempPackageFile.CreateMsixvc2();
         _toolProviderMock.SetupGet(x => x.IsAvailable).Returns(false);
-        _toolProviderMock.SetupGet(x => x.ExecutablePath).Returns((string?)null);
+        // Exercises IMsixvc2UploadToolProvider's documented contract: ExecutablePath is null when
+        // IsAvailable is false. null! (not a behavior change - the value is still null) because this
+        // test project compiles with nullable reference types while the interface's project does not.
+        _toolProviderMock.SetupGet(x => x.ExecutablePath).Returns((string)null!);
 
         var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
 

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#nullable enable
-
 namespace PackageUploader.Application.Tools;
 
 /// <summary>
@@ -24,5 +22,7 @@ internal sealed class Msixvc2CapabilityPlaceholder : IMsixvc2UploadToolProvider
     public bool IsAvailable => true;
 
     // TODO(GDK-release): replace with IMsixvc2ToolResolver.Resolve()?.ExecutablePath.
-    public string? ExecutablePath => PlaceholderExecutable;
+    // The replacement must return null/empty (never throw) when Resolve() finds no capable tool,
+    // and must share a single Resolve() call with IsAvailable. See IMsixvc2UploadToolProvider's contract.
+    public string ExecutablePath => PlaceholderExecutable;
 }

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#nullable enable
-
 using PackageUploader.ClientApi;
 
 namespace PackageUploader.Application.Tools;
@@ -11,6 +9,11 @@ namespace PackageUploader.Application.Tools;
 /// Command line and configuration values that are not part of the bound operation configuration but are
 /// still needed to build MakePkg.exe arguments — principally the authentication surface, which
 /// PackageUploader resolves from a mixture of command line options and configuration sections.
+///
+/// Every parameter except <paramref name="AuthenticationMethod"/> is OPTIONAL and may be null or empty —
+/// which credentials are present depends on the authentication method the user chose. The builder decides
+/// which ones a given method actually requires and fails with an actionable message when one is missing;
+/// consumers must not assume any of them is populated.
 /// </summary>
 /// <param name="AuthenticationMethod">The --Authentication value the user selected.</param>
 /// <param name="TenantId">AAD tenant, forwarded to MakePkg.exe via /tenantid.</param>
@@ -30,12 +33,12 @@ namespace PackageUploader.Application.Tools;
 /// <param name="ResourceId">Azure resource id, forwarded via /resourceid for ManagedIdentityFederated.</param>
 internal sealed record Msixvc2CommandLineContext(
     IngestionExtensions.AuthenticationMethod AuthenticationMethod,
-    string? TenantId = null,
-    string? ClientId = null,
-    string? ClientSecret = null,
-    string? CertificateThumbprint = null,
-    string? CertificateSubject = null,
-    string? CertificateStore = null,
-    string? CertificateLocation = null,
-    string? CertificatePath = null,
-    string? ResourceId = null);
+    string TenantId = null,
+    string ClientId = null,
+    string ClientSecret = null,
+    string CertificateThumbprint = null,
+    string CertificateSubject = null,
+    string CertificateStore = null,
+    string CertificateLocation = null,
+    string CertificatePath = null,
+    string ResourceId = null);

@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-#nullable enable
-
 using PackageUploader.ClientApi.Packaging;
 
 namespace PackageUploader.ClientApi.Test.Packaging;
@@ -12,7 +10,7 @@ public class PackageFormatDetectorTest
 {
     private const int MinimumDetectableSize = 4096;
 
-    private static string CreatePackage(string extension, byte[]? header = null, byte[]? footer = null)
+    private static string CreatePackage(string extension, byte[] header = null, byte[] footer = null)
     {
         var path = Path.Combine(Path.GetTempPath(), $"pu-detector-{Guid.NewGuid():N}{extension}");
         var contents = new byte[MinimumDetectableSize * 2];
