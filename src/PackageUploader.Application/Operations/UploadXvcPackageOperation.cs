@@ -44,8 +44,12 @@ internal class UploadXvcPackageOperation(
         {
             // SAFETY (defense in depth): format detection is a heuristic and can false-positive on an XVC1
             // package whose encrypted tail happens to contain the ZIP end-of-central-directory signature.
-            // If this process was itself started by a MakePkg.exe we delegated to, delegating again would be
-            // exactly the unbounded cycle above, so fall through to the normal upload path instead.
+            // Two independent signals say "MakePkg.exe is already in this call chain", and either one means
+            // delegating again risks the unbounded cycle above.
+            //
+            // Both fall through to the normal XVC1 upload rather than failing, which is the outcome that is
+            // correct either way: for a false-positive XVC1 package the upload simply succeeds, and for a
+            // genuine MSIXVC2 package it fails, which is what an un-delegatable MSIXVC2 package should do.
             if (_msixvc2DelegationGuard.IsDelegatedInvocation)
             {
                 _logger.LogWarning(
@@ -53,14 +57,42 @@ internal class UploadXvcPackageOperation(
                     "Uploading directly instead of delegating back to MakePkg.exe, to avoid an infinite MakePkg.exe/PackageUploader.exe loop.",
                     _config.PackageFilePath,
                     Msixvc2DelegationGuard.EnvironmentVariableName);
-            }
-            else
-            {
-                await UploadMsixvc2PackageAsync(ct).ConfigureAwait(false);
+
+                await UploadXvcPackageAsync(ct).ConfigureAwait(false);
                 return;
             }
+
+            // The environment stamp above only covers cycles this executable started. When MakePkg.exe is the
+            // entry point it invokes us without any stamp, so the parent process is checked too. MakePkg.exe
+            // only invokes PackageUploader.exe for XVC1/MSIXVC1 packages, so a MakePkg.exe parent contradicts
+            // the MSIXVC2 detection, and the parent is the more trustworthy of the two signals.
+            var makePkgParent = _msixvc2DelegationGuard.GetMakePkgParentProcessName();
+
+            if (makePkgParent is not null)
+            {
+                _logger.LogWarning(
+                    "Package '{PackageFilePath}' looks like MSIXVC2, but PackageUploader was started by '{ParentProcessName}', which only hands over " +
+                    "XVC1/MSIXVC1 packages. Treating the package as XVC1 and uploading directly, to avoid an infinite MakePkg.exe/PackageUploader.exe loop.",
+                    _config.PackageFilePath,
+                    makePkgParent);
+
+                await UploadXvcPackageAsync(ct).ConfigureAwait(false);
+                return;
+            }
+
+            await UploadMsixvc2PackageAsync(ct).ConfigureAwait(false);
+            return;
         }
 
+        await UploadXvcPackageAsync(ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The original, unchanged XVC1/MSIXVC1 upload path, which is also the fallback whenever an MSIXVC2
+    /// detection cannot be acted on because MakePkg.exe is already in the process chain.
+    /// </summary>
+    private async Task UploadXvcPackageAsync(CancellationToken ct)
+    {
         var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
         var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
         var marketGroupPackage = await _storeBrokerService.GetGameMarketGroupPackage(product, packageBranch, _config, ct).ConfigureAwait(false);

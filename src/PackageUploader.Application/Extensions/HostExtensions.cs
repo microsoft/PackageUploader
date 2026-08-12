@@ -76,6 +76,7 @@ namespace PackageUploader.Application.Extensions
 
             hostAppBuilder.Services.AddSingleton(BuildMsixvc2CommandLineContext(hostAppBuilder, parseResult));
             hostAppBuilder.Services.AddSingleton<IMsixvc2ProcessRunner, Msixvc2ProcessRunner>();
+            hostAppBuilder.Services.AddSingleton<IParentProcessProvider, ParentProcessProvider>();
             hostAppBuilder.Services.AddSingleton<IMsixvc2DelegationGuard, Msixvc2DelegationGuard>();
             // TODO(GDK-release): swap Msixvc2CapabilityPlaceholder for an adapter over
             // PackageUploader.ClientApi.Tools.IMsixvc2ToolResolver once PR #<change-1> merges.

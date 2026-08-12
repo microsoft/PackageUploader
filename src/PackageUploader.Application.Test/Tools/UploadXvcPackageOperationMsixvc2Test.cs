@@ -327,6 +327,70 @@ public class UploadXvcPackageOperationMsixvc2Test
         _loggerMock.VerifyLogWarningContains(Msixvc2DelegationGuard.EnvironmentVariableName);
     }
 
+    /// <summary>
+    /// Loop-breaker, direction 3: the environment stamp only covers cycles PackageUploader.exe itself
+    /// starts. When MakePkg.exe is the entry point it invokes us with no stamp, so a MakePkg.exe parent must
+    /// independently suppress delegation.
+    /// </summary>
+    [TestMethod]
+    public async Task MakePkgParentProcess_NeverShellsOutAndTakesLegacyPath()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
+        _delegationGuardMock.Setup(x => x.GetMakePkgParentProcessName()).Returns("MakePkg.exe");
+
+        _serviceMock
+            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
+
+        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _processRunnerMock.VerifyNoOtherCalls();
+        _serviceMock.Verify(x => x.GetProductByBigIdAsync(BigId, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task MakePkgParentProcess_LogsWarningNamingTheParent()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
+        _delegationGuardMock.Setup(x => x.GetMakePkgParentProcessName()).Returns("makepkg2.exe");
+        _serviceMock
+            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
+
+        await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        _loggerMock.VerifyLogWarningContains("makepkg2.exe");
+    }
+
+    /// <summary>
+    /// The parent check must not become a blanket block: an ordinary parent (or an undeterminable one, which
+    /// the provider also reports as null) has to leave normal MSIXVC2 delegation working.
+    /// </summary>
+    [TestMethod]
+    public async Task NonMakePkgParentProcess_StillDelegates()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
+        // null is the documented "parent unknown / not MakePkg" value. null! (not a behavior change) because
+        // this test project compiles with nullable reference types while the interface's project does not.
+        _delegationGuardMock.Setup(x => x.GetMakePkgParentProcessName()).Returns((string)null!);
+
+        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        _processRunnerMock.Verify(
+            x => x.RunAsync(ResolvedMakePkgPath, ExpectedArguments(package.Path), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
     [TestMethod]
     public async Task Cancellation_PropagatesTokenAndFailsOperation()
     {
