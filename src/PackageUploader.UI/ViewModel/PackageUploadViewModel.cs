@@ -398,7 +398,16 @@ public partial class PackageUploadViewModel : BaseViewModel
     public string Msixvc2UnavailableMessage
     {
         get => _msixvc2UnavailableMessage;
-        set => SetProperty(ref _msixvc2UnavailableMessage, value);
+        set
+        {
+            if (SetProperty(ref _msixvc2UnavailableMessage, value))
+            {
+                // IsUploadReady() gates on this message, so the Upload command's CanExecute must be
+                // re-evaluated whenever it changes - including when the background capability probe
+                // reports back after the package has already been selected.
+                CheckCanExecuteUploadCommand();
+            }
+        }
     }
 
     public string PackageIdentityName
@@ -495,6 +504,50 @@ public partial class PackageUploadViewModel : BaseViewModel
             _pathConfigurationService.MakePkgPath ?? string.Empty,
             _pathConfigurationService.MakePkg2Path ?? string.Empty);
 
+    /// <summary>
+    /// Tracks the background MSIXVC2 capability probe started when an MSIXVC2 package is selected.
+    /// Exposed so tests can await the result deterministically.
+    /// </summary>
+    internal Task Msixvc2ProbeTask { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Probes for an MSIXVC2-capable packaging tool off the UI thread and publishes the result to
+    /// the bound <see cref="Msixvc2UnavailableMessage"/> property, which in turn re-evaluates the
+    /// Upload command's CanExecute state.
+    /// </summary>
+    private Task ProbeMsixvc2AvailabilityAsync()
+    {
+        return Task.Run(() =>
+        {
+            bool isAvailable = false;
+
+            try
+            {
+                isAvailable = ResolveMsixvc2Tool() is not null;
+            }
+            catch (Exception)
+            {
+                // The resolver already logs and swallows probe failures; this guards against a
+                // background exception escaping and tearing down the app.
+                isAvailable = false;
+            }
+
+            RunOnUiThread(() =>
+            {
+                // A different package may have been selected while the probe was in flight; don't
+                // publish a stale result over it.
+                if (!IsMsixvc2Package)
+                {
+                    return;
+                }
+
+                Msixvc2UnavailableMessage = isAvailable
+                    ? string.Empty
+                    : Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+            });
+        });
+    }
+
     private bool IsUploadReady()
     {
         // MSIXVC2 packages require an MSIXVC2-capable packaging tool
@@ -581,11 +634,16 @@ public partial class PackageUploadViewModel : BaseViewModel
             IsMsixvc2Package = true;
             Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the MSIXVC2 packaging tool.";
 
-            // Check that an MSIXVC2-capable packaging tool is installed
-            if (ResolveMsixvc2Tool() is null)
-            {
-                Msixvc2UnavailableMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
-            }
+            // Check that an MSIXVC2-capable packaging tool is installed. The probe launches a child
+            // process and can block for up to the probe timeout (twice, if MakePkg.exe fails and we
+            // fall back to makepkg2.exe), so it runs off the UI thread rather than freezing the app
+            // immediately after the user picks a file. Msixvc2UnavailableMessage's setter re-raises
+            // the Upload command's CanExecuteChanged when the result arrives.
+            //
+            // Until then the message stays empty and Upload may appear enabled; that is safe because
+            // StartMsixvc2Upload() re-resolves synchronously and routes to the error page if no tool
+            // is available, so a click that races the probe can never launch a missing tool.
+            Msixvc2ProbeTask = ProbeMsixvc2AvailabilityAsync();
 
             try
             {
