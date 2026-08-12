@@ -148,7 +148,11 @@ Alternately, the executables (both the GUI and CMD tools) are also available fro
 
 Furthermore, you can also build it.
 
-1. [Download the .NET 10 SDK](https://dotnet.microsoft.com/en-us/download) or the latest version.
+1. [Download the .NET SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0), specifically version **10.0.203**.
+
+   This repository pins the SDK in [`global.json`](global.json) with `"rollForward": "disable"`, so the build requires that exact version and will not fall back to a newer SDK. If a different SDK is installed, `dotnet build` fails with `Install the [10.0.203] .NET SDK or update global.json to match an installed SDK`.
+
+   The pin is deliberate. All projects restore with [NuGet lock files](https://learn.microsoft.com/nuget/consume-packages/package-references-in-project-files#locking-dependencies), and different SDK versions resolve different transitive package versions, which would otherwise cause spurious `packages.lock.json` changes to appear in unrelated pull requests. Installing 10.0.203 alongside your existing SDKs is safe; it does not replace them.
 2. Open PowerShell, and then browse to the folder where you downloaded Package Uploader.
 3. Browse to the `src` folder, and then run `./publish.win-x64.ps1`.
 4. When it's built, PackageUploader.exe is in the `src\PackageUploader.Application\bin\release\win-x64\publish` directory.
