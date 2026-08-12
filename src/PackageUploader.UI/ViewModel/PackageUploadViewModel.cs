@@ -9,6 +9,7 @@ using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -34,6 +35,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     public readonly UploadingProgressPercentageProvider _uploadingProgressPercentageProvider;
     private readonly ErrorModelProvider _errorModelProvider;
     private readonly PathConfigurationProvider _pathConfigurationService;
+    private readonly IMsixvc2ToolResolver _msixvc2ToolResolver;
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
@@ -392,11 +394,11 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
     }
 
-    private string _makePkg2UnavailableMessage = string.Empty;
-    public string MakePkg2UnavailableMessage
+    private string _msixvc2UnavailableMessage = string.Empty;
+    public string Msixvc2UnavailableMessage
     {
-        get => _makePkg2UnavailableMessage;
-        set => SetProperty(ref _makePkg2UnavailableMessage, value);
+        get => _msixvc2UnavailableMessage;
+        set => SetProperty(ref _msixvc2UnavailableMessage, value);
     }
 
     public string PackageIdentityName
@@ -454,7 +456,8 @@ public partial class PackageUploadViewModel : BaseViewModel
                                   IWindowService windowService,
                                   UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
                                   ErrorModelProvider errorModelProvider,
-                                  PathConfigurationProvider pathConfigurationService)
+                                  PathConfigurationProvider pathConfigurationService,
+                                  IMsixvc2ToolResolver msixvc2ToolResolver)
     {
         _packageModelService = packageModelService;
         _uploaderService = uploaderService;
@@ -462,6 +465,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         _uploadingProgressPercentageProvider = uploadingProgressPercentageProvider;
         _errorModelProvider = errorModelProvider;
         _pathConfigurationService = pathConfigurationService;
+        _msixvc2ToolResolver = msixvc2ToolResolver;
 
         // Initialize commands with RelayCommand
         UploadPackageCommand = new RelayCommand(UploadPackageProcessAsync, () => IsUploadReady());
@@ -482,10 +486,19 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Resolves the MSIXVC2 packaging tool (MakePkg.exe preferred, makepkg2.exe fallback).
+    /// Resolved on demand rather than cached so in-place tool updates are picked up.
+    /// </summary>
+    private Msixvc2Tool? ResolveMsixvc2Tool() =>
+        _msixvc2ToolResolver.Resolve(
+            _pathConfigurationService.MakePkgPath ?? string.Empty,
+            _pathConfigurationService.MakePkg2Path ?? string.Empty);
+
     private bool IsUploadReady()
     {
-        // MSIXVC2 packages require makepkg2 tools
-        if (IsMsixvc2Package && !string.IsNullOrEmpty(MakePkg2UnavailableMessage))
+        // MSIXVC2 packages require an MSIXVC2-capable packaging tool
+        if (IsMsixvc2Package && !string.IsNullOrEmpty(Msixvc2UnavailableMessage))
         {
             return false;
         }
@@ -566,13 +579,12 @@ public partial class PackageUploadViewModel : BaseViewModel
         if (XvcFile.IsLikelyMsixvc2Package(PackageFilePath))
         {
             IsMsixvc2Package = true;
-            Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the makepkg2 upload tool.";
+            Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the MSIXVC2 packaging tool.";
 
-            // Check if makepkg2 tools are installed
-            string makePkg2Path = _pathConfigurationService.MakePkg2Path;
-            if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+            // Check that an MSIXVC2-capable packaging tool is installed
+            if (ResolveMsixvc2Tool() is null)
             {
-                MakePkg2UnavailableMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+                Msixvc2UnavailableMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
             }
 
             try
@@ -609,7 +621,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         PackageErrorMessage = string.Empty;
         Msixvc2InfoMessage = string.Empty;
-        MakePkg2UnavailableMessage = string.Empty;
+        Msixvc2UnavailableMessage = string.Empty;
         IsMsixvc2Package = false;
         PackageIdentityName = string.Empty;
 
@@ -1104,16 +1116,16 @@ public partial class PackageUploadViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Reroutes MSIXVC2 .msixvc package upload to makepkg2 upload tool.
+    /// Reroutes MSIXVC2 .msixvc package upload to the MSIXVC2 packaging tool.
     /// Sets PackageModel properties and navigates to the MSIXVC2 uploading progress screen.
     /// </summary>
     private void StartMsixvc2Upload()
     {
-        string makePkg2Path = _pathConfigurationService.MakePkg2Path;
-        if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+        Msixvc2Tool? tool = ResolveMsixvc2Tool();
+        if (tool is null)
         {
-            SetErrorAndGoToErrorPage("makepkg2 Not Found",
-                "makepkg2.exe was not found. Please install the Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package.");
+            SetErrorAndGoToErrorPage("MSIXVC2 packaging tool not found",
+                Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg);
             return;
         }
 
@@ -1130,7 +1142,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         Package.PackageIdentityName = PackageIdentityName;
         Package.FolderSize = PackageSize;
         Package.UploadArguments = uploadArgs;
-        Package.MakePkg2Path = makePkg2Path;
+        Package.Msixvc2ToolPath = tool.ExecutablePath;
         Package.UploadOriginPage = typeof(PackageUploadView);
         if (branchOrFlight != null)
         {

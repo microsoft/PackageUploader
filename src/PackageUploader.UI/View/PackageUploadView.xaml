@@ -636,10 +636,10 @@
                         TabIndex="5" />
                 </StackPanel>
             
-                <!-- makepkg2 unavailable warning for MSIXVC2 packages -->
-            <TextBlock Text="{Binding MakePkg2UnavailableMessage}"
+                <!-- MSIXVC2 packaging tool unavailable warning for MSIXVC2 packages -->
+            <TextBlock Text="{Binding Msixvc2UnavailableMessage}"
                        Foreground="{DynamicResource ErrorRedBrush}"
-                       Visibility="{Binding MakePkg2UnavailableMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
+                       Visibility="{Binding Msixvc2UnavailableMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
                        TextWrapping="Wrap"
                        HorizontalAlignment="Right"
                        Margin="0,5,0,0" />

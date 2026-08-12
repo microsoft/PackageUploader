@@ -3,6 +3,7 @@
 
 using Moq;
 using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.ViewModel;
@@ -28,7 +29,7 @@ namespace PackageUploader.UI.Test.ViewModel
                 UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
                 ErrorModelProvider errorModelProvider,
                 string xmlContent) 
-                : base(packageModelProvider, uploaderService, windowService, uploadingProgressPercentageProvider, errorModelProvider, new PathConfigurationProvider())
+                : base(packageModelProvider, uploaderService, windowService, uploadingProgressPercentageProvider, errorModelProvider, new PathConfigurationProvider(), new Msixvc2ToolResolver())
             {
                 _xmlContent = xmlContent;
                 TestSubValFilePath = Path.GetTempFileName();

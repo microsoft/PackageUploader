@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -42,6 +43,7 @@ public class MainPageViewModelTest
             _userLoggedInProvider,
             _authenticationService.Object, 
             _windowService.Object,
+            new Msixvc2ToolResolver(),
             _logger.Object
         );
     }

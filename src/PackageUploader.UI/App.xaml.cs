@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.FileLogger;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
@@ -46,6 +47,7 @@ public partial class App : System.Windows.Application
                 services.AddSingleton<IAuthenticationService, AuthenticationService>();
                 services.AddSingleton<IClipboardService, ClipboardService>();
                 services.AddSingleton<IProcessStarterService, ProcessStarterService>();
+                services.AddMsixvc2ToolResolver();
 
                 // Register providers
                 services.AddSingleton<PackageModelProvider>();

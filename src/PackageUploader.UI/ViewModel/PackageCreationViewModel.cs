@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Xml;
 using System.IO;
 using PackageUploader.UI.Utility;
+using PackageUploader.ClientApi.Tools;
 using Microsoft.Extensions.Logging;
 
 namespace PackageUploader.UI.ViewModel;
@@ -27,6 +28,7 @@ public partial class PackageCreationViewModel : BaseViewModel
     private readonly ValidatorResultsProvider _validatorResultsProvider;
     private readonly IWindowService _windowService;
     private readonly ILogger<PackageCreationViewModel> _logger;
+    private readonly IMsixvc2ToolResolver _msixvc2ToolResolver;
 
     private Process? _makePackageProcess;
 
@@ -329,12 +331,21 @@ public partial class PackageCreationViewModel : BaseViewModel
         set => SetProperty(ref _useMsixvc2, value);
     }
 
-    private bool _isMakePkg2Available = false;
-    public bool IsMakePkg2Available
+    private bool _isMsixvc2Available = false;
+    public bool IsMsixvc2Available
     {
-        get => _isMakePkg2Available;
-        set => SetProperty(ref _isMakePkg2Available, value);
+        get => _isMsixvc2Available;
+        set => SetProperty(ref _isMsixvc2Available, value);
     }
+
+    /// <summary>
+    /// Resolves the MSIXVC2 packaging tool (MakePkg.exe preferred, makepkg2.exe fallback).
+    /// Resolved on demand rather than cached so in-place tool updates are picked up.
+    /// </summary>
+    private Msixvc2Tool? ResolveMsixvc2Tool() =>
+        _msixvc2ToolResolver.Resolve(
+            _pathConfigurationService.MakePkgPath ?? string.Empty,
+            _pathConfigurationService.MakePkg2Path ?? string.Empty);
 
     public ICommand MakePackageCommand { get; }
     public ICommand GameDataPathDroppedCommand { get; }
@@ -350,7 +361,8 @@ public partial class PackageCreationViewModel : BaseViewModel
                                     PackingProgressPercentageProvider packingProgressPercentageProvider,
                                     ILogger<PackageCreationViewModel> logger,
                                     ErrorModelProvider errorModelProvider,
-                                    ValidatorResultsProvider validatorResultsProvider)
+                                    ValidatorResultsProvider validatorResultsProvider,
+                                    IMsixvc2ToolResolver msixvc2ToolResolver)
     {
         _packageModelService = packageModelService;
         _pathConfigurationService = pathConfigurationService;
@@ -359,6 +371,7 @@ public partial class PackageCreationViewModel : BaseViewModel
         _logger = logger;
         _errorModelProvider = errorModelProvider;
         _validatorResultsProvider = validatorResultsProvider;
+        _msixvc2ToolResolver = msixvc2ToolResolver;
 
         // Ensure our version of MakePkg supports custom SubVal paths before allowing that option.
         var mkgPkgpath = _pathConfigurationService.MakePkgPath;
@@ -385,8 +398,8 @@ public partial class PackageCreationViewModel : BaseViewModel
             // Future options can also be checked here to enable new features.
         }
 
-        var makePkg2Path = _pathConfigurationService.MakePkg2Path;
-        _isMakePkg2Available = !string.IsNullOrEmpty(makePkg2Path) && File.Exists(makePkg2Path);
+        // MSIXVC2 packaging comes from the current GDK's MakePkg.exe, or the standalone makepkg2.exe fallback.
+        _isMsixvc2Available = ResolveMsixvc2Tool() is not null;
 
         MakePackageCommand = new RelayCommand(StartMakePackageProcess, CanCreatePackage);
         GameDataPathDroppedCommand = new RelayCommand<string>(OnGameDataPathDropped);
@@ -672,9 +685,16 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         if (UseMsixvc2)
         {
+            Msixvc2Tool? msixvc2Tool = ResolveMsixvc2Tool();
+            if (msixvc2Tool is null)
+            {
+                LayoutParseError = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+                return;
+            }
+
             string msixvc2CmdFormat = "pack /f \"{0}\" /pd \"{1}\" /d \"{2}\" /msixvc2 /updatesubval /validationpath \"{3}\"";
             arguments = string.Format(msixvc2CmdFormat, MappingDataXmlPath, buildPath, GameDataPath, _settingsFolder);
-            executablePath = _pathConfigurationService.MakePkg2Path;
+            executablePath = msixvc2Tool.ExecutablePath;
         }
         else
         {

@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -45,18 +46,18 @@ public partial class MainPageViewModel : BaseViewModel
         set => SetProperty(ref _makePkgUnavailableErrorMessage, value);
     }
 
-    private bool _isMakePkg2Enabled = true;
-    public bool IsMakePkg2Enabled
+    private bool _isMsixvc2Enabled = true;
+    public bool IsMsixvc2Enabled
     {
-        get => _isMakePkg2Enabled;
-        set => SetProperty(ref _isMakePkg2Enabled, value);
+        get => _isMsixvc2Enabled;
+        set => SetProperty(ref _isMsixvc2Enabled, value);
     }
 
-    private string _makePkg2UnavailableErrorMessage = string.Empty;
-    public string MakePkg2UnavailableErrorMessage
+    private string _msixvc2UnavailableErrorMessage = string.Empty;
+    public string Msixvc2UnavailableErrorMessage
     {
-        get => _makePkg2UnavailableErrorMessage;
-        set => SetProperty(ref _makePkg2UnavailableErrorMessage, value);
+        get => _msixvc2UnavailableErrorMessage;
+        set => SetProperty(ref _msixvc2UnavailableErrorMessage, value);
     }
 
     public bool IsUserLoggedIn
@@ -139,6 +140,7 @@ public partial class MainPageViewModel : BaseViewModel
         UserLoggedInProvider userLoggedInProvider, 
         IAuthenticationService authenticationService,
         IWindowService windowService, 
+        IMsixvc2ToolResolver msixvc2ToolResolver,
         ILogger<MainPageViewModel> logger)
     {
         _pathConfigurationService = pathConfigurationService;
@@ -248,12 +250,22 @@ public partial class MainPageViewModel : BaseViewModel
         if (File.Exists(makePkg2Path))
         {
             _pathConfigurationService.MakePkg2Path = makePkg2Path;
-            IsMakePkg2Enabled = true;
+        }
+
+        // MSIXVC2 capability comes from the current GDK's MakePkg.exe, or from the standalone
+        // makepkg2.exe as a fallback. Both are verified by probing "supports uploadsource".
+        Msixvc2Tool? msixvc2Tool = msixvc2ToolResolver.Resolve(makePkgPath, makePkg2Path);
+
+        if (msixvc2Tool is not null)
+        {
+            IsMsixvc2Enabled = true;
+            _logger.LogInformation("MSIXVC2 support provided by {tool} at {location}.",
+                msixvc2Tool.IsMakePkg2Fallback ? "makepkg2.exe" : "MakePkg.exe", msixvc2Tool.ExecutablePath);
         }
         else
         {
-            IsMakePkg2Enabled = false;
-            MakePkg2UnavailableErrorMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+            IsMsixvc2Enabled = false;
+            Msixvc2UnavailableErrorMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
         }
 
         // Log version of the tool

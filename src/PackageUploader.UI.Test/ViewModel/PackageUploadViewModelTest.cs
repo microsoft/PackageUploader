@@ -3,6 +3,7 @@ using Moq;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
@@ -64,7 +65,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
                 _errorModelProvider,
-                new PathConfigurationProvider()
+                new PathConfigurationProvider(),
+                new Msixvc2ToolResolver()
             );
         }
 
@@ -89,7 +91,8 @@ namespace PackageUploader.UI.Test.ViewModel
                  _mockWindowService.Object,
                  _uploadingProgressPercentageProvider,
                  _errorModelProvider,
-                new PathConfigurationProvider()
+                new PathConfigurationProvider(),
+                new Msixvc2ToolResolver()
             );
             viewModel2.BranchOrFlightDisplayName = "Test";
             Assert.AreEqual("Test", viewModel2.BranchOrFlightDisplayName);
@@ -127,7 +130,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
                 _errorModelProvider,
-                new PathConfigurationProvider()
+                new PathConfigurationProvider(),
+                new Msixvc2ToolResolver()
             );
 
             viewModel2.BranchAndFlightNames = names; // tests the former value is successfully retrieved
@@ -150,7 +154,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
                 _errorModelProvider,
-                new PathConfigurationProvider()
+                new PathConfigurationProvider(),
+                new Msixvc2ToolResolver()
             );
 
             viewModel2.MarketGroupNames = names; // tests the former value is successfully retrieved

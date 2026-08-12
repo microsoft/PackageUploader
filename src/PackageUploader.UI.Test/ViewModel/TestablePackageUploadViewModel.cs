@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
@@ -43,7 +44,7 @@ namespace PackageUploader.UI.Test.ViewModel
             IWindowService windowService,
             UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
             ErrorModelProvider errorModelProvider)
-            : base(packageModelProvider, uploaderService, windowService, uploadingProgressPercentageProvider, errorModelProvider, new PathConfigurationProvider())
+            : base(packageModelProvider, uploaderService, windowService, uploadingProgressPercentageProvider, errorModelProvider, new PathConfigurationProvider(), new Msixvc2ToolResolver())
         {
         }
 

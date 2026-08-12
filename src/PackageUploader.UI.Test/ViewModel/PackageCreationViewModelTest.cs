@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
@@ -64,7 +65,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _progressProvider,
                 _mockLogger.Object,
                 _errorModelProvider,
-                _validatorResultsProvider
+                _validatorResultsProvider,
+                new Msixvc2ToolResolver()
             );
 
             // mock files
