@@ -34,6 +34,13 @@ internal sealed class Msixvc2ProcessRunner(ILogger<Msixvc2ProcessRunner> logger)
             EnableRaisingEvents = true,
         };
 
+        // Recursion breaker: MakePkg.exe shells back out to PackageUploader.exe for XVC1 uploads. Stamping
+        // the child environment means any PackageUploader.exe started beneath us can see that it is already
+        // a delegated invocation and refuse to delegate again, bounding the cycle at a single hop even if
+        // the MSIXVC2 format heuristic false-positives. See Msixvc2DelegationGuard.
+        process.StartInfo.Environment[Msixvc2DelegationGuard.EnvironmentVariableName] =
+            Msixvc2DelegationGuard.EnvironmentVariableValue;
+
         process.OutputDataReceived += (_, e) =>
         {
             if (!string.IsNullOrEmpty(e.Data))
