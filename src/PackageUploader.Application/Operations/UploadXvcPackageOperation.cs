@@ -88,7 +88,7 @@ internal class UploadXvcPackageOperation(
         {
             throw new InvalidOperationException(
                 "The package is an MSIXVC2 package, but no MSIXVC2-capable MakePkg.exe was found. " +
-                "Install the latest Microsoft GDK (or the Microsoft.Xbox.Packaging.Tools package) and try again.");
+                "Install the latest Microsoft GDK and try again.");
         }
 
         var bigId = await ResolveBigIdAsync(ct).ConfigureAwait(false);
