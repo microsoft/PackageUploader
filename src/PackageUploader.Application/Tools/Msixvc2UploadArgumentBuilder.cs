@@ -36,6 +36,12 @@ namespace PackageUploader.Application.Tools;
 /// value representing PackageUploader, so the flag is omitted and the tool's own default is used.</item>
 /// </list>
 ///
+/// CAVEAT: the binary this mapping was verified against is <c>makepkg2.exe</c>, not the renamed
+/// <c>MakePkg.exe</c> that ships with the GDK once the two tools are merged. The legacy <c>makepkg.exe</c>
+/// is demonstrably a different surface (it has <c>/tenantid</c> but no <c>/auth</c> at all), so if the merged
+/// MakePkg.exe diverges on <c>/auth</c>, this mapping — and especially
+/// <see cref="ResolveAuthenticationMethod"/> — is the first thing to re-verify against its help output.
+///
 /// Options that MakePkg.exe has no equivalent for are either warned about and ignored (when ignoring them
 /// cannot change the outcome) or cause a <see cref="Msixvc2UnsupportedOptionException"/> (when it could).
 /// </summary>

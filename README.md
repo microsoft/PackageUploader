@@ -200,7 +200,7 @@ The following configuration options behave differently on the MSIXVC2 path:
 | `deltaUpload` | Ignored with a warning. |
 | `availabilityDate` / `preDownloadDate` | Not supported. MakePkg.exe does not report back the identity of the package it uploaded, so the post-upload XVC configuration step cannot target it. Set these dates with a separate `PublishPackages` or configuration invocation. |
 | `productId` | Supported. It is resolved to the corresponding Big ID, which is what MakePkg.exe requires. |
-| Authentication | Supported, including non-interactive/CI authentication. See below. |
+| Authentication | Supported, including non-interactive/CI authentication — but see the credential-exposure warning in [Authentication on the MSIXVC2 path](#authentication-on-the-msixvc2-path). |
 
 If no MSIXVC2-capable `MakePkg.exe` is available, the operation fails with an actionable error instead of attempting an
 upload that cannot succeed.
@@ -210,6 +210,17 @@ upload that cannot succeed.
 MakePkg.exe acquires its own token, so PackageUploader forwards the identity you configured rather than forcing an
 interactive sign-in. `--Authentication`, `--TenantId`, and the client id / secret / certificate values from your
 configuration file are passed through, so an unattended pipeline using a service principal keeps working.
+
+> [!WARNING]
+> **Avoid secret-bearing authentication methods on shared machines.** Because the upload is delegated to a separate
+> process, a client secret has to be handed to MakePkg.exe on its command line, where it is visible to anything that can
+> read the process table for as long as the upload runs. MakePkg.exe offers no way to pass a credential out of band.
+> PackageUploader redacts the secret from its own logs, but that does not protect the command line itself.
+>
+> On shared build agents, prefer an authentication method that puts no credential on the command line:
+> **`Environment`**, **`AzurePipelines`**, **`ManagedIdentity`**, or **`ManagedIdentityFederated`**. These are forwarded
+> as just `/auth <method>`, and MakePkg.exe obtains the token from the ambient environment itself. Only use
+> `AppSecret`/`ClientSecret` where you control the machine and trust every process on it.
 
 | `--Authentication` | Forwarded to MakePkg.exe as |
 | --- | --- |
@@ -225,11 +236,6 @@ Two limitations, both because MakePkg.exe has no corresponding option:
   and use `AppCert` with `AadAuthInfo:CertificateThumbprint`.
 - **Certificates cannot be selected by subject.** `AadAuthInfo:CertificateSubject` is rejected; use
   `AadAuthInfo:CertificateThumbprint`.
-
-> **Note:** with `AppSecret`/`ClientSecret`, the secret is passed to MakePkg.exe on its command line and is therefore
-> visible to anything that can read the process table on the machine. PackageUploader redacts it from its own logs. On
-> shared build agents prefer `Environment`, `AzurePipelines`, `ManagedIdentity`, or `ManagedIdentityFederated`, none of
-> which put a credential on the command line.
 
 ### Available parameters
 
