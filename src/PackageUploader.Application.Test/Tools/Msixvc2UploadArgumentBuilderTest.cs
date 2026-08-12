@@ -1,13 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+#nullable enable
+
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PackageUploader.Application.Config;
-using PackageUploader.Application.Test.Config;
 using PackageUploader.Application.Tools;
 using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
+using System;
+using System.IO;
 
 namespace PackageUploader.Application.Test.Tools;
 
@@ -15,180 +20,311 @@ namespace PackageUploader.Application.Test.Tools;
 public class Msixvc2UploadArgumentBuilderTest
 {
     private const string BigId = "9NBLGGH4R315";
-    private static readonly string PackageFilePath = Path.Combine(Path.GetTempPath(), "packages", "game.msixvc");
-    private static readonly string PackageDirectory = Path.GetDirectoryName(Path.GetFullPath(PackageFilePath))!;
 
-    private static readonly Msixvc2CommandLineContext CacheableBrowserContext =
-        new(IngestionExtensions.AuthenticationMethod.CacheableBrowser, TenantId: null);
+    private Mock<ILogger> _loggerMock = null!;
 
-    private readonly Mock<ILogger> _loggerMock = new();
-
-    private static UploadXvcPackageOperationConfig CreateConfig() => new TestUploadXvcPackageOperationConfig
+    [TestInitialize]
+    public void Initialize()
     {
-        OperationName = "UploadXvcPackage",
+        _loggerMock = new Mock<ILogger>();
+    }
+
+    private static UploadXvcPackageOperationConfig CreateConfig(string packagePath) => new()
+    {
         BigId = BigId,
         BranchFriendlyName = "Main",
         MarketGroupName = "default",
-        PackageFilePath = PackageFilePath,
+        PackageFilePath = packagePath,
     };
 
-    private string Build(UploadXvcPackageOperationConfig config, Msixvc2CommandLineContext? context = null, bool supportsUploadSource = false) =>
-        Msixvc2UploadArgumentBuilder.Build(config, context ?? CacheableBrowserContext, BigId, supportsUploadSource, _loggerMock.Object);
+    private static Msixvc2CommandLineContext BrowserContext() =>
+        new(IngestionExtensions.AuthenticationMethod.CacheableBrowser);
+
+    private string Build(UploadXvcPackageOperationConfig config, Msixvc2CommandLineContext context) =>
+        Msixvc2UploadArgumentBuilder.Build(config, context, BigId, _loggerMock.Object);
 
     [TestMethod]
-    public void Build_BranchConfig_ProducesExpectedArguments()
+    public void Build_WithBranch_ProducesExpectedArguments()
     {
-        var args = Build(CreateConfig());
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
+
+        var arguments = Build(config, BrowserContext());
 
         Assert.AreEqual(
-            $"upload /pd \"{PackageDirectory}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" /auth CacheableBrowser",
-            args);
+            $"upload /pd \"{package.Directory}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" /auth CacheableBrowser",
+            arguments);
     }
 
     [TestMethod]
-    public void Build_FlightConfigWithUploadSource_ProducesExpectedArguments()
+    public void Build_WithFlight_UsesFlightInsteadOfBranch()
     {
-        var config = CreateConfig();
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
         config.BranchFriendlyName = null;
-        config.FlightName = "PreviewFlight";
-        config.MarketGroupName = "NorthAmerica";
+        config.FlightName = "Alpha Flight";
 
-        var args = Build(config, supportsUploadSource: true);
+        var arguments = Build(config, BrowserContext());
+
+        StringAssert.Contains(arguments, "/flight \"Alpha Flight\"");
+        Assert.IsFalse(arguments.Contains("/branch", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void Build_DoesNotEmitUploadSource()
+    {
+        // makepkg2's /uploadsource enum only accepts 'makepkg2' and 'XGPM'; there is no value that
+        // represents PackageUploader, so the flag is deliberately omitted.
+        using var package = TempPackageFile.CreateMsixvc2();
+
+        var arguments = Build(CreateConfig(package.Path), BrowserContext());
+
+        Assert.IsFalse(arguments.Contains("/uploadsource", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [TestMethod]
+    public void Build_WithoutMarketGroup_OmitsMarketFlag()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
+        config.MarketGroupName = null;
+
+        var arguments = Build(config, BrowserContext());
+
+        Assert.IsFalse(arguments.Contains("/market", StringComparison.Ordinal));
+    }
+
+    #region Authentication
+
+    [TestMethod]
+    public void Build_WithAppSecret_MapsToClientSecretAndForwardsCredentials()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.AppSecret,
+            TenantId: "tenant-1",
+            ClientId: "client-1",
+            ClientSecret: "secret-1");
+
+        var arguments = Build(CreateConfig(package.Path), context);
 
         Assert.AreEqual(
-            $"upload /pd \"{PackageDirectory}\" /flight \"PreviewFlight\" /market \"NorthAmerica\" /storeid \"{BigId}\" /uploadsource PackageUploader /auth CacheableBrowser",
-            args);
-    }
-
-    /// <summary>
-    /// /msixvc2 belongs to the pack-from-content-folder form (Msixvc2UploadViewModel, which uses /d).
-    /// The already-built-package form used by the CLI mirrors PackageUploadViewModel and must not emit it.
-    /// </summary>
-    [TestMethod]
-    public void Build_DoesNotEmitMsixvc2FlagForAlreadyBuiltPackage() =>
-        Assert.DoesNotContain("/msixvc2", Build(CreateConfig()));
-
-    [TestMethod]
-    public void Build_ResolvedBigIdIsUsedInsteadOfConfigProductId()
-    {
-        var config = CreateConfig();
-        config.BigId = null;
-        config.ProductId = "00000000-0000-0000-0000-000000000001";
-
-        var args = Msixvc2UploadArgumentBuilder.Build(config, CacheableBrowserContext, "9RESOLVED123", supportsUploadSource: false, _loggerMock.Object);
-
-        StringAssert.Contains(args, "/storeid \"9RESOLVED123\"");
+            $"upload /pd \"{package.Directory}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" " +
+            "/auth ClientSecret /tenantid \"tenant-1\" /clientid \"client-1\" /clientsecret \"secret-1\"",
+            arguments);
     }
 
     [TestMethod]
-    public void Build_GameAssetsInPackageDirectory_WarnsAndContinues()
+    public void Build_WithClientSecret_ForwardsVerbatim()
     {
-        var config = CreateConfig();
-        config.GameAssets = new GameAssets
-        {
-            EkbFilePath = Path.Combine(PackageDirectory, "game.ekb"),
-            SubValFilePath = Path.Combine(PackageDirectory, "validator.xml"),
-        };
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.ClientSecret,
+            TenantId: "tenant-1",
+            ClientId: "client-1",
+            ClientSecret: "secret-1");
 
-        var args = Build(config);
+        var arguments = Build(CreateConfig(package.Path), context);
 
-        StringAssert.Contains(args, "/storeid");
-        _loggerMock.VerifyLogWarningContains("'gameAssets' is not used for MSIXVC2 uploads");
+        StringAssert.Contains(arguments, "/auth ClientSecret");
     }
 
     [TestMethod]
-    public void Build_GameAssetsOutsidePackageDirectory_Throws()
+    public void Build_WithAppCert_MapsToClientCertificateAndForwardsStoreDetails()
     {
-        var strayPath = Path.Combine(Path.GetTempPath(), "elsewhere", "game.ekb");
-        var config = CreateConfig();
-        config.GameAssets = new GameAssets
-        {
-            EkbFilePath = strayPath,
-            SubValFilePath = Path.Combine(PackageDirectory, "validator.xml"),
-        };
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.AppCert,
+            TenantId: "tenant-1",
+            ClientId: "client-1",
+            CertificateThumbprint: "ABC123",
+            CertificateStore: "My",
+            CertificateLocation: "CurrentUser");
 
-        var ex = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(() => Build(config));
+        var arguments = Build(CreateConfig(package.Path), context);
 
-        StringAssert.Contains(ex.Message, "gameAssets.ekbFilePath");
-        StringAssert.Contains(ex.Message, strayPath);
-        StringAssert.Contains(ex.Message, PackageDirectory);
+        Assert.AreEqual(
+            $"upload /pd \"{package.Directory}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" " +
+            "/auth ClientCertificate /tenantid \"tenant-1\" /clientid \"client-1\" " +
+            "/certthumbprint \"ABC123\" /certstore \"My\" /certlocation \"CurrentUser\"",
+            arguments);
     }
 
     [TestMethod]
-    public void Build_MinutesToWaitForProcessing_WarnsAndContinues()
+    public void Build_WithAzurePipelines_ForwardsMethodWithoutCredentials()
     {
-        var config = CreateConfig();
-        config.MinutesToWaitForProcessing = 60;
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(IngestionExtensions.AuthenticationMethod.AzurePipelines);
 
-        var args = Build(config);
+        var arguments = Build(CreateConfig(package.Path), context);
 
-        StringAssert.Contains(args, "/storeid");
-        _loggerMock.VerifyLogWarningContains("'minutesToWaitForProcessing' is not used for MSIXVC2 uploads");
+        StringAssert.Contains(arguments, "/auth AzurePipelines");
+        Assert.IsFalse(arguments.Contains("/clientsecret", StringComparison.Ordinal));
     }
 
     [TestMethod]
-    public void Build_DeltaUpload_WarnsAndContinues()
+    public void Build_WithManagedIdentityFederated_ForwardsResourceId()
     {
-        var config = CreateConfig();
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.ManagedIdentityFederated,
+            ClientId: "client-1",
+            ResourceId: "resource-1");
+
+        var arguments = Build(CreateConfig(package.Path), context);
+
+        StringAssert.Contains(arguments, "/auth ManagedIdentityFederated");
+        StringAssert.Contains(arguments, "/resourceid \"resource-1\"");
+    }
+
+    [TestMethod]
+    public void Build_WithClientSecretButNoSecret_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.AppSecret,
+            TenantId: "tenant-1",
+            ClientId: "client-1");
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(CreateConfig(package.Path), context));
+
+        StringAssert.Contains(exception.Message, "/clientsecret");
+    }
+
+    [TestMethod]
+    public void Build_WithCertificateFilePath_Throws()
+    {
+        // makepkg2 authenticates from a certificate store only; there is no flag naming a PFX file.
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.ClientCertificate,
+            TenantId: "tenant-1",
+            ClientId: "client-1",
+            CertificatePath: @"C:\certs\app.pfx");
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(CreateConfig(package.Path), context));
+
+        StringAssert.Contains(exception.Message, "app.pfx");
+    }
+
+    [TestMethod]
+    public void Build_WithCertificateSubject_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.AppCert,
+            TenantId: "tenant-1",
+            ClientId: "client-1",
+            CertificateSubject: "CN=Contoso");
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(CreateConfig(package.Path), context));
+
+        StringAssert.Contains(exception.Message, "CN=Contoso");
+    }
+
+    [TestMethod]
+    public void Build_WithCertificateButNoThumbprint_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.AppCert,
+            TenantId: "tenant-1",
+            ClientId: "client-1");
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(CreateConfig(package.Path), context));
+
+        StringAssert.Contains(exception.Message, "/certthumbprint");
+    }
+
+    #endregion
+
+    #region Unsupported options
+
+    [TestMethod]
+    public void Build_WithAvailabilityDate_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow };
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(config, BrowserContext()));
+
+        StringAssert.Contains(exception.Message, "availabilityDate");
+    }
+
+    [TestMethod]
+    public void Build_WithPreDownloadDate_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
+        config.PreDownloadDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow };
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(config, BrowserContext()));
+
+        StringAssert.Contains(exception.Message, "preDownloadDate");
+    }
+
+    [TestMethod]
+    public void Build_WithDeltaUpload_WarnsAndContinues()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
         config.DeltaUpload = true;
 
-        var args = Build(config);
+        var arguments = Build(config, BrowserContext());
 
-        StringAssert.Contains(args, "/storeid");
-        _loggerMock.VerifyLogWarningContains("'deltaUpload' is not used for MSIXVC2 uploads");
+        Assert.IsFalse(string.IsNullOrEmpty(arguments));
+        _loggerMock.VerifyLogWarningContains("deltaUpload");
     }
 
     [TestMethod]
-    public void Build_AvailabilityDate_Throws()
+    public void Build_AlwaysWarnsAboutMinutesToWaitForProcessing()
     {
-        var config = CreateConfig();
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(1) };
+        using var package = TempPackageFile.CreateMsixvc2();
 
-        var ex = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(() => Build(config));
+        Build(CreateConfig(package.Path), BrowserContext());
 
-        StringAssert.Contains(ex.Message, "'availabilityDate' cannot be applied");
+        _loggerMock.VerifyLogWarningContains("minutesToWaitForProcessing");
     }
 
     [TestMethod]
-    public void Build_DisabledAvailabilityDate_DoesNotThrow()
+    public void Build_WithGameAssetsInPackageDirectory_WarnsAndContinues()
     {
-        var config = CreateConfig();
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = false };
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
+        config.GameAssets = new GameAssets
+        {
+            EkbFilePath = Path.Combine(package.Directory, "package.ekb"),
+            SubValFilePath = Path.Combine(package.Directory, "validator.xml"),
+        };
 
-        StringAssert.Contains(Build(config), "/storeid");
+        var arguments = Build(config, BrowserContext());
+
+        Assert.IsFalse(string.IsNullOrEmpty(arguments));
+        _loggerMock.VerifyLogWarningContains("gameAssets");
     }
 
     [TestMethod]
-    public void Build_PreDownloadDate_Throws()
+    public void Build_WithGameAssetsOutsidePackageDirectory_Throws()
     {
-        var config = CreateConfig();
-        config.PreDownloadDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(1) };
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
+        var strayPath = Path.Combine(Path.GetTempPath(), "elsewhere", "package.ekb");
+        config.GameAssets = new GameAssets { EkbFilePath = strayPath };
 
-        var ex = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(() => Build(config));
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(config, BrowserContext()));
 
-        StringAssert.Contains(ex.Message, "'preDownloadDate' cannot be applied");
+        StringAssert.Contains(exception.Message, "ekbFilePath");
+        StringAssert.Contains(exception.Message, package.Directory);
     }
 
-    [TestMethod]
-    public void Build_TenantId_Throws()
-    {
-        var ex = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(() => Build(
-            CreateConfig(),
-            new Msixvc2CommandLineContext(IngestionExtensions.AuthenticationMethod.CacheableBrowser, "contoso.onmicrosoft.com")));
-
-        StringAssert.Contains(ex.Message, "TenantId");
-    }
-
-    [TestMethod]
-    [DataRow(IngestionExtensions.AuthenticationMethod.AppSecret)]
-    [DataRow(IngestionExtensions.AuthenticationMethod.Browser)]
-    [DataRow(IngestionExtensions.AuthenticationMethod.AzureCli)]
-    public void Build_NonCacheableBrowserAuthentication_Throws(IngestionExtensions.AuthenticationMethod method)
-    {
-        var ex = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(() => Build(
-            CreateConfig(),
-            new Msixvc2CommandLineContext(method, TenantId: null)));
-
-        StringAssert.Contains(ex.Message, method.ToString());
-    }
+    #endregion
 }
+

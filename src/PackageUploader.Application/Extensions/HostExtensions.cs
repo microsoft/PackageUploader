@@ -74,10 +74,9 @@ namespace PackageUploader.Application.Extensions
             hostAppBuilder.Services.AddSingleton(new DataOutputOptions(isData));
             hostAppBuilder.Services.AddPackageUploaderService(parseResult.GetValue(CommandLineHelper.AuthenticationMethodOption));
 
-            hostAppBuilder.Services.AddSingleton(new Msixvc2CommandLineContext(
-                parseResult.GetValue(CommandLineHelper.AuthenticationMethodOption),
-                parseResult.GetValue(CommandLineHelper.TenantIdOption)));
+            hostAppBuilder.Services.AddSingleton(BuildMsixvc2CommandLineContext(hostAppBuilder, parseResult));
             hostAppBuilder.Services.AddSingleton<IMsixvc2ProcessRunner, Msixvc2ProcessRunner>();
+            hostAppBuilder.Services.AddSingleton<IMsixvc2DelegationGuard, Msixvc2DelegationGuard>();
             // TODO(GDK-release): swap Msixvc2CapabilityPlaceholder for an adapter over
             // PackageUploader.ClientApi.Tools.IMsixvc2ToolResolver once PR #<change-1> merges.
             hostAppBuilder.Services.AddSingleton<IMsixvc2UploadToolProvider, Msixvc2CapabilityPlaceholder>();
@@ -118,6 +117,45 @@ namespace PackageUploader.Application.Extensions
                 .AddOptions<PublishPackagesOperationConfig>().Bind(hostAppBuilder.Configuration);
 
             return hostAppBuilder;
+        }
+
+        /// <summary>
+        /// Collects the authentication surface MakePkg.exe needs for MSIXVC2 uploads. PackageUploader spreads
+        /// this across a command line option (--Authentication) and several configuration sections, and
+        /// MakePkg.exe accepts the same credential material through /auth, /tenantid, /clientid,
+        /// /clientsecret, /certthumbprint, /certstore, /certlocation and /resourceid — so a CI pipeline using
+        /// a service principal keeps working when the upload is delegated.
+        /// </summary>
+        private static Msixvc2CommandLineContext BuildMsixvc2CommandLineContext(HostApplicationBuilder hostAppBuilder, ParseResult parseResult)
+        {
+            var configuration = hostAppBuilder.Configuration;
+            var aad = configuration.GetSection(AadAuthInfo.ConfigName);
+            var clientSecret = configuration.GetSection(ClientSecretAuthInfo.ConfigName);
+            var clientCertificate = configuration.GetSection(ClientCertificateAuthInfo.ConfigName);
+
+            static string First(params string[] values) =>
+                values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+
+            return new Msixvc2CommandLineContext(
+                parseResult.GetValue(CommandLineHelper.AuthenticationMethodOption),
+                TenantId: First(
+                    parseResult.GetValue(CommandLineHelper.TenantIdOption),
+                    aad[nameof(AadAuthInfo.TenantId)],
+                    clientSecret[nameof(ClientSecretAuthInfo.TenantId)],
+                    clientCertificate[nameof(ClientCertificateAuthInfo.TenantId)]),
+                ClientId: First(
+                    aad[nameof(AadAuthInfo.ClientId)],
+                    clientSecret[nameof(ClientSecretAuthInfo.ClientId)],
+                    clientCertificate[nameof(ClientCertificateAuthInfo.ClientId)]),
+                ClientSecret: First(
+                    aad[nameof(AzureApplicationSecretAuthInfo.ClientSecret)],
+                    clientSecret[nameof(ClientSecretAuthInfo.ClientSecret)]),
+                CertificateThumbprint: aad[nameof(AzureApplicationCertificateAuthInfo.CertificateThumbprint)],
+                CertificateSubject: aad[nameof(AzureApplicationCertificateAuthInfo.CertificateSubject)],
+                CertificateStore: aad[nameof(AzureApplicationCertificateAuthInfo.CertificateStore)],
+                CertificateLocation: aad[nameof(AzureApplicationCertificateAuthInfo.CertificateLocation)],
+                CertificatePath: clientCertificate[nameof(ClientCertificateAuthInfo.CertificatePath)],
+                ResourceId: aad["ResourceId"]);
         }
 
         internal static HostApplicationBuilder ConfigureAppConfiguration(this HostApplicationBuilder hostAppBuilder, ParseResult parseResult)

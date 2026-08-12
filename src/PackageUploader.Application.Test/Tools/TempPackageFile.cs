@@ -14,6 +14,9 @@ internal sealed class TempPackageFile : IDisposable
 
     public string Path { get; }
 
+    /// <summary>Directory containing the package, which is what MakePkg.exe's /pd flag takes.</summary>
+    public string Directory => System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path))!;
+
     private TempPackageFile(string path) => Path = path;
 
     /// <summary>Creates a .msixvc file that starts with the ZIP local file header, i.e. an MSIXVC2 package.</summary>

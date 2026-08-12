@@ -17,7 +17,4 @@ internal interface IMsixvc2UploadToolProvider
 
     /// <summary>Full path to the resolved MakePkg.exe (or makepkg2.exe fallback). Null when unavailable.</summary>
     string? ExecutablePath { get; }
-
-    /// <summary>True when the resolved tool understands the /uploadsource flag.</summary>
-    bool SupportsUploadSource { get; }
 }

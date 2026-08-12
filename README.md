@@ -200,10 +200,36 @@ The following configuration options behave differently on the MSIXVC2 path:
 | `deltaUpload` | Ignored with a warning. |
 | `availabilityDate` / `preDownloadDate` | Not supported. MakePkg.exe does not report back the identity of the package it uploaded, so the post-upload XVC configuration step cannot target it. Set these dates with a separate `PublishPackages` or configuration invocation. |
 | `productId` | Supported. It is resolved to the corresponding Big ID, which is what MakePkg.exe requires. |
-| Authentication | MakePkg.exe performs its own interactive, cached sign-in. Only `CacheableBrowser` is supported; other `--Authentication` values and `--TenantId` fail with an explicit error rather than being silently ignored. |
+| Authentication | Supported, including non-interactive/CI authentication. See below. |
 
 If no MSIXVC2-capable `MakePkg.exe` is available, the operation fails with an actionable error instead of attempting an
 upload that cannot succeed.
+
+#### Authentication on the MSIXVC2 path
+
+MakePkg.exe acquires its own token, so PackageUploader forwards the identity you configured rather than forcing an
+interactive sign-in. `--Authentication`, `--TenantId`, and the client id / secret / certificate values from your
+configuration file are passed through, so an unattended pipeline using a service principal keeps working.
+
+| `--Authentication` | Forwarded to MakePkg.exe as |
+| --- | --- |
+| `AppSecret` | `ClientSecret` (PackageUploader's legacy name for the same AAD application secret flow) |
+| `AppCert` | `ClientCertificate` |
+| `Default`, `Browser`, `CacheableBrowser`, `AzureCli`, `ManagedIdentity`, `ManagedIdentityFederated`, `Environment`, `AzurePipelines`, `ClientSecret`, `ClientCertificate` | The same value |
+
+Two limitations, both because MakePkg.exe has no corresponding option:
+
+- **Certificates must live in a Windows certificate store.** MakePkg.exe selects a certificate by thumbprint
+  (`/certthumbprint`, `/certstore`, `/certlocation`) and has no option naming a certificate file, so a PFX path
+  (`ClientCertificateAuthInfo:CertificatePath`) is rejected with an explicit error. Import the certificate into a store
+  and use `AppCert` with `AadAuthInfo:CertificateThumbprint`.
+- **Certificates cannot be selected by subject.** `AadAuthInfo:CertificateSubject` is rejected; use
+  `AadAuthInfo:CertificateThumbprint`.
+
+> **Note:** with `AppSecret`/`ClientSecret`, the secret is passed to MakePkg.exe on its command line and is therefore
+> visible to anything that can read the process table on the machine. PackageUploader redacts it from its own logs. On
+> shared build agents prefer `Environment`, `AzurePipelines`, `ManagedIdentity`, or `ManagedIdentityFederated`, none of
+> which put a credential on the command line.
 
 ### Available parameters
 

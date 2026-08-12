@@ -9,6 +9,7 @@ using PackageUploader.Application.Tools;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Packaging;
 using System;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,6 +21,7 @@ internal class UploadXvcPackageOperation(
     IOptions<UploadXvcPackageOperationConfig> config,
     IMsixvc2UploadToolProvider msixvc2ToolProvider,
     IMsixvc2ProcessRunner msixvc2ProcessRunner,
+    IMsixvc2DelegationGuard msixvc2DelegationGuard,
     Msixvc2CommandLineContext msixvc2CommandLineContext) : Operation(logger)
 {
     private readonly IPackageUploaderService _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
@@ -27,6 +29,7 @@ internal class UploadXvcPackageOperation(
     private readonly UploadXvcPackageOperationConfig _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
     private readonly IMsixvc2UploadToolProvider _msixvc2ToolProvider = msixvc2ToolProvider ?? throw new ArgumentNullException(nameof(msixvc2ToolProvider));
     private readonly IMsixvc2ProcessRunner _msixvc2ProcessRunner = msixvc2ProcessRunner ?? throw new ArgumentNullException(nameof(msixvc2ProcessRunner));
+    private readonly IMsixvc2DelegationGuard _msixvc2DelegationGuard = msixvc2DelegationGuard ?? throw new ArgumentNullException(nameof(msixvc2DelegationGuard));
     private readonly Msixvc2CommandLineContext _msixvc2CommandLineContext = msixvc2CommandLineContext ?? throw new ArgumentNullException(nameof(msixvc2CommandLineContext));
 
     protected override async Task ProcessAsync(CancellationToken ct)
@@ -39,8 +42,23 @@ internal class UploadXvcPackageOperation(
         // package-format detection itself (not a config flag) so it cannot be bypassed by configuration.
         if (PackageFormatDetector.IsLikelyMsixvc2Package(_config.PackageFilePath))
         {
-            await UploadMsixvc2PackageAsync(ct).ConfigureAwait(false);
-            return;
+            // SAFETY (defense in depth): format detection is a heuristic and can false-positive on an XVC1
+            // package whose encrypted tail happens to contain the ZIP end-of-central-directory signature.
+            // If this process was itself started by a MakePkg.exe we delegated to, delegating again would be
+            // exactly the unbounded cycle above, so fall through to the normal upload path instead.
+            if (_msixvc2DelegationGuard.IsDelegatedInvocation)
+            {
+                _logger.LogWarning(
+                    "Package '{PackageFilePath}' looks like MSIXVC2, but this PackageUploader process was started by MakePkg.exe ({EnvironmentVariable} is set). " +
+                    "Uploading directly instead of delegating back to MakePkg.exe, to avoid an infinite MakePkg.exe/PackageUploader.exe loop.",
+                    _config.PackageFilePath,
+                    Msixvc2DelegationGuard.EnvironmentVariableName);
+            }
+            else
+            {
+                await UploadMsixvc2PackageAsync(ct).ConfigureAwait(false);
+                return;
+            }
         }
 
         var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
@@ -76,9 +94,11 @@ internal class UploadXvcPackageOperation(
         var bigId = await ResolveBigIdAsync(ct).ConfigureAwait(false);
 
         var executablePath = _msixvc2ToolProvider.ExecutablePath;
-        var arguments = Msixvc2UploadArgumentBuilder.Build(_config, _msixvc2CommandLineContext, bigId, _msixvc2ToolProvider.SupportsUploadSource, _logger);
+        var arguments = Msixvc2UploadArgumentBuilder.Build(_config, _msixvc2CommandLineContext, bigId, _logger);
 
-        _logger.LogInformation("Running {executablePath} {arguments}", executablePath, arguments);
+        // The argument string can carry a client secret, so log a redacted form. The child process still
+        // receives the real value.
+        _logger.LogInformation("Running {executablePath} {arguments}", executablePath, Redact(arguments));
 
         var exitCode = await _msixvc2ProcessRunner.RunAsync(executablePath, arguments, ct).ConfigureAwait(false);
 
@@ -89,6 +109,16 @@ internal class UploadXvcPackageOperation(
 
         _logger.LogInformation("MSIXVC2 package uploaded successfully.");
     }
+
+    /// <summary>
+    /// Replaces the value of any secret-bearing MakePkg.exe flag so credentials never reach the log file.
+    /// </summary>
+    private static string Redact(string arguments) =>
+        Regex.Replace(
+            arguments,
+            "(?<flag>/(?:clientsecret|certpassword))\\s+\"[^\"]*\"",
+            "${flag} \"***\"",
+            RegexOptions.IgnoreCase);
 
     /// <summary>
     /// MakePkg.exe identifies the product by Store ID (/storeid) only. When the config supplies a ProductId

@@ -25,6 +25,7 @@ public class UploadXvcPackageOperationMsixvc2Test
     private readonly Mock<ILogger<UploadXvcPackageOperation>> _loggerMock = new();
     private readonly Mock<IMsixvc2UploadToolProvider> _toolProviderMock = new();
     private readonly Mock<IMsixvc2ProcessRunner> _processRunnerMock = new();
+    private readonly Mock<IMsixvc2DelegationGuard> _delegationGuardMock = new();
 
     private UploadXvcPackageOperation CreateOperation(
         UploadXvcPackageOperationConfig config,
@@ -34,7 +35,8 @@ public class UploadXvcPackageOperationMsixvc2Test
             Options.Create(config),
             _toolProviderMock.Object,
             _processRunnerMock.Object,
-            new Msixvc2CommandLineContext(authenticationMethod, TenantId: null));
+            _delegationGuardMock.Object,
+            new Msixvc2CommandLineContext(authenticationMethod));
 
     private static UploadXvcPackageOperationConfig CreateConfig(string packageFilePath) => new TestUploadXvcPackageOperationConfig
     {
@@ -56,11 +58,10 @@ public class UploadXvcPackageOperationMsixvc2Test
         return product;
     }
 
-    private void SetUpAvailableTool(bool supportsUploadSource = false)
+    private void SetUpAvailableTool()
     {
         _toolProviderMock.SetupGet(x => x.IsAvailable).Returns(true);
         _toolProviderMock.SetupGet(x => x.ExecutablePath).Returns(ResolvedMakePkgPath);
-        _toolProviderMock.SetupGet(x => x.SupportsUploadSource).Returns(supportsUploadSource);
     }
 
     private void SetUpSuccessfulRun() =>
@@ -263,6 +264,64 @@ public class UploadXvcPackageOperationMsixvc2Test
 
         Assert.AreEqual(3, result);
         _loggerMock.VerifyLogErrorContains("MakePkg.exe failed with exit code 7");
+    }
+
+    /// <summary>
+    /// Loop-breaker, direction 1: a normal (non-delegated) invocation delegates as usual.
+    /// </summary>
+    [TestMethod]
+    public async Task DelegationGuardAbsent_Delegates()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
+
+        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        _processRunnerMock.Verify(
+            x => x.RunAsync(ResolvedMakePkgPath, ExpectedArguments(package.Path), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Loop-breaker, direction 2: when this process was itself launched by MakePkg.exe, never delegate back.
+    /// Format detection is a heuristic, so a false positive on an XVC1 package could otherwise produce
+    /// PackageUploader.exe -> MakePkg.exe -> PackageUploader.exe recursion without bound.
+    /// </summary>
+    [TestMethod]
+    public async Task DelegationGuardPresent_NeverShellsOutAndTakesLegacyPath()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(true);
+
+        _serviceMock
+            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
+
+        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _processRunnerMock.VerifyNoOtherCalls();
+        _serviceMock.Verify(x => x.GetProductByBigIdAsync(BigId, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task DelegationGuardPresent_LogsWarning()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(true);
+        _serviceMock
+            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
+
+        await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        _loggerMock.VerifyLogWarningContains(Msixvc2DelegationGuard.EnvironmentVariableName);
     }
 
     [TestMethod]

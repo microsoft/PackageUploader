@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using PackageUploader.Application.Config;
 using PackageUploader.ClientApi;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -15,12 +16,25 @@ namespace PackageUploader.Application.Tools;
 /// <summary>
 /// Translates an <see cref="UploadXvcPackageOperationConfig"/> into a MakePkg.exe "upload" command line.
 ///
-/// Every flag emitted here is grounded in existing repository code that already shells out to the tool.
-/// The closest precedent is <c>PackageUploadViewModel.BuildMsixvc2UploadArguments()</c>, which handles the
-/// same scenario as the CLI: an already-built .msixvc package on disk. That builder emits
-/// <c>upload /pd "&lt;dir&gt;" [/branch|/flight] [/market] [/storeid] /auth CacheableBrowser</c> and deliberately
-/// does NOT pass /msixvc2 — that flag only appears in <c>Msixvc2UploadViewModel.BuildUploadArguments()</c>,
-/// which packs from a loose content folder via /d. The CLI mirrors the /pd form.
+/// Every flag emitted here is grounded in the verbatim help output of the MSIXVC2-capable packaging tool
+/// (<c>makepkg2.exe upload /?</c>, version 2604.405.14000.0), cross-checked against the two existing UI
+/// argument builders. The closest in-repo precedent is <c>PackageUploadViewModel.BuildMsixvc2UploadArguments()</c>,
+/// which handles the same scenario as the CLI: an already-built .msixvc package on disk. That builder emits
+/// the <c>/pd</c> form and deliberately does NOT pass <c>/msixvc2</c> — that flag only appears in
+/// <c>Msixvc2UploadViewModel.BuildUploadArguments()</c>, which packs from a loose content folder via <c>/d</c>.
+///
+/// Notable grounding results:
+/// <list type="bullet">
+/// <item><c>/auth</c> accepts Default, Browser, CacheableBrowser, AzureCli, ManagedIdentity,
+/// ManagedIdentityFederated, Environment, AzurePipelines, ClientSecret and ClientCertificate — so
+/// non-interactive CI authentication is fully supported and is forwarded rather than rejected.</item>
+/// <item><c>/tenantid</c>, <c>/clientid</c>, <c>/clientsecret</c>, <c>/certthumbprint</c>, <c>/certstore</c>,
+/// <c>/certlocation</c> and <c>/resourceid</c> all exist and carry the credential material.</item>
+/// <item>There is no flag naming a certificate <em>file</em>, and no flag for a certificate <em>subject</em>,
+/// so those two configurations are rejected rather than silently authenticating as a different identity.</item>
+/// <item><c>/uploadsource</c> exists but its enum only accepts <c>makepkg2</c> and <c>XGPM</c>. There is no
+/// value representing PackageUploader, so the flag is omitted and the tool's own default is used.</item>
+/// </list>
 ///
 /// Options that MakePkg.exe has no equivalent for are either warned about and ignored (when ignoring them
 /// cannot change the outcome) or cause a <see cref="Msixvc2UnsupportedOptionException"/> (when it could).
@@ -28,16 +42,27 @@ namespace PackageUploader.Application.Tools;
 internal static class Msixvc2UploadArgumentBuilder
 {
     /// <summary>
-    /// The only /auth value with precedent in this repository. Both UI argument builders emit this literal.
-    /// MakePkg.exe performs the interactive sign-in itself, so no other credential can be forwarded.
+    /// The /auth values accepted by the MSIXVC2 packaging tool, taken verbatim from its help output.
+    /// PackageUploader's own AuthenticationMethod enum uses the same names for all of these.
     /// </summary>
-    private const string MakePkgAuthenticationValue = "CacheableBrowser";
+    private static readonly HashSet<IngestionExtensions.AuthenticationMethod> DirectlySupportedAuthenticationMethods =
+    [
+        IngestionExtensions.AuthenticationMethod.Default,
+        IngestionExtensions.AuthenticationMethod.Browser,
+        IngestionExtensions.AuthenticationMethod.CacheableBrowser,
+        IngestionExtensions.AuthenticationMethod.AzureCli,
+        IngestionExtensions.AuthenticationMethod.ManagedIdentity,
+        IngestionExtensions.AuthenticationMethod.ManagedIdentityFederated,
+        IngestionExtensions.AuthenticationMethod.Environment,
+        IngestionExtensions.AuthenticationMethod.AzurePipelines,
+        IngestionExtensions.AuthenticationMethod.ClientSecret,
+        IngestionExtensions.AuthenticationMethod.ClientCertificate,
+    ];
 
     public static string Build(
         UploadXvcPackageOperationConfig config,
         Msixvc2CommandLineContext commandLineContext,
         string bigId,
-        bool supportsUploadSource,
         ILogger logger)
     {
         ArgumentNullException.ThrowIfNull(config);
@@ -47,7 +72,7 @@ internal static class Msixvc2UploadArgumentBuilder
 
         var packageDirectory = GetPackageDirectory(config.PackageFilePath);
 
-        ValidateUnsupportedOptions(config, commandLineContext, packageDirectory, logger);
+        ValidateUnsupportedOptions(config, packageDirectory, logger);
 
         var args = new StringBuilder();
         args.Append("upload");
@@ -69,19 +94,125 @@ internal static class Msixvc2UploadArgumentBuilder
 
         args.Append(Invariant($" /storeid \"{bigId}\""));
 
-        if (supportsUploadSource)
-        {
-            args.Append(Invariant($" /uploadsource {IngestionExtensions.PackageUploaderUploadSource}"));
-        }
-
-        args.Append(Invariant($" /auth {MakePkgAuthenticationValue}"));
+        AppendAuthenticationArguments(args, commandLineContext);
 
         return args.ToString();
     }
 
+    /// <summary>
+    /// Forwards the selected authentication method and its credential material. MakePkg.exe performs the
+    /// token acquisition itself, so PackageUploader hands over the same identity the user configured rather
+    /// than forcing an interactive sign-in — otherwise MSIXVC2 upload would be impossible from any
+    /// non-interactive pipeline.
+    /// </summary>
+    private static void AppendAuthenticationArguments(StringBuilder args, Msixvc2CommandLineContext context)
+    {
+        var method = ResolveAuthenticationMethod(context.AuthenticationMethod);
+
+        args.Append(Invariant($" /auth {method}"));
+
+        if (!string.IsNullOrWhiteSpace(context.TenantId))
+        {
+            args.Append(Invariant($" /tenantid \"{context.TenantId}\""));
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.ClientId))
+        {
+            args.Append(Invariant($" /clientid \"{context.ClientId}\""));
+        }
+
+        switch (method)
+        {
+            case IngestionExtensions.AuthenticationMethod.ClientSecret:
+                RequireCredential(context.ClientId, "/clientid", "a client id", "AadAuthInfo:ClientId or ClientSecretAuthInfo:ClientId");
+                RequireCredential(context.ClientSecret, "/clientsecret", "a client secret", "AadAuthInfo:ClientSecret or ClientSecretAuthInfo:ClientSecret");
+                args.Append(Invariant($" /clientsecret \"{context.ClientSecret}\""));
+                break;
+
+            case IngestionExtensions.AuthenticationMethod.ClientCertificate:
+                AppendCertificateArguments(args, context);
+                break;
+
+            case IngestionExtensions.AuthenticationMethod.ManagedIdentityFederated:
+                if (!string.IsNullOrWhiteSpace(context.ResourceId))
+                {
+                    args.Append(Invariant($" /resourceid \"{context.ResourceId}\""));
+                }
+                break;
+        }
+    }
+
+    private static void AppendCertificateArguments(StringBuilder args, Msixvc2CommandLineContext context)
+    {
+        // makepkg2 authenticates from a certificate STORE (thumbprint + store + location). It exposes
+        // /certpassword but no flag naming a certificate file, so a PFX path cannot be forwarded.
+        if (!string.IsNullOrWhiteSpace(context.CertificatePath))
+        {
+            throw new Msixvc2UnsupportedOptionException(
+                $"Certificate file authentication ('{context.CertificatePath}') cannot be forwarded to MakePkg.exe for MSIXVC2 uploads, " +
+                "because MakePkg.exe only accepts a certificate from a Windows certificate store (/certthumbprint, /certstore, /certlocation) " +
+                "and has no option naming a certificate file. " +
+                $"Import the certificate into a store and use --Authentication {IngestionExtensions.AuthenticationMethod.AppCert} " +
+                "with AadAuthInfo:CertificateThumbprint, or choose a different authentication method.");
+        }
+
+        // makepkg2 has no certificate-subject option. Resolving the subject ourselves and forwarding the
+        // resulting thumbprint would be guesswork about which certificate the user meant.
+        if (!string.IsNullOrWhiteSpace(context.CertificateSubject))
+        {
+            throw new Msixvc2UnsupportedOptionException(
+                $"Certificate subject authentication ('{context.CertificateSubject}') cannot be forwarded to MakePkg.exe for MSIXVC2 uploads, " +
+                "because MakePkg.exe selects certificates by thumbprint only. " +
+                "Set AadAuthInfo:CertificateThumbprint instead of AadAuthInfo:CertificateSubject.");
+        }
+
+        RequireCredential(context.ClientId, "/clientid", "a client id", "AadAuthInfo:ClientId");
+        RequireCredential(context.CertificateThumbprint, "/certthumbprint", "a certificate thumbprint", "AadAuthInfo:CertificateThumbprint");
+
+        args.Append(Invariant($" /certthumbprint \"{context.CertificateThumbprint}\""));
+
+        if (!string.IsNullOrWhiteSpace(context.CertificateStore))
+        {
+            args.Append(Invariant($" /certstore \"{context.CertificateStore}\""));
+        }
+
+        if (!string.IsNullOrWhiteSpace(context.CertificateLocation))
+        {
+            args.Append(Invariant($" /certlocation \"{context.CertificateLocation}\""));
+        }
+    }
+
+    /// <summary>
+    /// Maps PackageUploader's AuthenticationMethod onto a /auth value MakePkg.exe accepts.
+    /// All but two names are shared verbatim. AppSecret and AppCert are PackageUploader's legacy names for
+    /// the same AAD application flows that MakePkg.exe calls ClientSecret and ClientCertificate — both
+    /// authenticate an AAD application with, respectively, a client secret or a store certificate, so the
+    /// rename is a straight alias rather than a behavioral change.
+    /// </summary>
+    private static IngestionExtensions.AuthenticationMethod ResolveAuthenticationMethod(
+        IngestionExtensions.AuthenticationMethod method) => method switch
+        {
+            IngestionExtensions.AuthenticationMethod.AppSecret => IngestionExtensions.AuthenticationMethod.ClientSecret,
+            IngestionExtensions.AuthenticationMethod.AppCert => IngestionExtensions.AuthenticationMethod.ClientCertificate,
+            _ when DirectlySupportedAuthenticationMethods.Contains(method) => method,
+            _ => throw new Msixvc2UnsupportedOptionException(
+                $"--Authentication {method} has no MakePkg.exe equivalent for MSIXVC2 uploads. " +
+                "MakePkg.exe accepts: Default, Browser, CacheableBrowser, AzureCli, ManagedIdentity, " +
+                "ManagedIdentityFederated, Environment, AzurePipelines, ClientSecret, ClientCertificate."),
+        };
+
+    private static void RequireCredential(string? value, string flag, string description, string configPath)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new Msixvc2UnsupportedOptionException(
+                $"MakePkg.exe requires {description} ({flag}) for this authentication method during an MSIXVC2 upload, " +
+                $"but none was configured. Set {configPath} in the config file.");
+        }
+    }
+
     private static void ValidateUnsupportedOptions(
         UploadXvcPackageOperationConfig config,
-        Msixvc2CommandLineContext commandLineContext,
         string packageDirectory,
         ILogger logger)
     {
@@ -114,22 +245,6 @@ internal static class Msixvc2UploadArgumentBuilder
             throw new Msixvc2UnsupportedOptionException(
                 "'preDownloadDate' cannot be applied during an MSIXVC2 upload because MakePkg.exe does not report which package it uploaded. " +
                 "Remove it from this config and set the pre-download date in Partner Center, or with a separate PackageUploader invocation, after the upload completes.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(commandLineContext.TenantId))
-        {
-            throw new Msixvc2UnsupportedOptionException(
-                "--TenantId has no MakePkg.exe equivalent for MSIXVC2 uploads. Remove it and sign in with the account's default tenant.");
-        }
-
-        // MakePkg.exe performs the sign-in itself and cannot accept a forwarded client secret or certificate.
-        // CacheableBrowser is the only /auth value with precedent in this repository.
-        if (commandLineContext.AuthenticationMethod is not IngestionExtensions.AuthenticationMethod.CacheableBrowser)
-        {
-            throw new Msixvc2UnsupportedOptionException(
-                $"--Authentication {commandLineContext.AuthenticationMethod} cannot be forwarded to MakePkg.exe for MSIXVC2 uploads, " +
-                "because MakePkg.exe performs its own interactive sign-in. " +
-                $"Use --Authentication {IngestionExtensions.AuthenticationMethod.CacheableBrowser}.");
         }
     }
 

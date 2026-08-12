@@ -14,6 +14,9 @@ internal static class LoggerMockExtensions
     public static void VerifyLogWarningContains(this Mock<ILogger> loggerMock, string expectedSubstring) =>
         VerifyLogContains(loggerMock, LogLevel.Warning, expectedSubstring);
 
+    public static void VerifyLogWarningContains<T>(this Mock<ILogger<T>> loggerMock, string expectedSubstring) =>
+        VerifyLogContains(loggerMock, LogLevel.Warning, expectedSubstring);
+
     private static void VerifyLogContains<TLogger>(Mock<TLogger> loggerMock, LogLevel level, string expectedSubstring)
         where TLogger : class, ILogger =>
         loggerMock.Verify(
