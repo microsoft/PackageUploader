@@ -214,6 +214,6 @@
 Learn more: https://aka.ms/MSIXVC2</value>
   </data>
   <data name="MakePkg2NotFoundErrorMsg" xml:space="preserve">
-    <value>MSIXVC2 requires a packaging tool that supports it. Install the latest GDK to get MakePkg.exe with MSIXVC2 support, or install the Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package (makepkg2.exe, shipped as a preview in the April 2026 GDK).</value>
+    <value>MSIXVC2 requires a packaging tool that supports it. Install the latest GDK to get MakePkg.exe with MSIXVC2 support.</value>
   </data>
 </root>

@@ -22,13 +22,13 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     internal const string MakePkgFileName = "MakePkg.exe";
     internal const string MakePkg2FileName = "makepkg2.exe";
     internal const string SupportsUploadSourceArguments = "supports uploadsource";
-    internal const string MakePkg2NuGetPackageId = "microsoft.xbox.packaging.tools.makepkg2";
 
     private static readonly TimeSpan DefaultProbeTimeout = TimeSpan.FromSeconds(5);
 
     private readonly IToolProbeRunner _probeRunner;
     private readonly ILogger _logger;
     private readonly TimeSpan _probeTimeout;
+    private readonly IGdkRootLocator _gdkRootLocator;
 
     public Msixvc2ToolResolver()
         : this(null, null, null)
@@ -41,10 +41,20 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     }
 
     public Msixvc2ToolResolver(ILogger<Msixvc2ToolResolver>? logger, IToolProbeRunner? probeRunner, TimeSpan? probeTimeout)
+        : this(logger, probeRunner, probeTimeout, null)
+    {
+    }
+
+    internal Msixvc2ToolResolver(
+        ILogger<Msixvc2ToolResolver>? logger,
+        IToolProbeRunner? probeRunner,
+        TimeSpan? probeTimeout,
+        IGdkRootLocator? gdkRootLocator)
     {
         _logger = logger ?? (ILogger)NullLogger<Msixvc2ToolResolver>.Instance;
         _probeRunner = probeRunner ?? new ProcessToolProbeRunner();
         _probeTimeout = probeTimeout is { } timeout && timeout > TimeSpan.Zero ? timeout : DefaultProbeTimeout;
+        _gdkRootLocator = gdkRootLocator ?? new GdkRootLocator();
     }
 
     /// <inheritdoc />
@@ -58,14 +68,14 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
     public Msixvc2Tool? Resolve(string? makePkgPath, string? makePkg2Path)
     {
         // 1. The current GDK's MakePkg.exe absorbed the makepkg2 capabilities.
-        string? makePkgCandidate = makePkgPath is null ? DiscoverOnPath(MakePkgFileName) : NormalizeCandidate(makePkgPath);
+        string? makePkgCandidate = makePkgPath is null ? Discover(MakePkgFileName) : NormalizeCandidate(makePkgPath);
         if (makePkgCandidate is not null && ProbeSupportsUploadSource(makePkgCandidate, MakePkgFileName))
         {
             return new Msixvc2Tool(makePkgCandidate, IsMakePkg2Fallback: false);
         }
 
-        // 2. Fall back to the standalone makepkg2.exe shipped by the April 2026 GDK preview.
-        string? makePkg2Candidate = makePkg2Path is null ? DiscoverMakePkg2() : NormalizeCandidate(makePkg2Path);
+        // 2. Fall back to the standalone makepkg2.exe, which the GDK also ships in its bin directory.
+        string? makePkg2Candidate = makePkg2Path is null ? Discover(MakePkg2FileName) : NormalizeCandidate(makePkg2Path);
         if (makePkg2Candidate is not null && ProbeSupportsUploadSource(makePkg2Candidate, MakePkg2FileName))
         {
             return new Msixvc2Tool(makePkg2Candidate, IsMakePkg2Fallback: true);
@@ -104,10 +114,14 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
 
     /// <summary>
     /// Looks for <paramref name="fileName"/> next to the running application, in the current directory,
-    /// and then on PATH. GDK registry lookup is intentionally left to Windows-specific hosts, which pass
-    /// their already-resolved path in instead.
+    /// under any installed GDK, and finally on PATH.
     /// </summary>
-    private static string? DiscoverOnPath(string fileName)
+    /// <remarks>
+    /// The order mirrors the WPF host's own resolution so the command line and the UI agree on which
+    /// tool they will run. The GDK ships both MakePkg.exe and makepkg2.exe in its <c>bin</c> directory,
+    /// so the same discovery serves both.
+    /// </remarks>
+    private string? Discover(string fileName)
     {
         try
         {
@@ -121,6 +135,15 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
             if (File.Exists(currentDirectoryCandidate))
             {
                 return currentDirectoryCandidate;
+            }
+
+            foreach (string gdkRoot in _gdkRootLocator.GetGdkRoots())
+            {
+                string gdkCandidate = Path.Combine(gdkRoot, "bin", fileName);
+                if (File.Exists(gdkCandidate))
+                {
+                    return gdkCandidate;
+                }
             }
 
             string? pathValue = Environment.GetEnvironmentVariable("PATH");
@@ -149,54 +172,5 @@ public sealed class Msixvc2ToolResolver : IMsixvc2ToolResolver
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// Discovers makepkg2.exe locally, then falls back to the highest version present in the
-    /// Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package cache.
-    /// </summary>
-    internal static string? DiscoverMakePkg2()
-    {
-        string? localPath = DiscoverOnPath(MakePkg2FileName);
-        if (localPath is not null)
-        {
-            return localPath;
-        }
-
-        try
-        {
-            string nugetPackagesDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                ".nuget", "packages", MakePkg2NuGetPackageId);
-
-            if (!Directory.Exists(nugetPackagesDir))
-            {
-                return null;
-            }
-
-            string? bestPath = null;
-            Version? bestVersion = null;
-
-            foreach (string versionDir in Directory.GetDirectories(nugetPackagesDir))
-            {
-                if (!Version.TryParse(Path.GetFileName(versionDir), out Version? version))
-                {
-                    continue;
-                }
-
-                string candidate = Path.Combine(versionDir, "tools", "any", "win-x64", MakePkg2FileName);
-                if (File.Exists(candidate) && (bestVersion is null || version > bestVersion))
-                {
-                    bestVersion = version;
-                    bestPath = candidate;
-                }
-            }
-
-            return bestPath;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
     }
 }

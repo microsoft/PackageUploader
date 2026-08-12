@@ -14,8 +14,8 @@ namespace PackageUploader.ClientApi.Tools;
 /// <list type="number">
 /// <item><description><c>MakePkg.exe supports uploadsource</c> (exit code 0 means supported). A legacy
 /// MakePkg.exe fails this, which is the discriminator.</description></item>
-/// <item><description>The standalone <c>makepkg2.exe</c> shipped by the April 2026 GDK preview, probed the
-/// same way.</description></item>
+/// <item><description>The standalone <c>makepkg2.exe</c>, which the GDK ships alongside MakePkg.exe, probed
+/// the same way.</description></item>
 /// <item><description>Otherwise MSIXVC2 is unavailable.</description></item>
 /// </list>
 /// Implementations must be thread-safe and must not throw for missing or broken tools.
@@ -24,7 +24,7 @@ public interface IMsixvc2ToolResolver
 {
     /// <summary>
     /// Resolves the MSIXVC2-capable tool using self-discovery (application directory, current directory,
-    /// PATH, and the makepkg2 NuGet package cache).
+    /// the installed GDK, and PATH).
     /// </summary>
     /// <returns>The resolved tool, or <see langword="null"/> when MSIXVC2 is unavailable.</returns>
     Msixvc2Tool? Resolve();

@@ -10,7 +10,7 @@ namespace PackageUploader.ClientApi.Tools;
 /// </summary>
 /// <param name="ExecutablePath">Full path to the executable to invoke.</param>
 /// <param name="IsMakePkg2Fallback">
-/// True when the resolved tool is the legacy standalone <c>makepkg2.exe</c> (April 2026 GDK preview /
-/// Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package) rather than the current GDK's <c>MakePkg.exe</c>.
+/// True when the resolved tool is the standalone <c>makepkg2.exe</c> rather than the current GDK's
+/// <c>MakePkg.exe</c>.
 /// </param>
 public sealed record Msixvc2Tool(string ExecutablePath, bool IsMakePkg2Fallback);

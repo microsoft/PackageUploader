@@ -178,7 +178,7 @@ namespace PackageUploader.UI.Resources.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to MSIXVC2 requires a packaging tool that supports it. Install the latest GDK to get MakePkg.exe with MSIXVC2 support, or install the Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package (makepkg2.exe, shipped as a preview in the April 2026 GDK)..
+        ///   Looks up a localized string similar to MSIXVC2 requires a packaging tool that supports it. Install the latest GDK to get MakePkg.exe with MSIXVC2 support..
         /// </summary>
         public static string MakePkg2NotFoundErrorMsg {
             get {
