@@ -831,6 +831,96 @@ namespace PackageUploader.UI.Test.ViewModel
             Assert.AreEqual(string.Empty, _viewModel.SubValDllError);
         }
 
+        #region MSIXVC2 capability probe
+
+        private PackageCreationViewModel CreateViewModel(IMsixvc2ToolResolver resolver) =>
+            new(
+                _packageModelProvider,
+                _pathConfigProvider,
+                _mockWindowService.Object,
+                _progressProvider,
+                _mockLogger.Object,
+                _errorModelProvider,
+                _validatorResultsProvider,
+                resolver);
+
+        [TestMethod]
+        public async Task Msixvc2Probe_SetsIsMsixvc2Available_WhenAToolIsResolved()
+        {
+            var resolver = new Mock<IMsixvc2ToolResolver>();
+            resolver.Setup(x => x.Resolve(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns(new Msixvc2Tool(@"C:\gdk\MakePkg.exe", IsMakePkg2Fallback: false));
+
+            var viewModel = CreateViewModel(resolver.Object);
+            await viewModel.Msixvc2ProbeTask;
+
+            Assert.IsTrue(viewModel.IsMsixvc2Available);
+        }
+
+        [TestMethod]
+        public async Task Msixvc2Probe_ClearsIsMsixvc2Available_WhenNoToolIsResolved()
+        {
+            var resolver = new Mock<IMsixvc2ToolResolver>();
+            resolver.Setup(x => x.Resolve(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns((Msixvc2Tool)null);
+
+            var viewModel = CreateViewModel(resolver.Object);
+            await viewModel.Msixvc2ProbeTask;
+
+            Assert.IsFalse(viewModel.IsMsixvc2Available);
+        }
+
+        [TestMethod]
+        public async Task Msixvc2Probe_DoesNotBlockTheConstructor()
+        {
+            // The probe launches a child process and can block for up to the probe timeout (twice,
+            // if MakePkg.exe fails and we fall back to makepkg2.exe). It must never run inline on
+            // the UI thread while the packaging page is being constructed.
+            var probeStarted = new ManualResetEventSlim(false);
+            var releaseProbe = new ManualResetEventSlim(false);
+
+            var resolver = new Mock<IMsixvc2ToolResolver>();
+            resolver.Setup(x => x.Resolve(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns(() =>
+                    {
+                        probeStarted.Set();
+                        releaseProbe.Wait(TimeSpan.FromSeconds(30));
+                        return new Msixvc2Tool(@"C:\gdk\MakePkg.exe", IsMakePkg2Fallback: false);
+                    });
+
+            var stopwatch = Stopwatch.StartNew();
+            var viewModel = CreateViewModel(resolver.Object);
+            stopwatch.Stop();
+
+            Assert.IsTrue(probeStarted.Wait(TimeSpan.FromSeconds(10)), "The probe should have been started in the background.");
+            Assert.IsTrue(
+                stopwatch.Elapsed < TimeSpan.FromSeconds(5),
+                $"The constructor blocked for {stopwatch.Elapsed.TotalSeconds:F1}s waiting on the capability probe.");
+
+            // The property keeps its safe default until the probe reports back.
+            Assert.IsFalse(viewModel.IsMsixvc2Available);
+
+            releaseProbe.Set();
+            await viewModel.Msixvc2ProbeTask;
+
+            Assert.IsTrue(viewModel.IsMsixvc2Available);
+        }
+
+        [TestMethod]
+        public async Task Msixvc2Probe_ClearsIsMsixvc2Available_WhenTheResolverThrows()
+        {
+            var resolver = new Mock<IMsixvc2ToolResolver>();
+            resolver.Setup(x => x.Resolve(It.IsAny<string>(), It.IsAny<string>()))
+                    .Throws(new InvalidOperationException("boom"));
+
+            var viewModel = CreateViewModel(resolver.Object);
+            await viewModel.Msixvc2ProbeTask;
+
+            Assert.IsFalse(viewModel.IsMsixvc2Available);
+        }
+
+        #endregion
+
         [TestCleanup]
         public void Cleanup()
         {

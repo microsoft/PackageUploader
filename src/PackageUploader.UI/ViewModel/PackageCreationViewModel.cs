@@ -347,6 +347,37 @@ public partial class PackageCreationViewModel : BaseViewModel
             _pathConfigurationService.MakePkgPath ?? string.Empty,
             _pathConfigurationService.MakePkg2Path ?? string.Empty);
 
+    /// <summary>
+    /// Tracks the background MSIXVC2 capability probe started during construction.
+    /// Exposed so tests can await the result deterministically.
+    /// </summary>
+    internal Task Msixvc2ProbeTask { get; }
+
+    /// <summary>
+    /// Probes for an MSIXVC2-capable packaging tool off the UI thread and publishes the result to
+    /// the bound <see cref="IsMsixvc2Available"/> property.
+    /// </summary>
+    private Task ProbeMsixvc2AvailabilityAsync()
+    {
+        return Task.Run(() =>
+        {
+            bool isAvailable = false;
+
+            try
+            {
+                isAvailable = ResolveMsixvc2Tool() is not null;
+            }
+            catch (Exception ex)
+            {
+                // The resolver already swallows probe failures; this guards against a background
+                // exception escaping and tearing down the app.
+                _logger.LogWarning(ex, "Failed to probe for MSIXVC2 packaging tool support.");
+            }
+
+            RunOnUiThread(() => IsMsixvc2Available = isAvailable);
+        });
+    }
+
     public ICommand MakePackageCommand { get; }
     public ICommand GameDataPathDroppedCommand { get; }
     public ICommand BrowseGameDataPathCommand { get; }
@@ -398,8 +429,10 @@ public partial class PackageCreationViewModel : BaseViewModel
             // Future options can also be checked here to enable new features.
         }
 
-        // MSIXVC2 packaging comes from the current GDK's MakePkg.exe, or the standalone makepkg2.exe fallback.
-        _isMsixvc2Available = ResolveMsixvc2Tool() is not null;
+        // MSIXVC2 packaging comes from the current GDK's MakePkg.exe, or the standalone makepkg2.exe
+        // fallback. The capability probe launches a child process and can block for up to the probe
+        // timeout, so it runs off the UI thread and updates the bound property when it completes.
+        Msixvc2ProbeTask = ProbeMsixvc2AvailabilityAsync();
 
         MakePackageCommand = new RelayCommand(StartMakePackageProcess, CanCreatePackage);
         GameDataPathDroppedCommand = new RelayCommand<string>(OnGameDataPathDropped);

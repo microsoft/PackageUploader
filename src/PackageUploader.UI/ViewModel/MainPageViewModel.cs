@@ -46,7 +46,9 @@ public partial class MainPageViewModel : BaseViewModel
         set => SetProperty(ref _makePkgUnavailableErrorMessage, value);
     }
 
-    private bool _isMsixvc2Enabled = true;
+    // Defaults to false until the background capability probe completes, so the user can't enter
+    // the MSIXVC2 flow before we know the tool supports it.
+    private bool _isMsixvc2Enabled = false;
     public bool IsMsixvc2Enabled
     {
         get => _isMsixvc2Enabled;
@@ -253,20 +255,11 @@ public partial class MainPageViewModel : BaseViewModel
         }
 
         // MSIXVC2 capability comes from the current GDK's MakePkg.exe, or from the standalone
-        // makepkg2.exe as a fallback. Both are verified by probing "supports uploadsource".
-        Msixvc2Tool? msixvc2Tool = msixvc2ToolResolver.Resolve(makePkgPath, makePkg2Path);
-
-        if (msixvc2Tool is not null)
-        {
-            IsMsixvc2Enabled = true;
-            _logger.LogInformation("MSIXVC2 support provided by {tool} at {location}.",
-                msixvc2Tool.IsMakePkg2Fallback ? "makepkg2.exe" : "MakePkg.exe", msixvc2Tool.ExecutablePath);
-        }
-        else
-        {
-            IsMsixvc2Enabled = false;
-            Msixvc2UnavailableErrorMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
-        }
+        // makepkg2.exe as a fallback. Both are verified by probing "supports uploadsource", which
+        // launches a child process and can block for up to the probe timeout (twice, if MakePkg.exe
+        // fails and we fall back). That must never run on the UI thread, so the probe is kicked off
+        // in the background and the bound property is updated when it completes.
+        Msixvc2ProbeTask = ProbeMsixvc2SupportAsync(msixvc2ToolResolver, makePkgPath, makePkg2Path);
 
         // Log version of the tool
         _logger.LogInformation("PackageUploader.UI version {version} is starting from location {location}.", GetVersion(), AppContext.BaseDirectory);
@@ -286,6 +279,56 @@ public partial class MainPageViewModel : BaseViewModel
             string makePkg2Version = makePkg2VersionInfo.FileVersion ?? string.Empty;
             _logger.LogInformation("Using makepkg2.exe version: {makePkg2Version} from location {makePkg2Location}.", makePkg2Version, makePkg2Path);
         }
+    }
+
+    /// <summary>
+    /// Tracks the background MSIXVC2 capability probe started during construction.
+    /// Exposed so tests can await the result deterministically.
+    /// </summary>
+    internal Task Msixvc2ProbeTask { get; }
+
+    /// <summary>
+    /// Probes for an MSIXVC2-capable packaging tool off the UI thread and publishes the result
+    /// to the bound <see cref="IsMsixvc2Enabled"/> / <see cref="Msixvc2UnavailableErrorMessage"/>
+    /// properties.
+    /// </summary>
+    private Task ProbeMsixvc2SupportAsync(IMsixvc2ToolResolver msixvc2ToolResolver, string makePkgPath, string makePkg2Path)
+    {
+        return Task.Run(() =>
+        {
+            Msixvc2Tool? msixvc2Tool = null;
+
+            try
+            {
+                msixvc2Tool = msixvc2ToolResolver.Resolve(makePkgPath, makePkg2Path);
+
+                if (msixvc2Tool is not null)
+                {
+                    _logger.LogInformation("MSIXVC2 support provided by {tool} at {location}.",
+                        msixvc2Tool.IsMakePkg2Fallback ? "makepkg2.exe" : "MakePkg.exe", msixvc2Tool.ExecutablePath);
+                }
+                else
+                {
+                    _logger.LogInformation("No MSIXVC2-capable packaging tool was found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // The resolver already swallows probe failures; this is belt-and-braces so a
+                // background exception can never take down the app at startup.
+                _logger.LogWarning(ex, "Failed to probe for MSIXVC2 packaging tool support.");
+            }
+
+            bool isSupported = msixvc2Tool is not null;
+
+            RunOnUiThread(() =>
+            {
+                IsMsixvc2Enabled = isSupported;
+                Msixvc2UnavailableErrorMessage = isSupported
+                    ? string.Empty
+                    : Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+            });
+        });
     }
 
     private async void LoadAvailableTenants()
