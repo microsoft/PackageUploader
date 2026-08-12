@@ -38,7 +38,14 @@ public class Msixvc2UploadArgumentBuilderTest
     private static Msixvc2CommandLineContext BrowserContext() =>
         new(IngestionExtensions.AuthenticationMethod.CacheableBrowser);
 
+    /// <summary>
+    /// Returns the executable command line. Redaction is asserted separately, so the existing argument
+    /// expectations continue to describe exactly what MakePkg.exe receives.
+    /// </summary>
     private string Build(UploadXvcPackageOperationConfig config, Msixvc2CommandLineContext context) =>
+        Msixvc2UploadArgumentBuilder.Build(config, context, BigId, _loggerMock.Object).CommandLine;
+
+    private Msixvc2UploadArguments BuildBoth(UploadXvcPackageOperationConfig config, Msixvc2CommandLineContext context) =>
         Msixvc2UploadArgumentBuilder.Build(config, context, BigId, _loggerMock.Object);
 
     [TestMethod]
@@ -125,6 +132,65 @@ public class Msixvc2UploadArgumentBuilderTest
         var arguments = Build(CreateConfig(package.Path), context);
 
         StringAssert.Contains(arguments, "/auth ClientSecret");
+    }
+
+    /// <summary>
+    /// The whole point of the split return: the loggable command line must not contain the secret, while the
+    /// executable one must still carry it verbatim.
+    /// </summary>
+    [TestMethod]
+    public void Build_WithClientSecret_RedactedCommandLineOmitsTheSecret()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.ClientSecret,
+            TenantId: "tenant-1",
+            ClientId: "client-1",
+            ClientSecret: "super-secret-value");
+
+        var arguments = BuildBoth(CreateConfig(package.Path), context);
+
+        Assert.IsFalse(
+            arguments.RedactedCommandLine.Contains("super-secret-value", StringComparison.Ordinal),
+            "The redacted command line must never contain the secret, since it is what gets logged.");
+        StringAssert.Contains(arguments.RedactedCommandLine, "/clientsecret \"***\"");
+
+        // The executable form is unaffected: MakePkg.exe still receives the real credential.
+        StringAssert.Contains(arguments.CommandLine, "/clientsecret \"super-secret-value\"");
+    }
+
+    /// <summary>
+    /// Redaction must replace only the secret. Everything else has to survive, or the logged command line
+    /// stops being a faithful record of what actually ran.
+    /// </summary>
+    [TestMethod]
+    public void Build_WithClientSecret_RedactedCommandLineMatchesApartFromTheSecret()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.ClientSecret,
+            TenantId: "tenant-1",
+            ClientId: "client-1",
+            ClientSecret: "super-secret-value");
+
+        var arguments = BuildBoth(CreateConfig(package.Path), context);
+
+        Assert.AreEqual(
+            arguments.CommandLine.Replace("\"super-secret-value\"", "\"***\"", StringComparison.Ordinal),
+            arguments.RedactedCommandLine);
+    }
+
+    /// <summary>
+    /// With no secret to hide there is nothing to diverge, so both forms stay identical.
+    /// </summary>
+    [TestMethod]
+    public void Build_WithoutClientSecret_RedactedCommandLineIsIdentical()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+
+        var arguments = BuildBoth(CreateConfig(package.Path), BrowserContext());
+
+        Assert.AreEqual(arguments.CommandLine, arguments.RedactedCommandLine);
     }
 
     [TestMethod]

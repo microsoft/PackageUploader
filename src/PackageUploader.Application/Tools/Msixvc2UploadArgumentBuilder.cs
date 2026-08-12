@@ -45,6 +45,9 @@ namespace PackageUploader.Application.Tools;
 /// </summary>
 internal static class Msixvc2UploadArgumentBuilder
 {
+    /// <summary>Stands in for a credential in the command line built for logging.</summary>
+    private const string RedactedValue = "***";
+
     /// <summary>
     /// The /auth values accepted by the MSIXVC2 packaging tool, taken verbatim from its help output.
     /// PackageUploader's own AuthenticationMethod enum uses the same names for all of these.
@@ -63,7 +66,7 @@ internal static class Msixvc2UploadArgumentBuilder
         IngestionExtensions.AuthenticationMethod.ClientCertificate,
     ];
 
-    public static string Build(
+    public static Msixvc2UploadArguments Build(
         UploadXvcPackageOperationConfig config,
         Msixvc2CommandLineContext commandLineContext,
         string bigId,
@@ -78,6 +81,30 @@ internal static class Msixvc2UploadArgumentBuilder
 
         ValidateUnsupportedOptions(config, packageDirectory, logger);
 
+        var commandLine = BuildCommandLine(config, commandLineContext, bigId, packageDirectory);
+
+        // The log-safe form is BUILT FROM A CONTEXT THAT NEVER HELD THE SECRET rather than produced by
+        // scrubbing the finished command line. Post-hoc scrubbing has to keep a pattern in sync with the
+        // exact spelling, spacing and quoting the builder happens to emit, and silently leaks the moment
+        // those drift or a new credential flag is added. Substituting at the source cannot drift, and it
+        // keeps the secret out of the value that reaches the logger entirely.
+        var redactedCommandLine = string.IsNullOrWhiteSpace(commandLineContext.ClientSecret)
+            ? commandLine
+            : BuildCommandLine(
+                config,
+                commandLineContext with { ClientSecret = RedactedValue },
+                bigId,
+                packageDirectory);
+
+        return new Msixvc2UploadArguments(commandLine, redactedCommandLine);
+    }
+
+    private static string BuildCommandLine(
+        UploadXvcPackageOperationConfig config,
+        Msixvc2CommandLineContext commandLineContext,
+        string bigId,
+        string packageDirectory)
+    {
         var args = new StringBuilder();
         args.Append("upload");
         args.Append(Invariant($" /pd \"{packageDirectory}\""));

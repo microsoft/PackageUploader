@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
@@ -9,7 +9,6 @@ using PackageUploader.Application.Tools;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Packaging;
 using System;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -128,11 +127,12 @@ internal class UploadXvcPackageOperation(
         var executablePath = _msixvc2ToolProvider.ExecutablePath;
         var arguments = Msixvc2UploadArgumentBuilder.Build(_config, _msixvc2CommandLineContext, bigId, _logger);
 
-        // The argument string can carry a client secret, so log a redacted form. The child process still
-        // receives the real value.
-        _logger.LogInformation("Running {executablePath} {arguments}", executablePath, Redact(arguments));
+        // Only the redacted form is ever logged. It is built from credential-free inputs rather than
+        // scrubbed after the fact, so no credential reaches the logger. The child process below still
+        // receives the real command line.
+        _logger.LogInformation("Running {executablePath} {arguments}", executablePath, arguments.RedactedCommandLine);
 
-        var exitCode = await _msixvc2ProcessRunner.RunAsync(executablePath, arguments, ct).ConfigureAwait(false);
+        var exitCode = await _msixvc2ProcessRunner.RunAsync(executablePath, arguments.CommandLine, ct).ConfigureAwait(false);
 
         if (exitCode != 0)
         {
@@ -141,16 +141,6 @@ internal class UploadXvcPackageOperation(
 
         _logger.LogInformation("MSIXVC2 package uploaded successfully.");
     }
-
-    /// <summary>
-    /// Replaces the value of any secret-bearing MakePkg.exe flag so credentials never reach the log file.
-    /// </summary>
-    private static string Redact(string arguments) =>
-        Regex.Replace(
-            arguments,
-            "(?<flag>/(?:clientsecret|certpassword))\\s+\"[^\"]*\"",
-            "${flag} \"***\"",
-            RegexOptions.IgnoreCase);
 
     /// <summary>
     /// MakePkg.exe identifies the product by Store ID (/storeid) only. When the config supplies a ProductId

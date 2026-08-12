@@ -391,6 +391,48 @@ public class UploadXvcPackageOperationMsixvc2Test
             Times.Once);
     }
 
+    /// <summary>
+    /// End-to-end proof of the CodeQL finding's underlying concern: with client-secret authentication the
+    /// secret must reach MakePkg.exe but must never appear in any log entry.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithClientSecret_PassesSecretToProcessButNeverLogsIt()
+    {
+        const string secret = "super-secret-value";
+
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var operation = new UploadXvcPackageOperation(
+            _serviceMock.Object,
+            _loggerMock.Object,
+            Options.Create(CreateConfig(package.Path)),
+            _toolProviderMock.Object,
+            _processRunnerMock.Object,
+            _delegationGuardMock.Object,
+            new Msixvc2CommandLineContext(
+                IngestionExtensions.AuthenticationMethod.ClientSecret,
+                TenantId: "tenant-1",
+                ClientId: "client-1",
+                ClientSecret: secret));
+
+        var result = await operation.RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+
+        // The child process gets the real credential...
+        _processRunnerMock.Verify(
+            x => x.RunAsync(
+                ResolvedMakePkgPath,
+                It.Is<string>(a => a.Contains($"/clientsecret \"{secret}\"", StringComparison.Ordinal)),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        // ...and the logger never does, at any level.
+        _loggerMock.VerifyNeverLogged(secret);
+    }
+
     [TestMethod]
     public async Task Cancellation_PropagatesTokenAndFailsOperation()
     {
