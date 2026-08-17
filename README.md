@@ -198,12 +198,16 @@ The following configuration options behave differently on the MSIXVC2 path:
 | `gameAssets` | Not required. MakePkg.exe picks the assets up from the folder that contains the package. If the paths you supply resolve to that same folder they are ignored with a warning; if they point elsewhere the operation fails so an asset is never silently dropped. |
 | `minutesToWaitForProcessing` | Ignored with a warning. MakePkg.exe manages its own processing wait. |
 | `deltaUpload` | Ignored with a warning. |
-| `availabilityDate` / `preDownloadDate` | Not supported. MakePkg.exe does not report back the identity of the package it uploaded, so the post-upload XVC configuration step cannot target it. Set these dates with a separate `PublishPackages` or configuration invocation. |
+| `availabilityDate` / `preDownloadDate` | Supported, and applied the same way as for XVC1. MakePkg.exe does not set the dates itself, but it does report the identity of the package it created, so PackageUploader applies them after the upload completes. The reported package is looked up in the target branch and market group before anything is written, and if it cannot be found the operation fails rather than dating a different package. |
 | `productId` | Supported. It is resolved to the corresponding Big ID, which is what MakePkg.exe requires. |
 | Authentication | Supported, including non-interactive/CI authentication — but see the credential-exposure warning in [Authentication on the MSIXVC2 path](#authentication-on-the-msixvc2-path). |
 
 If no MSIXVC2-capable `MakePkg.exe` is available, the operation fails with an actionable error instead of attempting an
 upload that cannot succeed.
+
+> [!NOTE]
+> Because `availabilityDate`/`preDownloadDate` are applied *after* MakePkg.exe finishes, a failure at that stage does not
+> undo the upload. The error says so explicitly: the package is uploaded, only the dates were not set.
 
 #### Authentication on the MSIXVC2 path
 

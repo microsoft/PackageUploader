@@ -64,10 +64,12 @@ public class UploadXvcPackageOperationMsixvc2Test
         _toolProviderMock.SetupGet(x => x.ExecutablePath).Returns(ResolvedMakePkgPath);
     }
 
+    private const string UploadedPackageId = "e2b5176e-a226-413f-b4d0-32cfbea10047";
+
     private void SetUpSuccessfulRun() =>
         _processRunnerMock
             .Setup(x => x.RunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(0);
+            .ReturnsAsync(new Msixvc2ProcessResult(0, UploadedPackageId));
 
     [TestMethod]
     public async Task Msixvc2PackageWithCapability_ShellsOutWithExpectedArguments()
@@ -220,20 +222,35 @@ public class UploadXvcPackageOperationMsixvc2Test
         _processRunnerMock.VerifyNoOtherCalls();
     }
 
+    /// <summary>
+    /// A config option with no MakePkg.exe equivalent must fail fast rather than be silently dropped.
+    /// Certificate-subject authentication is the case in point: MakePkg.exe selects a certificate by
+    /// thumbprint only, so honouring this would mean guessing which certificate the user meant.
+    /// </summary>
     [TestMethod]
     public async Task UnsupportedConfigOption_FailsWithExplicitErrorAndDoesNotShellOut()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         SetUpAvailableTool();
 
-        var config = CreateConfig(package.Path);
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(1) };
+        var operation = new UploadXvcPackageOperation(
+            _serviceMock.Object,
+            _loggerMock.Object,
+            Options.Create(CreateConfig(package.Path)),
+            _toolProviderMock.Object,
+            _processRunnerMock.Object,
+            _delegationGuardMock.Object,
+            new Msixvc2CommandLineContext(
+                IngestionExtensions.AuthenticationMethod.ClientCertificate,
+                TenantId: "tenant-1",
+                ClientId: "client-1",
+                CertificateSubject: "CN=Contoso"));
 
-        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+        var result = await operation.RunAsync(CancellationToken.None);
 
         Assert.AreEqual(3, result);
         _processRunnerMock.VerifyNoOtherCalls();
-        _loggerMock.VerifyLogErrorContains("'availabilityDate' cannot be applied");
+        _loggerMock.VerifyLogErrorContains("Certificate subject authentication");
     }
 
     [TestMethod]
@@ -261,7 +278,7 @@ public class UploadXvcPackageOperationMsixvc2Test
         SetUpAvailableTool();
         _processRunnerMock
             .Setup(x => x.RunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(7);
+            .ReturnsAsync(new Msixvc2ProcessResult(7, null));
 
         var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
 
@@ -433,6 +450,167 @@ public class UploadXvcPackageOperationMsixvc2Test
         _loggerMock.VerifyNeverLogged(secret);
     }
 
+    #region Availability and pre-download dates
+
+    private static GamePackage CreateGamePackage(string id)
+    {
+        var package = (GamePackage)RuntimeHelpers.GetUninitializedObject(typeof(GamePackage));
+        typeof(GamePackageResource).GetProperty("Id")!.SetValue(package, id);
+        return package;
+    }
+
+    private static async IAsyncEnumerable<GamePackage> AsAsync(params GamePackage[] packages)
+    {
+        foreach (var package in packages)
+        {
+            yield return package;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private (GameProduct Product, GamePackageBranch Branch) SetUpBranchWithPackages(params GamePackage[] packages)
+    {
+        var product = CreateProduct("1234567890", BigId);
+        var branch = (GamePackageBranch)RuntimeHelpers.GetUninitializedObject(typeof(GamePackageBranch));
+
+        _serviceMock
+            .Setup(x => x.GetProductByBigIdAsync(BigId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(product);
+        _serviceMock
+            .Setup(x => x.GetPackageBranchByFriendlyNameAsync(product, "Main", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(branch);
+        _serviceMock
+            .Setup(x => x.GetGamePackagesAsync(product, branch, "default", It.IsAny<CancellationToken>()))
+            .Returns(AsAsync(packages));
+
+        return (product, branch);
+    }
+
+    /// <summary>
+    /// The adoption case: MakePkg.exe uploads the package and reports its identity, and PackageUploader
+    /// applies the dates afterwards exactly as it does for XVC1.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithAvailabilityDate_AppliesDatesToTheReportedPackage()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var uploaded = CreateGamePackage(UploadedPackageId);
+        var (product, branch) = SetUpBranchWithPackages(CreateGamePackage(Guid.NewGuid().ToString()), uploaded);
+
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(3) };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        _serviceMock.Verify(
+            x => x.SetXvcConfigurationAsync(product, branch, uploaded, "default", config, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Without a configured date there is nothing to apply, so the delegated upload must not make any
+    /// ingestion calls at all — the same shape the pre-existing argument test asserts.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithoutDates_DoesNotTouchIngestion()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        _serviceMock.VerifyNoOtherCalls();
+    }
+
+    /// <summary>
+    /// If MakePkg.exe does not report an identity we must not guess. The upload has already succeeded, so
+    /// the failure has to say that plainly rather than reading as a failed upload.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithDatesButNoReportedPackageId_FailsWithoutSettingDates()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        _processRunnerMock
+            .Setup(x => x.RunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Msixvc2ProcessResult(0, null));
+
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(3) };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _loggerMock.VerifyLogErrorContains("did not report which package it created");
+        _loggerMock.VerifyLogErrorContains("The upload itself is unaffected");
+        _serviceMock.Verify(
+            x => x.SetXvcConfigurationAsync(
+                It.IsAny<GameProduct>(), It.IsAny<IGamePackageBranch>(), It.IsAny<GamePackage>(),
+                It.IsAny<string>(), It.IsAny<IXvcGameConfiguration>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    /// <summary>
+    /// The reported identity is verified against the target market group rather than trusted. A package that
+    /// is not there must fail rather than have dates written somewhere else.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithDatesButPackageNotInMarketGroup_FailsWithoutSettingDates()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        SetUpBranchWithPackages(CreateGamePackage(Guid.NewGuid().ToString()));
+
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(3) };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _loggerMock.VerifyLogErrorContains($"('{UploadedPackageId}') is not in market group 'default'");
+        _serviceMock.Verify(
+            x => x.SetXvcConfigurationAsync(
+                It.IsAny<GameProduct>(), It.IsAny<IGamePackageBranch>(), It.IsAny<GamePackage>(),
+                It.IsAny<string>(), It.IsAny<IXvcGameConfiguration>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    /// <summary>
+    /// A disabled date is still a configured date: the XVC1 path calls through so the value is cleared, and
+    /// MSIXVC2 must not quietly differ.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithDisabledAvailabilityDate_StillAppliesConfiguration()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var uploaded = CreateGamePackage(UploadedPackageId);
+        var (product, branch) = SetUpBranchWithPackages(uploaded);
+
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate { IsEnabled = false };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        _serviceMock.Verify(
+            x => x.SetXvcConfigurationAsync(product, branch, uploaded, "default", config, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    #endregion
+
     [TestMethod]
     public async Task Cancellation_PropagatesTokenAndFailsOperation()
     {
@@ -454,3 +632,4 @@ public class UploadXvcPackageOperationMsixvc2Test
         Assert.IsTrue(observedToken.IsCancellationRequested, "The operation cancellation token must be handed to the process runner.");
     }
 }
+

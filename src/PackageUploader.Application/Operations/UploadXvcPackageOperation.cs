@@ -7,6 +7,7 @@ using PackageUploader.Application.Config;
 using PackageUploader.Application.Extensions;
 using PackageUploader.Application.Tools;
 using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Packaging;
 using System;
 using System.Threading;
@@ -132,14 +133,73 @@ internal class UploadXvcPackageOperation(
         // receives the real command line.
         _logger.LogInformation("Running {executablePath} {arguments}", executablePath, arguments.RedactedCommandLine);
 
-        var exitCode = await _msixvc2ProcessRunner.RunAsync(executablePath, arguments.CommandLine, ct).ConfigureAwait(false);
+        var result = await _msixvc2ProcessRunner.RunAsync(executablePath, arguments.CommandLine, ct).ConfigureAwait(false);
 
-        if (exitCode != 0)
+        if (result.ExitCode != 0)
         {
-            throw new InvalidOperationException($"MakePkg.exe failed with exit code {exitCode}.");
+            throw new InvalidOperationException($"MakePkg.exe failed with exit code {result.ExitCode}.");
         }
 
         _logger.LogInformation("MSIXVC2 package uploaded successfully.");
+
+        // Mirrors the XVC1 condition exactly, so a configured date behaves the same on both paths —
+        // including a disabled date, which clears any previously set value rather than being a no-op.
+        if (_config.AvailabilityDate is not null || _config.PreDownloadDate is not null)
+        {
+            await SetMsixvc2ConfigurationAsync(result.UploadedPackageId, ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Applies availability and pre-download dates to the package MakePkg.exe just uploaded.
+    ///
+    /// MakePkg.exe does not set these itself, but it does name the package it created, so the same
+    /// ingestion call the XVC1 path uses can be reused. The reported identity is resolved against the
+    /// packages actually present in the target branch and market group rather than being trusted
+    /// outright: that both yields the real <see cref="GamePackage"/> and proves the identity belongs
+    /// where the dates are about to be written.
+    ///
+    /// Every failure here is loud. The upload has already succeeded at this point, so silently skipping
+    /// the dates would leave a package live on a date the caller never asked for.
+    /// </summary>
+    private async Task SetMsixvc2ConfigurationAsync(string uploadedPackageId, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(uploadedPackageId))
+        {
+            throw new InvalidOperationException(
+                "The MSIXVC2 package uploaded successfully, but MakePkg.exe did not report which package it created, " +
+                "so 'availabilityDate'/'preDownloadDate' could not be applied. The upload itself is unaffected. " +
+                "Set the dates in Partner Center, or re-run this operation without them once the dates are set.");
+        }
+
+        var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
+        var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
+
+        GamePackage gamePackage = null;
+
+        await foreach (var package in _storeBrokerService
+                           .GetGamePackagesAsync(product, packageBranch, _config.MarketGroupName, ct)
+                           .ConfigureAwait(false))
+        {
+            if (string.Equals(package.Id, uploadedPackageId, StringComparison.OrdinalIgnoreCase))
+            {
+                gamePackage = package;
+                break;
+            }
+        }
+
+        if (gamePackage is null)
+        {
+            throw new InvalidOperationException(
+                $"The MSIXVC2 package uploaded successfully, but the package MakePkg.exe reported ('{uploadedPackageId}') is not in " +
+                $"market group '{_config.MarketGroupName}', so 'availabilityDate'/'preDownloadDate' were not applied. " +
+                "The upload itself is unaffected. Set the dates in Partner Center.");
+        }
+
+        _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
+
+        await _storeBrokerService.SetXvcConfigurationAsync(product, packageBranch, gamePackage, _config.MarketGroupName, _config, ct).ConfigureAwait(false);
+        _logger.LogInformation("Configuration set for Xvc packages");
     }
 
     /// <summary>

@@ -42,6 +42,11 @@ namespace PackageUploader.Application.Tools;
 ///
 /// Options that MakePkg.exe has no equivalent for are either warned about and ignored (when ignoring them
 /// cannot change the outcome) or cause a <see cref="Msixvc2UnsupportedOptionException"/> (when it could).
+///
+/// Note that <c>availabilityDate</c>/<c>preDownloadDate</c> are deliberately NOT handled here. MakePkg.exe
+/// has no flag for them, but they are still honoured: the operation applies them through ingestion after the
+/// upload, using the package identity MakePkg.exe reports. This builder must therefore leave them alone
+/// rather than treat them as unsupported.
 /// </summary>
 internal static class Msixvc2UploadArgumentBuilder
 {
@@ -263,23 +268,6 @@ internal static class Msixvc2UploadArgumentBuilder
         {
             logger.LogWarning(
                 "'deltaUpload' is not used for MSIXVC2 uploads and will be ignored; MakePkg.exe decides its own chunk reuse strategy.");
-        }
-
-        // Availability/pre-download dates are applied today by a post-upload SetXvcConfigurationAsync call,
-        // which needs the specific GamePackage that was just uploaded. MakePkg.exe does not report that
-        // identity back, and guessing which package it created could reconfigure the wrong package.
-        if (config.AvailabilityDate?.IsEnabled == true)
-        {
-            throw new Msixvc2UnsupportedOptionException(
-                "'availabilityDate' cannot be applied during an MSIXVC2 upload because MakePkg.exe does not report which package it uploaded. " +
-                "Remove it from this config and set the availability date in Partner Center, or with a separate PackageUploader invocation, after the upload completes.");
-        }
-
-        if (config.PreDownloadDate?.IsEnabled == true)
-        {
-            throw new Msixvc2UnsupportedOptionException(
-                "'preDownloadDate' cannot be applied during an MSIXVC2 upload because MakePkg.exe does not report which package it uploaded. " +
-                "Remove it from this config and set the pre-download date in Partner Center, or with a separate PackageUploader invocation, after the upload completes.");
         }
     }
 

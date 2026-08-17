@@ -308,30 +308,22 @@ public class Msixvc2UploadArgumentBuilderTest
 
     #region Unsupported options
 
+    /// <summary>
+    /// Availability and pre-download dates are applied after the upload, by the operation, using the package
+    /// identity MakePkg.exe reports. They are deliberately NOT command line arguments, so the builder must
+    /// neither reject them nor try to encode them.
+    /// </summary>
     [TestMethod]
-    public void Build_WithAvailabilityDate_Throws()
+    public void Build_WithAvailabilityAndPreDownloadDates_IsUnaffected()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         var config = CreateConfig(package.Path);
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow };
+        var expected = Build(config, BrowserContext());
 
-        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
-            () => Build(config, BrowserContext()));
+        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(5) };
+        config.PreDownloadDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(1) };
 
-        StringAssert.Contains(exception.Message, "availabilityDate");
-    }
-
-    [TestMethod]
-    public void Build_WithPreDownloadDate_Throws()
-    {
-        using var package = TempPackageFile.CreateMsixvc2();
-        var config = CreateConfig(package.Path);
-        config.PreDownloadDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow };
-
-        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
-            () => Build(config, BrowserContext()));
-
-        StringAssert.Contains(exception.Message, "preDownloadDate");
+        Assert.AreEqual(expected, Build(config, BrowserContext()));
     }
 
     [TestMethod]
