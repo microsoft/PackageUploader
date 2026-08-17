@@ -11,6 +11,7 @@ using PackageUploader.Application.Operations;
 using PackageUploader.Application.Tools;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.FileLogger;
 using System;
 using System.Collections.Generic;
@@ -78,9 +79,10 @@ namespace PackageUploader.Application.Extensions
             hostAppBuilder.Services.AddSingleton<IMsixvc2ProcessRunner, Msixvc2ProcessRunner>();
             hostAppBuilder.Services.AddSingleton<IParentProcessProvider, ParentProcessProvider>();
             hostAppBuilder.Services.AddSingleton<IMsixvc2DelegationGuard, Msixvc2DelegationGuard>();
-            // TODO(GDK-release): swap Msixvc2CapabilityPlaceholder for an adapter over
-            // PackageUploader.ClientApi.Tools.IMsixvc2ToolResolver once PR #<change-1> merges.
-            hostAppBuilder.Services.AddSingleton<IMsixvc2UploadToolProvider, Msixvc2CapabilityPlaceholder>();
+            hostAppBuilder.Services.AddMsixvc2ToolResolver();
+            // Scoped, not singleton: the adapter resolves once per instance, so a scoped lifetime gives
+            // each operation a fresh resolution instead of one cached for the life of the process.
+            hostAppBuilder.Services.AddScoped<IMsixvc2UploadToolProvider, Msixvc2ToolResolverAdapter>();
 
             hostAppBuilder.Services
                 .AddScoped<GetProductOperation>()
