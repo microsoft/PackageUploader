@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -20,6 +21,7 @@ public class Msixvc2UploadViewModelTest
     private ErrorModelProvider _errorModelProvider;
     private PathConfigurationProvider _pathConfigurationProvider;
     private PackageModelProvider _packageModelProvider;
+    private IMsixvc2ToolResolver _msixvc2ToolResolver;
 
     private Msixvc2UploadViewModel _viewModel;
 
@@ -32,6 +34,7 @@ public class Msixvc2UploadViewModelTest
         _errorModelProvider = new ErrorModelProvider();
         _pathConfigurationProvider = new PathConfigurationProvider();
         _packageModelProvider = new PackageModelProvider();
+        _msixvc2ToolResolver = new Msixvc2ToolResolver();
 
         _viewModel = new Msixvc2UploadViewModel(
             _mockWindowService.Object,
@@ -39,7 +42,8 @@ public class Msixvc2UploadViewModelTest
             _mockLogger.Object,
             _errorModelProvider,
             _pathConfigurationProvider,
-            _packageModelProvider
+            _packageModelProvider,
+            _msixvc2ToolResolver
         );
     }
 
@@ -499,6 +503,179 @@ public class Msixvc2UploadViewModelTest
         finally
         {
             File.Delete(batPath);
+        }
+    }
+
+    #endregion
+
+    #region MakePkg.exe / makepkg2.exe resolution order
+
+    private static string WriteTempScript(string name, string content)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"{name}_{Guid.NewGuid():N}.bat");
+        File.WriteAllText(path, content);
+        return path;
+    }
+
+    [TestMethod]
+    public void ResolveMsixvc2Tool_PrefersMakePkg_WhenItSupportsUploadSource()
+    {
+        string makePkg = WriteTempScript("makepkg_new", "@exit /b 0");
+        string makePkg2 = WriteTempScript("makepkg2_new", "@exit /b 0");
+        try
+        {
+            _pathConfigurationProvider.MakePkgPath = makePkg;
+            _pathConfigurationProvider.MakePkg2Path = makePkg2;
+
+            var tool = _viewModel.ResolveMsixvc2Tool();
+
+            Assert.IsNotNull(tool, "New MakePkg.exe supporting the verb must resolve");
+            Assert.AreEqual(makePkg, tool.ExecutablePath, "MakePkg.exe must win over makepkg2.exe");
+            Assert.IsFalse(tool.IsMakePkg2Fallback, "Must not be flagged as a makepkg2 fallback");
+        }
+        finally
+        {
+            File.Delete(makePkg);
+            File.Delete(makePkg2);
+        }
+    }
+
+    [TestMethod]
+    public void ResolveMsixvc2Tool_FallsBackToMakePkg2_WhenLegacyMakePkgFailsProbe()
+    {
+        // Legacy MakePkg.exe doesn't understand "supports uploadsource" and exits non-zero.
+        string makePkg = WriteTempScript("makepkg_legacy",
+            "@echo Unrecognized command or argument 'supports'. 1>&2\r\n@exit /b 1");
+        string makePkg2 = WriteTempScript("makepkg2_ok", "@exit /b 0");
+        try
+        {
+            _pathConfigurationProvider.MakePkgPath = makePkg;
+            _pathConfigurationProvider.MakePkg2Path = makePkg2;
+
+            var tool = _viewModel.ResolveMsixvc2Tool();
+
+            Assert.IsNotNull(tool, "makepkg2.exe fallback must resolve when MakePkg.exe is legacy");
+            Assert.AreEqual(makePkg2, tool.ExecutablePath);
+            Assert.IsTrue(tool.IsMakePkg2Fallback, "Must be flagged as a makepkg2 fallback");
+        }
+        finally
+        {
+            File.Delete(makePkg);
+            File.Delete(makePkg2);
+        }
+    }
+
+    [TestMethod]
+    public void ResolveMsixvc2Tool_ReturnsNull_WhenBothToolsFailProbe()
+    {
+        string makePkg = WriteTempScript("makepkg_legacy2", "@exit /b 1");
+        string makePkg2 = WriteTempScript("makepkg2_legacy2", "@exit /b 1");
+        try
+        {
+            _pathConfigurationProvider.MakePkgPath = makePkg;
+            _pathConfigurationProvider.MakePkg2Path = makePkg2;
+
+            Assert.IsNull(_viewModel.ResolveMsixvc2Tool(), "MSIXVC2 must be unavailable when both probes fail");
+            Assert.IsFalse(_viewModel.SupportsUploadSourceFlag());
+        }
+        finally
+        {
+            File.Delete(makePkg);
+            File.Delete(makePkg2);
+        }
+    }
+
+    [TestMethod]
+    public void ResolveMsixvc2Tool_ReturnsNull_WhenBothToolsMissing()
+    {
+        _pathConfigurationProvider.MakePkgPath = @"C:\nonexistent\MakePkg.exe";
+        _pathConfigurationProvider.MakePkg2Path = @"C:\nonexistent\makepkg2.exe";
+
+        Assert.IsNull(_viewModel.ResolveMsixvc2Tool());
+    }
+
+    [TestMethod]
+    public void ResolveMsixvc2Tool_FallsBackToMakePkg2_WhenMakePkgTimesOut()
+    {
+        string makePkg = WriteTempScript("makepkg_hang", "@ping -n 30 127.0.0.1 > nul");
+        string makePkg2 = WriteTempScript("makepkg2_after_hang", "@exit /b 0");
+        try
+        {
+            _pathConfigurationProvider.MakePkgPath = makePkg;
+            _pathConfigurationProvider.MakePkg2Path = makePkg2;
+
+            var tool = _viewModel.ResolveMsixvc2Tool();
+
+            Assert.IsNotNull(tool, "A hung MakePkg.exe probe must time out and fall through to makepkg2.exe");
+            Assert.AreEqual(makePkg2, tool.ExecutablePath);
+            Assert.IsTrue(tool.IsMakePkg2Fallback);
+        }
+        finally
+        {
+            File.Delete(makePkg);
+            File.Delete(makePkg2);
+        }
+    }
+
+    [TestMethod]
+    public void ResolveMsixvc2Tool_FallsBackToMakePkg2_WhenMakePkgMissing()
+    {
+        string makePkg2 = WriteTempScript("makepkg2_only", "@exit /b 0");
+        try
+        {
+            _pathConfigurationProvider.MakePkgPath = string.Empty;
+            _pathConfigurationProvider.MakePkg2Path = makePkg2;
+
+            var tool = _viewModel.ResolveMsixvc2Tool();
+
+            Assert.IsNotNull(tool);
+            Assert.AreEqual(makePkg2, tool.ExecutablePath);
+            Assert.IsTrue(tool.IsMakePkg2Fallback);
+        }
+        finally
+        {
+            File.Delete(makePkg2);
+        }
+    }
+
+    [TestMethod]
+    public void ResolveMsixvc2Tool_ReturnsNull_WhenMakePkgPathIsDirectory()
+    {
+        string dirPath = Path.Combine(Path.GetTempPath(), $"makepkg_dir_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(dirPath);
+        try
+        {
+            _pathConfigurationProvider.MakePkgPath = dirPath;
+            _pathConfigurationProvider.MakePkg2Path = dirPath;
+
+            Assert.IsNull(_viewModel.ResolveMsixvc2Tool(),
+                "A directory must never be treated as a packaging tool");
+        }
+        finally
+        {
+            Directory.Delete(dirPath);
+        }
+    }
+
+    [TestMethod]
+    public void BuildUploadArguments_IncludesUploadSource_WhenOnlyNewMakePkgAvailable()
+    {
+        string makePkg = WriteTempScript("makepkg_args", "@exit /b 0");
+        try
+        {
+            _pathConfigurationProvider.MakePkgPath = makePkg;
+            _pathConfigurationProvider.MakePkg2Path = string.Empty;
+            _viewModel.ContentPath = @"C:\game\content";
+            _viewModel.BranchOrFlightDisplayName = "Branch: Main";
+            _viewModel.MarketGroupName = "default";
+
+            string args = _viewModel.BuildUploadArguments();
+
+            Assert.IsTrue(args.Contains("/uploadsource XGPM"));
+        }
+        finally
+        {
+            File.Delete(makePkg);
         }
     }
 

@@ -84,12 +84,12 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
     {
         var package = _packageModelProvider.Package;
         string uploadArgs = package.UploadArguments;
-        string makePkg2Path = package.MakePkg2Path;
+        string msixvc2ToolPath = package.Msixvc2ToolPath;
 
-        if (string.IsNullOrEmpty(uploadArgs) || string.IsNullOrEmpty(makePkg2Path))
+        if (string.IsNullOrEmpty(uploadArgs) || string.IsNullOrEmpty(msixvc2ToolPath))
         {
             SetErrorAndGoToErrorPage("Upload Error",
-                "Upload arguments or makepkg2 path not set. Please try again.");
+                "Upload arguments or MSIXVC2 packaging tool path not set. Please try again.");
             return;
         }
 
@@ -100,9 +100,9 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
 
         try
         {
-            _logger.LogInformation("Starting makepkg2 loose upload: {Arguments}", uploadArgs);
+            _logger.LogInformation("Starting MSIXVC2 loose upload: {Arguments}", uploadArgs);
 
-            int exitCode = await RunMakePkg2ProcessAsync(makePkg2Path, uploadArgs, "Upload", line =>
+            int exitCode = await RunMakePkg2ProcessAsync(msixvc2ToolPath, uploadArgs, "Upload", line =>
             {
                 if (UploadStage == Msixvc2UploadStage.Preparing)
                 {
@@ -203,10 +203,10 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
 
             if (exitCode != 0)
             {
-                _logger.LogError("makepkg2 upload failed with exit code {ExitCode}.", exitCode);
+                _logger.LogError("MSIXVC2 upload failed with exit code {ExitCode}.", exitCode);
                 string errorDetail = !string.IsNullOrEmpty(lastErrorMessage)
                     ? lastErrorMessage
-                    : $"makepkg2 upload exited with code {exitCode}.";
+                    : $"MSIXVC2 upload exited with code {exitCode}.";
                 SetErrorAndGoToErrorPage("Upload Failed", errorDetail);
                 return;
             }

@@ -51,6 +51,32 @@ public partial class BaseViewModel : INotifyPropertyChanged
 
     public bool IsCompactMode => _compactModeProvider?.IsCompactMode ?? false;
 
+    /// <summary>
+    /// Marshals <paramref name="action"/> back onto the UI thread when a WPF dispatcher is
+    /// available, so background work can safely update bound properties. Runs inline when there
+    /// is no dispatcher (unit tests) or when already on the UI thread.
+    /// </summary>
+    protected static void RunOnUiThread(Action action)
+    {
+        var dispatcher = System.Windows.Application.Current?.Dispatcher;
+
+        try
+        {
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+        catch (System.Threading.Tasks.TaskCanceledException)
+        {
+            // The dispatcher shut down while we were marshalling (app is closing).
+        }
+    }
+
     protected static readonly string _settingsFolder = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "XboxPackageTool");

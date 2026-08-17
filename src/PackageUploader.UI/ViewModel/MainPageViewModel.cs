@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -45,18 +45,20 @@ public partial class MainPageViewModel : BaseViewModel
         set => SetProperty(ref _makePkgUnavailableErrorMessage, value);
     }
 
-    private bool _isMakePkg2Enabled = true;
-    public bool IsMakePkg2Enabled
+    // Defaults to false until the background capability probe completes, so the user can't enter
+    // the MSIXVC2 flow before we know the tool supports it.
+    private bool _isMsixvc2Enabled = false;
+    public bool IsMsixvc2Enabled
     {
-        get => _isMakePkg2Enabled;
-        set => SetProperty(ref _isMakePkg2Enabled, value);
+        get => _isMsixvc2Enabled;
+        set => SetProperty(ref _isMsixvc2Enabled, value);
     }
 
-    private string _makePkg2UnavailableErrorMessage = string.Empty;
-    public string MakePkg2UnavailableErrorMessage
+    private string _msixvc2UnavailableErrorMessage = string.Empty;
+    public string Msixvc2UnavailableErrorMessage
     {
-        get => _makePkg2UnavailableErrorMessage;
-        set => SetProperty(ref _makePkg2UnavailableErrorMessage, value);
+        get => _msixvc2UnavailableErrorMessage;
+        set => SetProperty(ref _msixvc2UnavailableErrorMessage, value);
     }
 
     public bool IsUserLoggedIn
@@ -139,6 +141,8 @@ public partial class MainPageViewModel : BaseViewModel
         UserLoggedInProvider userLoggedInProvider, 
         IAuthenticationService authenticationService,
         IWindowService windowService, 
+        IMsixvc2ToolResolver msixvc2ToolResolver,
+        IToolPathResolver toolPathResolver,
         ILogger<MainPageViewModel> logger)
     {
         _pathConfigurationService = pathConfigurationService;
@@ -222,7 +226,11 @@ public partial class MainPageViewModel : BaseViewModel
 
         IsUserLoggedIn = false;
 
-        string makePkgPath = ResolveFilePath("MakePkg.exe");
+        // Tool discovery is shared with the command line so both hosts resolve the same binaries.
+        // Find returns null when a tool is missing; the empty string keeps the historic contract with
+        // the calls below, and tells IMsixvc2ToolResolver that this host has already searched and
+        // found nothing rather than asking it to search again.
+        string makePkgPath = toolPathResolver.Find("MakePkg.exe") ?? string.Empty;
 
         if (File.Exists(makePkgPath))
         {
@@ -236,25 +244,26 @@ public partial class MainPageViewModel : BaseViewModel
             MakePkgUnavailableErrorMessage = PackageUploader.UI.Resources.Strings.MainPage.MakePackageNotFoundErrorMsg;
         }
 
-        string subValPath = ResolveFilePath("SubmissionValidator.dll");
+        string subValPath = toolPathResolver.Find("SubmissionValidator.dll") ?? string.Empty;
 
         if (File.Exists(subValPath))
         {
             _pathConfigurationService.BaseSubValPath = subValPath;
         }
 
-        string makePkg2Path = ResolveMakePkg2Path();
+        string makePkg2Path = toolPathResolver.Find("makepkg2.exe") ?? string.Empty;
 
         if (File.Exists(makePkg2Path))
         {
             _pathConfigurationService.MakePkg2Path = makePkg2Path;
-            IsMakePkg2Enabled = true;
         }
-        else
-        {
-            IsMakePkg2Enabled = false;
-            MakePkg2UnavailableErrorMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
-        }
+
+        // MSIXVC2 capability comes from the current GDK's MakePkg.exe, or from the standalone
+        // makepkg2.exe as a fallback. Both are verified by probing "supports uploadsource", which
+        // launches a child process and can block for up to the probe timeout (twice, if MakePkg.exe
+        // fails and we fall back). That must never run on the UI thread, so the probe is kicked off
+        // in the background and the bound property is updated when it completes.
+        Msixvc2ProbeTask = ProbeMsixvc2SupportAsync(msixvc2ToolResolver, makePkgPath, makePkg2Path);
 
         // Log version of the tool
         _logger.LogInformation("PackageUploader.UI version {version} is starting from location {location}.", GetVersion(), AppContext.BaseDirectory);
@@ -274,6 +283,56 @@ public partial class MainPageViewModel : BaseViewModel
             string makePkg2Version = makePkg2VersionInfo.FileVersion ?? string.Empty;
             _logger.LogInformation("Using makepkg2.exe version: {makePkg2Version} from location {makePkg2Location}.", makePkg2Version, makePkg2Path);
         }
+    }
+
+    /// <summary>
+    /// Tracks the background MSIXVC2 capability probe started during construction.
+    /// Exposed so tests can await the result deterministically.
+    /// </summary>
+    internal Task Msixvc2ProbeTask { get; }
+
+    /// <summary>
+    /// Probes for an MSIXVC2-capable packaging tool off the UI thread and publishes the result
+    /// to the bound <see cref="IsMsixvc2Enabled"/> / <see cref="Msixvc2UnavailableErrorMessage"/>
+    /// properties.
+    /// </summary>
+    private Task ProbeMsixvc2SupportAsync(IMsixvc2ToolResolver msixvc2ToolResolver, string makePkgPath, string makePkg2Path)
+    {
+        return Task.Run(() =>
+        {
+            Msixvc2Tool? msixvc2Tool = null;
+
+            try
+            {
+                msixvc2Tool = msixvc2ToolResolver.Resolve(makePkgPath, makePkg2Path);
+
+                if (msixvc2Tool is not null)
+                {
+                    _logger.LogInformation("MSIXVC2 support provided by {tool} at {location}.",
+                        msixvc2Tool.IsMakePkg2Fallback ? "makepkg2.exe" : "MakePkg.exe", msixvc2Tool.ExecutablePath);
+                }
+                else
+                {
+                    _logger.LogInformation("No MSIXVC2-capable packaging tool was found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // The resolver already swallows probe failures; this is belt-and-braces so a
+                // background exception can never take down the app at startup.
+                _logger.LogWarning(ex, "Failed to probe for MSIXVC2 packaging tool support.");
+            }
+
+            bool isSupported = msixvc2Tool is not null;
+
+            RunOnUiThread(() =>
+            {
+                IsMsixvc2Enabled = isSupported;
+                Msixvc2UnavailableErrorMessage = isSupported
+                    ? string.Empty
+                    : Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+            });
+        });
     }
 
     private async void LoadAvailableTenants()
@@ -334,130 +393,5 @@ public partial class MainPageViewModel : BaseViewModel
     public void OnAppearing()
     {
         OnPropertyChanged(nameof(IsUserLoggedIn));
-    }
-
-    private static string ResolveFilePath(string fileName)
-    {
-        // We search in several locations in priority order:
-        // 1. Next to our current executable
-        // 2. In the CurrentDirectory
-        // 3. In the GDK if it's installed
-        // 4. In the directories specified by the PATH environment variable
-
-        // Use AppContext.BaseDirectory instead of Assembly.Location for single-file compatibility
-        var assemblyDirectory = AppContext.BaseDirectory;
-
-        if (Directory.Exists(assemblyDirectory))
-        {
-            var nextToExePath = Path.Combine(assemblyDirectory, fileName);
-
-            if (File.Exists(nextToExePath))
-            {
-                return nextToExePath;
-            }
-        }
-
-        var currentDirectory = Directory.GetCurrentDirectory();
-
-        var currentDirectoryPath = Path.Combine(currentDirectory, fileName);
-
-        if (File.Exists(currentDirectoryPath))
-        {
-            return currentDirectoryPath;
-        }
-
-        string GdkRegistryPath = @"SOFTWARE\Microsoft\GDK\Installed Roots";
-        string? gdkPath = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{GdkRegistryPath}", "GDKInstallPath", null) as string;
-
-        if (!string.IsNullOrEmpty(gdkPath))
-        {
-            var gdkFilePath = Path.Combine(gdkPath, "bin", fileName);
-            if (File.Exists(gdkFilePath))
-            {
-                return gdkFilePath;
-            }
-        }
-
-        string GdkAltRegistryPath = @"SOFTWARE\WOW6432Node\Microsoft\GDK\Installed Roots";
-        string? gdkAltPath = Registry.GetValue($@"HKEY_LOCAL_MACHINE\{GdkAltRegistryPath}", "GDKInstallPath", null) as string;
-
-        if (!string.IsNullOrEmpty(gdkAltPath))
-        {
-            var gdkFilePath = Path.Combine(gdkAltPath, "bin", fileName);
-            if (File.Exists(gdkFilePath))
-            {
-                return gdkFilePath;
-            }
-        }
-
-        string? filePath = FindFileInPath(fileName);
-
-        if (File.Exists(filePath))
-        {
-            return filePath;
-        }
-
-        return string.Empty;
-    }
-
-    private static string? FindFileInPath(string fileName)
-    {
-        var pathValue = Environment.GetEnvironmentVariable("PATH");
-
-        if (string.IsNullOrEmpty(pathValue))
-        {
-            return null;
-        }
-
-        var paths = pathValue.Split(Path.PathSeparator);
-        foreach (var path in paths)
-        {
-            var filePath = Path.Combine(path, fileName);
-            if (File.Exists(filePath))
-            {
-                return filePath;
-            }
-        }
-        return null;
-    }
-
-    private static string ResolveMakePkg2Path()
-    {
-        string localPath = ResolveFilePath("makepkg2.exe");
-        if (File.Exists(localPath))
-        {
-            return localPath;
-        }
-
-        string nugetPackagesDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".nuget", "packages", "microsoft.xbox.packaging.tools.makepkg2");
-
-        if (Directory.Exists(nugetPackagesDir))
-        {
-            string? bestPath = null;
-            Version? bestVersion = null;
-
-            foreach (var versionDir in Directory.GetDirectories(nugetPackagesDir))
-            {
-                string dirName = Path.GetFileName(versionDir);
-                if (Version.TryParse(dirName, out var version))
-                {
-                    string candidate = Path.Combine(versionDir, "tools", "any", "win-x64", "makepkg2.exe");
-                    if (File.Exists(candidate) && (bestVersion == null || version > bestVersion))
-                    {
-                        bestVersion = version;
-                        bestPath = candidate;
-                    }
-                }
-            }
-
-            if (bestPath != null)
-            {
-                return bestPath;
-            }
-        }
-
-        return string.Empty;
     }
 }

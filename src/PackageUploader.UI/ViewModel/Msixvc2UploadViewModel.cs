@@ -10,6 +10,7 @@ using System.Xml;
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
@@ -25,6 +26,7 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
     private readonly ErrorModelProvider _errorModelProvider;
     private readonly PathConfigurationProvider _pathConfigurationService;
     private readonly PackageModelProvider _packageModelProvider;
+    private readonly IMsixvc2ToolResolver _msixvc2ToolResolver;
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
@@ -213,7 +215,8 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
                                   ILogger<Msixvc2UploadViewModel> logger,
                                   ErrorModelProvider errorModelProvider,
                                   PathConfigurationProvider pathConfigurationService,
-                                  PackageModelProvider packageModelProvider)
+                                  PackageModelProvider packageModelProvider,
+                                  IMsixvc2ToolResolver msixvc2ToolResolver)
     {
         _windowService = windowService;
         _uploaderService = uploaderService;
@@ -221,6 +224,7 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         _errorModelProvider = errorModelProvider;
         _pathConfigurationService = pathConfigurationService;
         _packageModelProvider = packageModelProvider;
+        _msixvc2ToolResolver = msixvc2ToolResolver;
 
         BrowseContentPathCommand = new RelayCommand(OnBrowseContentPath);
         BrowseMappingDataXmlPathCommand = new RelayCommand(OnBrowseMappingDataXml);
@@ -594,11 +598,11 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
 
     private void StartPackAndUploadAsync()
     {
-        string makePkg2Path = _pathConfigurationService.MakePkg2Path;
-        if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+        Msixvc2Tool? tool = ResolveMsixvc2Tool();
+        if (tool is null)
         {
-            SetErrorAndGoToErrorPage("makepkg2 Not Found",
-                "makepkg2.exe was not found. Please install the Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package.");
+            SetErrorAndGoToErrorPage("MSIXVC2 packaging tool not found",
+                Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg);
             return;
         }
 
@@ -615,7 +619,7 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
         _packageModelProvider.Package.PackageIdentityName = PackageIdentityName;
         _packageModelProvider.Package.FolderSize = EstimatedFolderSize;
         _packageModelProvider.Package.UploadArguments = uploadArgs;
-        _packageModelProvider.Package.MakePkg2Path = makePkg2Path;
+        _packageModelProvider.Package.Msixvc2ToolPath = tool.ExecutablePath;
         _packageModelProvider.Package.UploadOriginPage = typeof(Msixvc2UploadView);
         if (branchOrFlight != null)
         {
@@ -626,51 +630,20 @@ public partial class Msixvc2UploadViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Probes makepkg2.exe to check if it supports the /uploadsource flag.
-    /// Runs: makepkg2 supports uploadsource  (exit 0 = supported, non-zero = not)
-    /// Probed on every upload to handle in-place binary updates.
+    /// Resolves the tool used for MSIXVC2 pack and upload: the current GDK's MakePkg.exe when it supports
+    /// the uploadsource verb, otherwise the standalone makepkg2.exe.
+    /// Resolved on every call (no caching) to handle in-place binary updates.
     /// </summary>
-    internal bool SupportsUploadSourceFlag()
-    {
-        string makePkg2Path = _pathConfigurationService.MakePkg2Path;
-        if (string.IsNullOrEmpty(makePkg2Path))
-        {
-            return false;
-        }
+    internal Msixvc2Tool? ResolveMsixvc2Tool() =>
+        _msixvc2ToolResolver.Resolve(
+            _pathConfigurationService.MakePkgPath ?? string.Empty,
+            _pathConfigurationService.MakePkg2Path ?? string.Empty);
 
-        try
-        {
-            using var process = new Process();
-            process.StartInfo = new ProcessStartInfo
-            {
-                FileName = makePkg2Path,
-                Arguments = "supports uploadsource",
-                UseShellExecute = false,
-                RedirectStandardOutput = false,
-                RedirectStandardError = false,
-                CreateNoWindow = true
-            };
-            process.Start();
-            if (process.WaitForExit(5000))
-            {
-                bool supported = process.ExitCode == 0;
-                _logger.LogInformation("makepkg2 /uploadsource probe: {Result} (exit code {ExitCode})",
-                    supported ? "supported" : "not supported", process.ExitCode);
-                return supported;
-            }
-            else
-            {
-                try { process.Kill(); } catch { /* best effort */ }
-                _logger.LogWarning("makepkg2 uploadsource probe timed out after 5s.");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to probe makepkg2 for /uploadsource support.");
-        }
-
-        return false;
-    }
+    /// <summary>
+    /// True when an MSIXVC2-capable tool supporting the /uploadsource flag is available.
+    /// The tool resolution probe ("supports uploadsource") is itself the capability check.
+    /// </summary>
+    internal bool SupportsUploadSourceFlag() => ResolveMsixvc2Tool() is not null;
 
     internal string BuildUploadArguments()
     {

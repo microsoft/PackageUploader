@@ -3,13 +3,16 @@ using Moq;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
 using PackageUploader.UI.ViewModel;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using PackageUploader.ClientApi.Client.Ingestion;
@@ -64,7 +67,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
                 _errorModelProvider,
-                new PathConfigurationProvider()
+                new PathConfigurationProvider(),
+                new Msixvc2ToolResolver()
             );
         }
 
@@ -89,7 +93,8 @@ namespace PackageUploader.UI.Test.ViewModel
                  _mockWindowService.Object,
                  _uploadingProgressPercentageProvider,
                  _errorModelProvider,
-                new PathConfigurationProvider()
+                new PathConfigurationProvider(),
+                new Msixvc2ToolResolver()
             );
             viewModel2.BranchOrFlightDisplayName = "Test";
             Assert.AreEqual("Test", viewModel2.BranchOrFlightDisplayName);
@@ -127,7 +132,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
                 _errorModelProvider,
-                new PathConfigurationProvider()
+                new PathConfigurationProvider(),
+                new Msixvc2ToolResolver()
             );
 
             viewModel2.BranchAndFlightNames = names; // tests the former value is successfully retrieved
@@ -150,7 +156,8 @@ namespace PackageUploader.UI.Test.ViewModel
                 _mockWindowService.Object,
                 _uploadingProgressPercentageProvider,
                 _errorModelProvider,
-                new PathConfigurationProvider()
+                new PathConfigurationProvider(),
+                new Msixvc2ToolResolver()
             );
 
             viewModel2.MarketGroupNames = names; // tests the former value is successfully retrieved
@@ -395,5 +402,200 @@ namespace PackageUploader.UI.Test.ViewModel
         {
             // very important to test this for user input shenanigans
         }
+
+        #region MSIXVC2 capability probe on package selection
+
+        private PackageUploadViewModel CreateViewModel(IMsixvc2ToolResolver resolver) =>
+            new(
+                _packageModelProvider,
+                _mockPackageUploaderService.Object,
+                _mockWindowService.Object,
+                _uploadingProgressPercentageProvider,
+                _errorModelProvider,
+                new PathConfigurationProvider(),
+                resolver);
+
+        /// <summary>
+        /// Writes a file that XvcFile.IsLikelyMsixvc2Package recognises: a .msixvc at least
+        /// FirstReadSize (4096) bytes long starting with the ZIP local file header.
+        /// </summary>
+        private static string WriteFakeMsixvc2Package()
+        {
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".msixvc");
+            var bytes = new byte[8192];
+            bytes[0] = 0x50; bytes[1] = 0x4B; bytes[2] = 0x03; bytes[3] = 0x04;
+            File.WriteAllBytes(path, bytes);
+            return path;
+        }
+
+        [TestMethod]
+        public async Task Msixvc2Probe_DoesNotBlockPackageSelection()
+        {
+            // Selecting a package must not freeze the UI while the capability probe runs. The probe
+            // launches a child process and can block for up to the probe timeout, twice if
+            // MakePkg.exe fails and we fall back to makepkg2.exe.
+            var probeStarted = new ManualResetEventSlim(false);
+            var releaseProbe = new ManualResetEventSlim(false);
+
+            var resolver = new Mock<IMsixvc2ToolResolver>();
+            resolver.Setup(x => x.Resolve(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns(() =>
+                    {
+                        probeStarted.Set();
+                        releaseProbe.Wait(TimeSpan.FromSeconds(30));
+                        return new Msixvc2Tool(@"C:\gdk\MakePkg.exe", IsMakePkg2Fallback: false);
+                    });
+
+            var viewModel = CreateViewModel(resolver.Object);
+            string packagePath = WriteFakeMsixvc2Package();
+
+            try
+            {
+                var stopwatch = Stopwatch.StartNew();
+                viewModel.PackageFilePath = packagePath;
+                stopwatch.Stop();
+
+                Assert.IsTrue(viewModel.IsMsixvc2Package, "The fake package should be detected as MSIXVC2.");
+                Assert.IsTrue(probeStarted.Wait(TimeSpan.FromSeconds(10)), "The probe should have been started in the background.");
+                Assert.IsTrue(
+                    stopwatch.Elapsed < TimeSpan.FromSeconds(5),
+                    $"Package selection blocked for {stopwatch.Elapsed.TotalSeconds:F1}s waiting on the capability probe.");
+
+                releaseProbe.Set();
+                await viewModel.Msixvc2ProbeTask;
+
+                Assert.AreEqual(string.Empty, viewModel.Msixvc2UnavailableMessage);
+            }
+            finally
+            {
+                releaseProbe.Set();
+                File.Delete(packagePath);
+            }
+        }
+
+        [TestMethod]
+        public async Task Msixvc2Probe_SetsUnavailableMessageAndBlocksUpload_WhenNoToolIsResolved()
+        {
+            var resolver = new Mock<IMsixvc2ToolResolver>();
+            resolver.Setup(x => x.Resolve(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns((Msixvc2Tool)null);
+
+            var viewModel = CreateViewModel(resolver.Object);
+            string packagePath = WriteFakeMsixvc2Package();
+
+            try
+            {
+                bool canExecuteRaised = false;
+                viewModel.UploadPackageCommand.CanExecuteChanged += (s, e) => canExecuteRaised = true;
+
+                viewModel.PackageFilePath = packagePath;
+                await viewModel.Msixvc2ProbeTask;
+
+                Assert.AreEqual(
+                    PackageUploader.UI.Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg,
+                    viewModel.Msixvc2UnavailableMessage);
+
+                // IsUploadReady() gates on the message, so the probe result must block the upload.
+                //
+                // Note: RelayCommand routes CanExecuteChanged through WPF's
+                // CommandManager.RequerySuggested, which only fires on a running dispatcher, so the
+                // event itself can't be observed in a unit test host. CanExecute is the real
+                // contract, so assert on that; canExecuteRaised is left in only to document that
+                // the event is deliberately not asserted here.
+                _ = canExecuteRaised;
+                Assert.IsFalse(viewModel.UploadPackageCommand.CanExecute(null));
+            }
+            finally
+            {
+                File.Delete(packagePath);
+            }
+        }
+
+        [TestMethod]
+        public void Msixvc2Probe_UploadClickedWhileProbeInFlight_ShowsErrorAndDoesNotLaunchTool()
+        {
+            // A user can click Upload after selecting a package but before the probe completes,
+            // while Msixvc2UnavailableMessage is still empty. StartMsixvc2Upload() re-resolves
+            // synchronously, so that click must produce a clean error rather than launching a
+            // missing tool or crashing.
+            var releaseProbe = new ManualResetEventSlim(false);
+            var probeStarted = new ManualResetEventSlim(false);
+
+            var resolver = new Mock<IMsixvc2ToolResolver>();
+            resolver.Setup(x => x.Resolve(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns(() =>
+                    {
+                        // Only the background probe blocks; the synchronous re-resolve on the upload
+                        // path returns "no tool" immediately.
+                        if (!probeStarted.IsSet)
+                        {
+                            probeStarted.Set();
+                            releaseProbe.Wait(TimeSpan.FromSeconds(30));
+                        }
+
+                        return null;
+                    });
+
+            var viewModel = CreateViewModel(resolver.Object);
+            string packagePath = WriteFakeMsixvc2Package();
+
+            try
+            {
+                viewModel.PackageFilePath = packagePath;
+
+                Assert.IsTrue(probeStarted.Wait(TimeSpan.FromSeconds(10)));
+                Assert.IsTrue(viewModel.IsMsixvc2Package);
+
+                // Probe still in flight: the message hasn't been published yet.
+                Assert.AreEqual(string.Empty, viewModel.Msixvc2UnavailableMessage);
+
+                // Put the view model into an otherwise upload-ready state so the command is
+                // genuinely clickable, which is what makes this race reachable in the real app.
+                typeof(PackageUploadViewModel)
+                    .GetField("_gameProduct", BindingFlags.NonPublic | BindingFlags.Instance)!
+                    .SetValue(viewModel, new GameProduct());
+                viewModel.MarketGroupName = "default";
+
+                Assert.IsTrue(
+                    viewModel.UploadPackageCommand.CanExecute(null),
+                    "Upload should be clickable while the probe is still in flight - that's the race being tested.");
+
+                // Take the click's synchronous branch directly. UploadPackageProcessAsync is
+                // 'async void', so an exception from its WPF navigation (Application.Current is null
+                // in a unit test host) would be rethrown on the thread pool and kill the test
+                // process rather than surface here. StartMsixvc2Upload is the whole MSIXVC2 branch
+                // of that method, so invoking it directly tests the same path safely.
+                var startMsixvc2Upload = typeof(PackageUploadViewModel)
+                    .GetMethod("StartMsixvc2Upload", BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+                try
+                {
+                    startMsixvc2Upload.Invoke(viewModel, null);
+                }
+                catch (TargetInvocationException ex) when (ex.InnerException is NullReferenceException)
+                {
+                    // SetErrorAndGoToErrorPage navigates via System.Windows.Application.Current,
+                    // which doesn't exist in a unit test host. The error state it sets beforehand is
+                    // still observable, and that's what matters here.
+                }
+
+                // The tool was re-resolved synchronously, came back missing, and the upload was
+                // abandoned: an error was raised, no MSIXVC2 tool path was handed to the uploader,
+                // and we never navigated to the uploading screen.
+                Assert.AreEqual("MSIXVC2 packaging tool not found", _errorModelProvider.Error.MainMessage);
+                Assert.AreEqual(
+                    PackageUploader.UI.Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg,
+                    _errorModelProvider.Error.DetailMessage);
+                _mockWindowService.Verify(x => x.NavigateTo(typeof(Msixvc2UploadingView)), Times.Never);
+                Assert.IsTrue(string.IsNullOrEmpty(_packageModelProvider.Package.Msixvc2ToolPath));
+            }
+            finally
+            {
+                releaseProbe.Set();
+                File.Delete(packagePath);
+            }
+        }
+
+        #endregion
     }
 }

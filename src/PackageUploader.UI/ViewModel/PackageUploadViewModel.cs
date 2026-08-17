@@ -9,6 +9,7 @@ using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Exceptions;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Models;
+using PackageUploader.ClientApi.Tools;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -34,6 +35,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     public readonly UploadingProgressPercentageProvider _uploadingProgressPercentageProvider;
     private readonly ErrorModelProvider _errorModelProvider;
     private readonly PathConfigurationProvider _pathConfigurationService;
+    private readonly IMsixvc2ToolResolver _msixvc2ToolResolver;
 
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
@@ -392,11 +394,20 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
     }
 
-    private string _makePkg2UnavailableMessage = string.Empty;
-    public string MakePkg2UnavailableMessage
+    private string _msixvc2UnavailableMessage = string.Empty;
+    public string Msixvc2UnavailableMessage
     {
-        get => _makePkg2UnavailableMessage;
-        set => SetProperty(ref _makePkg2UnavailableMessage, value);
+        get => _msixvc2UnavailableMessage;
+        set
+        {
+            if (SetProperty(ref _msixvc2UnavailableMessage, value))
+            {
+                // IsUploadReady() gates on this message, so the Upload command's CanExecute must be
+                // re-evaluated whenever it changes - including when the background capability probe
+                // reports back after the package has already been selected.
+                CheckCanExecuteUploadCommand();
+            }
+        }
     }
 
     public string PackageIdentityName
@@ -454,7 +465,8 @@ public partial class PackageUploadViewModel : BaseViewModel
                                   IWindowService windowService,
                                   UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
                                   ErrorModelProvider errorModelProvider,
-                                  PathConfigurationProvider pathConfigurationService)
+                                  PathConfigurationProvider pathConfigurationService,
+                                  IMsixvc2ToolResolver msixvc2ToolResolver)
     {
         _packageModelService = packageModelService;
         _uploaderService = uploaderService;
@@ -462,6 +474,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         _uploadingProgressPercentageProvider = uploadingProgressPercentageProvider;
         _errorModelProvider = errorModelProvider;
         _pathConfigurationService = pathConfigurationService;
+        _msixvc2ToolResolver = msixvc2ToolResolver;
 
         // Initialize commands with RelayCommand
         UploadPackageCommand = new RelayCommand(UploadPackageProcessAsync, () => IsUploadReady());
@@ -482,10 +495,63 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Resolves the MSIXVC2 packaging tool (MakePkg.exe preferred, makepkg2.exe fallback).
+    /// Resolved on demand rather than cached so in-place tool updates are picked up.
+    /// </summary>
+    private Msixvc2Tool? ResolveMsixvc2Tool() =>
+        _msixvc2ToolResolver.Resolve(
+            _pathConfigurationService.MakePkgPath ?? string.Empty,
+            _pathConfigurationService.MakePkg2Path ?? string.Empty);
+
+    /// <summary>
+    /// Tracks the background MSIXVC2 capability probe started when an MSIXVC2 package is selected.
+    /// Exposed so tests can await the result deterministically.
+    /// </summary>
+    internal Task Msixvc2ProbeTask { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Probes for an MSIXVC2-capable packaging tool off the UI thread and publishes the result to
+    /// the bound <see cref="Msixvc2UnavailableMessage"/> property, which in turn re-evaluates the
+    /// Upload command's CanExecute state.
+    /// </summary>
+    private Task ProbeMsixvc2AvailabilityAsync()
+    {
+        return Task.Run(() =>
+        {
+            bool isAvailable = false;
+
+            try
+            {
+                isAvailable = ResolveMsixvc2Tool() is not null;
+            }
+            catch (Exception)
+            {
+                // The resolver already logs and swallows probe failures; this guards against a
+                // background exception escaping and tearing down the app.
+                isAvailable = false;
+            }
+
+            RunOnUiThread(() =>
+            {
+                // A different package may have been selected while the probe was in flight; don't
+                // publish a stale result over it.
+                if (!IsMsixvc2Package)
+                {
+                    return;
+                }
+
+                Msixvc2UnavailableMessage = isAvailable
+                    ? string.Empty
+                    : Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
+            });
+        });
+    }
+
     private bool IsUploadReady()
     {
-        // MSIXVC2 packages require makepkg2 tools
-        if (IsMsixvc2Package && !string.IsNullOrEmpty(MakePkg2UnavailableMessage))
+        // MSIXVC2 packages require an MSIXVC2-capable packaging tool
+        if (IsMsixvc2Package && !string.IsNullOrEmpty(Msixvc2UnavailableMessage))
         {
             return false;
         }
@@ -566,14 +632,18 @@ public partial class PackageUploadViewModel : BaseViewModel
         if (XvcFile.IsLikelyMsixvc2Package(PackageFilePath))
         {
             IsMsixvc2Package = true;
-            Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the makepkg2 upload tool.";
+            Msixvc2InfoMessage = "MSIXVC2 package detected. Upload is supported and will use the MSIXVC2 packaging tool.";
 
-            // Check if makepkg2 tools are installed
-            string makePkg2Path = _pathConfigurationService.MakePkg2Path;
-            if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
-            {
-                MakePkg2UnavailableMessage = Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg;
-            }
+            // Check that an MSIXVC2-capable packaging tool is installed. The probe launches a child
+            // process and can block for up to the probe timeout (twice, if MakePkg.exe fails and we
+            // fall back to makepkg2.exe), so it runs off the UI thread rather than freezing the app
+            // immediately after the user picks a file. Msixvc2UnavailableMessage's setter re-raises
+            // the Upload command's CanExecuteChanged when the result arrives.
+            //
+            // Until then the message stays empty and Upload may appear enabled; that is safe because
+            // StartMsixvc2Upload() re-resolves synchronously and routes to the error page if no tool
+            // is available, so a click that races the probe can never launch a missing tool.
+            Msixvc2ProbeTask = ProbeMsixvc2AvailabilityAsync();
 
             try
             {
@@ -609,7 +679,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
         PackageErrorMessage = string.Empty;
         Msixvc2InfoMessage = string.Empty;
-        MakePkg2UnavailableMessage = string.Empty;
+        Msixvc2UnavailableMessage = string.Empty;
         IsMsixvc2Package = false;
         PackageIdentityName = string.Empty;
 
@@ -1104,16 +1174,16 @@ public partial class PackageUploadViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Reroutes MSIXVC2 .msixvc package upload to makepkg2 upload tool.
+    /// Reroutes MSIXVC2 .msixvc package upload to the MSIXVC2 packaging tool.
     /// Sets PackageModel properties and navigates to the MSIXVC2 uploading progress screen.
     /// </summary>
     private void StartMsixvc2Upload()
     {
-        string makePkg2Path = _pathConfigurationService.MakePkg2Path;
-        if (string.IsNullOrEmpty(makePkg2Path) || !File.Exists(makePkg2Path))
+        Msixvc2Tool? tool = ResolveMsixvc2Tool();
+        if (tool is null)
         {
-            SetErrorAndGoToErrorPage("makepkg2 Not Found",
-                "makepkg2.exe was not found. Please install the Microsoft.Xbox.Packaging.Tools.makepkg2 NuGet package.");
+            SetErrorAndGoToErrorPage("MSIXVC2 packaging tool not found",
+                Resources.Strings.MainPage.MakePkg2NotFoundErrorMsg);
             return;
         }
 
@@ -1130,7 +1200,7 @@ public partial class PackageUploadViewModel : BaseViewModel
         Package.PackageIdentityName = PackageIdentityName;
         Package.FolderSize = PackageSize;
         Package.UploadArguments = uploadArgs;
-        Package.MakePkg2Path = makePkg2Path;
+        Package.Msixvc2ToolPath = tool.ExecutablePath;
         Package.UploadOriginPage = typeof(PackageUploadView);
         if (branchOrFlight != null)
         {

@@ -214,6 +214,6 @@
 Learn more: https://aka.ms/MSIXVC2</value>
   </data>
   <data name="MakePkg2NotFoundErrorMsg" xml:space="preserve">
-    <value>MSIXVC2 upload requires makepkg2 tools, available as a preview in the April 2026 GDK. Install the April 2026 GDK to get started.</value>
+    <value>MSIXVC2 requires a packaging tool that supports it. Install the latest GDK to get MakePkg.exe with MSIXVC2 support.</value>
   </data>
 </root>

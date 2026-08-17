@@ -26,6 +26,7 @@ public class PackageModel
     public string PackageIdentityName { get; set; } = string.Empty;
     public string FolderSize { get; set; } = string.Empty;
     public string UploadArguments { get; set; } = string.Empty;
-    public string MakePkg2Path { get; set; } = string.Empty;
+    /// <summary>Resolved MSIXVC2 packaging tool (MakePkg.exe, or makepkg2.exe as fallback).</summary>
+    public string Msixvc2ToolPath { get; set; } = string.Empty;
     public Type? UploadOriginPage { get; set; } = null;
 }
