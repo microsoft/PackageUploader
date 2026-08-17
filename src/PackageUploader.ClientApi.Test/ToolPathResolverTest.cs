@@ -148,11 +148,96 @@ public class ToolPathResolverTest
     }
 
     [TestMethod]
-    public void Find_DoesNotThrow_WhenTheGdkLookupFails()
+    public void Find_StillSearchesPath_WhenTheGdkLookupFails()
     {
-        var resolver = new ToolPathResolver(new ThrowingGdkRootLocator());
+        // A failing GDK lookup means "no GDK candidates", not "stop searching". Asserting only that
+        // Find does not throw would pass just as well if the search had been abandoned, so this
+        // asserts the stage after the failure still runs.
+        var pathDirectory = CreateDirectoryWith("on-path", ToolFileName);
+        Environment.SetEnvironmentVariable("PATH", pathDirectory);
 
-        Assert.IsNull(resolver.Find(ToolFileName));
+        var found = new ToolPathResolver(new ThrowingGdkRootLocator()).Find(ToolFileName);
+
+        Assert.AreEqual(Path.Combine(pathDirectory, ToolFileName), found);
+    }
+
+    [TestMethod]
+    public void Find_ReturnsNull_WhenTheGdkLookupFailsAndNothingIsOnPath()
+    {
+        Assert.IsNull(new ToolPathResolver(new ThrowingGdkRootLocator()).Find(ToolFileName));
+    }
+
+    [TestMethod]
+    public void Find_StillSearchesLaterGdkRoots_WhenAnEarlierRootIsUnusable()
+    {
+        // A single malformed root must cost only its own candidate.
+        var goodRoot = CreateGdkRoot("gdk-two", ToolFileName);
+
+        var found = CreateResolver(null, goodRoot).Find(ToolFileName);
+
+        Assert.AreEqual(Path.Combine(goodRoot, "bin", ToolFileName), found);
+    }
+
+    [TestMethod]
+    public void Find_StillSearchesPath_WhenTheGdkRootsAreUnusable()
+    {
+        var pathDirectory = CreateDirectoryWith("on-path", ToolFileName);
+        Environment.SetEnvironmentVariable("PATH", pathDirectory);
+
+        var found = CreateResolver(new string[] { null }).Find(ToolFileName);
+
+        Assert.AreEqual(Path.Combine(pathDirectory, ToolFileName), found);
+    }
+
+    [TestMethod]
+    public void Find_StillSearchesLaterPathEntries_WhenAnEarlierEntryIsUnusable()
+    {
+        // A quoted entry, an empty entry, and invalid path characters must each cost only their own
+        // candidate. No embedded NUL here: Windows truncates the variable at one, which would drop the
+        // good entry and make this pass for the wrong reason.
+        var pathDirectory = CreateDirectoryWith("on-path", ToolFileName);
+        var malformed = string.Join(
+            Path.PathSeparator.ToString(),
+            "\"C:\\quoted\"",
+            string.Empty,
+            "C:\\bad|entry",
+            "   ",
+            pathDirectory);
+        Environment.SetEnvironmentVariable("PATH", malformed);
+
+        var found = CreateResolver().Find(ToolFileName);
+
+        Assert.AreEqual(Path.Combine(pathDirectory, ToolFileName), found);
+    }
+
+    [TestMethod]
+    public void Find_ReturnsNull_WhenTheGdkLocatorReturnsNull()
+    {
+        Assert.IsNull(new ToolPathResolver(new StubGdkRootLocator(null)).Find(ToolFileName));
+    }
+
+    [TestMethod]
+    public void Find_PrefersTheCurrentDirectoryOverTheGdk()
+    {
+        // By design: copying a tool into the working directory is how a developer pins a hotfixed or
+        // otherwise specific version in place of the one their installed GDK ships. A uniquely named
+        // file is used so this never collides with a real tool.
+        var toolName = "PinnedTool_" + Guid.NewGuid().ToString("N") + ".exe";
+        var currentDirectoryTool = Path.Combine(Directory.GetCurrentDirectory(), toolName);
+        var gdkRoot = CreateGdkRoot("gdk", toolName);
+
+        File.WriteAllText(currentDirectoryTool, string.Empty);
+
+        try
+        {
+            var found = CreateResolver(gdkRoot).Find(toolName);
+
+            Assert.AreEqual(currentDirectoryTool, found);
+        }
+        finally
+        {
+            File.Delete(currentDirectoryTool);
+        }
     }
 
     [TestMethod]

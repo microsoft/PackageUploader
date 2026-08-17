@@ -21,6 +21,11 @@ public interface IToolPathResolver
     /// Searches for <paramref name="fileName"/> in the application directory, the current directory,
     /// the <c>bin</c> directory of any installed GDK, and finally each directory on PATH, in that order.
     /// </summary>
+    /// <remarks>
+    /// The application and current directories are searched before the GDK by design: copying a tool
+    /// next to the application or into the working directory is the supported way for a developer to
+    /// pin a hotfixed or otherwise specific version in place of the one their installed GDK ships.
+    /// </remarks>
     /// <param name="fileName">
     /// A bare file name such as <c>MakePkg.exe</c>, not a path. The search is by exact name.
     /// </param>
