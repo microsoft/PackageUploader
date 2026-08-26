@@ -195,36 +195,21 @@ The following configuration options behave differently on the MSIXVC2 path:
 
 | Option | Behavior |
 | --- | --- |
-| `gameAssets` | Not required. MakePkg.exe picks the assets up from the folder that contains the package. If the paths you supply resolve to that same folder they are ignored with a warning; if they point elsewhere the operation fails so an asset is never silently dropped. |
+| `gameAssets` | Not required. MakePkg.exe discovers the assets in the folder that contains the package and uploads them, so the configured paths are not forwarded. If the paths you supply resolve to that same folder they are ignored with a warning; if they point elsewhere the operation fails so an asset is never silently dropped. `sodbFilePath` is always rejected — SODB is uploaded to Partner Center as a separate asset, which MakePkg.exe cannot do, so no location works. |
 | `minutesToWaitForProcessing` | Ignored with a warning. MakePkg.exe manages its own processing wait. |
 | `deltaUpload` | Ignored with a warning. |
 | `availabilityDate` / `preDownloadDate` | Supported, and applied the same way as for XVC1. MakePkg.exe does not set the dates itself, but it does report the identity of the package it created, so PackageUploader applies them after the upload completes. The reported package is looked up in the target branch and market group before anything is written, and if it cannot be found the operation fails rather than dating a different package. |
 | `productId` | Supported. It is resolved to the corresponding Big ID, which is what MakePkg.exe requires. |
-| Authentication | Supported, including non-interactive/CI authentication — but see the credential-exposure warning in [Authentication on the MSIXVC2 path](#authentication-on-the-msixvc2-path). |
+| Authentication | Supported, including non-interactive/CI authentication. See [Authentication on the MSIXVC2 path](#authentication-on-the-msixvc2-path). |
 
 If no MSIXVC2-capable `MakePkg.exe` is available, the operation fails with an actionable error instead of attempting an
 upload that cannot succeed.
-
-> [!NOTE]
-> Because `availabilityDate`/`preDownloadDate` are applied *after* MakePkg.exe finishes, a failure at that stage does not
-> undo the upload. The error says so explicitly: the package is uploaded, only the dates were not set.
 
 #### Authentication on the MSIXVC2 path
 
 MakePkg.exe acquires its own token, so PackageUploader forwards the identity you configured rather than forcing an
 interactive sign-in. `--Authentication`, `--TenantId`, and the client id / secret / certificate values from your
 configuration file are passed through, so an unattended pipeline using a service principal keeps working.
-
-> [!WARNING]
-> **Avoid secret-bearing authentication methods on shared machines.** Because the upload is delegated to a separate
-> process, a client secret has to be handed to MakePkg.exe on its command line, where it is visible to anything that can
-> read the process table for as long as the upload runs. MakePkg.exe offers no way to pass a credential out of band.
-> PackageUploader redacts the secret from its own logs, but that does not protect the command line itself.
->
-> On shared build agents, prefer an authentication method that puts no credential on the command line:
-> **`Environment`**, **`AzurePipelines`**, **`ManagedIdentity`**, or **`ManagedIdentityFederated`**. These are forwarded
-> as just `/auth <method>`, and MakePkg.exe obtains the token from the ambient environment itself. Only use
-> `AppSecret`/`ClientSecret` where you control the machine and trust every process on it.
 
 | `--Authentication` | Forwarded to MakePkg.exe as |
 | --- | --- |

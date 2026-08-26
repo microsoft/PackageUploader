@@ -54,7 +54,8 @@ internal class UploadXvcPackageOperation(
             {
                 _logger.LogWarning(
                     "Package '{PackageFilePath}' looks like MSIXVC2, but this PackageUploader process was started by MakePkg.exe ({EnvironmentVariable} is set). " +
-                    "Uploading directly instead of delegating back to MakePkg.exe, to avoid an infinite MakePkg.exe/PackageUploader.exe loop.",
+                    "Uploading directly instead of delegating back to MakePkg.exe, to avoid an infinite MakePkg.exe/PackageUploader.exe loop. " +
+                    "If the upload fails, one possible cause is that the package really is MSIXVC2 and was handed over in error; installing the latest Microsoft GDK is the first thing to try.",
                     _config.PackageFilePath,
                     Msixvc2DelegationGuard.EnvironmentVariableName);
 
@@ -72,7 +73,8 @@ internal class UploadXvcPackageOperation(
             {
                 _logger.LogWarning(
                     "Package '{PackageFilePath}' looks like MSIXVC2, but PackageUploader was started by '{ParentProcessName}', which only hands over " +
-                    "XVC1/MSIXVC1 packages. Treating the package as XVC1 and uploading directly, to avoid an infinite MakePkg.exe/PackageUploader.exe loop.",
+                    "XVC1/MSIXVC1 packages. Treating the package as XVC1 and uploading directly, to avoid an infinite MakePkg.exe/PackageUploader.exe loop. " +
+                    "If the upload fails, one possible cause is that the package really is MSIXVC2 and was handed over in error; installing the latest Microsoft GDK is the first thing to try.",
                     _config.PackageFilePath,
                     makePkgParent);
 

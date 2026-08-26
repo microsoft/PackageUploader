@@ -381,6 +381,41 @@ public class Msixvc2UploadArgumentBuilderTest
         StringAssert.Contains(exception.Message, package.Directory);
     }
 
+    /// <summary>
+    /// SODB is rejected even when it sits next to the package, which is what separates it from every other
+    /// asset. MakePkg.exe uploads the co-located assets itself, but SODB reaches Partner Center as a separate
+    /// ingestion asset that MakePkg.exe cannot send, so accepting it would produce a successful upload with
+    /// the SODB file silently missing.
+    /// </summary>
+    [TestMethod]
+    public void Build_WithSodbInPackageDirectory_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
+        config.GameAssets = new GameAssets { SodbFilePath = Path.Combine(package.Directory, "package.sodb") };
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(config, BrowserContext()));
+
+        StringAssert.Contains(exception.Message, "sodbFilePath");
+    }
+
+    [TestMethod]
+    public void Build_WithSodbOutsidePackageDirectory_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var config = CreateConfig(package.Path);
+        config.GameAssets = new GameAssets
+        {
+            SodbFilePath = Path.Combine(Path.GetTempPath(), "elsewhere", "package.sodb"),
+        };
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(config, BrowserContext()));
+
+        StringAssert.Contains(exception.Message, "sodbFilePath");
+    }
+
     #endregion
 }
 

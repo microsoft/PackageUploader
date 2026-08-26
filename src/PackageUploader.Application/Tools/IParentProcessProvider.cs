@@ -8,8 +8,7 @@ namespace PackageUploader.Application.Tools;
 /// recognize that it was launched by MakePkg.exe. Seamed as an interface because the real implementation
 /// depends on OS process interop, which a unit test cannot arrange.
 ///
-/// CONTRACT — implementations must honor all of the following. This project does not compile with nullable
-/// reference types, so the compiler cannot express them:
+/// CONTRACT — implementations must honor all of the following:
 /// <list type="number">
 /// <item><see cref="GetParentProcessFileName"/> returns the parent's file name, WITHOUT directory, and with
 /// the extension when one is known (for example <c>MakePkg.exe</c>).</item>

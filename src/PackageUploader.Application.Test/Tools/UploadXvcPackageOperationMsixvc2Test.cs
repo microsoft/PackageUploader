@@ -137,8 +137,7 @@ public class UploadXvcPackageOperationMsixvc2Test
         using var package = TempPackageFile.CreateMsixvc2();
         _toolProviderMock.SetupGet(x => x.IsAvailable).Returns(false);
         // Exercises IMsixvc2UploadToolProvider's documented contract: ExecutablePath is null when
-        // IsAvailable is false. null! (not a behavior change - the value is still null) because this
-        // test project compiles with nullable reference types while the interface's project does not.
+        // IsAvailable is false.
         _toolProviderMock.SetupGet(x => x.ExecutablePath).Returns((string)null!);
 
         var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
@@ -396,8 +395,7 @@ public class UploadXvcPackageOperationMsixvc2Test
         SetUpAvailableTool();
         SetUpSuccessfulRun();
         _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
-        // null is the documented "parent unknown / not MakePkg" value. null! (not a behavior change) because
-        // this test project compiles with nullable reference types while the interface's project does not.
+        // null is the documented "parent unknown / not MakePkg" value.
         _delegationGuardMock.Setup(x => x.GetMakePkgParentProcessName()).Returns((string)null!);
 
         var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);

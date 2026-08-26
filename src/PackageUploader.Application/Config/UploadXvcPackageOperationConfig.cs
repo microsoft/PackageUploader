@@ -16,9 +16,10 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
 {
     internal override string GetOperationName() => "UploadXvcPackage";
 
-    // Not [Required] at the attribute level: MSIXVC2 packages are uploaded by MakePkg.exe, which has no
-    // concept of EKB/submission-validator assets. Requiredness is enforced in Validate() for every
-    // non-MSIXVC2 package, so XVC1 behaviour is unchanged.
+    // Not [Required] at the attribute level: MSIXVC2 packages are uploaded by MakePkg.exe, which discovers
+    // EKB and submission-validator assets by co-location with the package rather than by path, so the
+    // configured paths are not forwarded. Requiredness is enforced in Validate() for every non-MSIXVC2
+    // package, so XVC1 behaviour is unchanged.
     [ValidateObjectMembers]
     public GameAssets GameAssets { get; set; }
 

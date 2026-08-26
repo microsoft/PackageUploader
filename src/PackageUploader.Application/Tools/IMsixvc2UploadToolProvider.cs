@@ -8,8 +8,7 @@ namespace PackageUploader.Application.Tools;
 /// PackageUploader.Application depends only on this interface so that the underlying capability
 /// resolution can be swapped without touching any consuming code.
 ///
-/// CONTRACT — implementations must honor all of the following. These are stated here because this
-/// project does not compile with nullable reference types, so the compiler cannot express them:
+/// CONTRACT — implementations must honor all of the following:
 /// <list type="number">
 /// <item><see cref="IsAvailable"/> is false exactly when no MSIXVC2-capable tool could be found.</item>
 /// <item><see cref="ExecutablePath"/> is NULL OR EMPTY whenever <see cref="IsAvailable"/> is false, and

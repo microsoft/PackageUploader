@@ -54,9 +54,13 @@ internal sealed class Msixvc2DelegationGuard(IParentProcessProvider parentProces
     public const string EnvironmentVariableValue = "1";
 
     /// <summary>
-    /// Executable names, without extension, that identify a MakePkg capable of shelling back out to
-    /// PackageUploader.exe. Both are covered: <c>makepkg</c> is the tool that performs XVC1 uploads "via the
-    /// PackageUploader tool", and <c>makepkg2</c> is the MSIXVC2-capable tool we ourselves delegate to.
+    /// Executable names, without extension, of packaging tools whose upload path can invoke
+    /// PackageUploader.exe to perform an XVC1 upload. If one of them started this process, delegating an
+    /// MSIXVC2 upload back to it risks an unbounded cycle.
+    ///
+    /// Both names are covered because the MSIXVC2-capable tool ships as makepkg2.exe before the
+    /// October 2026 GDK and as MakePkg.exe from that release onward. From October 2026 one MakePkg.exe is
+    /// both the tool we delegate to and a tool that can invoke us, so this is not a legacy-only concern.
     /// </summary>
     private static readonly string[] MakePkgProcessNames = ["makepkg", "makepkg2"];
 

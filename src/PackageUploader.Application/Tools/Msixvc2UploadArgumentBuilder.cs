@@ -272,10 +272,14 @@ internal static class Msixvc2UploadArgumentBuilder
     }
 
     /// <summary>
-    /// MSIXVC2 packages do not use EKB or submission validator assets, and MakePkg.exe has no flags for them.
-    /// MakePkg.exe expects any such files to sit alongside the package, so assets already in the package
-    /// directory are harmless and are only warned about. Assets pointing elsewhere are a hard error, because
-    /// silently dropping a file the user deliberately placed somewhere else would change the outcome.
+    /// MakePkg.exe uploads the EKB, submission validator log, and symbol bundle when they sit alongside the
+    /// package, discovering them by co-location rather than by path, so the configured paths are not
+    /// forwarded. Assets already in the package directory are therefore harmless and are only warned about,
+    /// while assets pointing elsewhere are a hard error, because silently dropping a file the user
+    /// deliberately placed somewhere else would change the outcome. Disc layout is not supported for
+    /// MSIXVC2 and is held to the same co-location rule.
+    ///
+    /// SODB is the one asset that cannot work at any location, so it is always rejected.
     /// </summary>
     private static void ValidateGameAssets(UploadXvcPackageOperationConfig config, string packageDirectory, ILogger logger)
     {
@@ -288,11 +292,30 @@ internal static class Msixvc2UploadArgumentBuilder
         RequireInPackageDirectory(GameAssetPaths.SubValFilePath, config.GameAssets.SubValFilePath, packageDirectory);
         RequireInPackageDirectory(GameAssetPaths.SymbolsFilePath, config.GameAssets.SymbolsFilePath, packageDirectory);
         RequireInPackageDirectory(GameAssetPaths.DiscLayoutFilePath, config.GameAssets.DiscLayoutFilePath, packageDirectory);
-        RequireInPackageDirectory(GameAssetPaths.SodbFilePath, config.GameAssets.SodbFilePath, packageDirectory);
+        RejectSodb(config.GameAssets.SodbFilePath);
 
         logger.LogWarning(
-            "'gameAssets' is not used for MSIXVC2 uploads and will be ignored. The configured assets already sit in the package directory '{PackageDirectory}', where MakePkg.exe expects them.",
+            "'gameAssets' paths are not forwarded to MakePkg.exe for MSIXVC2 uploads. The configured assets already sit in the package directory '{PackageDirectory}', where MakePkg.exe discovers and uploads them.",
             packageDirectory);
+    }
+
+    /// <summary>
+    /// Fails whenever a SODB asset is configured. SODB does not follow the co-location rule the other assets
+    /// follow: PackageUploader uploads it to Partner Center as a separate ingestion asset, and MakePkg.exe
+    /// has no equivalent. Moving the file next to the package therefore does not help, so there is no
+    /// location that works and the asset would be missing from an otherwise successful upload.
+    /// </summary>
+    private static void RejectSodb(string sodbFilePath)
+    {
+        if (string.IsNullOrWhiteSpace(sodbFilePath))
+        {
+            return;
+        }
+
+        throw new Msixvc2UnsupportedOptionException(
+            $"'gameAssets.{ToCamelCase(GameAssetPaths.SodbFilePath)}' points at '{sodbFilePath}', but MSIXVC2 uploads are performed by MakePkg.exe, which cannot upload a SODB asset. " +
+            "Unlike the other assets, placing the file next to the package does not help, because SODB is uploaded to Partner Center separately rather than being picked up from the package directory. " +
+            "Remove it from the config file.");
     }
 
     /// <summary>
@@ -312,7 +335,7 @@ internal static class Msixvc2UploadArgumentBuilder
         {
             throw new Msixvc2UnsupportedOptionException(
                 $"'gameAssets.{ToCamelCase(propertyName)}' points at '{assetPath}', which is outside the package directory '{packageDirectory}'. " +
-                "MSIXVC2 uploads ignore gameAssets, and MakePkg.exe only picks up files that sit alongside the package, so this file would not be uploaded. " +
+                "MakePkg.exe only picks up files that sit alongside the package, so this file would not be uploaded. " +
                 "Move it into the package directory or remove it from the config file.");
         }
     }

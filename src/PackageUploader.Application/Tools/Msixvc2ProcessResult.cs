@@ -13,8 +13,5 @@ namespace PackageUploader.Application.Tools;
 /// or it printed two different identities. Callers must treat null as "unknown" and must never fall back
 /// to guessing which package was uploaded, because the identity is used to write availability and
 /// pre-download dates and writing them against the wrong package is worse than not writing them at all.
-///
-/// This project does not enable nullable reference types, so the null case is stated here rather than
-/// being expressed as an annotation.
 /// </param>
 internal sealed record Msixvc2ProcessResult(int ExitCode, string UploadedPackageId);
