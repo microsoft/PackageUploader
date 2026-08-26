@@ -20,15 +20,13 @@ namespace PackageUploader.Application.Tools;
 /// <param name="ClientId">AAD application (client) id, forwarded via /clientid.</param>
 /// <param name="ClientSecret">AAD application secret, forwarded via /clientsecret.</param>
 /// <param name="CertificateThumbprint">Certificate thumbprint, forwarded via /certthumbprint.</param>
-/// <param name="CertificateSubject">
-/// Certificate subject name. MakePkg.exe has no equivalent flag, so this is only carried so the builder
-/// can fail with an actionable message instead of silently authenticating as the wrong identity.
-/// </param>
+/// <param name="CertificateSubject">Certificate subject name, forwarded via /certsubject.</param>
 /// <param name="CertificateStore">Certificate store name, forwarded via /certstore.</param>
 /// <param name="CertificateLocation">Certificate store location, forwarded via /certlocation.</param>
-/// <param name="CertificatePath">
-/// Path to a PFX/PKCS12 certificate file. MakePkg.exe exposes /certpassword but no flag naming the
-/// certificate file itself, so this is only carried so the builder can fail with an actionable message.
+/// <param name="CertificatePath">Path to a certificate file, forwarded via /certpath.</param>
+/// <param name="CertificatePassword">
+/// Password for a password-protected PFX/PKCS12 file, forwarded via /certpassword. A CREDENTIAL: it must
+/// never reach a log.
 /// </param>
 /// <param name="ResourceId">Azure resource id, forwarded via /resourceid for ManagedIdentityFederated.</param>
 internal sealed record Msixvc2CommandLineContext(
@@ -41,4 +39,5 @@ internal sealed record Msixvc2CommandLineContext(
     string CertificateStore = null,
     string CertificateLocation = null,
     string CertificatePath = null,
+    string CertificatePassword = null,
     string ResourceId = null);

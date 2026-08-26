@@ -109,4 +109,101 @@ public class PackageFormatDetectorTest
     [DataRow("   ")]
     public void IsLikelyMsixvc2Package_EmptyPath_ReturnsFalse(string path) =>
         Assert.IsFalse(PackageFormatDetector.IsLikelyMsixvc2Package(path));
+
+    #region Loose game content
+
+    /// <summary>
+    /// A content directory is not a package. Recognising it lets the caller be told that PackageUploader has
+    /// no packaging step, instead of being told the file was not found.
+    /// </summary>
+    [TestMethod]
+    public void IsLooseGameContent_DirectoryWithGameConfig_ReturnsTrue()
+    {
+        var directory = CreateLooseContent();
+        try
+        {
+            Assert.IsTrue(PackageFormatDetector.IsLooseGameContent(directory));
+            Assert.AreEqual(
+                Path.Combine(directory, "MicrosoftGame.config"),
+                PackageFormatDetector.FindGameConfig(directory));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void IsLooseGameContent_GameConfigFile_ReturnsTrue()
+    {
+        var directory = CreateLooseContent();
+        var gameConfig = Path.Combine(directory, "MicrosoftGame.config");
+        try
+        {
+            Assert.IsTrue(PackageFormatDetector.IsLooseGameContent(gameConfig));
+            Assert.AreEqual(gameConfig, PackageFormatDetector.FindGameConfig(gameConfig));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    /// <summary>
+    /// The guard must not fire for a real package, or every supported upload would be refused.
+    /// </summary>
+    [TestMethod]
+    public void IsLooseGameContent_PackageFile_ReturnsFalse()
+    {
+        var path = CreatePackage(".msixvc", header: [0x50, 0x4B, 0x03, 0x04]);
+        try
+        {
+            Assert.IsFalse(PackageFormatDetector.IsLooseGameContent(path));
+            Assert.IsNull(PackageFormatDetector.FindGameConfig(path));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [TestMethod]
+    public void IsLooseGameContent_NullOrMissingPath_ReturnsFalse()
+    {
+        Assert.IsFalse(PackageFormatDetector.IsLooseGameContent(null));
+        Assert.IsFalse(PackageFormatDetector.IsLooseGameContent("   "));
+        Assert.IsFalse(PackageFormatDetector.IsLooseGameContent(Path.Combine(Path.GetTempPath(), $"pu-missing-{Guid.NewGuid():N}")));
+    }
+
+    /// <summary>
+    /// A directory with no MicrosoftGame.config is still not a package file, so it is still refused - just
+    /// without the config path in the message.
+    /// </summary>
+    [TestMethod]
+    public void IsLooseGameContent_DirectoryWithoutGameConfig_ReturnsTrueWithNoConfigPath()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"pu-loose-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        try
+        {
+            Assert.IsTrue(PackageFormatDetector.IsLooseGameContent(directory));
+            Assert.IsNull(PackageFormatDetector.FindGameConfig(directory));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    private static string CreateLooseContent()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"pu-loose-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(
+            Path.Combine(directory, "MicrosoftGame.config"),
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?><Game configVersion=\"1\" />");
+        return directory;
+    }
+
+    #endregion
 }

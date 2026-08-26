@@ -17,6 +17,9 @@ internal static class LoggerMockExtensions
     public static void VerifyLogWarningContains<T>(this Mock<ILogger<T>> loggerMock, string expectedSubstring) =>
         VerifyLogContains(loggerMock, LogLevel.Warning, expectedSubstring);
 
+    public static void VerifyLogInformationContains<T>(this Mock<ILogger<T>> loggerMock, string expectedSubstring) =>
+        VerifyLogContains(loggerMock, LogLevel.Information, expectedSubstring);
+
     /// <summary>
     /// Asserts that no log entry at any level contains the given text. Used to prove credentials never reach
     /// the logger, so it deliberately checks every level rather than the one the caller happens to expect.

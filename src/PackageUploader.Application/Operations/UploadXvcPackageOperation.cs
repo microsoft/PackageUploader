@@ -7,7 +7,6 @@ using PackageUploader.Application.Config;
 using PackageUploader.Application.Extensions;
 using PackageUploader.Application.Tools;
 using PackageUploader.ClientApi;
-using PackageUploader.ClientApi.Client.Ingestion.Models;
 using PackageUploader.ClientApi.Packaging;
 using System;
 using System.Threading;
@@ -21,7 +20,7 @@ internal class UploadXvcPackageOperation(
     IOptions<UploadXvcPackageOperationConfig> config,
     IMsixvc2UploadToolProvider msixvc2ToolProvider,
     IMsixvc2ProcessRunner msixvc2ProcessRunner,
-    IMsixvc2DelegationGuard msixvc2DelegationGuard,
+    IMakePkgFeatureProbe makePkgFeatureProbe,
     Msixvc2CommandLineContext msixvc2CommandLineContext) : Operation(logger)
 {
     private readonly IPackageUploaderService _storeBrokerService = storeBrokerService ?? throw new ArgumentNullException(nameof(storeBrokerService));
@@ -29,59 +28,33 @@ internal class UploadXvcPackageOperation(
     private readonly UploadXvcPackageOperationConfig _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
     private readonly IMsixvc2UploadToolProvider _msixvc2ToolProvider = msixvc2ToolProvider ?? throw new ArgumentNullException(nameof(msixvc2ToolProvider));
     private readonly IMsixvc2ProcessRunner _msixvc2ProcessRunner = msixvc2ProcessRunner ?? throw new ArgumentNullException(nameof(msixvc2ProcessRunner));
-    private readonly IMsixvc2DelegationGuard _msixvc2DelegationGuard = msixvc2DelegationGuard ?? throw new ArgumentNullException(nameof(msixvc2DelegationGuard));
+    private readonly IMakePkgFeatureProbe _makePkgFeatureProbe = makePkgFeatureProbe ?? throw new ArgumentNullException(nameof(makePkgFeatureProbe));
     private readonly Msixvc2CommandLineContext _msixvc2CommandLineContext = msixvc2CommandLineContext ?? throw new ArgumentNullException(nameof(msixvc2CommandLineContext));
 
     protected override async Task ProcessAsync(CancellationToken ct)
     {
         _logger.LogInformation("Starting {operationName} operation.", _config.GetOperationName());
 
-        // SAFETY: only MSIXVC2 packages may be delegated to MakePkg.exe. MakePkg.exe shells back out to
-        // PackageUploader.exe for XVC1/MSIXVC1 uploads, so delegating any other package format here would
-        // create an infinite process recursion between the two executables. This guard is deliberately the
-        // package-format detection itself (not a config flag) so it cannot be bypassed by configuration.
+        // Loose content is rejected before anything else. PackageUploader uploads a BUILT package; it has no
+        // packaging step, and for MSIXVC2 the pack-and-upload flow belongs to MakePkg.exe from end to end.
+        // Without this the caller gets "Package file not found" from the upload layer, which is true but
+        // says nothing about why a perfectly valid content directory was refused.
+        if (PackageFormatDetector.IsLooseGameContent(_config.PackageFilePath))
+        {
+            var gameConfig = PackageFormatDetector.FindGameConfig(_config.PackageFilePath);
+
+            throw new InvalidOperationException(
+                $"'{_config.PackageFilePath}' is loose game content, not a built package" +
+                (gameConfig is null ? "" : $" (it is described by '{gameConfig}')") + ". " +
+                "PackageUploader uploads an existing package file and cannot build one. " +
+                "Use MakePkg.exe to pack and upload loose content, or set 'packageFilePath' to the built .msixvc/.xvc file.");
+        }
+
+        // SAFETY: only MSIXVC2 packages are ever delegated to MakePkg.exe. This guard is deliberately the
+        // package-format detection itself (not a config flag) so it cannot be bypassed by configuration,
+        // and it keeps the XVC1/MSIXVC1 path below completely untouched.
         if (PackageFormatDetector.IsLikelyMsixvc2Package(_config.PackageFilePath))
         {
-            // SAFETY (defense in depth): format detection is a heuristic and can false-positive on an XVC1
-            // package whose encrypted tail happens to contain the ZIP end-of-central-directory signature.
-            // Two independent signals say "MakePkg.exe is already in this call chain", and either one means
-            // delegating again risks the unbounded cycle above.
-            //
-            // Both fall through to the normal XVC1 upload rather than failing, which is the outcome that is
-            // correct either way: for a false-positive XVC1 package the upload simply succeeds, and for a
-            // genuine MSIXVC2 package it fails, which is what an un-delegatable MSIXVC2 package should do.
-            if (_msixvc2DelegationGuard.IsDelegatedInvocation)
-            {
-                _logger.LogWarning(
-                    "Package '{PackageFilePath}' looks like MSIXVC2, but this PackageUploader process was started by MakePkg.exe ({EnvironmentVariable} is set). " +
-                    "Uploading directly instead of delegating back to MakePkg.exe, to avoid an infinite MakePkg.exe/PackageUploader.exe loop. " +
-                    "If the upload fails, one possible cause is that the package really is MSIXVC2 and was handed over in error; installing the latest Microsoft GDK is the first thing to try.",
-                    _config.PackageFilePath,
-                    Msixvc2DelegationGuard.EnvironmentVariableName);
-
-                await UploadXvcPackageAsync(ct).ConfigureAwait(false);
-                return;
-            }
-
-            // The environment stamp above only covers cycles this executable started. When MakePkg.exe is the
-            // entry point it invokes us without any stamp, so the parent process is checked too. MakePkg.exe
-            // only invokes PackageUploader.exe for XVC1/MSIXVC1 packages, so a MakePkg.exe parent contradicts
-            // the MSIXVC2 detection, and the parent is the more trustworthy of the two signals.
-            var makePkgParent = _msixvc2DelegationGuard.GetMakePkgParentProcessName();
-
-            if (makePkgParent is not null)
-            {
-                _logger.LogWarning(
-                    "Package '{PackageFilePath}' looks like MSIXVC2, but PackageUploader was started by '{ParentProcessName}', which only hands over " +
-                    "XVC1/MSIXVC1 packages. Treating the package as XVC1 and uploading directly, to avoid an infinite MakePkg.exe/PackageUploader.exe loop. " +
-                    "If the upload fails, one possible cause is that the package really is MSIXVC2 and was handed over in error; installing the latest Microsoft GDK is the first thing to try.",
-                    _config.PackageFilePath,
-                    makePkgParent);
-
-                await UploadXvcPackageAsync(ct).ConfigureAwait(false);
-                return;
-            }
-
             await UploadMsixvc2PackageAsync(ct).ConfigureAwait(false);
             return;
         }
@@ -90,8 +63,7 @@ internal class UploadXvcPackageOperation(
     }
 
     /// <summary>
-    /// The original, unchanged XVC1/MSIXVC1 upload path, which is also the fallback whenever an MSIXVC2
-    /// detection cannot be acted on because MakePkg.exe is already in the process chain.
+    /// The original XVC1/MSIXVC1 upload path, unchanged by MSIXVC2 support.
     /// </summary>
     private async Task UploadXvcPackageAsync(CancellationToken ct)
     {
@@ -125,9 +97,27 @@ internal class UploadXvcPackageOperation(
                 "Install the latest Microsoft GDK and try again.");
         }
 
+        var executablePath = _msixvc2ToolProvider.ExecutablePath;
+
+        // SAFETY + capability gate, in one check.
+        //
+        // Older MakePkg.exe releases performed XVC1/MSIXVC1 uploads by shelling back out to
+        // PackageUploader.exe. Delegating to one of those would put the two executables in an unbounded
+        // MakePkg.exe -> PackageUploader.exe -> MakePkg.exe cycle if the package format were ever
+        // misidentified. The release that started advertising "xvc1upload" is the same release that stopped
+        // invoking PackageUploader.exe, so this single probe answers both questions at once: the tool can
+        // perform the upload, AND it is not a tool that would call back into us. A tool that fails the probe
+        // is never launched, so no cycle is reachable and no separate recursion guard is needed.
+        if (!await _makePkgFeatureProbe.SupportsAsync(executablePath, MakePkgFeatures.Xvc1Upload, ct).ConfigureAwait(false))
+        {
+            throw new InvalidOperationException(
+                $"The package is an MSIXVC2 package, but '{executablePath}' is too old to perform the upload " +
+                $"(it does not report the '{MakePkgFeatures.Xvc1Upload}' capability). " +
+                "Install the latest Microsoft GDK and try again.");
+        }
+
         var bigId = await ResolveBigIdAsync(ct).ConfigureAwait(false);
 
-        var executablePath = _msixvc2ToolProvider.ExecutablePath;
         var arguments = Msixvc2UploadArgumentBuilder.Build(_config, _msixvc2CommandLineContext, bigId, _logger);
 
         // Only the redacted form is ever logged. It is built from credential-free inputs rather than
@@ -143,65 +133,6 @@ internal class UploadXvcPackageOperation(
         }
 
         _logger.LogInformation("MSIXVC2 package uploaded successfully.");
-
-        // Mirrors the XVC1 condition exactly, so a configured date behaves the same on both paths —
-        // including a disabled date, which clears any previously set value rather than being a no-op.
-        if (_config.AvailabilityDate is not null || _config.PreDownloadDate is not null)
-        {
-            await SetMsixvc2ConfigurationAsync(result.UploadedPackageId, ct).ConfigureAwait(false);
-        }
-    }
-
-    /// <summary>
-    /// Applies availability and pre-download dates to the package MakePkg.exe just uploaded.
-    ///
-    /// MakePkg.exe does not set these itself, but it does name the package it created, so the same
-    /// ingestion call the XVC1 path uses can be reused. The reported identity is resolved against the
-    /// packages actually present in the target branch and market group rather than being trusted
-    /// outright: that both yields the real <see cref="GamePackage"/> and proves the identity belongs
-    /// where the dates are about to be written.
-    ///
-    /// Every failure here is loud. The upload has already succeeded at this point, so silently skipping
-    /// the dates would leave a package live on a date the caller never asked for.
-    /// </summary>
-    private async Task SetMsixvc2ConfigurationAsync(string uploadedPackageId, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(uploadedPackageId))
-        {
-            throw new InvalidOperationException(
-                "The MSIXVC2 package uploaded successfully, but MakePkg.exe did not report which package it created, " +
-                "so 'availabilityDate'/'preDownloadDate' could not be applied. The upload itself is unaffected. " +
-                "Set the dates in Partner Center, or re-run this operation without them once the dates are set.");
-        }
-
-        var product = await _storeBrokerService.GetProductAsync(_config, ct).ConfigureAwait(false);
-        var packageBranch = await _storeBrokerService.GetGamePackageBranch(product, _config, ct).ConfigureAwait(false);
-
-        GamePackage gamePackage = null;
-
-        await foreach (var package in _storeBrokerService
-                           .GetGamePackagesAsync(product, packageBranch, _config.MarketGroupName, ct)
-                           .ConfigureAwait(false))
-        {
-            if (string.Equals(package.Id, uploadedPackageId, StringComparison.OrdinalIgnoreCase))
-            {
-                gamePackage = package;
-                break;
-            }
-        }
-
-        if (gamePackage is null)
-        {
-            throw new InvalidOperationException(
-                $"The MSIXVC2 package uploaded successfully, but the package MakePkg.exe reported ('{uploadedPackageId}') is not in " +
-                $"market group '{_config.MarketGroupName}', so 'availabilityDate'/'preDownloadDate' were not applied. " +
-                "The upload itself is unaffected. Set the dates in Partner Center.");
-        }
-
-        _logger.LogInformation("Uploaded package with id: {gamePackageId}", gamePackage.Id);
-
-        await _storeBrokerService.SetXvcConfigurationAsync(product, packageBranch, gamePackage, _config.MarketGroupName, _config, ct).ConfigureAwait(false);
-        _logger.LogInformation("Configuration set for Xvc packages");
     }
 
     /// <summary>

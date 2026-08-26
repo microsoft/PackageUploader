@@ -14,6 +14,7 @@ public static class PackageFormatDetector
 {
     private static readonly byte[] ZipLocalFileSignature = [0x50, 0x4B, 0x03, 0x04];
     private static readonly byte[] ZipEocdSignature = [0x50, 0x4B, 0x05, 0x06];
+    private const string GameConfigFileName = "MicrosoftGame.config";
     private const int FirstReadSize = 4096;
     private const int LastReadSize = 65 * 1024;
     private const int MinFileNameOffset = 30;
@@ -67,6 +68,59 @@ public static class PackageFormatDetector
         catch (Exception)
         {
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Detects loose (unpackaged) game content, which PackageUploader cannot upload at all.
+    ///
+    /// Loose content is a directory of build output described by a MicrosoftGame.config, not a package.
+    /// Turning it into an uploadable package is MakePkg.exe's job, and for MSIXVC2 the pack-and-upload flow
+    /// belongs to MakePkg.exe end to end — PackageUploader has no way to perform it and must not appear to.
+    /// Recognising the shape here lets the caller be told that, instead of getting "package file not found"
+    /// from a layer that only knows it was handed something that is not a file.
+    /// </summary>
+    public static bool IsLooseGameContent(string path)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return false;
+
+            if (path.EndsWith(GameConfigFileName, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return Directory.Exists(path);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Returns the MicrosoftGame.config describing <paramref name="path"/>, or null when there is none.
+    /// Used only to make the loose-content error message concrete.
+    /// </summary>
+    public static string FindGameConfig(string path)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return null;
+
+            if (path.EndsWith(GameConfigFileName, StringComparison.OrdinalIgnoreCase))
+                return File.Exists(path) ? path : null;
+
+            if (!Directory.Exists(path))
+                return null;
+
+            var candidate = Path.Combine(path, GameConfigFileName);
+            return File.Exists(candidate) ? candidate : null;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 

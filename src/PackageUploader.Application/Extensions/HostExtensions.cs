@@ -77,8 +77,7 @@ namespace PackageUploader.Application.Extensions
 
             hostAppBuilder.Services.AddSingleton(BuildMsixvc2CommandLineContext(hostAppBuilder, parseResult));
             hostAppBuilder.Services.AddSingleton<IMsixvc2ProcessRunner, Msixvc2ProcessRunner>();
-            hostAppBuilder.Services.AddSingleton<IParentProcessProvider, ParentProcessProvider>();
-            hostAppBuilder.Services.AddSingleton<IMsixvc2DelegationGuard, Msixvc2DelegationGuard>();
+            hostAppBuilder.Services.AddSingleton<IMakePkgFeatureProbe, MakePkgFeatureProbe>();
             hostAppBuilder.Services.AddMsixvc2ToolResolver();
             // Scoped, not singleton: the adapter resolves once per instance, so a scoped lifetime gives
             // each operation a fresh resolution instead of one cached for the life of the process.
@@ -126,8 +125,9 @@ namespace PackageUploader.Application.Extensions
         /// Collects the authentication surface MakePkg.exe needs for MSIXVC2 uploads. PackageUploader spreads
         /// this across a command line option (--Authentication) and several configuration sections, and
         /// MakePkg.exe accepts the same credential material through /auth, /tenantid, /clientid,
-        /// /clientsecret, /certthumbprint, /certstore, /certlocation and /resourceid — so a CI pipeline using
-        /// a service principal keeps working when the upload is delegated.
+        /// /clientsecret, /certpath, /certsubject, /certthumbprint, /certstore, /certlocation and
+        /// /resourceid — so a CI pipeline using a service principal keeps working when the upload is
+        /// delegated.
         /// </summary>
         private static Msixvc2CommandLineContext BuildMsixvc2CommandLineContext(HostApplicationBuilder hostAppBuilder, ParseResult parseResult)
         {
@@ -158,6 +158,7 @@ namespace PackageUploader.Application.Extensions
                 CertificateStore: aad[nameof(AzureApplicationCertificateAuthInfo.CertificateStore)],
                 CertificateLocation: aad[nameof(AzureApplicationCertificateAuthInfo.CertificateLocation)],
                 CertificatePath: clientCertificate[nameof(ClientCertificateAuthInfo.CertificatePath)],
+                CertificatePassword: clientCertificate[nameof(ClientCertificateAuthInfo.CertificatePassword)],
                 ResourceId: aad["ResourceId"]);
         }
 

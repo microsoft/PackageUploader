@@ -57,7 +57,7 @@ public class Msixvc2UploadArgumentBuilderTest
         var arguments = Build(config, BrowserContext());
 
         Assert.AreEqual(
-            $"upload /pd \"{package.Directory}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" /auth CacheableBrowser",
+            $"upload /pd \"{package.Path}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" /auth CacheableBrowser",
             arguments);
     }
 
@@ -78,8 +78,7 @@ public class Msixvc2UploadArgumentBuilderTest
     [TestMethod]
     public void Build_DoesNotEmitUploadSource()
     {
-        // makepkg2's /uploadsource enum only accepts 'makepkg2' and 'XGPM'; there is no value that
-        // represents PackageUploader, so the flag is deliberately omitted.
+        // MakePkg.exe's published upload options do not include /uploadsource, so nothing is emitted for it.
         using var package = TempPackageFile.CreateMsixvc2();
 
         var arguments = Build(CreateConfig(package.Path), BrowserContext());
@@ -114,7 +113,7 @@ public class Msixvc2UploadArgumentBuilderTest
         var arguments = Build(CreateConfig(package.Path), context);
 
         Assert.AreEqual(
-            $"upload /pd \"{package.Directory}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" " +
+            $"upload /pd \"{package.Path}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" " +
             "/auth ClientSecret /tenantid \"tenant-1\" /clientid \"client-1\" /clientsecret \"secret-1\"",
             arguments);
     }
@@ -208,7 +207,7 @@ public class Msixvc2UploadArgumentBuilderTest
         var arguments = Build(CreateConfig(package.Path), context);
 
         Assert.AreEqual(
-            $"upload /pd \"{package.Directory}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" " +
+            $"upload /pd \"{package.Path}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" " +
             "/auth ClientCertificate /tenantid \"tenant-1\" /clientid \"client-1\" " +
             "/certthumbprint \"ABC123\" /certstore \"My\" /certlocation \"CurrentUser\"",
             arguments);
@@ -256,37 +255,66 @@ public class Msixvc2UploadArgumentBuilderTest
         StringAssert.Contains(exception.Message, "/clientsecret");
     }
 
+    /// <summary>
+    /// /certstore and /certlocation only narrow a store lookup, so they must not accompany a certificate
+    /// file. /certpassword may, because a PFX can be password-protected.
+    /// </summary>
     [TestMethod]
-    public void Build_WithCertificateFilePath_Throws()
+    public void Build_WithCertificateFilePath_ForwardsPathWithoutStoreModifiers()
     {
-        // makepkg2 authenticates from a certificate store only; there is no flag naming a PFX file.
         using var package = TempPackageFile.CreateMsixvc2();
         var context = new Msixvc2CommandLineContext(
             IngestionExtensions.AuthenticationMethod.ClientCertificate,
             TenantId: "tenant-1",
             ClientId: "client-1",
+            CertificateStore: "My",
+            CertificateLocation: "CurrentUser",
             CertificatePath: @"C:\certs\app.pfx");
 
-        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
-            () => Build(CreateConfig(package.Path), context));
+        var arguments = Build(CreateConfig(package.Path), context);
 
-        StringAssert.Contains(exception.Message, "app.pfx");
+        StringAssert.Contains(arguments, "/certpath \"C:\\certs\\app.pfx\"");
+        Assert.IsFalse(arguments.Contains("/certstore", StringComparison.Ordinal));
+        Assert.IsFalse(arguments.Contains("/certlocation", StringComparison.Ordinal));
     }
 
     [TestMethod]
-    public void Build_WithCertificateSubject_Throws()
+    public void Build_WithCertificateSubject_ForwardsSubjectAndStoreModifiers()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         var context = new Msixvc2CommandLineContext(
             IngestionExtensions.AuthenticationMethod.AppCert,
             TenantId: "tenant-1",
             ClientId: "client-1",
+            CertificateSubject: "CN=Contoso",
+            CertificateStore: "My",
+            CertificateLocation: "CurrentUser");
+
+        var arguments = Build(CreateConfig(package.Path), context);
+
+        StringAssert.Contains(arguments, "/certsubject \"CN=Contoso\" /certstore \"My\" /certlocation \"CurrentUser\"");
+    }
+
+    /// <summary>
+    /// MakePkg.exe fails a command line carrying more than one certificate selector. Detecting it here means
+    /// the message can name PackageUploader's own configuration keys and arrives before the upload starts.
+    /// </summary>
+    [TestMethod]
+    public void Build_WithMultipleCertificateSelectors_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.AppCert,
+            TenantId: "tenant-1",
+            ClientId: "client-1",
+            CertificateThumbprint: "ABC123",
             CertificateSubject: "CN=Contoso");
 
         var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
             () => Build(CreateConfig(package.Path), context));
 
-        StringAssert.Contains(exception.Message, "CN=Contoso");
+        StringAssert.Contains(exception.Message, "CertificateThumbprint");
+        StringAssert.Contains(exception.Message, "CertificateSubject");
     }
 
     [TestMethod]
@@ -309,21 +337,35 @@ public class Msixvc2UploadArgumentBuilderTest
     #region Unsupported options
 
     /// <summary>
-    /// Availability and pre-download dates are applied after the upload, by the operation, using the package
-    /// identity MakePkg.exe reports. They are deliberately NOT command line arguments, so the builder must
-    /// neither reject them nor try to encode them.
+    /// MakePkg.exe applies the schedule itself, so both dates travel on the command line. The tri-state is
+    /// preserved: an enabled date sets, a disabled date clears, and an absent date is left alone.
     /// </summary>
     [TestMethod]
-    public void Build_WithAvailabilityAndPreDownloadDates_IsUnaffected()
+    public void Build_WithAvailabilityAndPreDownloadDates_ForwardsBoth()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         var config = CreateConfig(package.Path);
-        var expected = Build(config, BrowserContext());
+        config.AvailabilityDate = new GamePackageDate
+        {
+            IsEnabled = true,
+            EffectiveDate = new DateTime(2030, 5, 6, 7, 0, 0, DateTimeKind.Utc),
+        };
+        config.PreDownloadDate = new GamePackageDate { IsEnabled = false };
 
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(5) };
-        config.PreDownloadDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(1) };
+        var arguments = Build(config, BrowserContext());
 
-        Assert.AreEqual(expected, Build(config, BrowserContext()));
+        StringAssert.Contains(arguments, "/availabilitydate \"2030-05-06T07:00:00.0000000Z\"");
+        StringAssert.Contains(arguments, "/clearpredownloaddate");
+    }
+
+    [TestMethod]
+    public void Build_WithoutDates_EmitsNoDateFlags()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+
+        var arguments = Build(CreateConfig(package.Path), BrowserContext());
+
+        Assert.IsFalse(arguments.Contains("date", StringComparison.OrdinalIgnoreCase));
     }
 
     [TestMethod]
@@ -382,38 +424,40 @@ public class Msixvc2UploadArgumentBuilderTest
     }
 
     /// <summary>
-    /// SODB is rejected even when it sits next to the package, which is what separates it from every other
-    /// asset. MakePkg.exe uploads the co-located assets itself, but SODB reaches Partner Center as a separate
-    /// ingestion asset that MakePkg.exe cannot send, so accepting it would produce a successful upload with
-    /// the SODB file silently missing.
+    /// SODB has a real MakePkg.exe flag, so unlike the co-located assets its path is forwarded from wherever
+    /// it sits rather than being held to the package directory.
     /// </summary>
     [TestMethod]
-    public void Build_WithSodbInPackageDirectory_Throws()
+    public void Build_WithSodb_ForwardsPath()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         var config = CreateConfig(package.Path);
-        config.GameAssets = new GameAssets { SodbFilePath = Path.Combine(package.Directory, "package.sodb") };
+        var sodbPath = Path.Combine(Path.GetTempPath(), "elsewhere", "package.sodb");
+        config.GameAssets = new GameAssets { SodbFilePath = sodbPath };
 
-        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
-            () => Build(config, BrowserContext()));
+        var arguments = Build(config, BrowserContext());
 
-        StringAssert.Contains(exception.Message, "sodbFilePath");
+        StringAssert.Contains(arguments, $"/sodb \"{sodbPath}\"");
     }
 
+    /// <summary>
+    /// MakePkg.exe rejects /disclayout for every non-XVC1 format and has no MSIXVC2 disc-layout asset upload,
+    /// so a configured layout fails here with a message that explains why rather than being dropped.
+    /// </summary>
     [TestMethod]
-    public void Build_WithSodbOutsidePackageDirectory_Throws()
+    public void Build_WithDiscLayout_Throws()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         var config = CreateConfig(package.Path);
         config.GameAssets = new GameAssets
         {
-            SodbFilePath = Path.Combine(Path.GetTempPath(), "elsewhere", "package.sodb"),
+            DiscLayoutFilePath = Path.Combine(package.Directory, "layout.xml"),
         };
 
         var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
             () => Build(config, BrowserContext()));
 
-        StringAssert.Contains(exception.Message, "sodbFilePath");
+        StringAssert.Contains(exception.Message, "discLayoutFilePath");
     }
 
     #endregion

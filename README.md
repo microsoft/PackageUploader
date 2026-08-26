@@ -191,19 +191,28 @@ MSIXVC2 package, PackageUploader delegates the upload to the MSIXVC2-capable `Ma
 GDK, because MakePkg.exe owns the MSIXVC2 upload protocol. There is no separate operation name and no new configuration
 switch — an XVC1/MSIXVC1 package continues to be uploaded by PackageUploader itself, exactly as before.
 
+Delegation happens only when both conditions hold:
+
+1. The file is positively identified as an MSIXVC2 package.
+2. The installed `MakePkg.exe` reports the `xvc1upload` capability (`makepkg supports xvc1upload`).
+
+If either check fails the operation stops with an actionable error rather than attempting an upload that cannot succeed.
+
 The following configuration options behave differently on the MSIXVC2 path:
 
 | Option | Behavior |
 | --- | --- |
-| `gameAssets` | Not required. MakePkg.exe discovers the assets in the folder that contains the package and uploads them, so the configured paths are not forwarded. If the paths you supply resolve to that same folder they are ignored with a warning; if they point elsewhere the operation fails so an asset is never silently dropped. `sodbFilePath` is always rejected — SODB is uploaded to Partner Center as a separate asset, which MakePkg.exe cannot do, so no location works. |
+| `gameAssets` | Mostly not required. MakePkg.exe discovers the EKB, submission validator log, and symbol bundle in the folder that contains the package and uploads them, so those paths are not forwarded. If they resolve to that same folder they are ignored with a warning; if they point elsewhere the operation fails so an asset is never silently dropped. `sodbFilePath` is forwarded to MakePkg.exe (`/sodb`) from any location. `discLayoutFilePath` is rejected — MakePkg.exe has no MSIXVC2 disc-layout upload. |
 | `minutesToWaitForProcessing` | Ignored with a warning. MakePkg.exe manages its own processing wait. |
-| `deltaUpload` | Ignored with a warning. |
-| `availabilityDate` / `preDownloadDate` | Supported, and applied the same way as for XVC1. MakePkg.exe does not set the dates itself, but it does report the identity of the package it created, so PackageUploader applies them after the upload completes. The reported package is looked up in the target branch and market group before anything is written, and if it cannot be found the operation fails rather than dating a different package. |
+| `deltaUpload` | Ignored with a warning. MSIXVC2 packages never re-upload unchanged content, so MakePkg.exe decides what to transfer. |
+| `availabilityDate` / `preDownloadDate` | Supported. Both are forwarded to MakePkg.exe, which applies the schedule itself. A disabled date sends the matching clear flag, so "clear the date" stays distinguishable from "leave the date alone", exactly as on the XVC1 path. |
 | `productId` | Supported. It is resolved to the corresponding Big ID, which is what MakePkg.exe requires. |
 | Authentication | Supported, including non-interactive/CI authentication. See [Authentication on the MSIXVC2 path](#authentication-on-the-msixvc2-path). |
 
-If no MSIXVC2-capable `MakePkg.exe` is available, the operation fails with an actionable error instead of attempting an
-upload that cannot succeed.
+#### Loose game content is not supported
+
+PackageUploader uploads a **built package**; it has no packaging step. Pointing `packageFilePath` at a loose content
+directory or at a `MicrosoftGame.config` fails with an explicit error. Use MakePkg.exe to pack and upload loose content.
 
 #### Authentication on the MSIXVC2 path
 
@@ -217,14 +226,17 @@ configuration file are passed through, so an unattended pipeline using a service
 | `AppCert` | `ClientCertificate` |
 | `Default`, `Browser`, `CacheableBrowser`, `AzureCli`, `ManagedIdentity`, `ManagedIdentityFederated`, `Environment`, `AzurePipelines`, `ClientSecret`, `ClientCertificate` | The same value |
 
-Two limitations, both because MakePkg.exe has no corresponding option:
+Certificate authentication supports all three selectors MakePkg.exe accepts, but **exactly one** of them may be
+configured:
 
-- **Certificates must live in a Windows certificate store.** MakePkg.exe selects a certificate by thumbprint
-  (`/certthumbprint`, `/certstore`, `/certlocation`) and has no option naming a certificate file, so a PFX path
-  (`ClientCertificateAuthInfo:CertificatePath`) is rejected with an explicit error. Import the certificate into a store
-  and use `AppCert` with `AadAuthInfo:CertificateThumbprint`.
-- **Certificates cannot be selected by subject.** `AadAuthInfo:CertificateSubject` is rejected; use
-  `AadAuthInfo:CertificateThumbprint`.
+| Configuration | Forwarded as |
+| --- | --- |
+| `AadAuthInfo:CertificateThumbprint` | `/certthumbprint`, plus `/certstore` and `/certlocation` when set |
+| `AadAuthInfo:CertificateSubject` | `/certsubject`, plus `/certstore` and `/certlocation` when set |
+| `ClientCertificateAuthInfo:CertificatePath` | `/certpath`, plus `/certpassword` when set |
+
+Configuring more than one selector fails with an error naming the conflicting keys, because MakePkg.exe rejects such a
+command line. Credentials are never written to the console or log file.
 
 ### Available parameters
 

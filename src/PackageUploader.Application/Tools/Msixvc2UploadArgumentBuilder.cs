@@ -4,8 +4,10 @@
 using Microsoft.Extensions.Logging;
 using PackageUploader.Application.Config;
 using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -14,39 +16,32 @@ namespace PackageUploader.Application.Tools;
 /// <summary>
 /// Translates an <see cref="UploadXvcPackageOperationConfig"/> into a MakePkg.exe "upload" command line.
 ///
-/// Every flag emitted here is grounded in the verbatim help output of the MSIXVC2-capable packaging tool
-/// (<c>makepkg2.exe upload /?</c>, version 2604.405.14000.0), cross-checked against the two existing UI
-/// argument builders. The closest in-repo precedent is <c>PackageUploadViewModel.BuildMsixvc2UploadArguments()</c>,
-/// which handles the same scenario as the CLI: an already-built .msixvc package on disk. That builder emits
-/// the <c>/pd</c> form and deliberately does NOT pass <c>/msixvc2</c> — that flag only appears in
-/// <c>Msixvc2UploadViewModel.BuildUploadArguments()</c>, which packs from a loose content folder via <c>/d</c>.
+/// The mapping is grounded in MakePkg.exe's own option declarations rather than in help text: every flag
+/// emitted here appears in the upload command's supported-option list, so an option this builder emits is
+/// one MakePkg.exe will accept for a packaged upload.
 ///
 /// Notable grounding results:
 /// <list type="bullet">
 /// <item><c>/auth</c> accepts Default, Browser, CacheableBrowser, AzureCli, ManagedIdentity,
 /// ManagedIdentityFederated, Environment, AzurePipelines, ClientSecret and ClientCertificate — so
 /// non-interactive CI authentication is fully supported and is forwarded rather than rejected.</item>
-/// <item><c>/tenantid</c>, <c>/clientid</c>, <c>/clientsecret</c>, <c>/certthumbprint</c>, <c>/certstore</c>,
-/// <c>/certlocation</c> and <c>/resourceid</c> all exist and carry the credential material.</item>
-/// <item>There is no flag naming a certificate <em>file</em>, and no flag for a certificate <em>subject</em>,
-/// so those two configurations are rejected rather than silently authenticating as a different identity.</item>
-/// <item><c>/uploadsource</c> exists but its enum only accepts <c>makepkg2</c> and <c>XGPM</c>. There is no
-/// value representing PackageUploader, so the flag is omitted and the tool's own default is used.</item>
+/// <item>Certificate authentication accepts EXACTLY ONE selector: <c>/certpath</c>, <c>/certthumbprint</c>
+/// or <c>/certsubject</c>. MakePkg.exe rejects a command line carrying more than one, so this builder
+/// enforces the same rule up front with a message naming the configuration keys involved.</item>
+/// <item><c>/pd</c> accepts either a package file or a directory containing a single package, so the
+/// configured package file path is passed through verbatim rather than being reduced to its directory —
+/// which would be ambiguous whenever a directory holds more than one package.</item>
+/// <item><c>/sodb</c> exists, so the SODB asset path is forwarded rather than rejected.</item>
+/// <item>The four date flags (<c>/availabilitydate</c>, <c>/clearavailabilitydate</c>,
+/// <c>/predownloaddate</c>, <c>/clearpredownloaddate</c>) exist, so MakePkg.exe applies the schedule
+/// itself. PackageUploader no longer writes dates through ingestion after an MSIXVC2 upload.</item>
+/// <item><c>/disclayout</c> is rejected by MakePkg.exe for every non-XVC1 format, and MSIXVC2 has no
+/// disc-layout asset upload at all, so a configured disc layout is a hard error rather than a silent
+/// drop.</item>
 /// </list>
-///
-/// CAVEAT: the binary this mapping was verified against is <c>makepkg2.exe</c>, not the renamed
-/// <c>MakePkg.exe</c> that ships with the GDK once the two tools are merged. The legacy <c>makepkg.exe</c>
-/// is demonstrably a different surface (it has <c>/tenantid</c> but no <c>/auth</c> at all), so if the merged
-/// MakePkg.exe diverges on <c>/auth</c>, this mapping — and especially
-/// <see cref="ResolveAuthenticationMethod"/> — is the first thing to re-verify against its help output.
 ///
 /// Options that MakePkg.exe has no equivalent for are either warned about and ignored (when ignoring them
 /// cannot change the outcome) or cause a <see cref="Msixvc2UnsupportedOptionException"/> (when it could).
-///
-/// Note that <c>availabilityDate</c>/<c>preDownloadDate</c> are deliberately NOT handled here. MakePkg.exe
-/// has no flag for them, but they are still honoured: the operation applies them through ingestion after the
-/// upload, using the package identity MakePkg.exe reports. This builder must therefore leave them alone
-/// rather than treat them as unsupported.
 /// </summary>
 internal static class Msixvc2UploadArgumentBuilder
 {
@@ -54,7 +49,7 @@ internal static class Msixvc2UploadArgumentBuilder
     private const string RedactedValue = "***";
 
     /// <summary>
-    /// The /auth values accepted by the MSIXVC2 packaging tool, taken verbatim from its help output.
+    /// The /auth values accepted by MakePkg.exe, taken verbatim from its option declarations.
     /// PackageUploader's own AuthenticationMethod enum uses the same names for all of these.
     /// </summary>
     private static readonly HashSet<IngestionExtensions.AuthenticationMethod> DirectlySupportedAuthenticationMethods =
@@ -86,20 +81,27 @@ internal static class Msixvc2UploadArgumentBuilder
 
         ValidateUnsupportedOptions(config, packageDirectory, logger);
 
-        var commandLine = BuildCommandLine(config, commandLineContext, bigId, packageDirectory);
+        var commandLine = BuildCommandLine(config, commandLineContext, bigId);
 
         // The log-safe form is BUILT FROM A CONTEXT THAT NEVER HELD THE SECRET rather than produced by
         // scrubbing the finished command line. Post-hoc scrubbing has to keep a pattern in sync with the
         // exact spelling, spacing and quoting the builder happens to emit, and silently leaks the moment
         // those drift or a new credential flag is added. Substituting at the source cannot drift, and it
         // keeps the secret out of the value that reaches the logger entirely.
-        var redactedCommandLine = string.IsNullOrWhiteSpace(commandLineContext.ClientSecret)
-            ? commandLine
-            : BuildCommandLine(
+        var hasCredential =
+            !string.IsNullOrWhiteSpace(commandLineContext.ClientSecret) ||
+            !string.IsNullOrWhiteSpace(commandLineContext.CertificatePassword);
+
+        var redactedCommandLine = hasCredential
+            ? BuildCommandLine(
                 config,
-                commandLineContext with { ClientSecret = RedactedValue },
-                bigId,
-                packageDirectory);
+                commandLineContext with
+                {
+                    ClientSecret = string.IsNullOrWhiteSpace(commandLineContext.ClientSecret) ? commandLineContext.ClientSecret : RedactedValue,
+                    CertificatePassword = string.IsNullOrWhiteSpace(commandLineContext.CertificatePassword) ? commandLineContext.CertificatePassword : RedactedValue,
+                },
+                bigId)
+            : commandLine;
 
         return new Msixvc2UploadArguments(commandLine, redactedCommandLine);
     }
@@ -107,12 +109,14 @@ internal static class Msixvc2UploadArgumentBuilder
     private static string BuildCommandLine(
         UploadXvcPackageOperationConfig config,
         Msixvc2CommandLineContext commandLineContext,
-        string bigId,
-        string packageDirectory)
+        string bigId)
     {
         var args = new StringBuilder();
         args.Append("upload");
-        args.Append(Invariant($" /pd \"{packageDirectory}\""));
+
+        // /pd takes the package file itself, so the configured path is passed through unchanged. Reducing
+        // it to its directory would be ambiguous the moment a directory contains more than one package.
+        args.Append(Invariant($" /pd \"{Path.GetFullPath(config.PackageFilePath)}\""));
 
         if (!string.IsNullOrWhiteSpace(config.BranchFriendlyName))
         {
@@ -131,8 +135,87 @@ internal static class Msixvc2UploadArgumentBuilder
         args.Append(Invariant($" /storeid \"{bigId}\""));
 
         AppendAuthenticationArguments(args, commandLineContext);
+        AppendPackageArguments(args, config);
+        AppendScheduleArguments(args, config);
 
         return args.ToString();
+    }
+
+    /// <summary>
+    /// Forwards the SODB asset, which has a direct MakePkg.exe equivalent.
+    ///
+    /// Delta upload is deliberately NOT forwarded. MSIXVC2 never re-uploads unchanged content, so the
+    /// notion of an opt-in delta does not apply to this format, and MakePkg.exe decides for itself what to
+    /// transfer. Passing a flag to say so would be redundant at best.
+    /// </summary>
+    private static void AppendPackageArguments(StringBuilder args, UploadXvcPackageOperationConfig config)
+    {
+        if (!string.IsNullOrWhiteSpace(config.GameAssets?.SodbFilePath))
+        {
+            args.Append(Invariant($" /sodb \"{config.GameAssets.SodbFilePath}\""));
+        }
+    }
+
+    /// <summary>
+    /// Forwards availability and pre-download dates.
+    ///
+    /// <see cref="GamePackageDate"/> carries a tri-state that maps exactly onto MakePkg.exe's flag pairs:
+    /// an enabled date sets a value, a disabled date CLEARS any previously set value, and an absent date
+    /// leaves the current value alone. The clear flags are what make the middle case expressible — without
+    /// them a disabled date would be indistinguishable from an absent one, and PackageUploader would
+    /// silently stop honouring a configuration that works on the XVC1 path.
+    /// </summary>
+    private static void AppendScheduleArguments(StringBuilder args, UploadXvcPackageOperationConfig config)
+    {
+        AppendDate(args, config.AvailabilityDate, "/availabilitydate", "/clearavailabilitydate", nameof(config.AvailabilityDate));
+        AppendDate(args, config.PreDownloadDate, "/predownloaddate", "/clearpredownloaddate", nameof(config.PreDownloadDate));
+    }
+
+    private static void AppendDate(StringBuilder args, GamePackageDate date, string setFlag, string clearFlag, string configName)
+    {
+        if (date is null)
+        {
+            return;
+        }
+
+        if (!date.IsEnabled)
+        {
+            args.Append(' ').Append(clearFlag);
+            return;
+        }
+
+        if (date.EffectiveDate is null)
+        {
+            // Defence in depth: UploadXvcPackageOperationConfig.Validate already rejects this combination,
+            // so reaching here means the config was constructed in code rather than bound and validated.
+            throw new Msixvc2UnsupportedOptionException(
+                $"'{ToCamelCase(configName)}' is enabled but has no 'effectiveDate', so no date could be passed to MakePkg.exe. " +
+                "Set an effective date or disable the option.");
+        }
+
+        args.Append(Invariant($" {setFlag} \"{FormatDate(date.EffectiveDate.Value)}\""));
+    }
+
+    /// <summary>
+    /// Renders a date in the round-trip ISO 8601 form MakePkg.exe parses.
+    ///
+    /// <see cref="GamePackageDate"/> already normalizes to UTC on assignment, so in practice the value
+    /// arrives with <see cref="DateTimeKind.Utc"/> and both paths agree on the instant. The switch is
+    /// defence for a value that somehow arrives otherwise: MakePkg.exe parses with
+    /// AssumeUniversal|AdjustToUniversal, so an <see cref="DateTimeKind.Unspecified"/> value is STAMPED as
+    /// UTC rather than converted from local time. Converting would shift the instant by the host's offset
+    /// and silently move a release date.
+    /// </summary>
+    private static string FormatDate(DateTime value)
+    {
+        var utc = value.Kind switch
+        {
+            DateTimeKind.Utc => value,
+            DateTimeKind.Local => value.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(value, DateTimeKind.Utc),
+        };
+
+        return utc.ToString("o", CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -178,34 +261,67 @@ internal static class Msixvc2UploadArgumentBuilder
         }
     }
 
+    /// <summary>
+    /// Emits the single certificate selector MakePkg.exe expects.
+    ///
+    /// MakePkg.exe requires EXACTLY ONE of /certpath, /certthumbprint and /certsubject and fails the whole
+    /// upload when given more than one. That rule is enforced here instead of being discovered by the child
+    /// process, so the error names PackageUploader's own configuration keys and arrives before any work
+    /// starts. /certstore and /certlocation are not selectors — they only narrow a store lookup — so they
+    /// are emitted only alongside the two store-based selectors.
+    /// </summary>
     private static void AppendCertificateArguments(StringBuilder args, Msixvc2CommandLineContext context)
     {
-        // makepkg2 authenticates from a certificate STORE (thumbprint + store + location). It exposes
-        // /certpassword but no flag naming a certificate file, so a PFX path cannot be forwarded.
+        RequireCredential(context.ClientId, "/clientid", "a client id", "AadAuthInfo:ClientId");
+
+        var selectors = new List<(string Flag, string Value, string ConfigPath, bool UsesStore)>();
+
         if (!string.IsNullOrWhiteSpace(context.CertificatePath))
         {
-            throw new Msixvc2UnsupportedOptionException(
-                $"Certificate file authentication ('{context.CertificatePath}') cannot be forwarded to MakePkg.exe for MSIXVC2 uploads, " +
-                "because MakePkg.exe only accepts a certificate from a Windows certificate store (/certthumbprint, /certstore, /certlocation) " +
-                "and has no option naming a certificate file. " +
-                $"Import the certificate into a store and use --Authentication {IngestionExtensions.AuthenticationMethod.AppCert} " +
-                "with AadAuthInfo:CertificateThumbprint, or choose a different authentication method.");
+            selectors.Add(("/certpath", context.CertificatePath, "AadAuthInfo:CertificatePath", false));
         }
 
-        // makepkg2 has no certificate-subject option. Resolving the subject ourselves and forwarding the
-        // resulting thumbprint would be guesswork about which certificate the user meant.
+        if (!string.IsNullOrWhiteSpace(context.CertificateThumbprint))
+        {
+            selectors.Add(("/certthumbprint", context.CertificateThumbprint, "AadAuthInfo:CertificateThumbprint", true));
+        }
+
         if (!string.IsNullOrWhiteSpace(context.CertificateSubject))
         {
-            throw new Msixvc2UnsupportedOptionException(
-                $"Certificate subject authentication ('{context.CertificateSubject}') cannot be forwarded to MakePkg.exe for MSIXVC2 uploads, " +
-                "because MakePkg.exe selects certificates by thumbprint only. " +
-                "Set AadAuthInfo:CertificateThumbprint instead of AadAuthInfo:CertificateSubject.");
+            selectors.Add(("/certsubject", context.CertificateSubject, "AadAuthInfo:CertificateSubject", true));
         }
 
-        RequireCredential(context.ClientId, "/clientid", "a client id", "AadAuthInfo:ClientId");
-        RequireCredential(context.CertificateThumbprint, "/certthumbprint", "a certificate thumbprint", "AadAuthInfo:CertificateThumbprint");
+        if (selectors.Count == 0)
+        {
+            throw new Msixvc2UnsupportedOptionException(
+                "MakePkg.exe requires a certificate path, thumbprint, or subject (/certpath, /certthumbprint or /certsubject) " +
+                "for certificate authentication during an MSIXVC2 upload, but none was configured. " +
+                "Set AadAuthInfo:CertificatePath, AadAuthInfo:CertificateThumbprint or AadAuthInfo:CertificateSubject in the config file.");
+        }
 
-        args.Append(Invariant($" /certthumbprint \"{context.CertificateThumbprint}\""));
+        if (selectors.Count > 1)
+        {
+            throw new Msixvc2UnsupportedOptionException(
+                "MakePkg.exe accepts only one certificate selector for an MSIXVC2 upload, but " +
+                $"{string.Join(", ", selectors.ConvertAll(selector => selector.ConfigPath))} are all configured. " +
+                "Remove all but one of them from the config file.");
+        }
+
+        var (flag, value, _, usesStore) = selectors[0];
+
+        args.Append(Invariant($" {flag} \"{value}\""));
+
+        if (!usesStore)
+        {
+            // A certificate file may be password-protected. The password is a credential, so it is
+            // redacted before anything is logged.
+            if (!string.IsNullOrWhiteSpace(context.CertificatePassword))
+            {
+                args.Append(Invariant($" /certpassword \"{context.CertificatePassword}\""));
+            }
+
+            return;
+        }
 
         if (!string.IsNullOrWhiteSpace(context.CertificateStore))
         {
@@ -222,7 +338,7 @@ internal static class Msixvc2UploadArgumentBuilder
     /// Maps PackageUploader's AuthenticationMethod onto a /auth value MakePkg.exe accepts.
     /// All but two names are shared verbatim. AppSecret and AppCert are PackageUploader's legacy names for
     /// the same AAD application flows that MakePkg.exe calls ClientSecret and ClientCertificate — both
-    /// authenticate an AAD application with, respectively, a client secret or a store certificate, so the
+    /// authenticate an AAD application with, respectively, a client secret or a certificate, so the
     /// rename is a straight alias rather than a behavioral change.
     /// </summary>
     private static IngestionExtensions.AuthenticationMethod ResolveAuthenticationMethod(
@@ -258,28 +374,31 @@ internal static class Msixvc2UploadArgumentBuilder
     {
         ValidateGameAssets(config, packageDirectory, logger);
 
+        if (config.DeltaUpload)
+        {
+            // Not an error: MSIXVC2 never re-uploads unchanged content, so the caller already gets what
+            // 'deltaUpload' asks for. Warned rather than silently dropped so the flag's absence from the
+            // command line is not mistaken for a bug.
+            logger.LogWarning(
+                "'deltaUpload' is not passed to MakePkg.exe for MSIXVC2 uploads; MSIXVC2 packages always avoid re-uploading unchanged content.");
+        }
+
         // MakePkg.exe owns the upload lifecycle and reports completion itself, so a caller-supplied
         // processing timeout cannot change the outcome. An explicitly configured 30 is indistinguishable
         // from the default, so this is always a warning rather than an error.
         logger.LogWarning(
             "'minutesToWaitForProcessing' is not used for MSIXVC2 uploads; MakePkg.exe manages upload processing itself.");
-
-        if (config.DeltaUpload)
-        {
-            logger.LogWarning(
-                "'deltaUpload' is not used for MSIXVC2 uploads and will be ignored; MakePkg.exe decides its own chunk reuse strategy.");
-        }
     }
 
     /// <summary>
     /// MakePkg.exe uploads the EKB, submission validator log, and symbol bundle when they sit alongside the
-    /// package, discovering them by co-location rather than by path, so the configured paths are not
-    /// forwarded. Assets already in the package directory are therefore harmless and are only warned about,
-    /// while assets pointing elsewhere are a hard error, because silently dropping a file the user
-    /// deliberately placed somewhere else would change the outcome. Disc layout is not supported for
-    /// MSIXVC2 and is held to the same co-location rule.
+    /// package, discovering them by co-location rather than by path, so those paths are not forwarded and
+    /// assets pointing elsewhere are a hard error — silently dropping a file the user deliberately placed
+    /// somewhere else would change the outcome.
     ///
-    /// SODB is the one asset that cannot work at any location, so it is always rejected.
+    /// SODB is different: it has a real MakePkg.exe flag, so its path is forwarded from anywhere and is not
+    /// held to the co-location rule. Disc layout is different again: MakePkg.exe has no MSIXVC2 disc-layout
+    /// upload at all, so it is always rejected.
     /// </summary>
     private static void ValidateGameAssets(UploadXvcPackageOperationConfig config, string packageDirectory, ILogger logger)
     {
@@ -288,33 +407,40 @@ internal static class Msixvc2UploadArgumentBuilder
             return;
         }
 
+        RejectDiscLayout(config.GameAssets.DiscLayoutFilePath);
+
         RequireInPackageDirectory(GameAssetPaths.EkbFilePath, config.GameAssets.EkbFilePath, packageDirectory);
         RequireInPackageDirectory(GameAssetPaths.SubValFilePath, config.GameAssets.SubValFilePath, packageDirectory);
         RequireInPackageDirectory(GameAssetPaths.SymbolsFilePath, config.GameAssets.SymbolsFilePath, packageDirectory);
-        RequireInPackageDirectory(GameAssetPaths.DiscLayoutFilePath, config.GameAssets.DiscLayoutFilePath, packageDirectory);
-        RejectSodb(config.GameAssets.SodbFilePath);
+
+        if (string.IsNullOrWhiteSpace(config.GameAssets.EkbFilePath) &&
+            string.IsNullOrWhiteSpace(config.GameAssets.SubValFilePath) &&
+            string.IsNullOrWhiteSpace(config.GameAssets.SymbolsFilePath))
+        {
+            return;
+        }
 
         logger.LogWarning(
-            "'gameAssets' paths are not forwarded to MakePkg.exe for MSIXVC2 uploads. The configured assets already sit in the package directory '{PackageDirectory}', where MakePkg.exe discovers and uploads them.",
+            "'gameAssets' paths other than 'sodbFilePath' are not forwarded to MakePkg.exe for MSIXVC2 uploads. The configured assets already sit in the package directory '{PackageDirectory}', where MakePkg.exe discovers and uploads them.",
             packageDirectory);
     }
 
     /// <summary>
-    /// Fails whenever a SODB asset is configured. SODB does not follow the co-location rule the other assets
-    /// follow: PackageUploader uploads it to Partner Center as a separate ingestion asset, and MakePkg.exe
-    /// has no equivalent. Moving the file next to the package therefore does not help, so there is no
-    /// location that works and the asset would be missing from an otherwise successful upload.
+    /// Fails whenever a disc layout asset is configured. MakePkg.exe rejects /disclayout for every
+    /// non-XVC1 format and has no MSIXVC2 disc-layout asset upload, so there is no location and no flag
+    /// that would get the file uploaded. Accepting it silently would produce a successful upload that is
+    /// missing an asset the caller asked for.
     /// </summary>
-    private static void RejectSodb(string sodbFilePath)
+    private static void RejectDiscLayout(string discLayoutFilePath)
     {
-        if (string.IsNullOrWhiteSpace(sodbFilePath))
+        if (string.IsNullOrWhiteSpace(discLayoutFilePath))
         {
             return;
         }
 
         throw new Msixvc2UnsupportedOptionException(
-            $"'gameAssets.{ToCamelCase(GameAssetPaths.SodbFilePath)}' points at '{sodbFilePath}', but MSIXVC2 uploads are performed by MakePkg.exe, which cannot upload a SODB asset. " +
-            "Unlike the other assets, placing the file next to the package does not help, because SODB is uploaded to Partner Center separately rather than being picked up from the package directory. " +
+            $"'gameAssets.{ToCamelCase(GameAssetPaths.DiscLayoutFilePath)}' points at '{discLayoutFilePath}', but MSIXVC2 uploads are performed by MakePkg.exe, which does not upload a disc layout file for MSIXVC2 packages. " +
+            "Moving the file next to the package does not help, because there is no MSIXVC2 disc-layout upload at all. " +
             "Remove it from the config file.");
     }
 
@@ -364,6 +490,5 @@ internal static class Msixvc2UploadArgumentBuilder
         public const string SubValFilePath = nameof(SubValFilePath);
         public const string SymbolsFilePath = nameof(SymbolsFilePath);
         public const string DiscLayoutFilePath = nameof(DiscLayoutFilePath);
-        public const string SodbFilePath = nameof(SodbFilePath);
     }
 }

@@ -25,18 +25,23 @@ public class UploadXvcPackageOperationMsixvc2Test
     private readonly Mock<ILogger<UploadXvcPackageOperation>> _loggerMock = new();
     private readonly Mock<IMsixvc2UploadToolProvider> _toolProviderMock = new();
     private readonly Mock<IMsixvc2ProcessRunner> _processRunnerMock = new();
-    private readonly Mock<IMsixvc2DelegationGuard> _delegationGuardMock = new();
+    private readonly Mock<IMakePkgFeatureProbe> _featureProbeMock = new();
 
     private UploadXvcPackageOperation CreateOperation(
         UploadXvcPackageOperationConfig config,
         IngestionExtensions.AuthenticationMethod authenticationMethod = IngestionExtensions.AuthenticationMethod.CacheableBrowser) =>
+        CreateOperation(config, new Msixvc2CommandLineContext(authenticationMethod));
+
+    private UploadXvcPackageOperation CreateOperation(
+        UploadXvcPackageOperationConfig config,
+        Msixvc2CommandLineContext commandLineContext) =>
         new(_serviceMock.Object,
             _loggerMock.Object,
             Options.Create(config),
             _toolProviderMock.Object,
             _processRunnerMock.Object,
-            _delegationGuardMock.Object,
-            new Msixvc2CommandLineContext(authenticationMethod));
+            _featureProbeMock.Object,
+            commandLineContext);
 
     private static UploadXvcPackageOperationConfig CreateConfig(string packageFilePath) => new TestUploadXvcPackageOperationConfig
     {
@@ -47,8 +52,8 @@ public class UploadXvcPackageOperationMsixvc2Test
         PackageFilePath = packageFilePath,
     };
 
-    private static string ExpectedArguments(string packageFilePath) =>
-        $"upload /pd \"{Path.GetDirectoryName(Path.GetFullPath(packageFilePath))}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" /auth CacheableBrowser";
+    private static string ExpectedArguments(string packageFilePath, string extra = "") =>
+        $"upload /pd \"{Path.GetFullPath(packageFilePath)}\" /branch \"Main\" /market \"default\" /storeid \"{BigId}\" /auth CacheableBrowser{extra}";
 
     private static GameProduct CreateProduct(string productId, string bigId)
     {
@@ -58,18 +63,31 @@ public class UploadXvcPackageOperationMsixvc2Test
         return product;
     }
 
+    /// <summary>
+    /// The happy-path environment: a resolved MakePkg.exe that advertises the capability gate.
+    /// </summary>
     private void SetUpAvailableTool()
     {
         _toolProviderMock.SetupGet(x => x.IsAvailable).Returns(true);
         _toolProviderMock.SetupGet(x => x.ExecutablePath).Returns(ResolvedMakePkgPath);
+        _featureProbeMock
+            .Setup(x => x.SupportsAsync(It.IsAny<string>(), MakePkgFeatures.Xvc1Upload, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
     }
 
-    private const string UploadedPackageId = "e2b5176e-a226-413f-b4d0-32cfbea10047";
+    private string _capturedArguments = null!;
 
     private void SetUpSuccessfulRun() =>
         _processRunnerMock
             .Setup(x => x.RunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Msixvc2ProcessResult(0, UploadedPackageId));
+            .Callback<string, string, CancellationToken>((_, arguments, _) => _capturedArguments = arguments)
+            .ReturnsAsync(new Msixvc2ProcessResult(0));
+
+    private string CapturedArguments()
+    {
+        Assert.IsNotNull(_capturedArguments, "MakePkg.exe was never launched.");
+        return _capturedArguments;
+    }
 
     [TestMethod]
     public async Task Msixvc2PackageWithCapability_ShellsOutWithExpectedArguments()
@@ -132,7 +150,7 @@ public class UploadXvcPackageOperationMsixvc2Test
     }
 
     [TestMethod]
-    public async Task Msixvc2PackageWithoutCapability_FailsAndDoesNotShellOut()
+    public async Task Msixvc2PackageWithoutTool_FailsAndDoesNotShellOut()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         _toolProviderMock.SetupGet(x => x.IsAvailable).Returns(false);
@@ -147,9 +165,117 @@ public class UploadXvcPackageOperationMsixvc2Test
         _loggerMock.VerifyLogErrorContains("no MSIXVC2-capable MakePkg.exe was found");
     }
 
+    #region Capability probe
+
     /// <summary>
-    /// Circular-dependency guard: MakePkg.exe shells back out to PackageUploader.exe for XVC1/MSIXVC1
-    /// uploads, so a non-MSIXVC2 package must NEVER be delegated to MakePkg.exe.
+    /// The capability gate doubles as the loop-breaker. MakePkg.exe releases that predate the
+    /// "xvc1upload" capability performed XVC1 uploads by shelling back out to PackageUploader.exe, so
+    /// launching one risks an unbounded MakePkg.exe/PackageUploader.exe cycle. A tool that fails the probe
+    /// must never be launched at all.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2PackageWithToolLackingCapability_FailsAndDoesNotShellOut()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        _toolProviderMock.SetupGet(x => x.IsAvailable).Returns(true);
+        _toolProviderMock.SetupGet(x => x.ExecutablePath).Returns(ResolvedMakePkgPath);
+        _featureProbeMock
+            .Setup(x => x.SupportsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _processRunnerMock.VerifyNoOtherCalls();
+        _loggerMock.VerifyLogErrorContains("too old to perform the upload");
+        _loggerMock.VerifyLogErrorContains(MakePkgFeatures.Xvc1Upload);
+    }
+
+    /// <summary>
+    /// The probe must be run against the resolved executable, not some independently discovered path —
+    /// otherwise the capability answer could describe a different binary than the one that is launched.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2Package_ProbesTheResolvedExecutable()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        _featureProbeMock.Verify(
+            x => x.SupportsAsync(ResolvedMakePkgPath, MakePkgFeatures.Xvc1Upload, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// The probe launches a process, so it must never run for a package that will not be delegated.
+    /// </summary>
+    [TestMethod]
+    public async Task NonMsixvc2Package_NeverProbes()
+    {
+        using var package = TempPackageFile.CreateLegacyXvc();
+        SetUpAvailableTool();
+        _serviceMock
+            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
+
+        await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+
+        _featureProbeMock.Verify(
+            x => x.SupportsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    #endregion
+
+    #region Loose game content
+
+    /// <summary>
+    /// The MSIXVC2 pack-and-upload flow belongs to MakePkg.exe end to end. PackageUploader has no packaging
+    /// step, so loose content must be refused outright — and refused with a message that says why, rather
+    /// than the "package file not found" the upload layer would otherwise produce.
+    /// </summary>
+    [TestMethod]
+    public async Task LooseGameContentDirectory_FailsAndNeitherProbesNorShellsOut()
+    {
+        using var content = TempLooseContent.Create();
+
+        SetUpAvailableTool();
+
+        var result = await CreateOperation(CreateConfig(content.Path)).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _processRunnerMock.VerifyNoOtherCalls();
+        _featureProbeMock.VerifyNoOtherCalls();
+        _serviceMock.VerifyNoOtherCalls();
+        _loggerMock.VerifyLogErrorContains("loose game content");
+        _loggerMock.VerifyLogErrorContains("MicrosoftGame.config");
+    }
+
+    /// <summary>
+    /// Pointing straight at the MicrosoftGame.config is the other natural way to ask for the loose flow,
+    /// and it is refused for the same reason.
+    /// </summary>
+    [TestMethod]
+    public async Task LooseGameContentConfigFile_Fails()
+    {
+        using var content = TempLooseContent.Create();
+
+        SetUpAvailableTool();
+
+        var result = await CreateOperation(CreateConfig(content.GameConfigPath)).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _processRunnerMock.VerifyNoOtherCalls();
+        _loggerMock.VerifyLogErrorContains("loose game content");
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Format guard: only a package positively identified as MSIXVC2 is ever handed to MakePkg.exe.
     /// </summary>
     [TestMethod]
     public async Task NonMsixvc2Package_NeverShellsOut()
@@ -221,10 +347,13 @@ public class UploadXvcPackageOperationMsixvc2Test
         _processRunnerMock.VerifyNoOtherCalls();
     }
 
+    #region Options with no MakePkg.exe equivalent
+
     /// <summary>
     /// A config option with no MakePkg.exe equivalent must fail fast rather than be silently dropped.
-    /// Certificate-subject authentication is the case in point: MakePkg.exe selects a certificate by
-    /// thumbprint only, so honouring this would mean guessing which certificate the user meant.
+    /// Disc layout is the case in point: MakePkg.exe rejects /disclayout for every non-XVC1 format and has
+    /// no MSIXVC2 disc-layout asset upload, so accepting it would produce a "successful" upload that is
+    /// missing an asset the caller asked for.
     /// </summary>
     [TestMethod]
     public async Task UnsupportedConfigOption_FailsWithExplicitErrorAndDoesNotShellOut()
@@ -232,28 +361,74 @@ public class UploadXvcPackageOperationMsixvc2Test
         using var package = TempPackageFile.CreateMsixvc2();
         SetUpAvailableTool();
 
-        var operation = new UploadXvcPackageOperation(
-            _serviceMock.Object,
-            _loggerMock.Object,
-            Options.Create(CreateConfig(package.Path)),
-            _toolProviderMock.Object,
-            _processRunnerMock.Object,
-            _delegationGuardMock.Object,
-            new Msixvc2CommandLineContext(
-                IngestionExtensions.AuthenticationMethod.ClientCertificate,
-                TenantId: "tenant-1",
-                ClientId: "client-1",
-                CertificateSubject: "CN=Contoso"));
+        var config = CreateConfig(package.Path);
+        config.GameAssets = new GameAssets
+        {
+            DiscLayoutFilePath = Path.Combine(Path.GetDirectoryName(package.Path)!, "layout.txt"),
+        };
 
-        var result = await operation.RunAsync(CancellationToken.None);
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
 
         Assert.AreEqual(3, result);
         _processRunnerMock.VerifyNoOtherCalls();
-        _loggerMock.VerifyLogErrorContains("Certificate subject authentication");
+        _loggerMock.VerifyLogErrorContains("does not upload a disc layout file for MSIXVC2 packages");
     }
 
+    /// <summary>
+    /// MakePkg.exe discovers co-located assets itself, so an asset pointing somewhere else would not be
+    /// uploaded. That has to be an error rather than a silent drop.
+    /// </summary>
     [TestMethod]
-    public async Task IgnorableConfigOption_WarnsAndStillShellsOut()
+    public async Task GameAssetOutsidePackageDirectory_FailsAndDoesNotShellOut()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+
+        var config = CreateConfig(package.Path);
+        config.GameAssets = new GameAssets { EkbFilePath = @"C:\elsewhere\game.ekb" };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _processRunnerMock.VerifyNoOtherCalls();
+        _loggerMock.VerifyLogErrorContains("outside the package directory");
+    }
+
+    /// <summary>
+    /// An asset that already sits next to the package is discovered by MakePkg.exe, so the upload proceeds
+    /// — with a warning saying the path itself is not forwarded.
+    /// </summary>
+    [TestMethod]
+    public async Task GameAssetInsidePackageDirectory_WarnsAndStillShellsOut()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var config = CreateConfig(package.Path);
+        config.GameAssets = new GameAssets
+        {
+            EkbFilePath = Path.Combine(Path.GetDirectoryName(package.Path)!, "game.ekb"),
+        };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        Assert.AreEqual(ExpectedArguments(package.Path), CapturedArguments());
+        _loggerMock.VerifyLogWarningContains("are not forwarded to MakePkg.exe");
+    }
+
+    #endregion
+
+    #region Forwarded package options
+
+    /// <summary>
+    /// MSIXVC2 never re-uploads unchanged content, so there is nothing for a delta flag to ask for and
+    /// MakePkg.exe decides what to transfer. The request must not reach the command line, and must not be
+    /// silently swallowed either.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithDeltaUpload_WarnsAndDoesNotForwardAnyDeltaFlag()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         SetUpAvailableTool();
@@ -265,146 +440,157 @@ public class UploadXvcPackageOperationMsixvc2Test
         var result = await CreateOperation(config).RunAsync(CancellationToken.None);
 
         Assert.AreEqual(0, result);
-        _processRunnerMock.Verify(
-            x => x.RunAsync(ResolvedMakePkgPath, ExpectedArguments(package.Path), It.IsAny<CancellationToken>()),
-            Times.Once);
-    }
-
-    [TestMethod]
-    public async Task NonZeroExitCode_FailsOperation()
-    {
-        using var package = TempPackageFile.CreateMsixvc2();
-        SetUpAvailableTool();
-        _processRunnerMock
-            .Setup(x => x.RunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Msixvc2ProcessResult(7, null));
-
-        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
-
-        Assert.AreEqual(3, result);
-        _loggerMock.VerifyLogErrorContains("MakePkg.exe failed with exit code 7");
+        Assert.AreEqual(ExpectedArguments(package.Path), CapturedArguments());
+        _loggerMock.VerifyLogWarningContains("'deltaUpload' is not passed to MakePkg.exe");
     }
 
     /// <summary>
-    /// Loop-breaker, direction 1: a normal (non-delegated) invocation delegates as usual.
+    /// SODB has a real MakePkg.exe flag, so unlike the co-located assets its path is forwarded verbatim
+    /// from wherever the caller put it.
     /// </summary>
     [TestMethod]
-    public async Task DelegationGuardAbsent_Delegates()
+    public async Task Msixvc2WithSodbAsset_ForwardsSodbPath()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         SetUpAvailableTool();
         SetUpSuccessfulRun();
-        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
+
+        var config = CreateConfig(package.Path);
+        config.GameAssets = new GameAssets { SodbFilePath = @"C:\elsewhere\game.sodb" };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        Assert.AreEqual(ExpectedArguments(package.Path, " /sodb \"C:\\elsewhere\\game.sodb\""), CapturedArguments());
+    }
+
+    #endregion
+
+    #region Availability and pre-download dates
+
+    /// <summary>
+    /// MakePkg.exe applies the schedule itself, so the dates go over the command line and PackageUploader
+    /// makes no ingestion call at all.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithAvailabilityDate_ForwardsDateAndDoesNotTouchIngestion()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate
+        {
+            IsEnabled = true,
+            EffectiveDate = new DateTime(2030, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+        };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        Assert.AreEqual(
+            ExpectedArguments(package.Path, " /availabilitydate \"2030-05-06T07:00:00.0000000Z\""),
+            CapturedArguments());
+        _serviceMock.VerifyNoOtherCalls();
+    }
+
+    [TestMethod]
+    public async Task Msixvc2WithPreDownloadDate_ForwardsBothDatesInOrder()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate
+        {
+            IsEnabled = true,
+            EffectiveDate = new DateTime(2030, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+        };
+        config.PreDownloadDate = new GamePackageDate
+        {
+            IsEnabled = true,
+            EffectiveDate = new DateTime(2030, 5, 1, 0, 0, 0, DateTimeKind.Utc),
+        };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        Assert.AreEqual(
+            ExpectedArguments(
+                package.Path,
+                " /availabilitydate \"2030-05-06T07:00:00.0000000Z\" /predownloaddate \"2030-05-01T00:00:00.0000000Z\""),
+            CapturedArguments());
+    }
+
+    /// <summary>
+    /// A disabled date is not the same as an absent one: it means "clear whatever is set". MakePkg.exe's
+    /// dedicated clear flags are what make that expressible, and the XVC1 path behaves the same way.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithDisabledDates_ForwardsClearFlags()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate { IsEnabled = false };
+        config.PreDownloadDate = new GamePackageDate { IsEnabled = false };
+
+        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        Assert.AreEqual(
+            ExpectedArguments(package.Path, " /clearavailabilitydate /clearpredownloaddate"),
+            CapturedArguments());
+    }
+
+    [TestMethod]
+    public async Task Msixvc2WithoutDates_ForwardsNoDateFlags()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
 
         var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
 
         Assert.AreEqual(0, result);
-        _processRunnerMock.Verify(
-            x => x.RunAsync(ResolvedMakePkgPath, ExpectedArguments(package.Path), It.IsAny<CancellationToken>()),
-            Times.Once);
+        Assert.AreEqual(ExpectedArguments(package.Path), CapturedArguments());
     }
 
     /// <summary>
-    /// Loop-breaker, direction 2: when this process was itself launched by MakePkg.exe, never delegate back.
-    /// Format detection is a heuristic, so a false positive on an XVC1 package could otherwise produce
-    /// PackageUploader.exe -> MakePkg.exe -> PackageUploader.exe recursion without bound.
+    /// <see cref="GamePackageDate"/> normalizes on assignment: it converts to UTC and truncates to the hour.
+    /// The XVC1 path already sends that normalized value to Partner Center, so forwarding the same value to
+    /// MakePkg.exe verbatim is what keeps the two paths agreeing on the instant. This test pins the
+    /// normalization, because a change to it would silently move release dates on both paths.
     /// </summary>
     [TestMethod]
-    public async Task DelegationGuardPresent_NeverShellsOutAndTakesLegacyPath()
+    public async Task Msixvc2WithLocalKindDate_ForwardsTheModelNormalizedUtcValue()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         SetUpAvailableTool();
         SetUpSuccessfulRun();
-        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(true);
 
-        _serviceMock
-            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
+        var local = new DateTime(2030, 5, 6, 7, 8, 9, DateTimeKind.Local);
 
-        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+        var config = CreateConfig(package.Path);
+        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = local };
 
-        Assert.AreEqual(3, result);
-        _processRunnerMock.VerifyNoOtherCalls();
-        _serviceMock.Verify(x => x.GetProductByBigIdAsync(BigId, It.IsAny<CancellationToken>()), Times.Once);
+        await CreateOperation(config).RunAsync(CancellationToken.None);
+
+        var utc = local.ToUniversalTime();
+        var expectedValue = new DateTime(utc.Year, utc.Month, utc.Day, utc.Hour, 0, 0, DateTimeKind.Utc)
+            .ToString("o", System.Globalization.CultureInfo.InvariantCulture);
+        Assert.AreEqual(
+            ExpectedArguments(package.Path, $" /availabilitydate \"{expectedValue}\""),
+            CapturedArguments());
     }
 
-    [TestMethod]
-    public async Task DelegationGuardPresent_LogsWarning()
-    {
-        using var package = TempPackageFile.CreateMsixvc2();
-        SetUpAvailableTool();
-        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(true);
-        _serviceMock
-            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
+    #endregion
 
-        await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
-
-        _loggerMock.VerifyLogWarningContains(Msixvc2DelegationGuard.EnvironmentVariableName);
-    }
-
-    /// <summary>
-    /// Loop-breaker, direction 3: the environment stamp only covers cycles PackageUploader.exe itself
-    /// starts. When MakePkg.exe is the entry point it invokes us with no stamp, so a MakePkg.exe parent must
-    /// independently suppress delegation.
-    /// </summary>
-    [TestMethod]
-    public async Task MakePkgParentProcess_NeverShellsOutAndTakesLegacyPath()
-    {
-        using var package = TempPackageFile.CreateMsixvc2();
-        SetUpAvailableTool();
-        SetUpSuccessfulRun();
-        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
-        _delegationGuardMock.Setup(x => x.GetMakePkgParentProcessName()).Returns("MakePkg.exe");
-
-        _serviceMock
-            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
-
-        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
-
-        Assert.AreEqual(3, result);
-        _processRunnerMock.VerifyNoOtherCalls();
-        _serviceMock.Verify(x => x.GetProductByBigIdAsync(BigId, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [TestMethod]
-    public async Task MakePkgParentProcess_LogsWarningNamingTheParent()
-    {
-        using var package = TempPackageFile.CreateMsixvc2();
-        SetUpAvailableTool();
-        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
-        _delegationGuardMock.Setup(x => x.GetMakePkgParentProcessName()).Returns("makepkg2.exe");
-        _serviceMock
-            .Setup(x => x.GetProductByBigIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new InvalidOperationException("took the normal XVC upload path"));
-
-        await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
-
-        _loggerMock.VerifyLogWarningContains("makepkg2.exe");
-    }
-
-    /// <summary>
-    /// The parent check must not become a blanket block: an ordinary parent (or an undeterminable one, which
-    /// the provider also reports as null) has to leave normal MSIXVC2 delegation working.
-    /// </summary>
-    [TestMethod]
-    public async Task NonMakePkgParentProcess_StillDelegates()
-    {
-        using var package = TempPackageFile.CreateMsixvc2();
-        SetUpAvailableTool();
-        SetUpSuccessfulRun();
-        _delegationGuardMock.SetupGet(x => x.IsDelegatedInvocation).Returns(false);
-        // null is the documented "parent unknown / not MakePkg" value.
-        _delegationGuardMock.Setup(x => x.GetMakePkgParentProcessName()).Returns((string)null!);
-
-        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
-
-        Assert.AreEqual(0, result);
-        _processRunnerMock.Verify(
-            x => x.RunAsync(ResolvedMakePkgPath, ExpectedArguments(package.Path), It.IsAny<CancellationToken>()),
-            Times.Once);
-    }
+    #region Authentication
 
     /// <summary>
     /// End-to-end proof of the CodeQL finding's underlying concern: with client-secret authentication the
@@ -419,13 +605,8 @@ public class UploadXvcPackageOperationMsixvc2Test
         SetUpAvailableTool();
         SetUpSuccessfulRun();
 
-        var operation = new UploadXvcPackageOperation(
-            _serviceMock.Object,
-            _loggerMock.Object,
-            Options.Create(CreateConfig(package.Path)),
-            _toolProviderMock.Object,
-            _processRunnerMock.Object,
-            _delegationGuardMock.Object,
+        var operation = CreateOperation(
+            CreateConfig(package.Path),
             new Msixvc2CommandLineContext(
                 IngestionExtensions.AuthenticationMethod.ClientSecret,
                 TenantId: "tenant-1",
@@ -448,166 +629,183 @@ public class UploadXvcPackageOperationMsixvc2Test
         _loggerMock.VerifyNeverLogged(secret);
     }
 
-    #region Availability and pre-download dates
-
-    private static GamePackage CreateGamePackage(string id)
-    {
-        var package = (GamePackage)RuntimeHelpers.GetUninitializedObject(typeof(GamePackage));
-        typeof(GamePackageResource).GetProperty("Id")!.SetValue(package, id);
-        return package;
-    }
-
-    private static async IAsyncEnumerable<GamePackage> AsAsync(params GamePackage[] packages)
-    {
-        foreach (var package in packages)
-        {
-            yield return package;
-        }
-
-        await Task.CompletedTask;
-    }
-
-    private (GameProduct Product, GamePackageBranch Branch) SetUpBranchWithPackages(params GamePackage[] packages)
-    {
-        var product = CreateProduct("1234567890", BigId);
-        var branch = (GamePackageBranch)RuntimeHelpers.GetUninitializedObject(typeof(GamePackageBranch));
-
-        _serviceMock
-            .Setup(x => x.GetProductByBigIdAsync(BigId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(product);
-        _serviceMock
-            .Setup(x => x.GetPackageBranchByFriendlyNameAsync(product, "Main", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(branch);
-        _serviceMock
-            .Setup(x => x.GetGamePackagesAsync(product, branch, "default", It.IsAny<CancellationToken>()))
-            .Returns(AsAsync(packages));
-
-        return (product, branch);
-    }
-
-    /// <summary>
-    /// The adoption case: MakePkg.exe uploads the package and reports its identity, and PackageUploader
-    /// applies the dates afterwards exactly as it does for XVC1.
-    /// </summary>
     [TestMethod]
-    public async Task Msixvc2WithAvailabilityDate_AppliesDatesToTheReportedPackage()
+    public async Task Msixvc2WithCertificatePath_ForwardsCertPath()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         SetUpAvailableTool();
         SetUpSuccessfulRun();
 
-        var uploaded = CreateGamePackage(UploadedPackageId);
-        var (product, branch) = SetUpBranchWithPackages(CreateGamePackage(Guid.NewGuid().ToString()), uploaded);
+        var operation = CreateOperation(
+            CreateConfig(package.Path),
+            new Msixvc2CommandLineContext(
+                IngestionExtensions.AuthenticationMethod.ClientCertificate,
+                TenantId: "tenant-1",
+                ClientId: "client-1",
+                CertificatePath: @"C:\certs\upload.pfx"));
 
-        var config = CreateConfig(package.Path);
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(3) };
-
-        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+        var result = await operation.RunAsync(CancellationToken.None);
 
         Assert.AreEqual(0, result);
-        _serviceMock.Verify(
-            x => x.SetXvcConfigurationAsync(product, branch, uploaded, "default", config, It.IsAny<CancellationToken>()),
+        _processRunnerMock.Verify(
+            x => x.RunAsync(
+                ResolvedMakePkgPath,
+                "upload /pd \"" + Path.GetFullPath(package.Path) + "\" /branch \"Main\" /market \"default\" " +
+                $"/storeid \"{BigId}\" /auth ClientCertificate /tenantid \"tenant-1\" /clientid \"client-1\" /certpath \"C:\\certs\\upload.pfx\"",
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
     /// <summary>
-    /// Without a configured date there is nothing to apply, so the delegated upload must not make any
-    /// ingestion calls at all — the same shape the pre-existing argument test asserts.
+    /// A password-protected PFX must still reach MakePkg.exe, and the password must never reach a log —
+    /// the same rule as a client secret.
     /// </summary>
     [TestMethod]
-    public async Task Msixvc2WithoutDates_DoesNotTouchIngestion()
+    public async Task Msixvc2WithCertificatePassword_PassesPasswordToProcessButNeverLogsIt()
+    {
+        const string password = "pfx-pass-phrase";
+
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var operation = CreateOperation(
+            CreateConfig(package.Path),
+            new Msixvc2CommandLineContext(
+                IngestionExtensions.AuthenticationMethod.ClientCertificate,
+                TenantId: "tenant-1",
+                ClientId: "client-1",
+                CertificatePath: @"C:\certs\upload.pfx",
+                CertificatePassword: password));
+
+        var result = await operation.RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(0, result);
+        Assert.IsTrue(CapturedArguments().Contains($"/certpassword \"{password}\"", StringComparison.Ordinal));
+        _loggerMock.VerifyNeverLogged(password);
+    }
+
+    /// <summary>
+    /// /certstore and /certlocation narrow a store lookup, so they belong with a subject or thumbprint
+    /// selector and would be meaningless alongside a certificate file.
+    /// </summary>
+    [TestMethod]
+    public async Task Msixvc2WithCertificateSubject_ForwardsSubjectAndStoreModifiers()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         SetUpAvailableTool();
         SetUpSuccessfulRun();
 
-        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
+        var operation = CreateOperation(
+            CreateConfig(package.Path),
+            new Msixvc2CommandLineContext(
+                IngestionExtensions.AuthenticationMethod.ClientCertificate,
+                TenantId: "tenant-1",
+                ClientId: "client-1",
+                CertificateSubject: "CN=Contoso",
+                CertificateStore: "My",
+                CertificateLocation: "CurrentUser"));
+
+        var result = await operation.RunAsync(CancellationToken.None);
 
         Assert.AreEqual(0, result);
-        _serviceMock.VerifyNoOtherCalls();
+        _processRunnerMock.Verify(
+            x => x.RunAsync(
+                ResolvedMakePkgPath,
+                It.Is<string>(a => a.EndsWith(
+                    "/auth ClientCertificate /tenantid \"tenant-1\" /clientid \"client-1\" /certsubject \"CN=Contoso\" /certstore \"My\" /certlocation \"CurrentUser\"",
+                    StringComparison.Ordinal)),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [TestMethod]
+    public async Task Msixvc2WithCertificatePathAndStoreModifiers_OmitsStoreModifiers()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+        SetUpSuccessfulRun();
+
+        var operation = CreateOperation(
+            CreateConfig(package.Path),
+            new Msixvc2CommandLineContext(
+                IngestionExtensions.AuthenticationMethod.ClientCertificate,
+                TenantId: "tenant-1",
+                ClientId: "client-1",
+                CertificatePath: @"C:\certs\upload.pfx",
+                CertificateStore: "My",
+                CertificateLocation: "CurrentUser"));
+
+        await operation.RunAsync(CancellationToken.None);
+
+        var arguments = CapturedArguments();
+        Assert.IsFalse(arguments.Contains("/certstore", StringComparison.Ordinal), arguments);
+        Assert.IsFalse(arguments.Contains("/certlocation", StringComparison.Ordinal), arguments);
     }
 
     /// <summary>
-    /// If MakePkg.exe does not report an identity we must not guess. The upload has already succeeded, so
-    /// the failure has to say that plainly rather than reading as a failed upload.
+    /// MakePkg.exe accepts exactly one certificate selector and fails the whole upload when given more.
+    /// Catching that here means the error names PackageUploader's own config keys and arrives before any
+    /// work starts.
     /// </summary>
     [TestMethod]
-    public async Task Msixvc2WithDatesButNoReportedPackageId_FailsWithoutSettingDates()
+    public async Task Msixvc2WithMultipleCertificateSelectors_FailsAndDoesNotShellOut()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+
+        var operation = CreateOperation(
+            CreateConfig(package.Path),
+            new Msixvc2CommandLineContext(
+                IngestionExtensions.AuthenticationMethod.ClientCertificate,
+                TenantId: "tenant-1",
+                ClientId: "client-1",
+                CertificatePath: @"C:\certs\upload.pfx",
+                CertificateThumbprint: "ABCDEF"));
+
+        var result = await operation.RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _processRunnerMock.VerifyNoOtherCalls();
+        _loggerMock.VerifyLogErrorContains("accepts only one certificate selector");
+    }
+
+    [TestMethod]
+    public async Task Msixvc2WithNoCertificateSelector_FailsAndDoesNotShellOut()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        SetUpAvailableTool();
+
+        var operation = CreateOperation(
+            CreateConfig(package.Path),
+            new Msixvc2CommandLineContext(
+                IngestionExtensions.AuthenticationMethod.ClientCertificate,
+                TenantId: "tenant-1",
+                ClientId: "client-1"));
+
+        var result = await operation.RunAsync(CancellationToken.None);
+
+        Assert.AreEqual(3, result);
+        _processRunnerMock.VerifyNoOtherCalls();
+        _loggerMock.VerifyLogErrorContains("requires a certificate path, thumbprint, or subject");
+    }
+
+    #endregion
+
+    [TestMethod]
+    public async Task NonZeroExitCode_FailsOperation()
     {
         using var package = TempPackageFile.CreateMsixvc2();
         SetUpAvailableTool();
         _processRunnerMock
             .Setup(x => x.RunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Msixvc2ProcessResult(0, null));
+            .ReturnsAsync(new Msixvc2ProcessResult(7));
 
-        var config = CreateConfig(package.Path);
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(3) };
-
-        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
+        var result = await CreateOperation(CreateConfig(package.Path)).RunAsync(CancellationToken.None);
 
         Assert.AreEqual(3, result);
-        _loggerMock.VerifyLogErrorContains("did not report which package it created");
-        _loggerMock.VerifyLogErrorContains("The upload itself is unaffected");
-        _serviceMock.Verify(
-            x => x.SetXvcConfigurationAsync(
-                It.IsAny<GameProduct>(), It.IsAny<IGamePackageBranch>(), It.IsAny<GamePackage>(),
-                It.IsAny<string>(), It.IsAny<IXvcGameConfiguration>(), It.IsAny<CancellationToken>()),
-            Times.Never);
+        _loggerMock.VerifyLogErrorContains("MakePkg.exe failed with exit code 7");
     }
-
-    /// <summary>
-    /// The reported identity is verified against the target market group rather than trusted. A package that
-    /// is not there must fail rather than have dates written somewhere else.
-    /// </summary>
-    [TestMethod]
-    public async Task Msixvc2WithDatesButPackageNotInMarketGroup_FailsWithoutSettingDates()
-    {
-        using var package = TempPackageFile.CreateMsixvc2();
-        SetUpAvailableTool();
-        SetUpSuccessfulRun();
-
-        SetUpBranchWithPackages(CreateGamePackage(Guid.NewGuid().ToString()));
-
-        var config = CreateConfig(package.Path);
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = true, EffectiveDate = DateTime.UtcNow.AddDays(3) };
-
-        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
-
-        Assert.AreEqual(3, result);
-        _loggerMock.VerifyLogErrorContains($"('{UploadedPackageId}') is not in market group 'default'");
-        _serviceMock.Verify(
-            x => x.SetXvcConfigurationAsync(
-                It.IsAny<GameProduct>(), It.IsAny<IGamePackageBranch>(), It.IsAny<GamePackage>(),
-                It.IsAny<string>(), It.IsAny<IXvcGameConfiguration>(), It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
-
-    /// <summary>
-    /// A disabled date is still a configured date: the XVC1 path calls through so the value is cleared, and
-    /// MSIXVC2 must not quietly differ.
-    /// </summary>
-    [TestMethod]
-    public async Task Msixvc2WithDisabledAvailabilityDate_StillAppliesConfiguration()
-    {
-        using var package = TempPackageFile.CreateMsixvc2();
-        SetUpAvailableTool();
-        SetUpSuccessfulRun();
-
-        var uploaded = CreateGamePackage(UploadedPackageId);
-        var (product, branch) = SetUpBranchWithPackages(uploaded);
-
-        var config = CreateConfig(package.Path);
-        config.AvailabilityDate = new GamePackageDate { IsEnabled = false };
-
-        var result = await CreateOperation(config).RunAsync(CancellationToken.None);
-
-        Assert.AreEqual(0, result);
-        _serviceMock.Verify(
-            x => x.SetXvcConfigurationAsync(product, branch, uploaded, "default", config, It.IsAny<CancellationToken>()),
-            Times.Once);
-    }
-
-    #endregion
 
     [TestMethod]
     public async Task Cancellation_PropagatesTokenAndFailsOperation()
@@ -630,4 +828,3 @@ public class UploadXvcPackageOperationMsixvc2Test
         Assert.IsTrue(observedToken.IsCancellationRequested, "The operation cancellation token must be handed to the process runner.");
     }
 }
-
