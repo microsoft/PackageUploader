@@ -118,4 +118,27 @@ public class UploadXvcPackageOperationConfigTest
 
         Assert.DoesNotContain(r => r.MemberNames.Contains("GameAssets"), results);
     }
+
+    /// <remarks>
+    /// Loose content is refused by the operation with a message that names the real problem. Requiring
+    /// GameAssets here would pre-empt that with a complaint about an unrelated field, so the user would be
+    /// told to supply an EKB for content that has no package to attach one to.
+    /// </remarks>
+    [TestMethod]
+    public void Validate_LooseGameContentWithoutGameAssets_NoGameAssetsError()
+    {
+        using var content = Test.Tools.TempLooseContent.Create();
+        var config = new TestUploadXvcPackageOperationConfig
+        {
+            OperationName = "UploadXvcPackage",
+            ProductId = "product-123",
+            BranchFriendlyName = "main",
+            PackageFilePath = content.Path,
+            GameAssets = null,
+        };
+
+        var results = ConfigTestHelper.ValidateConfig(config);
+
+        Assert.DoesNotContain(r => r.MemberNames.Contains("GameAssets"), results);
+    }
 }

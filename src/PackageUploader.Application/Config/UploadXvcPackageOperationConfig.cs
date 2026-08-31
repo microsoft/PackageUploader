@@ -16,10 +16,11 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
 {
     internal override string GetOperationName() => "UploadXvcPackage";
 
-    // Not [Required] at the attribute level: MSIXVC2 packages are uploaded by MakePkg.exe, which discovers
-    // EKB and submission-validator assets by co-location with the package rather than by path, so the
-    // configured paths are not forwarded. Requiredness is enforced in Validate() for every non-MSIXVC2
-    // package, so XVC1 behaviour is unchanged.
+    // Not [Required] at the attribute level: this field is only meaningful for a package PackageUploader
+    // uploads itself. MSIXVC2 packages are uploaded by MakePkg.exe, which discovers EKB and
+    // submission-validator assets by co-location with the package rather than by path, and loose content is
+    // refused outright. Requiredness is enforced in Validate() for everything else, so XVC1 behaviour is
+    // unchanged.
     [ValidateObjectMembers]
     public GameAssets GameAssets { get; set; }
 
@@ -32,7 +33,13 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
         foreach (var validationResult in base.Validate(validationContext))
             yield return validationResult;
 
-        if (GameAssets is null && !PackageFormatDetector.IsLikelyMsixvc2Package(PackageFilePath))
+        // Loose content is exempt for the same reason MSIXVC2 is: it never reaches the upload path that
+        // consumes these assets. Demanding them here would replace the operation's specific "this is loose
+        // content, PackageUploader cannot build a package" message with a misleading complaint about an
+        // unrelated field, which is the opposite of helpful.
+        if (GameAssets is null &&
+            !PackageFormatDetector.IsLikelyMsixvc2Package(PackageFilePath) &&
+            !PackageFormatDetector.IsLooseGameContent(PackageFilePath))
         {
             yield return new ValidationResult($"The {nameof(GameAssets)} field is required.", [nameof(GameAssets)]);
         }
