@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using PackageUploader.Application.Config;
 using PackageUploader.ClientApi;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using PackageUploader.ClientApi.Models;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,42 @@ internal static class Msixvc2UploadArgumentBuilder
 {
     /// <summary>Stands in for a credential in the command line built for logging.</summary>
     private const string RedactedValue = "***";
+
+    /// <summary>
+    /// The configuration paths named in error messages, derived from the binding models rather than
+    /// written out by hand.
+    ///
+    /// These strings tell a user which key to edit, so a wrong one sends them to a section that has no such
+    /// key. That is easy to get wrong because the certificate settings are split across TWO sections that
+    /// do not mirror each other: the store-based selectors bind to AadAuthInfo, while the file-based
+    /// selector and its password bind to ClientCertificateAuthInfo. Building the paths from
+    /// <c>nameof</c> means a renamed property breaks the build instead of silently misdirecting the user.
+    /// </summary>
+    private static class ConfigPaths
+    {
+        private const string Aad = nameof(AadAuthInfo);
+        private const string ClientSecretSection = nameof(ClientSecretAuthInfo);
+        private const string ClientCertificateSection = nameof(ClientCertificateAuthInfo);
+
+        public const string AadClientId = $"{Aad}:{nameof(AadAuthInfo.ClientId)}";
+        public const string AadClientSecret = $"{Aad}:{nameof(AzureApplicationSecretAuthInfo.ClientSecret)}";
+        public const string CertificateThumbprint = $"{Aad}:{nameof(AzureApplicationCertificateAuthInfo.CertificateThumbprint)}";
+        public const string CertificateSubject = $"{Aad}:{nameof(AzureApplicationCertificateAuthInfo.CertificateSubject)}";
+
+        public const string ClientSecretClientId = $"{ClientSecretSection}:{nameof(ClientSecretAuthInfo.ClientId)}";
+        public const string ClientSecretValue = $"{ClientSecretSection}:{nameof(ClientSecretAuthInfo.ClientSecret)}";
+
+        // CertificatePath and CertificatePassword exist ONLY on ClientCertificateAuthInfo. AadAuthInfo and
+        // its subclasses have no file-based certificate settings at all, so naming AadAuthInfo here would
+        // point the user at a section that cannot hold the value.
+        public const string CertificateClientId = $"{ClientCertificateSection}:{nameof(ClientCertificateAuthInfo.ClientId)}";
+        public const string CertificatePath = $"{ClientCertificateSection}:{nameof(ClientCertificateAuthInfo.CertificatePath)}";
+
+        // Deliberately a literal: unlike every other path here, no binding model declares this key. MakePkg
+        // requires a resource id for ManagedIdentityFederated and PackageUploader's federated model has no
+        // counterpart, so the key is read straight from configuration and cannot be tied to a nameof.
+        public const string ResourceId = $"{Aad}:ResourceId";
+    }
 
     /// <summary>
     /// The /auth values accepted by MakePkg.exe, taken verbatim from its option declarations.
@@ -243,8 +280,8 @@ internal static class Msixvc2UploadArgumentBuilder
         switch (method)
         {
             case IngestionExtensions.AuthenticationMethod.ClientSecret:
-                RequireCredential(context.ClientId, "/clientid", "a client id", "AadAuthInfo:ClientId or ClientSecretAuthInfo:ClientId");
-                RequireCredential(context.ClientSecret, "/clientsecret", "a client secret", "AadAuthInfo:ClientSecret or ClientSecretAuthInfo:ClientSecret");
+                RequireCredential(context.ClientId, "/clientid", "a client id", $"{ConfigPaths.AadClientId} or {ConfigPaths.ClientSecretClientId}");
+                RequireCredential(context.ClientSecret, "/clientsecret", "a client secret", $"{ConfigPaths.AadClientSecret} or {ConfigPaths.ClientSecretValue}");
                 args.Append(Invariant($" /clientsecret \"{context.ClientSecret}\""));
                 break;
 
@@ -253,10 +290,19 @@ internal static class Msixvc2UploadArgumentBuilder
                 break;
 
             case IngestionExtensions.AuthenticationMethod.ManagedIdentityFederated:
-                if (!string.IsNullOrWhiteSpace(context.ResourceId))
-                {
-                    args.Append(Invariant($" /resourceid \"{context.ResourceId}\""));
-                }
+                // MakePkg.exe requires /resourceid for this method, and PackageUploader's own federated
+                // model has no equivalent: it authenticates with a user-assigned identity client id plus an
+                // application tenant/client pair and exchanges a token, so there is nothing to map a
+                // resource id from. The value therefore only ever arrives when a user sets the key
+                // directly in the config file. Omitting it silently would hand MakePkg.exe a command line
+                // it is guaranteed to reject, so the gap is reported here instead, naming the method and
+                // the key rather than leaving the user to decode a child-process failure.
+                RequireCredential(
+                    context.ResourceId,
+                    "/resourceid",
+                    "an Azure resource id",
+                    ConfigPaths.ResourceId);
+                args.Append(Invariant($" /resourceid \"{context.ResourceId}\""));
                 break;
         }
     }
@@ -272,23 +318,26 @@ internal static class Msixvc2UploadArgumentBuilder
     /// </summary>
     private static void AppendCertificateArguments(StringBuilder args, Msixvc2CommandLineContext context)
     {
-        RequireCredential(context.ClientId, "/clientid", "a client id", "AadAuthInfo:ClientId");
+        // Either section can supply the client id: the store-based selectors bind to AadAuthInfo and the
+        // file-based one to ClientCertificateAuthInfo, so both are named rather than guessing which the
+        // user is using.
+        RequireCredential(context.ClientId, "/clientid", "a client id", $"{ConfigPaths.AadClientId} or {ConfigPaths.CertificateClientId}");
 
         var selectors = new List<(string Flag, string Value, string ConfigPath, bool UsesStore)>();
 
         if (!string.IsNullOrWhiteSpace(context.CertificatePath))
         {
-            selectors.Add(("/certpath", context.CertificatePath, "AadAuthInfo:CertificatePath", false));
+            selectors.Add(("/certpath", context.CertificatePath, ConfigPaths.CertificatePath, false));
         }
 
         if (!string.IsNullOrWhiteSpace(context.CertificateThumbprint))
         {
-            selectors.Add(("/certthumbprint", context.CertificateThumbprint, "AadAuthInfo:CertificateThumbprint", true));
+            selectors.Add(("/certthumbprint", context.CertificateThumbprint, ConfigPaths.CertificateThumbprint, true));
         }
 
         if (!string.IsNullOrWhiteSpace(context.CertificateSubject))
         {
-            selectors.Add(("/certsubject", context.CertificateSubject, "AadAuthInfo:CertificateSubject", true));
+            selectors.Add(("/certsubject", context.CertificateSubject, ConfigPaths.CertificateSubject, true));
         }
 
         if (selectors.Count == 0)
@@ -296,7 +345,7 @@ internal static class Msixvc2UploadArgumentBuilder
             throw new Msixvc2UnsupportedOptionException(
                 "MakePkg.exe requires a certificate path, thumbprint, or subject (/certpath, /certthumbprint or /certsubject) " +
                 "for certificate authentication during an MSIXVC2 upload, but none was configured. " +
-                "Set AadAuthInfo:CertificatePath, AadAuthInfo:CertificateThumbprint or AadAuthInfo:CertificateSubject in the config file.");
+                $"Set {ConfigPaths.CertificatePath}, {ConfigPaths.CertificateThumbprint} or {ConfigPaths.CertificateSubject} in the config file.");
         }
 
         if (selectors.Count > 1)

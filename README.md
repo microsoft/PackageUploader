@@ -238,6 +238,11 @@ configured:
 Configuring more than one selector fails with an error naming the conflicting keys, because MakePkg.exe rejects such a
 command line. Credentials are never written to the console or log file.
 
+`ManagedIdentityFederated` needs one extra setting. MakePkg.exe requires an Azure resource id for this method, and
+PackageUploader's own federated model has no equivalent to map from — it authenticates with a user-assigned identity
+client id plus an application tenant and client id. Set `AadAuthInfo:ResourceId` in the configuration file to supply
+one; delegating without it fails with an error naming that key rather than a message from MakePkg.exe.
+
 ### Available parameters
 
 | Parameter | Description |

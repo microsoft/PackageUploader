@@ -8,9 +8,11 @@ using PackageUploader.Application.Config;
 using PackageUploader.Application.Tools;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.Models;
+using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using PackageUploader.ClientApi.Models;
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace PackageUploader.Application.Test.Tools;
 
@@ -240,6 +242,26 @@ public class Msixvc2UploadArgumentBuilderTest
         StringAssert.Contains(arguments, "/resourceid \"resource-1\"");
     }
 
+    /// <remarks>
+    /// MakePkg.exe requires /resourceid for this method, and PackageUploader has no config model that
+    /// carries one. Omitting it would build a command line the child is certain to reject, so the gap is
+    /// reported here with the key that supplies it.
+    /// </remarks>
+    [TestMethod]
+    public void Build_WithManagedIdentityFederatedButNoResourceId_Throws()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.ManagedIdentityFederated,
+            ClientId: "client-1");
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(CreateConfig(package.Path), context));
+
+        StringAssert.Contains(exception.Message, "/resourceid");
+        StringAssert.Contains(exception.Message, "AadAuthInfo:ResourceId");
+    }
+
     [TestMethod]
     public void Build_WithClientSecretButNoSecret_Throws()
     {
@@ -330,6 +352,53 @@ public class Msixvc2UploadArgumentBuilderTest
             () => Build(CreateConfig(package.Path), context));
 
         StringAssert.Contains(exception.Message, "/certthumbprint");
+    }
+
+    /// <summary>
+    /// Pins the configuration keys named in the "no selector configured" error against the binding models.
+    ///
+    /// The certificate settings are split across two sections that do not mirror each other, so an error
+    /// message can easily name a section that has no such key — which sends the user to edit a setting that
+    /// will never be read. Reflection is used deliberately: asserting the literal strings would only restate
+    /// the message, whereas resolving each named key against the type that binds its section fails if either
+    /// the message or the model moves.
+    /// </summary>
+    [TestMethod]
+    public void Build_WithCertificateButNoSelector_NamesKeysThatExistOnTheBindingModels()
+    {
+        using var package = TempPackageFile.CreateMsixvc2();
+        var context = new Msixvc2CommandLineContext(
+            IngestionExtensions.AuthenticationMethod.ClientCertificate,
+            TenantId: "tenant-1",
+            ClientId: "client-1");
+
+        var exception = Assert.ThrowsExactly<Msixvc2UnsupportedOptionException>(
+            () => Build(CreateConfig(package.Path), context));
+
+        // CertificatePath lives on ClientCertificateAuthInfo only; the store selectors live on AadAuthInfo.
+        AssertNamedConfigKeyExists(exception.Message, typeof(ClientCertificateAuthInfo), nameof(ClientCertificateAuthInfo.CertificatePath));
+        AssertNamedConfigKeyExists(exception.Message, typeof(AzureApplicationCertificateAuthInfo), nameof(AzureApplicationCertificateAuthInfo.CertificateThumbprint));
+        AssertNamedConfigKeyExists(exception.Message, typeof(AzureApplicationCertificateAuthInfo), nameof(AzureApplicationCertificateAuthInfo.CertificateSubject));
+    }
+
+    /// <summary>
+    /// Asserts the message names "<c>Section:Key</c>" using the section the supplied type binds to, and that
+    /// the type really declares that key.
+    /// </summary>
+    private static void AssertNamedConfigKeyExists(string message, Type bindingType, string propertyName)
+    {
+        var sectionField = bindingType
+            .GetField("ConfigName", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+
+        Assert.IsNotNull(sectionField, $"{bindingType.Name} does not declare a ConfigName section constant.");
+
+        var sectionName = sectionField.GetValue(null) as string;
+
+        Assert.IsNotNull(
+            bindingType.GetProperty(propertyName),
+            $"{bindingType.Name} does not declare {propertyName}, so '{sectionName}:{propertyName}' cannot be bound from configuration.");
+
+        StringAssert.Contains(message, $"{sectionName}:{propertyName}");
     }
 
     #endregion

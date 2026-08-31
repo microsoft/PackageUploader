@@ -159,6 +159,10 @@ namespace PackageUploader.Application.Extensions
                 CertificateLocation: aad[nameof(AzureApplicationCertificateAuthInfo.CertificateLocation)],
                 CertificatePath: clientCertificate[nameof(ClientCertificateAuthInfo.CertificatePath)],
                 CertificatePassword: clientCertificate[nameof(ClientCertificateAuthInfo.CertificatePassword)],
+                // No binding model declares this key, so it is read directly from configuration. MakePkg.exe
+                // requires a resource id for ManagedIdentityFederated and PackageUploader's own federated
+                // model has no equivalent to map from, so this is the only way a user can supply one. The
+                // argument builder reports a clear error when the method is selected without it.
                 ResourceId: aad["ResourceId"]);
         }
 
