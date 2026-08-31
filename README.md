@@ -12,6 +12,7 @@ This ReadMe covers the following:
 * [Service creation and authentication](#service-creation-and-authentication)
 * [Get Package Uploader](#get-package-uploader)
 * [Run Package Uploader](#run-package-uploader)
+* [MSIXVC2 packages](#msixvc2-packages)
 * [Putting it all together](#putting-it-all-together)
 * [Example GetProduct operation](#example-getproduct-operation)
 * [Example UploadXvcPackage operation](#example-uploadxvcpackage-operation)
@@ -176,12 +177,71 @@ The following table has important arguments for running Package Uploader.
 | **[GetProduct](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetProduct)** | Gets metadata for the product. This is useful for getting the productId, BigId, and product name that's used in all configuration files. This also gets a list of the BranchFriendlyNames and FlightNames of the product. |
 | **[GetPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#GetPackages)** | Gets a list of the packages in a branch or flight. |
 | **[UploadUwpPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadUwpPackage)** | Uploads a UWP game package. |
-| **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads an XVC game package and assets, including EKB, SubVal, layout, and SODB files. |
+| **[UploadXvcPackage](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#UploadXvcPackage)** | Uploads an XVC game package and assets, including EKB, SubVal, layout, and SODB files. MSIXVC2 packages are detected automatically and uploaded through MakePkg.exe — see [MSIXVC2 packages](#msixvc2-packages). |
 | **[RemovePackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#RemovePackages)** | Removes game packages and assets from a branch. We recommend keeping only your 10 most recent packages to ensure optimal performance. |
 | **[ImportPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#ImportPackages)** | Imports all game packages from a branch to a destination branch. Use this operation to copy your previously uploaded and published packages from one branch to another. |
 | **[PublishPackages](https://github.com/microsoft/PackageUploader/blob/main/Operations.md#PublishPackages)** | Publishes all game packages from a branch or flight to a destination sandbox or flight. You can set specific availability times in the configuration file. |
 
 For more information about operation parameters, see [Operations](https://github.com/microsoft/PackageUploader/blob/main/Operations.md).
+
+### MSIXVC2 packages
+
+`UploadXvcPackage` detects the package format from the file you point `packageFilePath` at. When the package is an
+MSIXVC2 package, PackageUploader delegates the upload to the MSIXVC2-capable `MakePkg.exe` that ships with the Microsoft
+GDK, because MakePkg.exe owns the MSIXVC2 upload protocol. There is no separate operation name and no new configuration
+switch — an XVC1/MSIXVC1 package continues to be uploaded by PackageUploader itself, exactly as before.
+
+Delegation happens only when both conditions hold:
+
+1. The file is positively identified as an MSIXVC2 package.
+2. The installed `MakePkg.exe` reports the `xvc1upload` capability (`makepkg supports xvc1upload`).
+
+If either check fails the operation stops with an actionable error rather than attempting an upload that cannot succeed.
+
+The following configuration options behave differently on the MSIXVC2 path:
+
+| Option | Behavior |
+| --- | --- |
+| `gameAssets` | Mostly not required. MakePkg.exe discovers the EKB, submission validator log, and symbol bundle in the folder that contains the package and uploads them, so those paths are not forwarded. If they resolve to that same folder they are ignored with a warning; if they point elsewhere the operation fails so an asset is never silently dropped. `sodbFilePath` is forwarded to MakePkg.exe (`/sodb`) from any location. `discLayoutFilePath` is rejected — MakePkg.exe has no MSIXVC2 disc-layout upload. |
+| `minutesToWaitForProcessing` | Ignored with a warning. MakePkg.exe manages its own processing wait. |
+| `deltaUpload` | Ignored with a warning. MSIXVC2 packages never re-upload unchanged content, so MakePkg.exe decides what to transfer. |
+| `availabilityDate` / `preDownloadDate` | Supported. Both are forwarded to MakePkg.exe, which applies the schedule itself. A disabled date sends the matching clear flag, so "clear the date" stays distinguishable from "leave the date alone", exactly as on the XVC1 path. |
+| `productId` | Supported. It is resolved to the corresponding Big ID, which is what MakePkg.exe requires. |
+| Authentication | Supported, including non-interactive/CI authentication. See [Authentication on the MSIXVC2 path](#authentication-on-the-msixvc2-path). |
+
+#### Loose game content is not supported
+
+PackageUploader uploads a **built package**; it has no packaging step. Pointing `packageFilePath` at a loose content
+directory or at a `MicrosoftGame.config` fails with an explicit error. Use MakePkg.exe to pack and upload loose content.
+
+#### Authentication on the MSIXVC2 path
+
+MakePkg.exe acquires its own token, so PackageUploader forwards the identity you configured rather than forcing an
+interactive sign-in. `--Authentication`, `--TenantId`, and the client id / secret / certificate values from your
+configuration file are passed through, so an unattended pipeline using a service principal keeps working.
+
+| `--Authentication` | Forwarded to MakePkg.exe as |
+| --- | --- |
+| `AppSecret` | `ClientSecret` (PackageUploader's legacy name for the same AAD application secret flow) |
+| `AppCert` | `ClientCertificate` |
+| `Default`, `Browser`, `CacheableBrowser`, `AzureCli`, `ManagedIdentity`, `ManagedIdentityFederated`, `Environment`, `AzurePipelines`, `ClientSecret`, `ClientCertificate` | The same value |
+
+Certificate authentication supports all three selectors MakePkg.exe accepts, but **exactly one** of them may be
+configured:
+
+| Configuration | Forwarded as |
+| --- | --- |
+| `AadAuthInfo:CertificateThumbprint` | `/certthumbprint`, plus `/certstore` and `/certlocation` when set |
+| `AadAuthInfo:CertificateSubject` | `/certsubject`, plus `/certstore` and `/certlocation` when set |
+| `ClientCertificateAuthInfo:CertificatePath` | `/certpath`, plus `/certpassword` when set |
+
+Configuring more than one selector fails with an error naming the conflicting keys, because MakePkg.exe rejects such a
+command line. Credentials are never written to the console or log file.
+
+`ManagedIdentityFederated` needs one extra setting. MakePkg.exe requires an Azure resource id for this method, and
+PackageUploader's own federated model has no equivalent to map from — it authenticates with a user-assigned identity
+client id plus an application tenant and client id. Set `AadAuthInfo:ResourceId` in the configuration file to supply
+one; delegating without it fails with an error naming that key rather than a message from MakePkg.exe.
 
 ### Available parameters
 

@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Options;
 using PackageUploader.ClientApi.Models;
+using PackageUploader.ClientApi.Packaging;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -15,7 +16,11 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
 {
     internal override string GetOperationName() => "UploadXvcPackage";
 
-    [Required]
+    // Not [Required] at the attribute level: this field is only meaningful for a package PackageUploader
+    // uploads itself. MSIXVC2 packages are uploaded by MakePkg.exe, which discovers EKB and
+    // submission-validator assets by co-location with the package rather than by path, and loose content is
+    // refused outright. Requiredness is enforced in Validate() for everything else, so XVC1 behaviour is
+    // unchanged.
     [ValidateObjectMembers]
     public GameAssets GameAssets { get; set; }
 
@@ -27,6 +32,17 @@ internal class UploadXvcPackageOperationConfig : UploadPackageOperationConfig, I
     {
         foreach (var validationResult in base.Validate(validationContext))
             yield return validationResult;
+
+        // Loose content is exempt for the same reason MSIXVC2 is: it never reaches the upload path that
+        // consumes these assets. Demanding them here would replace the operation's specific "this is loose
+        // content, PackageUploader cannot build a package" message with a misleading complaint about an
+        // unrelated field, which is the opposite of helpful.
+        if (GameAssets is null &&
+            !PackageFormatDetector.IsLikelyMsixvc2Package(PackageFilePath) &&
+            !PackageFormatDetector.IsLooseGameContent(PackageFilePath))
+        {
+            yield return new ValidationResult($"The {nameof(GameAssets)} field is required.", [nameof(GameAssets)]);
+        }
 
         if (PreDownloadDate is { IsEnabled: true, EffectiveDate: null })
         {
