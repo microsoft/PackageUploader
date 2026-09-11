@@ -21,11 +21,15 @@ internal class UploadSourceConfig
     /// Header value used by the Xbox Game Package Manager (XGPM) UI.
     public const string XgpmSource = "XGPM";
 
+    /// Header value used by makepkg2 (makepkg2 -> packagingservices dll -> PackageUploader).
+    public const string MakePkg2Source = "makepkg2";
+
     /// Case-insensitive set of permitted UploadSource values.
     private static readonly HashSet<string> AllowedValues = new(StringComparer.OrdinalIgnoreCase)
     {
         PackageUploaderSource,
         XgpmSource,
+        MakePkg2Source,
     };
 
     /// The UploadSource value to send. Defaults to PackageUploaderSource.
