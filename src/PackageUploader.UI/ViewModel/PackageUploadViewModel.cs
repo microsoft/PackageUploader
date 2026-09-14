@@ -839,7 +839,7 @@ public partial class PackageUploadViewModel : BaseViewModel
             // The package's shell visuals are not loose entries in the archive, so they have to be
             // extracted by an external tool. Show the placeholder now and swap it in if the extract lands.
             PackagePreviewImage = LoadPackagePlaceholderImage();
-            Msixvc2PreviewImageTask = LoadMsixvc2PreviewImageAsync(packagePath, gameConfig);
+            Msixvc2PreviewImageTask = LoadMsixvc2PreviewImageAsync(packagePath, Path.GetDirectoryName(tempConfigPath), gameConfig);
 
             try
             {
@@ -881,7 +881,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     /// packageutil.exe, and does nothing when the asset cannot be extracted so that the placeholder
     /// simply stays put.
     /// </summary>
-    private Task LoadMsixvc2PreviewImageAsync(string packagePath, PartialGameConfigModel gameConfig)
+    private Task LoadMsixvc2PreviewImageAsync(string packagePath, string? configDirectory, PartialGameConfigModel gameConfig)
     {
         string packageUtilPath = _pathConfigurationService.PackageUtilPath ?? string.Empty;
         if (string.IsNullOrEmpty(packageUtilPath))
@@ -889,11 +889,13 @@ public partial class PackageUploadViewModel : BaseViewModel
             return Task.CompletedTask;
         }
 
+        // PartialGameConfigModel roots shell visuals against the config's own directory, but the
+        // packaged files are named by their path relative to it, so convert back before matching.
         string[] assetCandidates =
         [
-            gameConfig.ShellVisuals.Square150x150Logo,
-            gameConfig.ShellVisuals.StoreLogo,
-            gameConfig.ShellVisuals.Square44x44Logo,
+            Msixvc2LogoExtractor.GetRelativeAssetPath(configDirectory ?? string.Empty, gameConfig.ShellVisuals.Square150x150Logo),
+            Msixvc2LogoExtractor.GetRelativeAssetPath(configDirectory ?? string.Empty, gameConfig.ShellVisuals.StoreLogo),
+            Msixvc2LogoExtractor.GetRelativeAssetPath(configDirectory ?? string.Empty, gameConfig.ShellVisuals.Square44x44Logo),
         ];
 
         return Task.Run(() =>

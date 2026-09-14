@@ -30,12 +30,12 @@ internal static class Msixvc2LogoExtractor
     private const long MaxAssetBytes = 32 * 1024 * 1024;
 
     /// <summary>
-    /// Returns the bytes of the first of <paramref name="preferredAssetNames"/> that the package
-    /// actually contains, or null when nothing usable can be extracted. Never throws: every failure
-    /// mode - no packageutil.exe, an encrypted package, a tool error - is a null so that the caller
-    /// can fall back to the placeholder image.
+    /// Returns the bytes of the first of <paramref name="preferredAssetPaths"/> that the package
+    /// actually contains, or null when nothing usable can be extracted. Each path is relative to
+    /// MicrosoftGame.config. Never throws: every failure mode - no packageutil.exe, an encrypted
+    /// package, a tool error - is a null so that the caller can fall back to the placeholder image.
     /// </summary>
-    internal static byte[]? TryExtractAsset(string packageUtilPath, string packagePath, IReadOnlyList<string> preferredAssetNames)
+    internal static byte[]? TryExtractAsset(string packageUtilPath, string packagePath, IReadOnlyList<string> preferredAssetPaths)
     {
         try
         {
@@ -49,7 +49,7 @@ internal static class Msixvc2LogoExtractor
                 return null;
             }
 
-            string? assetName = SelectAsset(ParseFileNames(listing), preferredAssetNames);
+            string? assetName = SelectAsset(ParseFileNames(listing), preferredAssetPaths);
             if (assetName is null)
             {
                 return null;
@@ -105,36 +105,110 @@ internal static class Msixvc2LogoExtractor
     }
 
     /// <summary>
-    /// Picks the packaged file matching the earliest usable entry of <paramref name="preferredAssetNames"/>.
-    /// The names declared in MicrosoftGame.config do not necessarily match the packaged files' casing,
-    /// and packageutil matches the name it was given exactly, so the packaged spelling is what is returned.
+    /// Picks the packaged file matching the earliest usable entry of <paramref name="preferredAssetPaths"/>,
+    /// each of which is a path relative to MicrosoftGame.config.
     /// </summary>
-    internal static string? SelectAsset(IReadOnlyList<string> packagedNames, IReadOnlyList<string> preferredAssetNames)
+    /// <remarks>
+    /// The full relative path is matched first, because a package may legitimately contain several
+    /// files with the same name in different directories and only the path distinguishes them.
+    /// Packaging can also relocate a shell visual - generated tiles are emitted at the package root
+    /// regardless of where the source asset lived - so a file name match is kept as a fallback, but
+    /// only when exactly one packaged file bears that name. An ambiguous name is skipped rather than
+    /// guessed at, which at worst costs the real logo and leaves the placeholder.
+    ///
+    /// Matching is case-insensitive because the names declared in MicrosoftGame.config need not match
+    /// the packaged files' casing, and the packaged spelling is what is returned because packageutil
+    /// matches the name it is given exactly.
+    /// </remarks>
+    internal static string? SelectAsset(IReadOnlyList<string> packagedNames, IReadOnlyList<string> preferredAssetPaths)
     {
-        foreach (string preferred in preferredAssetNames)
+        foreach (string preferred in preferredAssetPaths)
         {
             if (string.IsNullOrWhiteSpace(preferred))
             {
                 continue;
             }
 
-            string wanted = Path.GetFileName(preferred);
-            if (string.IsNullOrEmpty(wanted))
+            string wantedPath = NormalizePath(preferred);
+            if (string.IsNullOrEmpty(wantedPath))
             {
                 continue;
             }
 
             foreach (string packaged in packagedNames)
             {
-                if (Path.GetFileName(packaged).Equals(wanted, StringComparison.OrdinalIgnoreCase))
+                if (NormalizePath(packaged).Equals(wantedPath, StringComparison.OrdinalIgnoreCase))
                 {
                     return packaged;
                 }
+            }
+
+            string wantedName = Path.GetFileName(wantedPath);
+            string? onlyNameMatch = null;
+
+            foreach (string packaged in packagedNames)
+            {
+                if (!Path.GetFileName(packaged).Equals(wantedName, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (onlyNameMatch is not null)
+                {
+                    onlyNameMatch = null;
+                    break;
+                }
+
+                onlyNameMatch = packaged;
+            }
+
+            if (onlyNameMatch is not null)
+            {
+                return onlyNameMatch;
             }
         }
 
         return null;
     }
+
+    /// <summary>
+    /// Turns an asset path produced by PartialGameConfigModel back into the path relative to the
+    /// config, which is the form the packaged files are named in.
+    /// </summary>
+    internal static string GetRelativeAssetPath(string configDirectory, string assetPath)
+    {
+        if (string.IsNullOrEmpty(assetPath))
+        {
+            return string.Empty;
+        }
+
+        if (string.IsNullOrEmpty(configDirectory))
+        {
+            return assetPath;
+        }
+
+        string relativePath;
+        try
+        {
+            relativePath = Path.GetRelativePath(configDirectory, assetPath);
+        }
+        catch (ArgumentException)
+        {
+            return Path.GetFileName(assetPath);
+        }
+
+        // PartialGameConfigModel roots every asset against the config's own directory. A result that
+        // escapes that directory means the config held an absolute path, so only the name is usable.
+        if (relativePath.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(relativePath))
+        {
+            return Path.GetFileName(assetPath);
+        }
+
+        return relativePath;
+    }
+
+    private static string NormalizePath(string path) =>
+        path.Replace('/', '\\').TrimStart('.', '\\');
 
     /// <summary>
     /// Reads the file names out of a "packageutil fileinfo" listing. The listing is a fixed-column

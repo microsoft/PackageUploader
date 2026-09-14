@@ -72,11 +72,88 @@ namespace PackageUploader.UI.Test.Model
         }
 
         [TestMethod]
-        public void SelectAsset_IgnoresTheDirectoryOfTheRequestedAsset()
+        public void SelectAsset_PrefersTheFullRelativePathOverABareNameMatch()
+        {
+            // Two logos with the same name in different directories: only the path tells them apart.
+            string[] packaged =
+            [
+                @"Assets\en-us\Logo.png",
+                @"Assets\ja-jp\Logo.png",
+            ];
+
+            Assert.AreEqual(@"Assets\ja-jp\Logo.png", Msixvc2LogoExtractor.SelectAsset(packaged, [@"Assets\ja-jp\Logo.png"]));
+            Assert.AreEqual(@"Assets\en-us\Logo.png", Msixvc2LogoExtractor.SelectAsset(packaged, [@"Assets\en-us\Logo.png"]));
+        }
+
+        [TestMethod]
+        public void SelectAsset_SkipsAnAmbiguousNameRatherThanGuessing()
+        {
+            string[] packaged =
+            [
+                @"Assets\en-us\Logo.png",
+                @"Assets\ja-jp\Logo.png",
+                @"Assets\StoreLogo.png",
+            ];
+
+            // The requested path is not in the package and the bare name is ambiguous, so the wrong
+            // logo must not be returned. The next candidate, which is unambiguous, is used instead.
+            var selected = Msixvc2LogoExtractor.SelectAsset(packaged, [@"Assets\fr-fr\Logo.png", "StoreLogo.png"]);
+
+            Assert.AreEqual(@"Assets\StoreLogo.png", selected);
+        }
+
+        [TestMethod]
+        public void SelectAsset_FallsBackToAnUnambiguousNameWhenPackagingRelocatedTheAsset()
+        {
+            // Generated tiles are emitted at the package root even when the source asset lived in a
+            // subdirectory, so an unambiguous name still has to match.
+            var packaged = Msixvc2LogoExtractor.ParseFileNames(RealListing);
+
+            var selected = Msixvc2LogoExtractor.SelectAsset(packaged, [@"Assets\Square150x150Logo.png"]);
+
+            Assert.AreEqual("Square150x150Logo.png", selected);
+        }
+
+        [TestMethod]
+        public void SelectAsset_TreatsForwardAndBackSlashesAsEquivalent()
+        {
+            string[] packaged = [@"Assets\en-us\Logo.png"];
+
+            Assert.AreEqual(@"Assets\en-us\Logo.png", Msixvc2LogoExtractor.SelectAsset(packaged, ["Assets/en-us/Logo.png"]));
+        }
+
+        [TestMethod]
+        public void GetRelativeAssetPath_RecoversThePathDeclaredInTheConfig()
+        {
+            string configDirectory = @"C:\temp\layout";
+
+            Assert.AreEqual(@"Assets\Logo.png", Msixvc2LogoExtractor.GetRelativeAssetPath(configDirectory, @"C:\temp\layout\Assets\Logo.png"));
+            Assert.AreEqual("Logo.png", Msixvc2LogoExtractor.GetRelativeAssetPath(configDirectory, @"C:\temp\layout\Logo.png"));
+        }
+
+        [TestMethod]
+        public void GetRelativeAssetPath_FallsBackToTheNameForAssetsOutsideTheConfigDirectory()
+        {
+            // A config holding an absolute path resolves outside its own directory; only the name
+            // is usable then.
+            Assert.AreEqual("Logo.png", Msixvc2LogoExtractor.GetRelativeAssetPath(@"C:\temp\layout", @"D:\elsewhere\Logo.png"));
+            Assert.AreEqual("Logo.png", Msixvc2LogoExtractor.GetRelativeAssetPath(@"C:\temp\layout", @"C:\temp\Logo.png"));
+        }
+
+        [TestMethod]
+        public void GetRelativeAssetPath_HandlesEmptyInput()
+        {
+            Assert.AreEqual(string.Empty, Msixvc2LogoExtractor.GetRelativeAssetPath(@"C:\temp", string.Empty));
+            Assert.AreEqual(@"C:\temp\Logo.png", Msixvc2LogoExtractor.GetRelativeAssetPath(string.Empty, @"C:\temp\Logo.png"));
+        }
+
+        [TestMethod]
+        public void SelectAsset_StillMatchesAnAbsolutePathByName()
         {
             var packaged = Msixvc2LogoExtractor.ParseFileNames(RealListing);
 
-            // PartialGameConfigModel rewrites shell visual paths to absolute paths under the config.
+            // GetRelativeAssetPath normally reduces these to a relative path, but an asset that sits
+            // outside the config's directory stays absolute, and the name must still resolve it.
             var selected = Msixvc2LogoExtractor.SelectAsset(packaged, [@"C:\temp\layout\StoreLogo.png"]);
 
             Assert.AreEqual("StoreLogo.png", selected);
