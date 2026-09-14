@@ -67,6 +67,21 @@ public class ErrorScreenViewModelTest
     }
 
     [TestMethod]
+    public void GoBackAndFix_WithoutAnOriginPage_NavigatesToTheMainPageView()
+    {
+        // The fallback has to name a view, not a view model: WindowService.NavigateTo throws
+        // ArgumentException for any type that does not inherit from UIElement.
+        _errorModelProvider.Error.OriginPage = null;
+
+        _errorScreenViewModel.GoBackAndFixCommand.Execute(null);
+
+        _windowService.Verify(x => x.NavigateTo(typeof(MainPageView)), Times.Once);
+        Assert.IsTrue(
+            typeof(UIElement).IsAssignableFrom(typeof(MainPageView)),
+            "The fallback navigation target must be something WindowService will accept.");
+    }
+
+    [TestMethod]
     public void ViewLogsCommandTest()
     {
         _errorScreenViewModel.ViewLogsCommand.Execute(null);
