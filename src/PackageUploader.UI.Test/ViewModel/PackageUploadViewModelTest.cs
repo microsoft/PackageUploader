@@ -12,6 +12,7 @@ using PackageUploader.UI.ViewModel;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -593,6 +594,319 @@ namespace PackageUploader.UI.Test.ViewModel
             {
                 releaseProbe.Set();
                 File.Delete(packagePath);
+            }
+        }
+
+        #endregion
+
+        #region MSIXVC2 package preview image
+
+        // A 1x1 PNG, used so the image extracted from the package is distinguishable from the placeholder.
+        private const string OnePixelPngBase64 =
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+        /// <summary>
+        /// Writes a real ZIP named .msixvc, which is what an MSIXVC2 package is. A filler entry keeps
+        /// it over the 4096 bytes PackageFormatDetector requires before it will sniff the file.
+        /// </summary>
+        private static string WriteMsixvc2Package()
+        {
+            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".msixvc");
+
+            const string gameConfig = """
+                <?xml version="1.0" encoding="utf-8"?>
+                <Game configVersion="1">
+                  <Identity Name="TestGame" Publisher="CN=Test" Version="1.0.0.0" />
+                  <ShellVisuals DefaultDisplayName="Test Game" PublisherDisplayName="Test" Square150x150Logo="square150x150logo.png" />
+                  <StoreId>9NBLGGH12345</StoreId>
+                </Game>
+                """;
+
+            using (var stream = File.Create(path))
+            using (var archive = new ZipArchive(stream, ZipArchiveMode.Create))
+            {
+                using (var configStream = archive.CreateEntry("MicrosoftGame.config").Open())
+                {
+                    var configBytes = System.Text.Encoding.UTF8.GetBytes(gameConfig);
+                    configStream.Write(configBytes, 0, configBytes.Length);
+                }
+
+                using var fillerStream = archive.CreateEntry("filler.bin", CompressionLevel.NoCompression).Open();
+                var filler = new byte[8192];
+                new Random(1).NextBytes(filler);
+                fillerStream.Write(filler, 0, filler.Length);
+            }
+
+            return path;
+        }
+
+        /// <summary>
+        /// Stands in for the GDK's packageutil.exe: answers "fileinfo" with a listing in the real
+        /// tool's fixed-column format, and answers "extract" by dropping the 1x1 PNG at the path the
+        /// real tool would have written it to.
+        /// </summary>
+        private static string WriteFakePackageUtil(bool packageContainsLogo, out string scratchDirectory)
+        {
+            scratchDirectory = Path.Combine(Path.GetTempPath(), "XGPMTest_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(scratchDirectory);
+
+            string listingPath = Path.Combine(scratchDirectory, "listing.txt");
+            string logoRow = packageContainsLogo
+                ? "REG   Square150x150Logo.png                              18.954 KB \n"
+                : string.Empty;
+
+            // The real listing's column rule is drawn with U+2500 and defines the column boundaries,
+            // so it has to be reproduced faithfully - including being written as UTF-8.
+            string listing =
+                "packageutil version 2610.308.24000.0\n" +
+                "\n" +
+                "Chunk Name                                               Size       \n" +
+                "───── ─────────────────────────────────────────────────── ────────── \n" +
+                "      MicrosoftGame.config                                           \n" +
+                "REG   MicrosoftGame.config                                1.041 KB   \n" +
+                logoRow +
+                "REG   StoreLogo.png                                       4.372 KB   \n" +
+                "1000  ShamWow.DirectX.GameCore.WindowsDX12.exe            1.578 MB   \n";
+
+            File.WriteAllText(listingPath, listing.Replace("\n", "\r\n"), new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+            string pngPath = Path.Combine(scratchDirectory, "logo.png");
+            File.WriteAllBytes(pngPath, Convert.FromBase64String(OnePixelPngBase64));
+
+            // Argument layout mirrors the real tool: "fileinfo <package>" and
+            // "extract /pd <package> /file <name> /out <directory>".
+            string batPath = Path.Combine(scratchDirectory, "packageutil.bat");
+            File.WriteAllText(batPath,
+                "@echo off\r\n" +
+                "if \"%~1\"==\"fileinfo\" (\r\n" +
+                $"  type \"{listingPath}\"\r\n" +
+                "  exit /b 0\r\n" +
+                ")\r\n" +
+                "if \"%~1\"==\"extract\" (\r\n" +
+                $"  copy /y \"{pngPath}\" \"%~7\\%~5\" >nul\r\n" +
+                "  exit /b 0\r\n" +
+                ")\r\n" +
+                "exit /b 1\r\n");
+
+            return batPath;
+        }
+
+        private PackageUploadViewModel CreateViewModelWithResolvedTool(string packageUtilPath = "")
+        {
+            var resolver = new Mock<IMsixvc2ToolResolver>();
+            resolver.Setup(x => x.Resolve(It.IsAny<string>(), It.IsAny<string>()))
+                    .Returns(new Msixvc2Tool(@"C:\gdk\MakePkg.exe", IsMakePkg2Fallback: false));
+
+            var pathConfiguration = new PathConfigurationProvider { PackageUtilPath = packageUtilPath };
+
+            return new PackageUploadViewModel(
+                _packageModelProvider,
+                _mockPackageUploaderService.Object,
+                _mockWindowService.Object,
+                _uploadingProgressPercentageProvider,
+                _errorModelProvider,
+                pathConfiguration,
+                resolver.Object);
+        }
+
+        [TestMethod]
+        public async Task Msixvc2Package_PreviewImageIsExtractedFromThePackage()
+        {
+            string packageUtilPath = WriteFakePackageUtil(packageContainsLogo: true, out string scratchDirectory);
+            var viewModel = CreateViewModelWithResolvedTool(packageUtilPath);
+            string packagePath = WriteMsixvc2Package();
+
+            try
+            {
+                viewModel.PackageFilePath = packagePath;
+                await viewModel.Msixvc2PreviewImageTask;
+
+                Assert.IsTrue(viewModel.IsMsixvc2Package, "The package should be detected as MSIXVC2.");
+                Assert.IsNotNull(viewModel.PackagePreviewImage, "A preview image should always be set.");
+                Assert.AreEqual(1, viewModel.PackagePreviewImage.PixelWidth, "The preview should be the 1x1 logo from the package, not the placeholder.");
+                Assert.AreEqual(1, viewModel.PackagePreviewImage.PixelHeight);
+            }
+            finally
+            {
+                File.Delete(packagePath);
+                Directory.Delete(scratchDirectory, recursive: true);
+            }
+        }
+
+        [TestMethod]
+        public async Task Msixvc2Package_MissingLogoDoesNotFailExtraction()
+        {
+            string packageUtilPath = WriteFakePackageUtil(packageContainsLogo: false, out string scratchDirectory);
+            var viewModel = CreateViewModelWithResolvedTool(packageUtilPath);
+            string packagePath = WriteMsixvc2Package();
+
+            try
+            {
+                viewModel.PackageFilePath = packagePath;
+                await viewModel.Msixvc2PreviewImageTask;
+
+                Assert.IsTrue(viewModel.IsMsixvc2Package, "The package should be detected as MSIXVC2.");
+                Assert.AreEqual("9NBLGGH12345", viewModel.BigId, "The rest of the package information should still be extracted.");
+                Assert.IsFalse(
+                    viewModel.PackageErrorMessage.Contains("Logo", StringComparison.OrdinalIgnoreCase),
+                    $"A missing logo must not surface an error: {viewModel.PackageErrorMessage}");
+            }
+            finally
+            {
+                File.Delete(packagePath);
+                Directory.Delete(scratchDirectory, recursive: true);
+            }
+        }
+
+        [TestMethod]
+        public async Task Msixvc2Package_WithoutPackageUtilFallsBackToPlaceholder()
+        {
+            var viewModel = CreateViewModelWithResolvedTool(packageUtilPath: string.Empty);
+            string packagePath = WriteMsixvc2Package();
+
+            try
+            {
+                viewModel.PackageFilePath = packagePath;
+                await viewModel.Msixvc2PreviewImageTask;
+
+                Assert.IsTrue(viewModel.IsMsixvc2Package, "The package should be detected as MSIXVC2.");
+                Assert.AreEqual("9NBLGGH12345", viewModel.BigId, "The rest of the package information should still be extracted.");
+                Assert.IsTrue(
+                    string.IsNullOrEmpty(viewModel.PackageErrorMessage),
+                    $"A missing packageutil.exe must not surface an error: {viewModel.PackageErrorMessage}");
+            }
+            finally
+            {
+                File.Delete(packagePath);
+            }
+        }
+
+        #endregion
+
+        #region BuildMsixvc2UploadArguments
+
+        private PackageUploadViewModel CreateViewModel(PathConfigurationProvider pathConfiguration) =>
+            new(
+                _packageModelProvider,
+                _mockPackageUploaderService.Object,
+                _mockWindowService.Object,
+                _uploadingProgressPercentageProvider,
+                _errorModelProvider,
+                pathConfiguration,
+                new Msixvc2ToolResolver());
+
+        /// <summary>
+        /// Builds a view model whose /uploadsource probe succeeds or fails deterministically, by
+        /// pointing MakePkg2Path at a batch file with the wanted exit code.
+        /// </summary>
+        private PackageUploadViewModel CreateViewModelWithProbeResult(bool probeSucceeds, out string tempBat)
+        {
+            tempBat = Path.Combine(Path.GetTempPath(), $"probe_{Guid.NewGuid():N}.bat");
+            File.WriteAllText(tempBat, probeSucceeds ? "@exit /b 0" : "@exit /b 1");
+            return CreateViewModel(new PathConfigurationProvider { MakePkg2Path = tempBat });
+        }
+
+        [TestMethod]
+        public void BuildMsixvc2UploadArguments_PassesThePackageFile_NotItsDirectory()
+        {
+            // MakePkg hard-fails on a directory holding more than one .msixvc/.xvc, so the file the
+            // user actually picked has to be passed through.
+            var viewModel = CreateViewModel(new PathConfigurationProvider());
+            viewModel.PackageFilePath = @"C:\out\Game.msixvc";
+
+            string args = viewModel.BuildMsixvc2UploadArguments();
+
+            Assert.IsTrue(args.StartsWith("upload /pd \"C:\\out\\Game.msixvc\""), args);
+            Assert.IsFalse(args.Contains("/pd \"C:\\out\""), $"/pd must not be the containing directory: {args}");
+        }
+
+        [TestMethod]
+        public void BuildMsixvc2UploadArguments_WithBranch()
+        {
+            var viewModel = CreateViewModel(new PathConfigurationProvider());
+            viewModel.PackageFilePath = @"C:\out\Game.msixvc";
+            viewModel.BranchOrFlightDisplayName = "Branch: Main";
+            viewModel.MarketGroupName = "default";
+            viewModel.BigId = "9ABC123DEF456";
+
+            string args = viewModel.BuildMsixvc2UploadArguments();
+
+            Assert.IsTrue(args.Contains("/branch \"Main\""), args);
+            Assert.IsFalse(args.Contains("/flight"), args);
+            Assert.IsTrue(args.Contains("/market \"default\""), args);
+            Assert.IsTrue(args.Contains("/storeid \"9ABC123DEF456\""), args);
+            Assert.IsTrue(args.Contains("/auth CacheableBrowser"), args);
+        }
+
+        [TestMethod]
+        public void BuildMsixvc2UploadArguments_WithFlight()
+        {
+            var viewModel = CreateViewModel(new PathConfigurationProvider());
+            viewModel.PackageFilePath = @"C:\out\Game.msixvc";
+            viewModel.BranchOrFlightDisplayName = "Flight: TestFlight";
+            viewModel.MarketGroupName = "default";
+            viewModel.BigId = "None";
+
+            string args = viewModel.BuildMsixvc2UploadArguments();
+
+            Assert.IsTrue(args.Contains("/flight \"TestFlight\""), args);
+            Assert.IsFalse(args.Contains("/branch"), args);
+            Assert.IsFalse(args.Contains("/storeid"), args);
+        }
+
+        [TestMethod]
+        public void BuildMsixvc2UploadArguments_NoStoreId_NotIncluded()
+        {
+            var viewModel = CreateViewModel(new PathConfigurationProvider());
+            viewModel.PackageFilePath = @"C:\out\Game.msixvc";
+            viewModel.BranchOrFlightDisplayName = "Branch: Dev";
+            viewModel.BigId = string.Empty;
+
+            Assert.IsFalse(viewModel.BuildMsixvc2UploadArguments().Contains("/storeid"));
+        }
+
+        [TestMethod]
+        public void BuildMsixvc2UploadArguments_IncludesUploadSource_WhenProbeSucceeds()
+        {
+            var viewModel = CreateViewModelWithProbeResult(probeSucceeds: true, out string tempBat);
+            try
+            {
+                viewModel.PackageFilePath = @"C:\out\Game.msixvc";
+                viewModel.BigId = "9ABC123DEF456";
+
+                string args = viewModel.BuildMsixvc2UploadArguments();
+
+                Assert.IsTrue(args.Contains($"/uploadsource {IngestionExtensions.XgpmUploadSource}"), args);
+                Assert.IsTrue(
+                    args.IndexOf("/storeid", StringComparison.Ordinal) < args.IndexOf("/uploadsource", StringComparison.Ordinal),
+                    $"/storeid must precede /uploadsource: {args}");
+                Assert.IsTrue(
+                    args.IndexOf("/uploadsource", StringComparison.Ordinal) < args.IndexOf("/auth", StringComparison.Ordinal),
+                    $"/uploadsource must precede /auth: {args}");
+            }
+            finally
+            {
+                File.Delete(tempBat);
+            }
+        }
+
+        [TestMethod]
+        public void BuildMsixvc2UploadArguments_OmitsUploadSource_WhenProbeFails()
+        {
+            var viewModel = CreateViewModelWithProbeResult(probeSucceeds: false, out string tempBat);
+            try
+            {
+                viewModel.PackageFilePath = @"C:\out\Game.msixvc";
+                viewModel.BigId = "9ABC123DEF456";
+
+                string args = viewModel.BuildMsixvc2UploadArguments();
+
+                Assert.IsFalse(args.Contains("/uploadsource"), args);
+                Assert.IsTrue(args.Contains("/auth CacheableBrowser"), args);
+            }
+            finally
+            {
+                File.Delete(tempBat);
             }
         }
 

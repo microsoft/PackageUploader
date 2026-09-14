@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider.Models;
 using PackageUploader.ClientApi.Tools;
+using PackageUploader.UI.Model;
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
 using PackageUploader.UI.View;
@@ -258,6 +259,15 @@ public partial class MainPageViewModel : BaseViewModel
             _pathConfigurationService.MakePkg2Path = makePkg2Path;
         }
 
+        // packageutil.exe is only used to read a package's own shell visuals for the preview tile, so
+        // it is optional: not finding it costs the real logo, not the ability to package or upload.
+        string packageUtilPath = toolPathResolver.Find(Msixvc2LogoExtractor.PackageUtilFileName) ?? string.Empty;
+
+        if (File.Exists(packageUtilPath))
+        {
+            _pathConfigurationService.PackageUtilPath = packageUtilPath;
+        }
+
         // MSIXVC2 capability comes from the current GDK's MakePkg.exe, or from the standalone
         // makepkg2.exe as a fallback. Both are verified by probing "supports uploadsource", which
         // launches a child process and can block for up to the probe timeout (twice, if MakePkg.exe
@@ -282,6 +292,15 @@ public partial class MainPageViewModel : BaseViewModel
             var makePkg2VersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(makePkg2Path);
             string makePkg2Version = makePkg2VersionInfo.FileVersion ?? string.Empty;
             _logger.LogInformation("Using makepkg2.exe version: {makePkg2Version} from location {makePkg2Location}.", makePkg2Version, makePkg2Path);
+        }
+
+        if (File.Exists(packageUtilPath))
+        {
+            _logger.LogInformation("Using packageutil.exe from location {packageUtilLocation}.", packageUtilPath);
+        }
+        else
+        {
+            _logger.LogInformation("packageutil.exe was not found; MSIXVC2 packages will show a placeholder preview image.");
         }
     }
 
