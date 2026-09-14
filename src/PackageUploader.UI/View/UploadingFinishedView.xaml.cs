@@ -1,5 +1,6 @@
 ﻿
 
+using PackageUploader.UI.Utility;
 using PackageUploader.UI.ViewModel;
 
 namespace PackageUploader.UI.View;
@@ -14,6 +15,6 @@ public partial class UploadingFinishedView : System.Windows.Controls.UserControl
         InitializeComponent();
         DataContext = uploadingFinishedViewModel;
 
-        this.Loaded += (s, e) => uploadingFinishedViewModel.OnAppearing();
+        this.OnFirstLoad(uploadingFinishedViewModel.OnAppearing);
     }
 }

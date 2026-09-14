@@ -24,6 +24,7 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
     private string _operationLogOutput = string.Empty;
     private string _lastLogFilePath = string.Empty;
     private bool _isCancelled;
+    private bool _isUploading;
 
     private int _uploadPercentage;
     public int UploadPercentage
@@ -71,6 +72,17 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
 
     public void OnAppearing()
     {
+        // Guard before touching any state. Loaded can be raised a second time on a view instance
+        // that was merely re-attached to the visual tree, and the resets below are destructive to a
+        // live upload: they would rewind the progress bar, and clearing _isCancelled would revive a
+        // run the user had already cancelled, letting it navigate on to the finished or error page.
+        if (_isUploading)
+        {
+            return;
+        }
+
+        _isUploading = true;
+
         _isCancelled = false;
         UploadPercentage = 0;
         UploadStage = Msixvc2UploadStage.Preparing;
@@ -81,6 +93,21 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
     }
 
     private async void StartUploadAsync()
+    {
+        try
+        {
+            await RunUploadAsync();
+        }
+        finally
+        {
+            // Covers every exit path, including the argument check that returns before the upload's
+            // own try block and the cancellation checks that return from inside it. Leaking the flag
+            // would wedge the page: no later navigation could ever start an upload again.
+            _isUploading = false;
+        }
+    }
+
+    private async Task RunUploadAsync()
     {
         var package = _packageModelProvider.Package;
         string uploadArgs = package.UploadArguments;

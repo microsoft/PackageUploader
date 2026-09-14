@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using PackageUploader.UI.Utility;
 using PackageUploader.UI.ViewModel;
 
 namespace PackageUploader.UI.View;
@@ -15,6 +16,8 @@ public partial class Msixvc2UploadingView : System.Windows.Controls.UserControl
         DataContext = viewModel;
         _viewModel = viewModel;
 
-        Loaded += (s, e) => _viewModel.OnAppearing();
+        // First load only: OnAppearing starts the upload, and a re-attached instance raising Loaded
+        // again would otherwise start a second one.
+        this.OnFirstLoad(() => _viewModel.OnAppearing());
     }
 }
