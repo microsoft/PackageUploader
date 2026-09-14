@@ -177,7 +177,7 @@ namespace PackageUploader.UI.Test.ViewModel
             // Arrange
             string storeId = _mockPackage.BigId;
             string branchId = _mockPackage.BranchId;
-            string expectedUrl = $"https://partner.microsoft.com/en-us/dashboard/products/{storeId}/packages/{branchId}";
+            string expectedUrl = $"https://partner.microsoft.com/en-us/dashboard/products/{storeId}/gamingpackages/{branchId}";
                 
             var mockProcess = new Mock<Process>();
             _mockProcessStarterService
