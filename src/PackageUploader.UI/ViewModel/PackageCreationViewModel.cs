@@ -339,6 +339,91 @@ public partial class PackageCreationViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// Derives the SubVal capabilities from MakePkg.exe's stamped version.
+    /// </summary>
+    /// <remarks>
+    /// Tools are not always stamped with something <see cref="Version"/> can parse - a SemVer
+    /// informational version such as "10.0.1.0+&lt;sha&gt;", or even a bare "0+&lt;sha&gt;", is
+    /// common - so an unreadable or unparseable version leaves the conservative defaults in place
+    /// instead of throwing. This runs in the constructor, so throwing here takes the whole app down
+    /// rather than just failing to enable an option.
+    /// </remarks>
+    private void ApplySubValCapabilitiesFromVersion(string makePkgPath)
+    {
+        if (!TryGetToolVersion(makePkgPath, out Version makePkgVersion))
+        {
+            return;
+        }
+
+        Version lastVersionBeforeSubValAutoUpdate = new("10.0.26100.4046"); // April 2025 GDK Update 1
+        _supportsSubValAutoUpdate = makePkgVersion > lastVersionBeforeSubValAutoUpdate;
+
+        // Only allow custom SubVal paths if we aren't doing SubVal auto-update.
+        if (!_supportsSubValAutoUpdate)
+        {
+            Version firstSupportedVersionForCustomSubValPath = new("10.0.22621.4272"); // June 2023 GDK
+            _supportsCustomSubValPath = makePkgVersion >= firstSupportedVersionForCustomSubValPath;
+        }
+        else
+        {
+            _supportsCustomSubValPath = false;
+        }
+
+        // Future options can also be checked here to enable new features.
+    }
+
+    /// <summary>
+    /// Reads a tool's product version, tolerating anything that is not a plain numeric version.
+    /// </summary>
+    /// <returns><see langword="false"/> when no usable version could be read. Never throws.</returns>
+    internal static bool TryGetToolVersion(string toolPath, out Version version)
+    {
+        version = null!;
+
+        if (string.IsNullOrWhiteSpace(toolPath))
+        {
+            return false;
+        }
+
+        string? productVersion;
+        try
+        {
+            productVersion = FileVersionInfo.GetVersionInfo(toolPath).ProductVersion;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(productVersion))
+        {
+            return false;
+        }
+
+        return TryParseToolVersion(productVersion, out version);
+    }
+
+    /// <summary>
+    /// Parses a product version string, tolerating anything that is not a plain numeric version.
+    /// </summary>
+    /// <returns><see langword="false"/> when the string is not a usable version. Never throws.</returns>
+    internal static bool TryParseToolVersion(string productVersion, out Version version)
+    {
+        version = null!;
+
+        if (string.IsNullOrWhiteSpace(productVersion))
+        {
+            return false;
+        }
+
+        // Drop any SemVer build metadata, which Version cannot parse. What remains still has to be
+        // at least "major.minor", so a bare "0" correctly fails rather than parsing as something.
+        string trimmed = productVersion.Split('+')[0].Trim();
+
+        return Version.TryParse(trimmed, out version!);
+    }
+
+    /// <summary>
     /// Resolves the MSIXVC2 packaging tool (MakePkg.exe preferred, makepkg2.exe fallback).
     /// Resolved on demand rather than cached so in-place tool updates are picked up.
     /// </summary>
@@ -355,17 +440,30 @@ public partial class PackageCreationViewModel : BaseViewModel
 
     /// <summary>
     /// Probes for an MSIXVC2-capable packaging tool off the UI thread and publishes the result to
-    /// the bound <see cref="IsMsixvc2Available"/> property.
+    /// the bound <see cref="IsMsixvc2Available"/> property. The same pass settles the SubVal
+    /// capabilities, which the constructor could only guess at from the stamped version.
     /// </summary>
     private Task ProbeMsixvc2AvailabilityAsync()
     {
         return Task.Run(() =>
         {
             bool isAvailable = false;
+            bool makePkgAnswersSupports = false;
 
             try
             {
                 isAvailable = ResolveMsixvc2Tool() is not null;
+
+                // Asking MakePkg.exe what it supports settles the SubVal capabilities without
+                // parsing a version at all. Answering this probe means the tool postdates SubVal
+                // auto-update, so no version comparison can be more accurate. makePkg2Path is
+                // passed as empty to keep the makepkg2.exe fallback out of it: the question here
+                // is specifically about MakePkg.exe.
+                Msixvc2Tool? makePkg = _msixvc2ToolResolver.Resolve(
+                    _pathConfigurationService.MakePkgPath ?? string.Empty,
+                    string.Empty);
+
+                makePkgAnswersSupports = makePkg is { IsMakePkg2Fallback: false };
             }
             catch (Exception ex)
             {
@@ -374,7 +472,19 @@ public partial class PackageCreationViewModel : BaseViewModel
                 _logger.LogWarning(ex, "Failed to probe for MSIXVC2 packaging tool support.");
             }
 
-            RunOnUiThread(() => IsMsixvc2Available = isAvailable);
+            RunOnUiThread(() =>
+            {
+                IsMsixvc2Available = isAvailable;
+
+                // Only ever upgrade what the version established. A probe can fail for reasons that
+                // say nothing about the tool's age - a timeout, say - so a failure must not revoke
+                // a capability already granted.
+                if (makePkgAnswersSupports)
+                {
+                    SupportsSubValAutoUpdate = true;
+                    SupportsCustomSubValPath = false;
+                }
+            });
         });
     }
 
@@ -404,30 +514,12 @@ public partial class PackageCreationViewModel : BaseViewModel
         _validatorResultsProvider = validatorResultsProvider;
         _msixvc2ToolResolver = msixvc2ToolResolver;
 
-        // Ensure our version of MakePkg supports custom SubVal paths before allowing that option.
-        var mkgPkgpath = _pathConfigurationService.MakePkgPath;
-        var mkgPkgVersionString = FileVersionInfo.GetVersionInfo(mkgPkgpath);
-
-        if (!string.IsNullOrEmpty(mkgPkgVersionString.ProductVersion))
-        {
-            Version makePkgVersion = new(mkgPkgVersionString.ProductVersion);
-
-            Version lastVersionBeforeSubValAutoUpdate = new("10.0.26100.4046"); // April 2025 GDK Update 1
-            _supportsSubValAutoUpdate = makePkgVersion > lastVersionBeforeSubValAutoUpdate;
-
-            // Only allow custom SubVal paths if we aren't doing SubVal auto-update.
-            if (!_supportsSubValAutoUpdate)
-            {
-                Version firstSupportedVersionForCustomSubValPath = new("10.0.22621.4272"); // June 2023 GDK
-                _supportsCustomSubValPath = makePkgVersion >= firstSupportedVersionForCustomSubValPath;
-            }
-            else
-            {
-                _supportsCustomSubValPath = false;
-            }
-
-            // Future options can also be checked here to enable new features.
-        }
+        // Establish the SubVal capabilities from MakePkg.exe's stamped version. This is only a
+        // starting point: the background probe below settles it authoritatively, and a tool whose
+        // version cannot be read or parsed simply keeps the conservative defaults rather than
+        // throwing. Some builds are stamped with a SemVer informational version such as "0+<sha>",
+        // which System.Version cannot parse at all.
+        ApplySubValCapabilitiesFromVersion(_pathConfigurationService.MakePkgPath);
 
         // MSIXVC2 packaging comes from the current GDK's MakePkg.exe, or the standalone makepkg2.exe
         // fallback. The capability probe launches a child process and can block for up to the probe

@@ -921,6 +921,55 @@ namespace PackageUploader.UI.Test.ViewModel
 
         #endregion
 
+        [TestMethod]
+        public void TryGetToolVersion_RejectsASemVerVersionWithoutCrashing()
+        {
+            // A tool stamped with only build metadata. Passing this to Version's constructor threw a
+            // FormatException out of the view model's constructor, which took the whole app down the
+            // moment the packaging page was opened.
+            Assert.IsFalse(PackageCreationViewModel.TryParseToolVersion("0+f272415c4a7b7837a57cb53418e8470c08be4afd", out _));
+        }
+
+        [TestMethod]
+        public void TryGetToolVersion_ParsesAVersionCarryingBuildMetadata()
+        {
+            Assert.IsTrue(PackageCreationViewModel.TryParseToolVersion("10.0.26100.5000+abc123", out Version withMetadata));
+            Assert.AreEqual(new Version("10.0.26100.5000"), withMetadata);
+
+            Assert.IsTrue(PackageCreationViewModel.TryParseToolVersion("10.0.26100.4046", out Version plain));
+            Assert.AreEqual(new Version("10.0.26100.4046"), plain);
+        }
+
+        [TestMethod]
+        public void TryGetToolVersion_RejectsVersionsThatAreNotUsable()
+        {
+            // Version needs at least "major.minor", so a bare number must not be accepted.
+            Assert.IsFalse(PackageCreationViewModel.TryParseToolVersion("0", out _));
+            Assert.IsFalse(PackageCreationViewModel.TryParseToolVersion("", out _));
+            Assert.IsFalse(PackageCreationViewModel.TryParseToolVersion("   ", out _));
+            Assert.IsFalse(PackageCreationViewModel.TryParseToolVersion(null, out _));
+            Assert.IsFalse(PackageCreationViewModel.TryParseToolVersion("not a version", out _));
+        }
+
+        [TestMethod]
+        public void TryGetToolVersion_ReturnsFalseForAnUnusableToolPath()
+        {
+            Assert.IsFalse(PackageCreationViewModel.TryGetToolVersion(null, out _));
+            Assert.IsFalse(PackageCreationViewModel.TryGetToolVersion("", out _));
+            Assert.IsFalse(PackageCreationViewModel.TryGetToolVersion("   ", out _));
+            Assert.IsFalse(PackageCreationViewModel.TryGetToolVersion(
+                Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".exe"), out _));
+        }
+
+        [TestMethod]
+        public void Constructor_DoesNotThrowWhenMakePkgHasNoReadableVersion()
+        {
+            // The temp file standing in for MakePkg.exe carries no version resource at all, which
+            // must leave the capabilities at their conservative defaults rather than throwing.
+            Assert.IsFalse(_viewModel.SupportsSubValAutoUpdate);
+            Assert.IsFalse(_viewModel.SupportsCustomSubValPath);
+        }
+
         [TestCleanup]
         public void Cleanup()
         {
