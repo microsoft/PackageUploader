@@ -505,6 +505,12 @@ public partial class PackageUploadViewModel : BaseViewModel
             _pathConfigurationService.MakePkg2Path ?? string.Empty);
 
     /// <summary>
+    /// True when an MSIXVC2-capable tool supporting the /uploadsource flag is available.
+    /// The tool resolution probe ("supports uploadsource") is itself the capability check.
+    /// </summary>
+    internal bool SupportsUploadSourceFlag() => ResolveMsixvc2Tool() is not null;
+
+    /// <summary>
     /// Tracks the background MSIXVC2 capability probe started when an MSIXVC2 package is selected.
     /// Exposed so tests can await the result deterministically.
     /// </summary>
@@ -829,7 +835,11 @@ public partial class PackageUploadViewModel : BaseViewModel
             var gameConfig = new PartialGameConfigModel(tempConfigPath);
 
             PackageIdentityName = gameConfig.Identity.Name ?? string.Empty;
-            PackagePreviewImage = new BitmapImage(new Uri("pack://application:,,,/Resources/Images/PackagePlaceholder.png"));
+
+            // The package's shell visuals are not loose entries in the archive, so they have to be
+            // extracted by an external tool. Show the placeholder now and swap it in if the extract lands.
+            PackagePreviewImage = LoadPackagePlaceholderImage();
+            Msixvc2PreviewImageTask = LoadMsixvc2PreviewImageAsync(packagePath, Path.GetDirectoryName(tempConfigPath), gameConfig);
 
             try
             {
@@ -856,6 +866,86 @@ public partial class PackageUploadViewModel : BaseViewModel
         {
             if (tempConfigPath != null && File.Exists(tempConfigPath))
                 File.Delete(tempConfigPath);
+        }
+    }
+
+    /// <summary>
+    /// Tracks the background MSIXVC2 preview image extract started when an MSIXVC2 package is
+    /// selected. Exposed so tests can await the result deterministically.
+    /// </summary>
+    internal Task Msixvc2PreviewImageTask { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// Replaces the placeholder with the package's own shell visual, preferring the same tile the
+    /// other upload paths show. Runs off the UI thread because the extract shells out to
+    /// packageutil.exe, and does nothing when the asset cannot be extracted so that the placeholder
+    /// simply stays put.
+    /// </summary>
+    private Task LoadMsixvc2PreviewImageAsync(string packagePath, string? configDirectory, PartialGameConfigModel gameConfig)
+    {
+        string packageUtilPath = _pathConfigurationService.PackageUtilPath ?? string.Empty;
+        if (string.IsNullOrEmpty(packageUtilPath))
+        {
+            return Task.CompletedTask;
+        }
+
+        // PartialGameConfigModel roots shell visuals against the config's own directory, but the
+        // packaged files are named by their path relative to it, so convert back before matching.
+        string[] assetCandidates =
+        [
+            Msixvc2LogoExtractor.GetRelativeAssetPath(configDirectory ?? string.Empty, gameConfig.ShellVisuals.Square150x150Logo),
+            Msixvc2LogoExtractor.GetRelativeAssetPath(configDirectory ?? string.Empty, gameConfig.ShellVisuals.StoreLogo),
+            Msixvc2LogoExtractor.GetRelativeAssetPath(configDirectory ?? string.Empty, gameConfig.ShellVisuals.Square44x44Logo),
+        ];
+
+        return Task.Run(() =>
+        {
+            BitmapImage? previewImage;
+
+            try
+            {
+                byte[]? assetBytes = Msixvc2LogoExtractor.TryExtractAsset(packageUtilPath, packagePath, assetCandidates);
+                if (assetBytes is null || assetBytes.Length == 0)
+                {
+                    return;
+                }
+
+                // LoadBitmapImage freezes the result, so it is safe to hand to the UI thread.
+                previewImage = LoadBitmapImage(assetBytes);
+            }
+            catch (Exception)
+            {
+                // A tool failure or an undecodable asset must never take down the app or blank the
+                // preview; the placeholder already on screen is the fallback.
+                return;
+            }
+
+            if (previewImage is null)
+            {
+                return;
+            }
+
+            RunOnUiThread(() =>
+            {
+                // A different package may have been selected while the extract was in flight; don't
+                // publish a stale image over it.
+                if (IsMsixvc2Package && string.Equals(PackageFilePath, packagePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    PackagePreviewImage = previewImage;
+                }
+            });
+        });
+    }
+
+    private static BitmapImage? LoadPackagePlaceholderImage()
+    {
+        try
+        {
+            return new BitmapImage(new Uri("pack://application:,,,/Resources/Images/PackagePlaceholder.png"));
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 
@@ -1212,8 +1302,9 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     internal string BuildMsixvc2UploadArguments()
     {
-        string packageDir = Path.GetDirectoryName(PackageFilePath) ?? string.Empty;
-        var args = $"upload /pd \"{packageDir}\"";
+        // /pd accepts a package file or a directory, but a directory holding more than one
+        // .msixvc/.xvc is a hard failure in MakePkg. The user picked a specific file, so pass it.
+        var args = $"upload /pd \"{Path.GetFullPath(PackageFilePath)}\"";
 
         if (BranchOrFlightDisplayName.StartsWith("Branch: "))
         {
@@ -1234,6 +1325,11 @@ public partial class PackageUploadViewModel : BaseViewModel
         if (!string.IsNullOrEmpty(BigId) && BigId != "None")
         {
             args += $" /storeid \"{BigId}\"";
+        }
+
+        if (SupportsUploadSourceFlag())
+        {
+            args += $" /uploadsource {IngestionExtensions.XgpmUploadSource}";
         }
 
         args += " /auth CacheableBrowser";

@@ -3,6 +3,7 @@
 
 using PackageUploader.UI.Providers;
 using PackageUploader.UI.Utility;
+using PackageUploader.UI.View;
 using System.Diagnostics;
 using System.Windows.Input;
 
@@ -49,8 +50,9 @@ namespace PackageUploader.UI.ViewModel
             }
             else
             {
-                // If the origin page is null, navigate to the main page
-                _windowService.NavigateTo(typeof(MainPageViewModel));
+                // If the origin page is null, navigate to the main page. This must be the view, not
+                // the view model: WindowService.NavigateTo rejects any type that is not a UIElement.
+                _windowService.NavigateTo(typeof(MainPageView));
             }
         }
 

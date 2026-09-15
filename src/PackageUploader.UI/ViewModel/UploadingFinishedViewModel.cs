@@ -169,7 +169,10 @@ namespace PackageUploader.UI.ViewModel
         public void OnViewInPartnerCenter()
         {
             string branchId = _packageModelProvider.Package.BranchId;
-            string partnerCenterUrl = $"https://partner.microsoft.com/en-us/dashboard/products/{StoreId}/packages/{branchId}";
+
+            // Partner Center serves game packages under "gamingpackages"; the older "packages"
+            // route no longer lands on the package view.
+            string partnerCenterUrl = $"https://partner.microsoft.com/en-us/dashboard/products/{StoreId}/gamingpackages/{branchId}";
             _processStarterService.Start(new ProcessStartInfo(partnerCenterUrl) { UseShellExecute = true });
         }
     }

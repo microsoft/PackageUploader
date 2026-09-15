@@ -50,6 +50,20 @@ public partial class PathConfigurationProvider : INotifyPropertyChanged
         }
     }
 
+    private string _packageUtilPath = string.Empty;
+    public string PackageUtilPath
+    {
+        get => _packageUtilPath;
+        set
+        {
+            if (_packageUtilPath != value)
+            {
+                _packageUtilPath = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     private string _packageUploaderPath = string.Empty;
     public string PackageUploaderPath
     {

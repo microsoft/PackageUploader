@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using PackageUploader.UI.Utility;
 using PackageUploader.UI.ViewModel;
 using System.Windows.Controls;
 
@@ -15,8 +16,9 @@ public partial class MainPageView : System.Windows.Controls.UserControl
         InitializeComponent();
         DataContext = viewModel;
         _viewModel = viewModel;
-        
-        // Subscribe to the Loaded event to refresh UI when the control is loaded
-        this.Loaded += (s, e) => _viewModel.OnAppearing();
+
+        // Refresh the UI once the control is loaded. Loaded can be raised again on a re-attached
+        // instance, so this runs on the first load only.
+        this.OnFirstLoad(() => _viewModel.OnAppearing());
     }
 }

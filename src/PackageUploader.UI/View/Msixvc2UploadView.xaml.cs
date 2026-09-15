@@ -16,12 +16,14 @@ public partial class Msixvc2UploadView : System.Windows.Controls.UserControl
         DataContext = viewModel;
         _viewModel = viewModel;
 
-        // Register drag drop event handlers after control is initialized
-        this.Loaded += (s, e) =>
+        // Register drag drop event handlers after control is initialized. First load only: a second
+        // registration would add a duplicate set of handlers, and the branch refresh is a redundant
+        // network call on a re-attached instance.
+        this.OnFirstLoad(() =>
         {
             RegisterDragDropHandlers();
             _viewModel.RefreshBranchesAsync();
-        };
+        });
     }
 
     private void RegisterDragDropHandlers()

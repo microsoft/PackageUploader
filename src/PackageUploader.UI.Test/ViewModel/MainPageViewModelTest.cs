@@ -87,6 +87,7 @@ public class MainPageViewModelTest
                 ["MakePkg.exe"] = CreateTempFile("MakePkg.exe"),
                 ["SubmissionValidator.dll"] = CreateTempFile("SubmissionValidator.dll"),
                 ["makepkg2.exe"] = CreateTempFile("makepkg2.exe"),
+                ["packageutil.exe"] = CreateTempFile("packageutil.exe"),
             }
         };
 
@@ -100,12 +101,13 @@ public class MainPageViewModelTest
             _logger.Object);
 
         CollectionAssert.AreEquivalent(
-            new[] { "MakePkg.exe", "SubmissionValidator.dll", "makepkg2.exe" },
+            new[] { "MakePkg.exe", "SubmissionValidator.dll", "makepkg2.exe", "packageutil.exe" },
             pathResolver.RequestedFileNames.Distinct().ToArray());
 
         Assert.AreEqual(pathResolver.Results["MakePkg.exe"], pathConfiguration.Object.MakePkgPath);
         Assert.AreEqual(pathResolver.Results["SubmissionValidator.dll"], pathConfiguration.Object.BaseSubValPath);
         Assert.AreEqual(pathResolver.Results["makepkg2.exe"], pathConfiguration.Object.MakePkg2Path);
+        Assert.AreEqual(pathResolver.Results["packageutil.exe"], pathConfiguration.Object.PackageUtilPath);
         Assert.IsTrue(viewModel.IsMakePkgEnabled);
     }
 

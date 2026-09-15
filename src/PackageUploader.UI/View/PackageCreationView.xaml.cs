@@ -13,10 +13,12 @@ public partial class PackageCreationView : System.Windows.Controls.UserControl
         DataContext = viewModel;
         _viewModel = viewModel;
 
-        this.Loaded += (s, e) => viewModel.OnAppearing();
-
-        // Register drag drop event handlers after control is initialized
-        this.Loaded += (s, e) => RegisterDragDropHandlers();
+        // First load only: a repeat registration would add duplicate drag drop handlers.
+        this.OnFirstLoad(() =>
+        {
+            viewModel.OnAppearing();
+            RegisterDragDropHandlers();
+        });
     }
 
     private void RegisterDragDropHandlers()
