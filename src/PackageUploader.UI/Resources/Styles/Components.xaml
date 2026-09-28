@@ -228,7 +228,8 @@
     </Style>
 
     <Style x:Key="WorkflowBrowseButtonStyle"
-           TargetType="Button">
+           TargetType="Button"
+           BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="MinWidth" Value="90" />
         <Setter Property="Height" Value="36" />
         <Setter Property="Margin" Value="10,0,0,0" />

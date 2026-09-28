@@ -61,7 +61,7 @@
 
                 <DockPanel LastChildFill="True">
                     <!-- Preview moves below the steps in compact mode. -->
-                    <Border DockPanel.Dock="Right">
+                    <Border>
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Background" Value="{DynamicResource CardBrush}" />
@@ -71,6 +71,7 @@
                                 <Setter Property="Padding" Value="20" />
                                 <Setter Property="Width" Value="360" />
                                 <Setter Property="Margin" Value="24,0,0,0" />
+                                <Setter Property="DockPanel.Dock" Value="Right" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsCompactMode}" Value="True">
                                         <Setter Property="DockPanel.Dock" Value="Bottom" />
