@@ -219,6 +219,9 @@
   <data name="StoreIdTitleText" xml:space="preserve">
     <value>StoreId</value>
   </data>
+  <data name="StoreIdPlaceholderText" xml:space="preserve">
+    <value>Select a package with a StoreId or enter one manually</value>
+  </data>
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
     <value>The Submission Validator log wasn't found: {0}</value>
   </data>
@@ -227,6 +230,9 @@
   </data>
   <data name="UploadButtonHelpText" xml:space="preserve">
     <value>Start uploading a package.</value>
+  </data>
+  <data name="UploadDestinationTitleText" xml:space="preserve">
+    <value>Upload destination</value>
   </data>
   <data name="UploadCancelledErrMsg" xml:space="preserve">
     <value>The upload was canceled.</value>
@@ -239,6 +245,9 @@
   </data>
   <data name="UploadPreviewTitleText" xml:space="preserve">
     <value>Preview</value>
+  </data>
+  <data name="UploadPreviewEmptyText" xml:space="preserve">
+    <value>Package and destination details will appear after you select a valid package file.</value>
   </data>
   <data name="ProductWithStoreIdNotFoundConfigHereErrMsg" xml:space="preserve">
     <value>The product with StoreId {0} wasn't found. Configure your product at https://aka.ms/mpc-ag.</value>
