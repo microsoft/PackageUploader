@@ -195,6 +195,9 @@
   <data name="UploadPreviewTitleText" xml:space="preserve">
     <value>Upload Preview</value>
   </data>
+  <data name="UploadPreviewEmptyText" xml:space="preserve">
+    <value>Package and destination details will appear after you select a valid loose-content folder.</value>
+  </data>
   <data name="ValidatorPathBoxDefaultText" xml:space="preserve">
     <value>Select or enter the folder path for SubmissionValidator.dll</value>
   </data>

@@ -293,6 +293,15 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("UploadPreviewTitleText", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Package and destination details will appear after you select a valid loose-content folder.
+        /// </summary>
+        public static string UploadPreviewEmptyText {
+            get {
+                return ResourceManager.GetString("UploadPreviewEmptyText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Select or enter the folder path for SubmissionValidator.dll.
