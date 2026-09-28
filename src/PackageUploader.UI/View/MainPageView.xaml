@@ -18,15 +18,22 @@
               HorizontalAlignment="Center">
             <StackPanel>
                 <!-- Page heading -->
-                <StackPanel Margin="0,6,0,24">
+                <StackPanel Margin="0,6,0,24"
+                            Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                     <TextBlock Text="{x:Static strings:MainPage.TitleTextBlock}"
                                d:Text="Make a package and upload it to Microsoft Partner Center"
                                Style="{StaticResource PageTitleTextStyle}" />
                     <TextBlock Text="{x:Static strings:MainPage.SubTitleTextBlock}"
                                d:Text="The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload."
                                Style="{StaticResource PageSubtitleTextStyle}"
-                               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
+                               Visibility="Visible" />
                 </StackPanel>
+
+                <TextBlock Text="{x:Static strings:MainPage.TitleTextBlock}"
+                           d:Text="Make a package and upload it to Microsoft Partner Center"
+                           Style="{StaticResource CompactPageTitleTextStyle}"
+                           MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource PercentageConverter}, ConverterParameter=0.9}"
+                           Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!-- Standard layout -->
                 <StackPanel Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">

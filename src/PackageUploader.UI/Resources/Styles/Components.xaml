@@ -21,6 +21,16 @@
         <Setter Property="LineHeight" Value="21" />
     </Style>
 
+    <Style x:Key="CompactPageTitleTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource PageTitleTextStyle}">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="LineHeight" Value="26" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="Margin" Value="0,2,0,18" />
+    </Style>
+
     <!-- Reusable surfaces -->
     <Style x:Key="AccountBannerStyle"
            TargetType="Border"
