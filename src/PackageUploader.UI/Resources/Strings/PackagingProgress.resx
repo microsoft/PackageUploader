@@ -126,6 +126,9 @@
   <data name="PackagingProgressTitleText" xml:space="preserve">
     <value>Getting your package ready...</value>
   </data>
+  <data name="PackagingProgressSubtitleText" xml:space="preserve">
+    <value>Keep this window open while Xbox Game Package Manager validates and packages your game.</value>
+  </data>
   <data name="PackingText" xml:space="preserve">
     <value>Packaging...</value>
   </data>
@@ -143,5 +146,8 @@
   </data>
   <data name="PackagingDataText" xml:space="preserve">
     <value>Packaging data...</value>
+  </data>
+  <data name="ViewLogsButtonContentText" xml:space="preserve">
+    <value>View logs</value>
   </data>
 </root>
