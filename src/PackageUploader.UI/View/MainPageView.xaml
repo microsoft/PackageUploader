@@ -3,373 +3,362 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
              x:Class="PackageUploader.UI.View.MainPageView"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:MainPageViewModel}"
-             Background="{DynamicResource AppBackgroundBrush}">
+             Background="{DynamicResource CanvasBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Orientation="Vertical" Margin="{DynamicResource MainPagePadding}" >
-        <TextBlock 
-               Text="{x:Static strings:MainPage.TitleTextBlock}"
-               d:Text="Make a package and upload it to Microsoft Partner Center" 
-               Style="{StaticResource Headline}"
-               HorizontalAlignment="Left"
-               Margin="{DynamicResource HeadlineMargin}"/>
-        
-        <TextBlock 
-               Text="{x:Static strings:MainPage.SubTitleTextBlock}"
-               d:Text="The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload."  
-               HorizontalAlignment="Left"
-               Foreground="{DynamicResource PrimaryTextBrush}"
-               TextWrapping="Wrap"
-               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
-
-        <TextBlock Text="{Binding MakePkgUnavailableErrorMessage}"
-               Foreground="{DynamicResource ErrorRedBrush}"
-               Visibility="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" 
-               Margin="{DynamicResource SubtitleMargin}"/>
-               
-        <Grid Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
-            <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition Height="0.2*"/>
-                <RowDefinition />
-                <RowDefinition Height="0.05*"/>
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="0.05*"/>
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            
-            <Border Grid.Row="0" 
-                    Grid.ColumnSpan="3"
-                    BorderBrush="{DynamicResource BorderBrush}"
-                    Background="{DynamicResource AppBackgroundBrush}"
-                    Margin="{DynamicResource CardBottomMargin}"
-                    Padding="{DynamicResource SectionCardPadding}" 
-                    CornerRadius="5"
-                    Visibility="{Binding IsUserLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
-                <StackPanel HorizontalAlignment="Left"
-                            VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock 
-                           Text="{x:Static strings:MainPage.SignInTextBlockTitle}"
-                           d:Text="Sign in"
-                           Style="{StaticResource SubHeadline}"
-                           HorizontalAlignment="Left" />
-                        <Button Style="{StaticResource WindowControlButtonStyle}"
-                                Width="20" Height="20"
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Center"
-                                Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                ToolTip="{x:Static strings:MainPage.SignInPreLoginText}">
-                            <Path Data="{StaticResource InfoIconGeometry}"
-                                  Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
-                                  Width="14" Height="14" Stretch="Uniform"/>
-                        </Button>
-                    </StackPanel>
-
-                    <TextBlock Margin="0, 10, 0, 0"
-                               Text="{x:Static strings:MainPage.SignInPreLoginText}"
-                               d:Text="For seamless access to your Product ID and publishing destinations, sign in to your Microsoft Partner Center account. This step is optional if you're only creating game packages without configurations, but it's required for anyone planning to upload packages, retrieve Product Ids, or link them to configuration files."
-                               HorizontalAlignment="Left" 
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               TextWrapping="Wrap"
-                               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
-
-                    <TextBlock Margin="0, 10, 0, 0" 
-                               Text="{x:Static strings:MainPage.SignInLogginInText}"
-                               d:Text="We are attempting to retrieve your sign-in information. If a browser page does not open within a few seconds, please click the sign-in button again to retry."
-                               HorizontalAlignment="Left"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               TextWrapping="Wrap"
-                               Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-
-                    <Grid Margin="0,15,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="15"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Button Grid.Column="0"
-                                Content="{x:Static strings:MainPage.SignInButtonContent}"
-                                d:Content="Sign In"
-                                Command="{Binding SignInCommand}"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                HorizontalAlignment="Left"
-                                Width="90"
-                                Height="32"/>
-
-                        <Button Grid.Column="2"
-                                Content="{x:Static strings:MainPage.ChooseTenantButtonText}"
-                                d:Content="Advanced: Choose Entra Tenant"
-                                Command="{Binding ShowTenantSelectionCommand}"
-                                Visibility="{Binding ShowTenantSelection, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
-                                HorizontalAlignment="Left"
-                                Height="32"/>
-
-                        <ComboBox Grid.Column="3"
-                                  Margin="20, 0, 0, 0"
-                                  ItemsSource="{Binding AvailableTenants}"
-                                  SelectedItem="{Binding SelectedTenant}"
-                                  DisplayMemberPath="DisplayName"
-                                  Visibility="{Binding ShowTenantSelection, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                  MinWidth="150"
-                                  Style="{StaticResource CustomComboBoxStyle}"
-                                  HorizontalAlignment="Stretch"/>
-                    </Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="{DynamicResource PagePadding}"
+              MaxWidth="1320"
+              HorizontalAlignment="Center">
+            <StackPanel>
+                <!-- Page heading -->
+                <StackPanel Margin="0,6,0,24">
+                    <TextBlock Text="{x:Static strings:MainPage.TitleTextBlock}"
+                               d:Text="Make a package and upload it to Microsoft Partner Center"
+                               Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock Text="{x:Static strings:MainPage.SubTitleTextBlock}"
+                               d:Text="The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload."
+                               Style="{StaticResource PageSubtitleTextStyle}"
+                               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
                 </StackPanel>
-            </Border>
 
-            <Border Grid.Column="0"
-                    Grid.Row="2"
-                    Background="{DynamicResource AppBackgroundBrush}"
-                    Margin="{DynamicResource CardBottomMargin}"
-                    Padding="{DynamicResource SectionCardPadding}"
-                    CornerRadius="5">
-                <StackPanel HorizontalAlignment="Left"
-                            VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock 
-                           Text="{x:Static strings:MainPage.MakeAPackageTextBlockTitle}"
-                           d:Text="Make a package"
-                           Style="{StaticResource SubHeadline}"
-                           HorizontalAlignment="Left" 
-                           Foreground="{DynamicResource PrimaryTextBrush}" />
-                        <Button Style="{StaticResource WindowControlButtonStyle}"
-                                Width="20" Height="20"
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Center"
-                                Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                ToolTip="{x:Static strings:MainPage.MakeAPackageBodyTextOne}">
-                            <Path Data="{StaticResource InfoIconGeometry}"
-                                  Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
-                                  Width="14" Height="14" Stretch="Uniform"/>
-                        </Button>
-                    </StackPanel>
-                       
-                    <TextBlock Margin="0, 10, 0, 0"
-                               TextWrapping="Wrap"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
-                        <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextOne}"
-                            d:Text="Game packages speed up uploads, ensure secure installs, and optimize Xbox performance. Just add build files and a config file "/>
-                        <Hyperlink Command="{Binding PackagingLearnMoreURL}"
-                                   CommandParameter="https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/packaging/gc-packaging-toc">
-                            <TextBlock Text="{x:Static strings:MainPage.MakeAPackageBodyURLText}"
-                                       d:Text="(learn more)"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                       TextDecorations="Underline"/>
-                        </Hyperlink>
-                        <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextTwo}"
-                             d:Text=", then upload."/>
-                    </TextBlock>
+                <!-- Standard layout -->
+                <StackPanel Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                    <!-- Partner Center sign-in -->
+                    <Border Style="{StaticResource AccountBannerStyle}"
+                            Visibility="{Binding IsUserLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                    <Button Content="{x:Static strings:MainPage.MakeAPackageButtonText}"
-                            d:Content="Create package"
-                            Command="{Binding NavigateToPackageCreationCommand}"
-                            IsEnabled="{Binding IsMakePkgEnabled}"
-                            HorizontalAlignment="Left"
-                            Margin="0,15,0,10"
-                            Width="128" />
+                            <Border Grid.Column="0"
+                                    Style="{StaticResource IconTileStyle}"
+                                    Margin="0,0,16,0">
+                                <Path Data="M12,4 A4,4 0 1,1 12,12 A4,4 0 1,1 12,4 M4,21 C4,16.6 7.6,14 12,14 C16.4,14 20,16.6 20,21"
+                                      Stroke="{DynamicResource SuccessBrush}"
+                                      StrokeThickness="1.5"
+                                      Width="22"
+                                      Height="22"
+                                      Stretch="Uniform"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static strings:MainPage.SignInTextBlockTitle}"
+                                           d:Text="Sign in"
+                                           Style="{StaticResource SubHeadline}"
+                                           HorizontalAlignment="Left"
+                                           TextAlignment="Left" />
+                                <TextBlock Text="{x:Static strings:MainPage.SignInPreLoginText}"
+                                           d:Text="Sign in to retrieve products, branches, flights, and publishing destinations."
+                                           Style="{StaticResource SecondaryTextStyle}"
+                                           Margin="0,5,20,0"
+                                           MaxWidth="760" />
+                                <TextBlock Text="{x:Static strings:MainPage.SignInLogginInText}"
+                                           Style="{StaticResource SecondaryTextStyle}"
+                                           Margin="0,6,20,0"
+                                           Visibility="{Binding SigninStarted, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                <Button Content="{x:Static strings:MainPage.SignInButtonContent}"
+                                        d:Content="Sign in"
+                                        Command="{Binding SignInCommand}"
+                                        Style="{StaticResource PrimaryButtonStyle}"
+                                        MinWidth="96" />
+                                <Button Content="{x:Static strings:MainPage.ChooseTenantButtonText}"
+                                        d:Content="Advanced: List available tenants"
+                                        Command="{Binding ShowTenantSelectionCommand}"
+                                        Visibility="{Binding ShowTenantSelection, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
+                                        Margin="8,0,0,0" />
+                                <ComboBox ItemsSource="{Binding AvailableTenants}"
+                                          SelectedItem="{Binding SelectedTenant}"
+                                          DisplayMemberPath="DisplayName"
+                                          Visibility="{Binding ShowTenantSelection, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                          MinWidth="210"
+                                          Style="{StaticResource CustomComboBoxStyle}"
+                                          Margin="8,0,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Primary tasks -->
+                    <primitives:UniformGrid Columns="3">
+                        <!-- Make a package -->
+                        <Border Style="{StaticResource ActionCardStyle}"
+                                Margin="0,0,8,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0"
+                                        Style="{StaticResource IconTileStyle}">
+                                    <Path Data="M3,7 H21 V19 H3 Z M7,3 H17 V7 H7 Z M7,11 H17 M7,15 H14"
+                                          Stroke="{DynamicResource SuccessBrush}"
+                                          StrokeThickness="1.5"
+                                          Width="22"
+                                          Height="22"
+                                          Stretch="Uniform"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Grid.Row="1"
+                                           Text="{x:Static strings:MainPage.MakeAPackageTextBlockTitle}"
+                                           d:Text="Make a package"
+                                           Style="{StaticResource CardTitleTextStyle}" />
+                                <TextBlock Grid.Row="2"
+                                           Style="{StaticResource CardBodyTextStyle}">
+                                    <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextOne}" />
+                                    <Hyperlink Command="{Binding PackagingLearnMoreURL}"
+                                               CommandParameter="https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/packaging/gc-packaging-toc">
+                                        <Run Text="{x:Static strings:MainPage.MakeAPackageBodyURLText}" />
+                                    </Hyperlink>
+                                    <Run Text="{x:Static strings:MainPage.MakeAPackageBodyTextTwo}" />
+                                </TextBlock>
+                                <StackPanel Grid.Row="3">
+                                    <TextBlock Text="{Binding MakePkgUnavailableErrorMessage}"
+                                               Foreground="{DynamicResource ErrorRedBrush}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,8"
+                                               Visibility="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" />
+                                    <Button Content="{x:Static strings:MainPage.MakeAPackageButtonText}"
+                                            d:Content="Make a package"
+                                            Command="{Binding NavigateToPackageCreationCommand}"
+                                            IsEnabled="{Binding IsMakePkgEnabled}"
+                                            Style="{StaticResource CardActionButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Upload a package -->
+                        <Border Style="{StaticResource ActionCardStyle}"
+                                Margin="8,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0"
+                                        Style="{StaticResource IconTileStyle}">
+                                    <Path Data="M12,18 V5 M7,10 L12,5 L17,10 M4,15 V21 H20 V15"
+                                          Stroke="{DynamicResource SuccessBrush}"
+                                          StrokeThickness="1.5"
+                                          Width="22"
+                                          Height="22"
+                                          Stretch="Uniform"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Grid.Row="1"
+                                           Text="{x:Static strings:MainPage.UploadPackageBlockTitle}"
+                                           d:Text="Upload a package (sign-in required)"
+                                           Style="{StaticResource CardTitleTextStyle}" />
+                                <TextBlock Grid.Row="2"
+                                           Text="{x:Static strings:MainPage.UploadPackageBlockBody}"
+                                           d:Text="Upload your completed game package to Partner Center."
+                                           Style="{StaticResource CardBodyTextStyle}" />
+                                <Button Grid.Row="3"
+                                        Content="{x:Static strings:MainPage.UploadPackageBlockButtonText}"
+                                        d:Content="Upload a package"
+                                        Command="{Binding NavigateToPackageUploadCommand}"
+                                        Style="{StaticResource CardActionButtonStyle}" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Package and upload loose files -->
+                        <Border Style="{StaticResource ActionCardStyle}"
+                                Margin="8,0,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Border Style="{StaticResource IconTileStyle}"
+                                            HorizontalAlignment="Left">
+                                        <Path Data="M4,4 H10 V10 H4 Z M14,4 H20 V10 H14 Z M4,14 H10 V20 H4 Z M14,14 H20 V20 H14 Z"
+                                              Stroke="{DynamicResource SuccessBrush}"
+                                              StrokeThickness="1.5"
+                                              Width="22"
+                                              Height="22"
+                                              Stretch="Uniform"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                                    </Border>
+                                    <Border Style="{StaticResource BadgeStyle}"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Top">
+                                        <TextBlock Text="{x:Static strings:MainPage.Msixvc2SubtitleText}"
+                                                   d:Text="MSIXVC2 Preview"
+                                                   Style="{StaticResource BadgeTextStyle}" />
+                                    </Border>
+                                </Grid>
+                                <TextBlock Grid.Row="1"
+                                           Text="{x:Static strings:MainPage.Msixvc2TextBlockTitle}"
+                                           d:Text="Upload Loose Files (PC only)"
+                                           Style="{StaticResource CardTitleTextStyle}" />
+                                <TextBlock Grid.Row="2"
+                                           Text="{x:Static strings:MainPage.Msixvc2BodyText}"
+                                           d:Text="Package and upload a loose PC content directory in one guided workflow."
+                                           Style="{StaticResource CardBodyTextStyle}" />
+                                <StackPanel Grid.Row="3">
+                                    <TextBlock Text="{Binding Msixvc2UnavailableErrorMessage}"
+                                               Foreground="{DynamicResource ErrorRedBrush}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,8"
+                                               Visibility="{Binding IsMsixvc2Enabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" />
+                                    <Button Content="{x:Static strings:MainPage.Msixvc2ButtonText}"
+                                            d:Content="Get started"
+                                            Command="{Binding NavigateToMsixvc2Command}"
+                                            IsEnabled="{Binding IsMsixvc2Enabled}"
+                                            Style="{StaticResource CardActionButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </primitives:UniformGrid>
                 </StackPanel>
-            </Border>
 
-            <Border Grid.Column="2"
-                    Grid.Row="2"
-                    Background="{DynamicResource AppBackgroundBrush}"
-                    Margin="{DynamicResource CardBottomMargin}"
-                    Padding="{DynamicResource SectionCardPadding}"
-                    CornerRadius="5">
-                <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{x:Static strings:MainPage.UploadPackageBlockTitle}"
-                            d:Text="Upload a package (sign in required)"
-                           Style="{StaticResource SubHeadline}"
-                           Foreground="{DynamicResource PrimaryTextBrush}"
-                           HorizontalAlignment="Left" />
-                        <Button Style="{StaticResource WindowControlButtonStyle}"
-                                Width="20" Height="20"
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Center"
-                                Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                ToolTip="{x:Static strings:MainPage.UploadPackageBlockBody}">
-                            <Path Data="{StaticResource InfoIconGeometry}"
-                                  Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
-                                  Width="14" Height="14" Stretch="Uniform"/>
-                        </Button>
-                    </StackPanel>
+                <!-- Compact layout -->
+                <StackPanel Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border Style="{StaticResource CompactActionCardStyle}"
+                            Visibility="{Binding IsUserLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CompactIconTileStyle}"
+                                    Margin="0,0,12,0">
+                                <Path Data="M12,4 A4,4 0 1,1 12,12 A4,4 0 1,1 12,4 M4,21 C4,16.6 7.6,14 12,14 C16.4,14 20,16.6 20,21"
+                                      Stroke="{DynamicResource SuccessBrush}"
+                                      StrokeThickness="1.5"
+                                      Width="18"
+                                      Height="18"
+                                      Stretch="Uniform" />
+                            </Border>
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Static strings:MainPage.SignInTextBlockTitle}"
+                                       Style="{StaticResource SubHeadline}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" />
+                            <Button Grid.Column="2"
+                                    Content="{x:Static strings:MainPage.SignInButtonContent}"
+                                    Command="{Binding SignInCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    MinWidth="88" />
+                        </Grid>
+                    </Border>
 
-                    <TextBlock Margin="0, 10, 0, 0" TextWrapping="Wrap"
-                       Text="{x:Static strings:MainPage.UploadPackageBlockBody}"
-                       d:Text="Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account."
-                       HorizontalAlignment="Left"
-                       Foreground="{DynamicResource SecondaryTextBrush}"
-                       Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
+                    <Border Style="{StaticResource CompactActionCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CompactIconTileStyle}"
+                                    Margin="0,0,12,0">
+                                <Path Data="M3,7 H21 V19 H3 Z M7,3 H17 V7 H7 Z"
+                                      Stroke="{DynamicResource SuccessBrush}"
+                                      StrokeThickness="1.5"
+                                      Width="18"
+                                      Height="18"
+                                      Stretch="Uniform" />
+                            </Border>
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Static strings:MainPage.MakeAPackageTextBlockTitle}"
+                                       Style="{StaticResource SubHeadline}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" />
+                            <Button Grid.Column="2"
+                                    Content="{x:Static strings:MainPage.MakeAPackageButtonText}"
+                                    Command="{Binding NavigateToPackageCreationCommand}"
+                                    IsEnabled="{Binding IsMakePkgEnabled}"
+                                    MinWidth="112" />
+                        </Grid>
+                    </Border>
 
-                    <Button Content="{x:Static strings:MainPage.UploadPackageBlockButtonText}"
-                        d:Content="Upload package"
-                        Command="{Binding NavigateToPackageUploadCommand}"
-                        HorizontalAlignment="Left"
-                        Margin="0,15,0,10"
-                        Width="133" />
+                    <Border Style="{StaticResource CompactActionCardStyle}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CompactIconTileStyle}"
+                                    Margin="0,0,12,0">
+                                <Path Data="M12,18 V5 M7,10 L12,5 L17,10 M4,15 V21 H20 V15"
+                                      Stroke="{DynamicResource SuccessBrush}"
+                                      StrokeThickness="1.5"
+                                      Width="18"
+                                      Height="18"
+                                      Stretch="Uniform" />
+                            </Border>
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Static strings:MainPage.UploadPackageBlockButtonText}"
+                                       Style="{StaticResource SubHeadline}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center" />
+                            <Button Grid.Column="2"
+                                    Content="{x:Static strings:MainPage.UploadPackageBlockButtonText}"
+                                    Command="{Binding NavigateToPackageUploadCommand}"
+                                    MinWidth="112" />
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource CompactActionCardStyle}"
+                            Margin="0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CompactIconTileStyle}"
+                                    Margin="0,0,12,0">
+                                <Path Data="M4,4 H10 V10 H4 Z M14,4 H20 V10 H14 Z M4,14 H10 V20 H4 Z M14,14 H20 V20 H14 Z"
+                                      Stroke="{DynamicResource SuccessBrush}"
+                                      StrokeThickness="1.5"
+                                      Width="18"
+                                      Height="18"
+                                      Stretch="Uniform" />
+                            </Border>
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Static strings:MainPage.Msixvc2TextBlockTitle}"
+                                       Style="{StaticResource SubHeadline}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                            <Button Grid.Column="2"
+                                    Content="{x:Static strings:MainPage.Msixvc2ButtonText}"
+                                    Command="{Binding NavigateToMsixvc2Command}"
+                                    IsEnabled="{Binding IsMsixvc2Enabled}"
+                                    MinWidth="112" />
+                        </Grid>
+                    </Border>
                 </StackPanel>
-            </Border>
-
-            <Border Grid.Column="0"
-                    Grid.Row="4"
-                    Background="{DynamicResource AppBackgroundBrush}"
-                    Padding="{DynamicResource SectionCardPadding}"
-                    CornerRadius="5">
-                <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{x:Static strings:MainPage.Msixvc2TextBlockTitle}"
-                           d:Text="Upload Loose Files (PC only)"
-                           Style="{StaticResource SubHeadline}"
-                           Foreground="{DynamicResource PrimaryTextBrush}"
-                           HorizontalAlignment="Left" />
-                        <Button Style="{StaticResource WindowControlButtonStyle}"
-                                Width="20" Height="20"
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Center"
-                                Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                ToolTip="{x:Static strings:MainPage.Msixvc2BodyTextWithLink}">
-                            <Path Data="{StaticResource InfoIconGeometry}"
-                                  Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
-                                  Width="14" Height="14" Stretch="Uniform"/>
-                        </Button>
-                    </StackPanel>
-
-                    <TextBlock Margin="0, 2, 0, 0"
-                               Foreground="{DynamicResource SecondaryTextBrush}"
-                               FontSize="12"
-                               Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
-                        <Run Text="{x:Static strings:MainPage.Msixvc2SubtitleText}"
-                             d:Text="MSIXVC2 Preview"/>
-                        <Hyperlink Command="{Binding PackagingLearnMoreURL}"
-                                   CommandParameter="https://aka.ms/MSIXVC2">
-                            <TextBlock Text="{x:Static strings:MainPage.MakeAPackageBodyURLText}"
-                                       d:Text="(learn more)"
-                                       Foreground="{DynamicResource SecondaryTextBrush}"
-                                       TextDecorations="Underline"
-                                       FontSize="12"/>
-                        </Hyperlink>
-                    </TextBlock>
-
-                    <TextBlock Margin="0, 10, 0, 0" TextWrapping="Wrap"
-                       Text="{x:Static strings:MainPage.Msixvc2BodyText}"
-                       d:Text="Point to your loose file directory containing a MicrosoftGame.config for your PC game. Your files will be packaged and uploaded using the MSIXVC2 format — no pre-built package required."
-                       HorizontalAlignment="Left"
-                       Foreground="{DynamicResource SecondaryTextBrush}"
-                       Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
-
-                    <Button Content="{x:Static strings:MainPage.Msixvc2ButtonText}"
-                        d:Content="Get started"
-                        Command="{Binding NavigateToMsixvc2Command}"
-                        IsEnabled="{Binding IsMsixvc2Enabled}"
-                        HorizontalAlignment="Left"
-                        Margin="0,15,0,10"
-                        Width="128" />
-
-                    <TextBlock Text="{Binding Msixvc2UnavailableErrorMessage}"
-                        Foreground="{DynamicResource ErrorRedBrush}"
-                        Visibility="{Binding IsMsixvc2Enabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}"
-                        TextWrapping="Wrap"
-                        Margin="0,0,0,5" />
-                </StackPanel>
-            </Border>
+            </StackPanel>
         </Grid>
-
-        <!-- Compact mode: single-column vertical layout -->
-        <StackPanel Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    HorizontalAlignment="Center"
-                    Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource PercentageConverter}, ConverterParameter=0.7}">
-            <!-- Sign In -->
-            <Grid Margin="{DynamicResource CardBottomMargin}"
-                  Visibility="{Binding IsUserLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Button Content="{x:Static strings:MainPage.SignInButtonContent}"
-                        Command="{Binding SignInCommand}"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        HorizontalAlignment="Stretch"/>
-                <Button Grid.Column="1"
-                        Style="{StaticResource WindowControlButtonStyle}"
-                        Width="24" Height="24" Margin="6,0,0,0"
-                        ToolTip="{x:Static strings:MainPage.SignInPreLoginText}">
-                    <Path Data="{StaticResource InfoIconGeometry}"
-                          Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
-                          Width="14" Height="14" Stretch="Uniform"/>
-                </Button>
-            </Grid>
-
-            <!-- Make a package -->
-            <Grid Margin="{DynamicResource CardBottomMargin}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Button Content="{x:Static strings:MainPage.MakeAPackageButtonText}"
-                        Command="{Binding NavigateToPackageCreationCommand}"
-                        IsEnabled="{Binding IsMakePkgEnabled}"
-                        HorizontalAlignment="Stretch"/>
-                <Button Grid.Column="1"
-                        Style="{StaticResource WindowControlButtonStyle}"
-                        Width="24" Height="24" Margin="6,0,0,0"
-                        ToolTip="{x:Static strings:MainPage.MakeAPackageBodyTextOne}">
-                    <Path Data="{StaticResource InfoIconGeometry}"
-                          Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
-                          Width="14" Height="14" Stretch="Uniform"/>
-                </Button>
-            </Grid>
-
-            <!-- Upload a package -->
-            <Grid Margin="{DynamicResource CardBottomMargin}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Button Content="{x:Static strings:MainPage.UploadPackageBlockButtonText}"
-                        Command="{Binding NavigateToPackageUploadCommand}"
-                        HorizontalAlignment="Stretch"/>
-                <Button Grid.Column="1"
-                        Style="{StaticResource WindowControlButtonStyle}"
-                        Width="24" Height="24" Margin="6,0,0,0"
-                        ToolTip="{x:Static strings:MainPage.UploadPackageBlockBody}">
-                    <Path Data="{StaticResource InfoIconGeometry}"
-                          Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
-                          Width="14" Height="14" Stretch="Uniform"/>
-                </Button>
-            </Grid>
-
-            <!-- Upload Loose Files -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Button Content="{x:Static strings:MainPage.Msixvc2TextBlockTitle}"
-                        Command="{Binding NavigateToMsixvc2Command}"
-                        HorizontalAlignment="Stretch"/>
-                <Button Grid.Column="1"
-                        Style="{StaticResource WindowControlButtonStyle}"
-                        Width="24" Height="24" Margin="6,0,0,0"
-                        ToolTip="{x:Static strings:MainPage.Msixvc2BodyTextWithLink}">
-                    <Path Data="{StaticResource InfoIconGeometry}"
-                          Stroke="{DynamicResource SecondaryTextBrush}" StrokeThickness="1.2"
-                          Width="14" Height="14" Stretch="Uniform"/>
-                </Button>
-            </Grid>
-        </StackPanel>
-    </StackPanel>
     </ScrollViewer>
 </UserControl>

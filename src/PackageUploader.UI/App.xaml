@@ -13,6 +13,7 @@
                 <ResourceDictionary Source="Resources/Styles/DesignTokens.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/WindowStyles.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Components.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Value Converters -->
