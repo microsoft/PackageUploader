@@ -34,6 +34,11 @@ public partial class App : System.Windows.Application
     private const string HighContrastTheme = "Resources/Styles/Colors.HighContrast.xaml";
     private const string NormalSizes = "Resources/Styles/Sizes.Normal.xaml";
     private const string CompactSizes = "Resources/Styles/Sizes.Compact.xaml";
+    private string? _testingThemeOverride;
+    private string _activeTheme = DarkTheme;
+
+    internal bool IsDarkThemeActive => _activeTheme == DarkTheme;
+    internal bool IsHighContrastThemeActive => _activeTheme == HighContrastTheme;
 
     public static string GetLogFilePath() => LogFilePath;
 
@@ -212,7 +217,9 @@ public partial class App : System.Windows.Application
 
     private void ApplyTheme()
     {
-        string themeToApply = GetSystemThemeResource();
+        string themeToApply = SystemParameters.HighContrast
+            ? HighContrastTheme
+            : _testingThemeOverride ?? GetSystemThemeResource();
         var dicts = Resources.MergedDictionaries;
         // Remove any of our theme dictionaries
         for (int i = dicts.Count - 1; i >= 0; i--)
@@ -223,6 +230,23 @@ public partial class App : System.Windows.Application
         }
         // Theme always goes first (index 0)
         dicts.Insert(0, new ResourceDictionary { Source = new Uri(themeToApply, UriKind.Relative) });
+        _activeTheme = themeToApply;
+
+        if (System.Windows.Application.Current.MainWindow is MainWindow mainWindow)
+        {
+            mainWindow.UpdateThemeToggleIcon();
+        }
+    }
+
+    internal void ToggleThemeForTesting()
+    {
+        if (SystemParameters.HighContrast)
+        {
+            return;
+        }
+
+        _testingThemeOverride = IsDarkThemeActive ? LightTheme : DarkTheme;
+        ApplyTheme();
     }
 
     private static string GetSystemThemeResource()

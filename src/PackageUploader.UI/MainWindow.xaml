@@ -91,6 +91,22 @@
 
                 <!-- Window Controls -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <!-- Temporary theme toggle for redesign testing. Production behavior remains system-driven. -->
+                    <Button x:Name="ThemeToggleButton"
+                            Width="46" Height="32"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Click="ThemeToggleButton_Click"
+                            Style="{StaticResource WindowControlButtonStyle}"
+                            AutomationProperties.HelpText="Temporarily toggle light and dark theme"
+                            ToolTip="Switch to light mode">
+                        <Path x:Name="ThemeToggleIcon"
+                              Data="M8,2 A6,6 0 1 0 14,8 A5,5 0 0 1 8,2"
+                              Stroke="{DynamicResource SecondaryTextBrush}"
+                              StrokeThickness="1"
+                              Width="14"
+                              Height="14"
+                              Stretch="Uniform"/>
+                    </Button>
                     <!-- Compact mode toggle -->
                     <Button x:Name="CompactModeButton"
                             Width="46" Height="32"
@@ -101,7 +117,7 @@
                             ToolTip="{x:Static strings:MainPage.CompactModeTooltipCompact}">
                         <Path x:Name="CompactModeIcon"
                               Data="M3,5 H13 M3,8 H13 M3,11 H13"
-                              Stroke="{StaticResource SecondaryTextBrush}"
+                              Stroke="{DynamicResource SecondaryTextBrush}"
                               StrokeThickness="1"
                               Width="14"
                               Height="14"
@@ -117,7 +133,7 @@
                                 AutomationProperties.HelpText="Send feedback about the application"
                                 ToolTip="{x:Static strings:MainPage.GitHubIssues}">
                             <Path Data="M 0 0 L 0 9  L 3 9 L 3 13 L 6 9  L 12 9 L 12 0 z"
-                                  Stroke="{StaticResource SecondaryTextBrush}"
+                                  Stroke="{DynamicResource SecondaryTextBrush}"
                                   StrokeThickness="1"
                                   StrokeEndLineCap="Square"
                                   StrokeStartLineCap="Square"
@@ -135,7 +151,7 @@
                             AutomationProperties.HelpText="Minimize the window"
                             ToolTip="{x:Static strings:MainPage.MinimizeWindow}">
                         <Path Data="M0,6 H10" 
-                              Stroke="{StaticResource SecondaryTextBrush}" 
+                              Stroke="{DynamicResource SecondaryTextBrush}" 
                               StrokeThickness="1" 
                               Stretch="None" 
                               VerticalAlignment="Center" 
@@ -150,7 +166,7 @@
                             ToolTip="{x:Static strings:MainPage.MaximizeWindow}">
                         <Path x:Name="MaximizeIcon" 
                               Data="M0,0 H10 V10 H0 V0" 
-                              Stroke="{StaticResource SecondaryTextBrush}" 
+                              Stroke="{DynamicResource SecondaryTextBrush}" 
                               StrokeThickness="1" 
                               Stretch="None" 
                               VerticalAlignment="Center" 
@@ -164,7 +180,7 @@
                             AutomationProperties.HelpText="Close the application"
                             ToolTip="{x:Static strings:MainPage.CloseWindow}">
                         <Path Data="M0,0 L10,10 M0,10 L10,0" 
-                              Stroke="{StaticResource SecondaryTextBrush}" 
+                              Stroke="{DynamicResource SecondaryTextBrush}" 
                               StrokeThickness="1" 
                               Stretch="None" 
                               VerticalAlignment="Center" 
