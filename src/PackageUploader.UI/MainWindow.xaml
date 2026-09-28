@@ -28,7 +28,7 @@
             CornerRadius="0" />
     </WindowChrome.WindowChrome>
 
-    <Border BorderThickness="1" BorderBrush="{DynamicResource BorderBrushColor}">
+    <Border BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}">
         <Border.Effect>
             <DropShadowEffect Color="{DynamicResource DropShadowComboBoxItemColor}" BlurRadius="12" ShadowDepth="2" Opacity="0.40"/>
         </Border.Effect>

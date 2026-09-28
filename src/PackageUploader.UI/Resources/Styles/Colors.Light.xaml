@@ -4,39 +4,59 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Colors -->
-    <Color x:Key="PrimaryTextColor">#000000</Color>
-    <Color x:Key="SecondaryTextColor">#4A4A4A</Color>
+    <Color x:Key="PrimaryTextColor">#1A1A1A</Color>
+    <Color x:Key="SecondaryTextColor">#5E6166</Color>
 
     <Color x:Key="TextEntryHighlightedBackgroundColor">#E8E8E8</Color>
 
-    <Color x:Key="PrimaryButtonColor">#5F41C9</Color>
-    <Color x:Key="PrimaryButtonHoverColor">#4A24AE</Color>
-    <Color x:Key="PrimaryButtonDisabledColor">#A6A6A6</Color>
-    <Color x:Key="PrimaryButtonClickedColor">#8479AB</Color>
+    <Color x:Key="PrimaryButtonColor">#107C10</Color>
+    <Color x:Key="PrimaryButtonHoverColor">#0B6410</Color>
+    <Color x:Key="PrimaryButtonDisabledColor">#B7C9B5</Color>
+    <Color x:Key="PrimaryButtonClickedColor">#094C0C</Color>
 
-    <Color x:Key="SecondaryButtonColor">#F3F3F3</Color>
-    <Color x:Key="SecondaryButtonHoverColor">#E1E1E1</Color>
-    <Color x:Key="SecondaryButtonDisabledColor">#C8C8C8</Color>
-    <Color x:Key="SecondaryButtonClickedColor">#D0D0D0</Color>
+    <Color x:Key="SecondaryButtonColor">#FFFFFF</Color>
+    <Color x:Key="SecondaryButtonHoverColor">#F3F4F5</Color>
+    <Color x:Key="SecondaryButtonDisabledColor">#ECEDEF</Color>
+    <Color x:Key="SecondaryButtonClickedColor">#E4E6E8</Color>
 
-    <Color x:Key="ComboBoxBorderHighlightColor">#CCCCCC</Color>
-    <Color x:Key="HighlightedComboBoxItemColor">#606060</Color>
-    <Color x:Key="DropShadowComboBoxItemColor">#606060</Color>
+    <Color x:Key="ComboBoxBorderHighlightColor">#8A8D91</Color>
+    <Color x:Key="HighlightedComboBoxItemColor">#E7F4E4</Color>
+    <Color x:Key="DropShadowComboBoxItemColor">#000000</Color>
 
-    <Color x:Key="ApplicationControlsColor">#000000</Color>
-    <Color x:Key="ApplicationControlsSelectColor">#F0F0F0</Color>
+    <Color x:Key="ApplicationControlsColor">#E8EAEC</Color>
+    <Color x:Key="ApplicationControlsSelectColor">#D8DADD</Color>
 
     <Color x:Key="ErrorRed">#D83B01</Color>
     <Color x:Key="ErrorRedTransluscent">#1AD83B01</Color>
 
-    <Color x:Key="LightPurplishBlue">#8A2BE2</Color>
+    <Color x:Key="LightPurplishBlue">#107C10</Color>
 
-    <Color x:Key="BorderColor">#D6D6D6</Color>
-    <Color x:Key="ErrorScreenBackgroundColor">#F9F9F9</Color>
-    <Color x:Key="BackgroundColor">#FFFFFF</Color>
+    <Color x:Key="BorderColor">#D8DADD</Color>
+    <Color x:Key="ErrorScreenBackgroundColor">#F4F5F6</Color>
+    <Color x:Key="BackgroundColor">#F4F5F6</Color>
 
-    <Color x:Key="ProgressBarForegroundColor">#0078D7</Color>
-    <Color x:Key="ProgressBarBackgroundColor">#E1E1E1</Color>
+    <Color x:Key="ProgressBarForegroundColor">#107C10</Color>
+    <Color x:Key="ProgressBarBackgroundColor">#E1E3E5</Color>
+
+    <!-- Semantic design tokens -->
+    <Color x:Key="CanvasColor">#F4F5F6</Color>
+    <Color x:Key="LayerColor">#FFFFFF</Color>
+    <Color x:Key="CardColor">#FFFFFF</Color>
+    <Color x:Key="CardHoverColor">#F8F9FA</Color>
+    <Color x:Key="ControlFillColor">#FFFFFF</Color>
+    <Color x:Key="ControlFillHoverColor">#F3F4F5</Color>
+    <Color x:Key="ControlFillPressedColor">#E4E6E8</Color>
+    <Color x:Key="ControlFillDisabledColor">#ECEDEF</Color>
+    <Color x:Key="ControlStrokeColor">#B8BBC0</Color>
+    <Color x:Key="ControlStrokeFocusColor">#0067C0</Color>
+    <Color x:Key="DisabledTextColor">#8A8D91</Color>
+    <Color x:Key="AccentTextColor">#FFFFFF</Color>
+    <Color x:Key="DividerColor">#E2E4E7</Color>
+    <Color x:Key="SuccessColor">#107C10</Color>
+    <Color x:Key="SuccessBackgroundColor">#E7F4E4</Color>
+    <Color x:Key="WarningColor">#8A4B08</Color>
+    <Color x:Key="WarningBackgroundColor">#FFF4CE</Color>
+    <Color x:Key="ShadowColor">#000000</Color>
 
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}"/>
@@ -71,5 +91,23 @@
 
     <SolidColorBrush x:Key="ProgressBarForegroundBrush" Color="{StaticResource ProgressBarForegroundColor}"/>
     <SolidColorBrush x:Key="ProgressBarBackgroundBrush" Color="{StaticResource ProgressBarBackgroundColor}"/>
+
+    <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}"/>
+    <SolidColorBrush x:Key="LayerBrush" Color="{StaticResource LayerColor}"/>
+    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource CardColor}"/>
+    <SolidColorBrush x:Key="CardHoverBrush" Color="{StaticResource CardHoverColor}"/>
+    <SolidColorBrush x:Key="ControlFillBrush" Color="{StaticResource ControlFillColor}"/>
+    <SolidColorBrush x:Key="ControlFillHoverBrush" Color="{StaticResource ControlFillHoverColor}"/>
+    <SolidColorBrush x:Key="ControlFillPressedBrush" Color="{StaticResource ControlFillPressedColor}"/>
+    <SolidColorBrush x:Key="ControlFillDisabledBrush" Color="{StaticResource ControlFillDisabledColor}"/>
+    <SolidColorBrush x:Key="ControlStrokeBrush" Color="{StaticResource ControlStrokeColor}"/>
+    <SolidColorBrush x:Key="ControlStrokeFocusBrush" Color="{StaticResource ControlStrokeFocusColor}"/>
+    <SolidColorBrush x:Key="DisabledTextBrush" Color="{StaticResource DisabledTextColor}"/>
+    <SolidColorBrush x:Key="AccentTextBrush" Color="{StaticResource AccentTextColor}"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource DividerColor}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="SuccessBackgroundBrush" Color="{StaticResource SuccessBackgroundColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="WarningBackgroundBrush" Color="{StaticResource WarningBackgroundColor}"/>
 
 </ResourceDictionary>

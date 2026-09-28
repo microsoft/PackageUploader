@@ -10,6 +10,7 @@
                 <!-- Default to Colors.Dark.xaml, will be swapped at runtime -->
                 <ResourceDictionary Source="Resources/Styles/Colors.Dark.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Sizes.Normal.xaml" />
+                <ResourceDictionary Source="Resources/Styles/DesignTokens.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/WindowStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>

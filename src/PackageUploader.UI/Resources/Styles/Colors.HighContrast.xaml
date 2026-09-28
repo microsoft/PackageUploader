@@ -38,6 +38,26 @@
     <Color x:Key="ProgressBarForegroundColor">#FFFF00</Color>
     <Color x:Key="ProgressBarBackgroundColor">#4D4D4D</Color>
 
+    <!-- Semantic design tokens -->
+    <Color x:Key="CanvasColor">#000000</Color>
+    <Color x:Key="LayerColor">#000000</Color>
+    <Color x:Key="CardColor">#000000</Color>
+    <Color x:Key="CardHoverColor">#1A1A1A</Color>
+    <Color x:Key="ControlFillColor">#000000</Color>
+    <Color x:Key="ControlFillHoverColor">#1A1A1A</Color>
+    <Color x:Key="ControlFillPressedColor">#333333</Color>
+    <Color x:Key="ControlFillDisabledColor">#1A1A1A</Color>
+    <Color x:Key="ControlStrokeColor">#FFFFFF</Color>
+    <Color x:Key="ControlStrokeFocusColor">#FFFF00</Color>
+    <Color x:Key="DisabledTextColor">#C0C0C0</Color>
+    <Color x:Key="AccentTextColor">#000000</Color>
+    <Color x:Key="DividerColor">#FFFFFF</Color>
+    <Color x:Key="SuccessColor">#00FF00</Color>
+    <Color x:Key="SuccessBackgroundColor">#000000</Color>
+    <Color x:Key="WarningColor">#FFFF00</Color>
+    <Color x:Key="WarningBackgroundColor">#000000</Color>
+    <Color x:Key="ShadowColor">#000000</Color>
+
     <!-- Brushes -->
     <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}"/>
     <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
@@ -71,5 +91,23 @@
 
     <SolidColorBrush x:Key="ProgressBarForegroundBrush" Color="{StaticResource ProgressBarForegroundColor}"/>
     <SolidColorBrush x:Key="ProgressBarBackgroundBrush" Color="{StaticResource ProgressBarBackgroundColor}"/>
+
+    <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}"/>
+    <SolidColorBrush x:Key="LayerBrush" Color="{StaticResource LayerColor}"/>
+    <SolidColorBrush x:Key="CardBrush" Color="{StaticResource CardColor}"/>
+    <SolidColorBrush x:Key="CardHoverBrush" Color="{StaticResource CardHoverColor}"/>
+    <SolidColorBrush x:Key="ControlFillBrush" Color="{StaticResource ControlFillColor}"/>
+    <SolidColorBrush x:Key="ControlFillHoverBrush" Color="{StaticResource ControlFillHoverColor}"/>
+    <SolidColorBrush x:Key="ControlFillPressedBrush" Color="{StaticResource ControlFillPressedColor}"/>
+    <SolidColorBrush x:Key="ControlFillDisabledBrush" Color="{StaticResource ControlFillDisabledColor}"/>
+    <SolidColorBrush x:Key="ControlStrokeBrush" Color="{StaticResource ControlStrokeColor}"/>
+    <SolidColorBrush x:Key="ControlStrokeFocusBrush" Color="{StaticResource ControlStrokeFocusColor}"/>
+    <SolidColorBrush x:Key="DisabledTextBrush" Color="{StaticResource DisabledTextColor}"/>
+    <SolidColorBrush x:Key="AccentTextBrush" Color="{StaticResource AccentTextColor}"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource DividerColor}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="SuccessBackgroundBrush" Color="{StaticResource SuccessBackgroundColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="WarningBackgroundBrush" Color="{StaticResource WarningBackgroundColor}"/>
 
 </ResourceDictionary>
