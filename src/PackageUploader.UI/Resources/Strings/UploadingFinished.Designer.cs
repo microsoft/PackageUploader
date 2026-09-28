@@ -167,6 +167,15 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("UploadCompleteTitleText", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Your package was uploaded successfully and is ready in Partner Center..
+        /// </summary>
+        public static string UploadCompleteSubtitleText {
+            get {
+                return ResourceManager.GetString("UploadCompleteSubtitleText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Upload Size.

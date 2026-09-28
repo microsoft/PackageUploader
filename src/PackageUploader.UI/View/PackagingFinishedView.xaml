@@ -1,224 +1,267 @@
 ﻿<UserControl x:Class="PackageUploader.UI.View.PackagingFinishedView"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
-      xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
-      xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
-      mc:Ignorable="d"
-      d:DataContext="{d:DesignInstance Type=viewmodel:PackagingFinishedViewModel}"
-      Background="{DynamicResource AppBackgroundBrush}">
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
+             xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewmodel:PackagingFinishedViewModel}"
+             Background="{DynamicResource CanvasBrush}">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/> <!-- check -->
-            <RowDefinition Height="auto"/> <!-- title -->
-            <RowDefinition Height="auto"/> <!-- Main Box -->
-            <RowDefinition Height="auto"/> <!-- Error Box -->
-            <RowDefinition /> <!-- buttons row -->
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  HorizontalContentAlignment="Stretch">
+        <Grid Margin="{DynamicResource PagePadding}"
+              MaxWidth="1100"
+              HorizontalAlignment="Stretch">
+            <StackPanel Margin="0,24,0,0">
+                <Image Source="/Resources/Images/Complete.png"
+                       Height="{DynamicResource StatusImageSize}"
+                       Width="{DynamicResource StatusImageSize}"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,18" />
+                <TextBlock Text="{x:Static strings:PackagingFinished.PackagingCompletedTitleText}"
+                           d:Text="Packaging completed"
+                           Style="{StaticResource PageTitleTextStyle}"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="{x:Static strings:PackagingFinished.PackagingCompletedSubtitleText}"
+                           d:Text="Your game package is ready for testing or upload."
+                           Style="{StaticResource PageSubtitleTextStyle}"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,24"
+                           MaxWidth="680" />
 
-        <Image Grid.Row="0"
-               Margin="{DynamicResource StatusImageMargin}"
-               Source="/Resources/Images/Complete.png"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Height="{DynamicResource StatusImageSize}"
-               Width="{DynamicResource StatusImageSize}" />
-        <TextBlock Grid.Row="1"
-                   Margin="0, 0, 0, 23"
-                   Style="{StaticResource SubHeadline}"
-                   Text="{x:Static strings:PackagingFinished.PackagingCompletedTitleText}"
-                   d:Text="Packaging completed"
-                   Foreground="{DynamicResource PrimaryTextBrush}" />
-        <Border Grid.Row="2"
-                Margin="40, 0, 40, 0"
-                BorderBrush="#6B7584"
-                BorderThickness="1"
-                CornerRadius="6"
-                Padding="6">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"/> <!-- image -->
-                    <ColumnDefinition /> <!-- text -->
-                    <ColumnDefinition Width="auto"/> <!-- button -->
-                    <ColumnDefinition Width="auto"/> <!-- button -->
-                </Grid.ColumnDefinitions>
-                <Image Grid.Row="0"
-                       Grid.Column="0"
-                       Grid.RowSpan="4"
-                       Source="{Binding PackagePreviewImage}"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Center"
-                       Height="80"
-                       Width="80"
-                       Margin="10,0,15,0"/>
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
-                    <TextBlock HorizontalAlignment="Left"
-                               Text="{x:Static strings:PackagingFinished.FileNameTitleText}"
-                               d:Text="File name" 
-                               Foreground="{DynamicResource SecondaryTextBrush}"/>
-                    <TextBlock HorizontalAlignment="Left"
-                               Text="{Binding PackageFileName}" 
-                               Foreground="{DynamicResource PrimaryTextBrush}"/>
-                </StackPanel>
-                <Grid Margin="0, 10, 0, 0" Grid.Row="1" Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="33*" />
-                        <ColumnDefinition Width="33*" />
-                        <ColumnDefinition Width="33*" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0"
-                                Orientation="Vertical"
+                <!-- Full package summary -->
+                <Border Style="{DynamicResource OutcomePanelStyle}"
+                        Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="96" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Width="80"
+                                Height="80"
+                                Background="{DynamicResource ControlFillBrush}"
+                                BorderBrush="{DynamicResource DividerBrush}"
+                                BorderThickness="1"
+                                CornerRadius="{DynamicResource ControlCornerRadius}"
                                 HorizontalAlignment="Left"
-                                Margin="0, 0, 50, 0">
-                        <TextBlock HorizontalAlignment="Left"
-                                   Text="{x:Static strings:PackagingFinished.StoreIdTitleText}"
-                                   d:Text="Store ID" 
-                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBlock Text="{Binding StoreId}"
-                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock Text="{x:Static strings:PackagingFinished.SizeTitleText}"
-                                   d:Text="Size" 
-                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBlock Text="{Binding PackageSize}" 
-                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Left">
-                        <TextBlock Text="{x:Static strings:PackagingFinished.FamilyTitleText}"
-                                   d:Text="Family" 
-                                   Foreground="{DynamicResource SecondaryTextBrush}"/>
-                        <TextBlock Text="{Binding PackageType}" 
-                                   Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    </StackPanel>
-                </Grid>
-                <Button Grid.RowSpan="4" Grid.Column="2"
-                        d:Content="Install game"
-                        Content="{x:Static strings:PackagingFinished.InstallGameButtonContent}"
-                        Command="{Binding InstallGameCommand}"
-                        IsEnabled="True"
-                        Width="107"
-                        Height="32"
-                        Margin="10, 0, 10, 0"/>
-                <Button Grid.RowSpan="4" Grid.Column="3"
-                        d:Content="View package"
-                        Content="{x:Static strings:PackagingFinished.ViewPackageButtonContent}"
-                        Command="{Binding ViewPackageCommand}"
-                        IsEnabled="True"
-                        Width="116"
-                        Height="32"
-                        Margin="0, 0, 10, 0"/>
-            </Grid>
-        </Border>
-        <!-- Full mode: draw all validator errors inline -->
-        <Border Grid.Row="3"
-                Visibility="{Binding ShowFullValidatorBlock, Converter={StaticResource BooleanToVisibilityConverter}}"
-                Background="{DynamicResource ErrorRedTransluscentBrush}"
-                Margin="40, 10, 40, 0"
-                CornerRadius="6"
-                BorderBrush="{DynamicResource ErrorRedTransluscentBrush}">
-            <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                    </Grid.RowDefinitions>
+                                VerticalAlignment="Top">
+                            <Image Source="{Binding PackagePreviewImage}"
+                                   Width="64"
+                                   Height="64"
+                                   Stretch="Uniform"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                        </Border>
 
-                    <Image Grid.Row="0"
-                           Grid.Column="0"
-                           Source="/Resources/AppIcon/ErrorIcon.png" 
-                           HorizontalAlignment="Right"
-                           Margin="10,10,0,0"/>
-                    <TextBlock Grid.Row="0"
-                               Grid.Column="1"
-                               Text="{x:Static strings:PackagingFinished.ValidatorFailuresTitleText}"
-                               d:Text="Validator failures"
-                               Style="{StaticResource SubHeadline}"
-                               Foreground="{DynamicResource ErrorRedBrush}"
-                               HorizontalAlignment="Left"
-                               Margin="10, 10, 0, 0" />
-                    <TextBlock Grid.Row="1"
-                               Grid.ColumnSpan="2"
-                               Text="{Binding ValidatorFailuresText, Mode=OneWay}"
-                               Foreground="{DynamicResource PrimaryTextBrush}" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"
-                               TextWrapping="Wrap"
-                               Margin="10, 10, 20, 20"
-                               MaxHeight="300"/>
-                </Grid>
-            </ScrollViewer>
-        </Border>
+                        <StackPanel Grid.Column="1"
+                                    Margin="0,0,24,0">
+                            <TextBlock Text="{x:Static strings:PackagingFinished.FileNameTitleText}"
+                                       Style="{DynamicResource WorkflowMetadataLabelStyle}" />
+                            <TextBlock Text="{Binding PackageFileName}"
+                                       Style="{DynamicResource OutcomePrimaryValueStyle}"
+                                       Margin="0,0,0,18" />
+                            <UniformGrid Columns="3">
+                                <StackPanel Margin="0,0,20,0">
+                                    <TextBlock Text="{x:Static strings:PackagingFinished.StoreIdTitleText}"
+                                               Style="{DynamicResource WorkflowMetadataLabelStyle}" />
+                                    <TextBlock Text="{Binding StoreId}"
+                                               Style="{DynamicResource WorkflowMetadataValueStyle}" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,20,0">
+                                    <TextBlock Text="{x:Static strings:PackagingFinished.SizeTitleText}"
+                                               Style="{DynamicResource WorkflowMetadataLabelStyle}" />
+                                    <TextBlock Text="{Binding PackageSize}"
+                                               Style="{DynamicResource WorkflowMetadataValueStyle}" />
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="{x:Static strings:PackagingFinished.FamilyTitleText}"
+                                               Style="{DynamicResource WorkflowMetadataLabelStyle}" />
+                                    <TextBlock Text="{Binding PackageType}"
+                                               Style="{DynamicResource WorkflowMetadataValueStyle}" />
+                                </StackPanel>
+                            </UniformGrid>
+                        </StackPanel>
 
-        <!-- Compact mode: collapsible expander so buttons are never pushed off-screen -->
-        <Border Grid.Row="3"
-                Visibility="{Binding ShowCompactValidatorExpander, Converter={StaticResource BooleanToVisibilityConverter}}"
-                Background="{DynamicResource ErrorRedTransluscentBrush}"
-                Margin="40, 10, 40, 0"
-                CornerRadius="6"
-                Padding="4">
-            <Expander>
-                <Expander.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="/Resources/AppIcon/ErrorIcon.png"
-                               Width="16" Height="16"
-                               Margin="0,0,8,0"
-                               VerticalAlignment="Center"/>
-                        <TextBlock Text="{x:Static strings:PackagingFinished.ValidatorMessagesExpanderText}"
-                                   d:Text="Submission Validator messages"
-                                   FontSize="{DynamicResource SubHeadlineFontSize}"
-                                   Foreground="{DynamicResource ErrorRedBrush}"
-                                   VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <Button Content="{x:Static strings:PackagingFinished.InstallGameButtonContent}"
+                                    d:Content="Install game"
+                                    Command="{Binding InstallGameCommand}"
+                                    MinWidth="112"
+                                    Margin="0,0,10,0" />
+                            <Button Content="{x:Static strings:PackagingFinished.ViewPackageButtonContent}"
+                                    d:Content="View package"
+                                    Command="{Binding ViewPackageCommand}"
+                                    MinWidth="116" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Compact package summary -->
+                <Border Style="{DynamicResource OutcomePanelStyle}"
+                        Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,0,0,18">
+                            <Border Width="64"
+                                    Height="64"
+                                    Background="{DynamicResource ControlFillBrush}"
+                                    BorderBrush="{DynamicResource DividerBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{DynamicResource ControlCornerRadius}"
+                                    Margin="0,0,14,0">
+                                <Image Source="{Binding PackagePreviewImage}"
+                                       Width="50"
+                                       Height="50"
+                                       Stretch="Uniform"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static strings:PackagingFinished.FileNameTitleText}"
+                                           Style="{DynamicResource WorkflowMetadataLabelStyle}" />
+                                <TextBlock Text="{Binding PackageFileName}"
+                                           Style="{DynamicResource OutcomePrimaryValueStyle}"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                        <UniformGrid Columns="2"
+                                     Margin="0,0,0,18">
+                            <StackPanel Margin="0,0,14,14">
+                                <TextBlock Text="{x:Static strings:PackagingFinished.StoreIdTitleText}"
+                                           Style="{DynamicResource WorkflowMetadataLabelStyle}" />
+                                <TextBlock Text="{Binding StoreId}"
+                                           Style="{DynamicResource WorkflowMetadataValueStyle}" />
+                            </StackPanel>
+                            <StackPanel Margin="0,0,0,14">
+                                <TextBlock Text="{x:Static strings:PackagingFinished.SizeTitleText}"
+                                           Style="{DynamicResource WorkflowMetadataLabelStyle}" />
+                                <TextBlock Text="{Binding PackageSize}"
+                                           Style="{DynamicResource WorkflowMetadataValueStyle}" />
+                            </StackPanel>
+                            <StackPanel Margin="0,0,14,0">
+                                <TextBlock Text="{x:Static strings:PackagingFinished.FamilyTitleText}"
+                                           Style="{DynamicResource WorkflowMetadataLabelStyle}" />
+                                <TextBlock Text="{Binding PackageType}"
+                                           Style="{DynamicResource WorkflowMetadataValueStyle}" />
+                            </StackPanel>
+                        </UniformGrid>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right">
+                            <Button Content="{x:Static strings:PackagingFinished.InstallGameButtonContent}"
+                                    d:Content="Install game"
+                                    Command="{Binding InstallGameCommand}"
+                                    MinWidth="112"
+                                    Margin="0,0,10,0" />
+                            <Button Content="{x:Static strings:PackagingFinished.ViewPackageButtonContent}"
+                                    d:Content="View package"
+                                    Command="{Binding ViewPackageCommand}"
+                                    MinWidth="116" />
+                        </StackPanel>
                     </StackPanel>
-                </Expander.Header>
-                <ScrollViewer MaxHeight="120"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled"
-                              Margin="10,4,10,8">
-                    <TextBlock Text="{Binding ValidatorFailuresText, Mode=OneWay}"
-                               Foreground="{DynamicResource PrimaryTextBrush}"
-                               TextWrapping="Wrap"/>
-                </ScrollViewer>
-            </Expander>
-        </Border>
-        <StackPanel Grid.Row="4"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom">
-            <Button Content="{x:Static strings:PackagingFinished.ViewLogsButtonContent}"
-                    d:Content="View logs"
-                    Command="{Binding ViewLogsCommand}"
-                    Style="{StaticResource HyperlinkUnderlinedButtonStyle}"
-                    Margin="0, 0, 20, 20" />
-            <Button Content="{x:Static strings:PackagingFinished.GoHomeButtonContent}"
-                    d:Content="Go home"
-                    Command="{Binding GoHomeCommand}"
-                    IsEnabled="True"
-                    Margin="0, 0, 10, 20"
-                    Width="150"
-                    Height="30"/>
-            <Button Content="{x:Static strings:PackagingFinished.ConfigureUploadButtonContent}"
-                    d:Content="Configure upload"
-                    Command="{Binding ConfigureUploadCommand}"
-                    IsEnabled="True"
-                    Margin="0, 0, 25, 20"
-                    Style="{StaticResource PrimaryButtonStyle}"
-                    Width="140"
-                    Height="34"/>
-        </StackPanel>
-    </Grid>
+                </Border>
+
+                <!-- Full validator results -->
+                <Border Style="{DynamicResource OutcomeErrorPanelStyle}"
+                        Visibility="{Binding ShowFullValidatorBlock, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0"
+                                    Orientation="Horizontal">
+                            <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                   Width="20"
+                                   Height="20"
+                                   Margin="0,1,10,0" />
+                            <TextBlock Text="{x:Static strings:PackagingFinished.ValidatorFailuresTitleText}"
+                                       d:Text="Submission Validator Errors"
+                                       Style="{StaticResource SubHeadline}"
+                                       Foreground="{DynamicResource ErrorRedBrush}"
+                                       HorizontalAlignment="Left"
+                                       TextAlignment="Left" />
+                        </StackPanel>
+                        <ScrollViewer Grid.Row="1"
+                                      MaxHeight="240"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Margin="0,14,0,0">
+                            <TextBlock Text="{Binding ValidatorFailuresText, Mode=OneWay}"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       TextWrapping="Wrap" />
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- Compact validator results -->
+                <Border Style="{DynamicResource OutcomeErrorPanelStyle}"
+                        Visibility="{Binding ShowCompactValidatorExpander, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Expander>
+                        <Expander.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/Resources/AppIcon/ErrorIcon.png"
+                                       Width="18"
+                                       Height="18"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Static strings:PackagingFinished.ValidatorMessagesExpanderText}"
+                                           d:Text="Submission Validator messages"
+                                           FontWeight="{DynamicResource SemiboldFontWeight}"
+                                           Foreground="{DynamicResource ErrorRedBrush}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Expander.Header>
+                        <ScrollViewer MaxHeight="150"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      Margin="0,10,0,0">
+                            <TextBlock Text="{Binding ValidatorFailuresText, Mode=OneWay}"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
+                                       TextWrapping="Wrap" />
+                        </ScrollViewer>
+                    </Expander>
+                </Border>
+
+                <Border Style="{DynamicResource WorkflowActionBarStyle}"
+                        MaxWidth="900"
+                        HorizontalAlignment="Stretch">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                Content="{x:Static strings:PackagingFinished.ViewLogsButtonContent}"
+                                d:Content="View logs"
+                                Command="{Binding ViewLogsCommand}"
+                                HorizontalAlignment="Left"
+                                MinWidth="96" />
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal">
+                            <Button Content="{x:Static strings:PackagingFinished.GoHomeButtonContent}"
+                                    d:Content="Home"
+                                    Command="{Binding GoHomeCommand}"
+                                    MinWidth="96"
+                                    Margin="0,0,10,0" />
+                            <Button Content="{x:Static strings:PackagingFinished.ConfigureUploadButtonContent}"
+                                    d:Content="Configure upload"
+                                    Command="{Binding ConfigureUploadCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    MinWidth="140" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

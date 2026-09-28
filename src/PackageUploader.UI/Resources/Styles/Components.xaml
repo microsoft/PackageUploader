@@ -307,4 +307,31 @@
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
+
+    <Style x:Key="OutcomePanelStyle"
+           TargetType="Border"
+           BasedOn="{StaticResource CardContainerStyle}">
+        <Setter Property="Padding" Value="24" />
+        <Setter Property="MaxWidth" Value="900" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <Style x:Key="OutcomeErrorPanelStyle"
+           TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ErrorRedTransluscentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource CardCornerRadius}" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="Margin" Value="0,12,0,0" />
+        <Setter Property="MaxWidth" Value="900" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <Style x:Key="OutcomePrimaryValueStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource WorkflowMetadataValueStyle}">
+        <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
 </ResourceDictionary>
