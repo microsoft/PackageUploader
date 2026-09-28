@@ -21,10 +21,11 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled">
+                  HorizontalScrollBarVisibility="Disabled"
+                  HorizontalContentAlignment="Stretch">
         <Grid Margin="{DynamicResource PagePadding}"
               MaxWidth="1320"
-              HorizontalAlignment="Center">
+              HorizontalAlignment="Stretch">
             <StackPanel>
                 <!-- Page heading -->
                 <Grid Margin="0,6,0,24">
