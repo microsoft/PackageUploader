@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
@@ -731,6 +732,34 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         if (processId != 0)
         {
+            if (UseMsixvc2)
+            {
+                try
+                {
+                    if (!_makePackageProcess!.HasExited)
+                    {
+                        // makepkg2 launches xvdsign while producing the final package. A console
+                        // cancel can exit makepkg2 without stopping xvdsign, leaving the output
+                        // file locked and causing the next package attempt to fail.
+                        _makePackageProcess.Kill(entireProcessTree: true);
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    // The process exited between the state check and the kill request.
+                }
+                catch (NotSupportedException ex)
+                {
+                    _logger.LogWarning(ex, "Unable to stop the MSIXVC2 packaging process tree.");
+                }
+                catch (Win32Exception ex)
+                {
+                    _logger.LogWarning(ex, "Unable to stop the MSIXVC2 packaging process tree.");
+                }
+
+                return;
+            }
+
             // Getting this to work was a little bit difficult. C# applications
             // don't have a console window so can't use the normal Console.CancelKeyPress
             // event. We can work around this by attaching to the MakePkg console, however
