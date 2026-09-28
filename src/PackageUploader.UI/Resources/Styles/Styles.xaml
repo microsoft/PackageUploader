@@ -102,6 +102,15 @@
         <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}" />
         <Setter Property="Background" Value="{DynamicResource PrimaryButtonBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryButtonBrush}" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}"
+                               FontWeight="{Binding FontWeight, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
