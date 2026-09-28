@@ -276,7 +276,8 @@
                                     Content="{x:Static strings:MainPage.SignInButtonContent}"
                                     Command="{Binding SignInCommand}"
                                     Style="{StaticResource PrimaryButtonStyle}"
-                                    MinWidth="88" />
+                                    MinWidth="88"
+                                    Margin="16,0,0,0" />
                         </Grid>
                     </Border>
 
@@ -305,7 +306,8 @@
                                     Content="{x:Static strings:MainPage.MakeAPackageButtonText}"
                                     Command="{Binding NavigateToPackageCreationCommand}"
                                     IsEnabled="{Binding IsMakePkgEnabled}"
-                                    MinWidth="112" />
+                                    MinWidth="112"
+                                    Margin="16,0,0,0" />
                         </Grid>
                     </Border>
 
@@ -333,7 +335,8 @@
                             <Button Grid.Column="2"
                                     Content="{x:Static strings:MainPage.UploadPackageBlockButtonText}"
                                     Command="{Binding NavigateToPackageUploadCommand}"
-                                    MinWidth="112" />
+                                    MinWidth="112"
+                                    Margin="16,0,0,0" />
                         </Grid>
                     </Border>
 
@@ -364,7 +367,8 @@
                                     Content="{x:Static strings:MainPage.Msixvc2ButtonText}"
                                     Command="{Binding NavigateToMsixvc2Command}"
                                     IsEnabled="{Binding IsMsixvc2Enabled}"
-                                    MinWidth="112" />
+                                    MinWidth="112"
+                                    Margin="16,0,0,0" />
                         </Grid>
                     </Border>
                 </StackPanel>

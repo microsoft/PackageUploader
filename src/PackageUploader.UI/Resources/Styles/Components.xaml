@@ -24,9 +24,10 @@
     <Style x:Key="PageEyebrowTextStyle"
            TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
-        <Setter Property="FontSize" Value="{DynamicResource TinyFontSize}" />
+        <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
         <Setter Property="FontWeight" Value="{DynamicResource BoldFontWeight}" />
-        <Setter Property="Margin" Value="0,0,0,6" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="Margin" Value="0,0,0,7" />
     </Style>
 
     <Style x:Key="CompactPageTitleTextStyle"
