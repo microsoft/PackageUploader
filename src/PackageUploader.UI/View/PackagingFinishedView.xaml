@@ -206,7 +206,7 @@
                 <!-- Compact validator results -->
                 <Border Style="{DynamicResource OutcomeErrorPanelStyle}"
                         Visibility="{Binding ShowCompactValidatorExpander, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Expander>
+                    <Expander Style="{StaticResource CustomExpanderStyle}">
                         <Expander.Header>
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="/Resources/AppIcon/ErrorIcon.png"

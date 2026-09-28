@@ -81,13 +81,14 @@
                                      Height="8"
                                      Margin="0,14,0,0"
                                      HorizontalAlignment="Stretch" />
-                        <TextBlock Text="{Binding UploadStats}"
-                                   Foreground="{DynamicResource SecondaryTextBrush}"
-                                   FontSize="{DynamicResource SmallFontSize}"
-                                   TextWrapping="Wrap"
-                                   Margin="0,10,0,18"
-                                   MinHeight="18"
-                                   Visibility="{Binding ShowUploadStats, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <Grid MinHeight="18"
+                              Margin="0,10,0,18">
+                            <TextBlock Text="{Binding UploadStats}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       FontSize="{DynamicResource SmallFontSize}"
+                                       TextWrapping="Wrap"
+                                       Visibility="{Binding ShowUploadStats, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </Grid>
 
                         <Border Style="{DynamicResource ProgressStageRowStyle}">
                             <Grid>
