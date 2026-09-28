@@ -176,10 +176,13 @@
     <value>Sign out user</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
-    <value>The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
+    <value>Create optimized game packages, validate them, and upload releases to Microsoft Partner Center.</value>
   </data>
   <data name="TitleTextBlock" xml:space="preserve">
-    <value>Make a package and upload it to Microsoft Partner Center</value>
+    <value>Build and publish your Xbox game</value>
+  </data>
+  <data name="WorkspaceEyebrowText" xml:space="preserve">
+    <value>PACKAGE WORKSPACE</value>
   </data>
   <data name="UploadPackageBlockBody" xml:space="preserve">
     <value>Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account.</value>

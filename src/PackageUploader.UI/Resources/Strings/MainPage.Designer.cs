@@ -312,6 +312,15 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("TitleTextBlock", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to PACKAGE WORKSPACE.
+        /// </summary>
+        public static string WorkspaceEyebrowText {
+            get {
+                return ResourceManager.GetString("WorkspaceEyebrowText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account..

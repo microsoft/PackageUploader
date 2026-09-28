@@ -28,11 +28,17 @@
               MaxWidth="1000"
               HorizontalAlignment="Stretch">
             <StackPanel Margin="0,24,0,0">
-                <Image Source="/Resources/Images/InProgress.png"
-                       Height="{DynamicResource StatusImageSize}"
-                       Width="{DynamicResource StatusImageSize}"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,18" />
+                <Border Style="{DynamicResource StatusTileStyle}">
+                    <Path Data="M 4,12 L 20,12 M 14,6 L 20,12 L 14,18"
+                          Stroke="{DynamicResource SuccessBrush}"
+                          StrokeThickness="2.4"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          StrokeLineJoin="Round"
+                          Width="32"
+                          Height="32"
+                          Stretch="Uniform" />
+                </Border>
                 <TextBlock Text="{x:Static strings:Msixvc2Uploading.TitleText}"
                            d:Text="Uploading package to Partner Center"
                            Style="{StaticResource PageTitleTextStyle}"

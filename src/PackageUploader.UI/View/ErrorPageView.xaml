@@ -16,11 +16,16 @@
               MaxWidth="1000"
               HorizontalAlignment="Stretch">
             <StackPanel Margin="0,24,0,0">
-                <Image Source="/Resources/Images/ErrorImage.png"
-                       Height="{DynamicResource StatusImageSize}"
-                       Width="{DynamicResource StatusImageSize}"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,18" />
+                <Border Style="{DynamicResource ErrorStatusTileStyle}">
+                    <Path Data="M 6,6 L 18,18 M 18,6 L 6,18"
+                          Stroke="{DynamicResource ErrorBrush}"
+                          StrokeThickness="2.6"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          Width="32"
+                          Height="32"
+                          Stretch="Uniform" />
+                </Border>
                 <TextBlock Text="{x:Static strings:ErrorPage.ErrorTitleString}"
                            d:Text="We've run into an issue"
                            Style="{StaticResource PageTitleTextStyle}"

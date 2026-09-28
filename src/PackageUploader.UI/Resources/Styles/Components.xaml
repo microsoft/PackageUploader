@@ -21,6 +21,14 @@
         <Setter Property="LineHeight" Value="21" />
     </Style>
 
+    <Style x:Key="PageEyebrowTextStyle"
+           TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
+        <Setter Property="FontSize" Value="{DynamicResource TinyFontSize}" />
+        <Setter Property="FontWeight" Value="{DynamicResource BoldFontWeight}" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
     <Style x:Key="CompactPageTitleTextStyle"
            TargetType="TextBlock"
            BasedOn="{StaticResource PageTitleTextStyle}">
@@ -44,6 +52,7 @@
            BasedOn="{StaticResource InteractiveCardContainerStyle}">
         <Setter Property="MinHeight" Value="230" />
         <Setter Property="Padding" Value="20" />
+        <Setter Property="Effect" Value="{DynamicResource CardShadowEffect}" />
     </Style>
 
     <Style x:Key="CompactActionCardStyle"
@@ -126,6 +135,7 @@
            BasedOn="{StaticResource CardContainerStyle}">
         <Setter Property="Padding" Value="20" />
         <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="Effect" Value="{DynamicResource CardShadowEffect}" />
     </Style>
 
     <Style x:Key="WorkflowStepIndicatorStyle"
@@ -147,6 +157,15 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="TextAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="WorkflowStepConnectorStyle"
+           TargetType="Border">
+        <Setter Property="Width" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource DividerBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Margin" Value="15,31,0,-37" />
     </Style>
 
     <Style x:Key="WorkflowStepTitleStyle"
@@ -252,6 +271,21 @@
         <Setter Property="Margin" Value="24,0,0,0" />
     </Style>
 
+    <Style x:Key="WorkflowPreviewHeroStyle"
+           TargetType="Border">
+        <Setter Property="Height" Value="112" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+        <Setter Property="Margin" Value="0,0,0,18" />
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="{DynamicResource SuccessBackgroundColor}" Offset="0" />
+                    <GradientStop Color="{DynamicResource CardColor}" Offset="1" />
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="WorkflowPreviewTitleStyle"
            TargetType="TextBlock"
            BasedOn="{StaticResource SubHeadline}">
@@ -288,16 +322,17 @@
         <Setter Property="Padding" Value="28" />
         <Setter Property="MaxWidth" Value="760" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Effect" Value="{DynamicResource CardShadowEffect}" />
     </Style>
 
     <Style x:Key="ProgressStageRowStyle"
            TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource ControlFillBrush}" />
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
-        <Setter Property="Padding" Value="14" />
-        <Setter Property="Margin" Value="0,0,0,10" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="16,14" />
+        <Setter Property="Margin" Value="0" />
     </Style>
 
     <Style x:Key="ProgressStageTitleStyle"
@@ -314,6 +349,7 @@
         <Setter Property="Padding" Value="24" />
         <Setter Property="MaxWidth" Value="900" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Effect" Value="{DynamicResource CardShadowEffect}" />
     </Style>
 
     <Style x:Key="OutcomeErrorPanelStyle"
@@ -333,5 +369,21 @@
            BasedOn="{StaticResource WorkflowMetadataValueStyle}">
         <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
         <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="StatusTileStyle"
+           TargetType="Border">
+        <Setter Property="Width" Value="76" />
+        <Setter Property="Height" Value="76" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="Background" Value="{DynamicResource SuccessBackgroundBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,0,0,18" />
+    </Style>
+
+    <Style x:Key="ErrorStatusTileStyle"
+           TargetType="Border"
+           BasedOn="{StaticResource StatusTileStyle}">
+        <Setter Property="Background" Value="{DynamicResource ErrorRedTransluscentBrush}" />
     </Style>
 </ResourceDictionary>

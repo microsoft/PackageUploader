@@ -117,12 +117,14 @@
 
                             <!-- Populated preview -->
                             <StackPanel Visibility="{Binding HasValidGameConfig, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <Image Source="{Binding PackagePreviewImage}"
-                                       Height="{DynamicResource PreviewImageSize}"
-                                       Width="{DynamicResource PreviewImageSize}"
-                                       Stretch="Uniform"
-                                       HorizontalAlignment="Left"
-                                       Margin="0,0,0,18" />
+                                <Border Style="{DynamicResource WorkflowPreviewHeroStyle}">
+                                    <Image Source="{Binding PackagePreviewImage}"
+                                           Height="{DynamicResource PreviewImageSize}"
+                                           Width="{DynamicResource PreviewImageSize}"
+                                           Stretch="Uniform"
+                                           HorizontalAlignment="Center"
+                                           Margin="18" />
+                                </Border>
 
                                 <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewPackageIdText}"
                                            d:Text="Package Identity Name"
@@ -185,6 +187,8 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
+                                <Border Grid.Column="0"
+                                        Style="{DynamicResource WorkflowStepConnectorStyle}" />
                                 <Border Grid.Column="0"
                                         Style="{DynamicResource WorkflowStepIndicatorStyle}">
                                     <TextBlock Text="1"

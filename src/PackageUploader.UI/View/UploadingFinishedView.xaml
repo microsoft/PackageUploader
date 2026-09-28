@@ -16,11 +16,17 @@
               MaxWidth="1100"
               HorizontalAlignment="Stretch">
             <StackPanel Margin="0,24,0,0">
-                <Image Source="/Resources/Images/Complete.png"
-                       Height="{DynamicResource StatusImageSize}"
-                       Width="{DynamicResource StatusImageSize}"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,18" />
+                <Border Style="{DynamicResource StatusTileStyle}">
+                    <Path Data="M 4,13 L 10,19 L 22,7"
+                          Stroke="{DynamicResource SuccessBrush}"
+                          StrokeThickness="2.6"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          StrokeLineJoin="Round"
+                          Width="32"
+                          Height="32"
+                          Stretch="Uniform" />
+                </Border>
                 <TextBlock Text="{x:Static strings:UploadingFinished.UploadCompleteTitleText}"
                            d:Text="Upload complete"
                            Style="{StaticResource PageTitleTextStyle}"

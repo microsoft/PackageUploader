@@ -20,11 +20,14 @@
                 <!-- Page heading -->
                 <StackPanel Margin="0,6,0,24"
                             Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
+                    <TextBlock Text="{x:Static strings:MainPage.WorkspaceEyebrowText}"
+                               d:Text="PACKAGE WORKSPACE"
+                               Style="{StaticResource PageEyebrowTextStyle}" />
                     <TextBlock Text="{x:Static strings:MainPage.TitleTextBlock}"
-                               d:Text="Make a package and upload it to Microsoft Partner Center"
+                               d:Text="Build and publish your Xbox game"
                                Style="{StaticResource PageTitleTextStyle}" />
                     <TextBlock Text="{x:Static strings:MainPage.SubTitleTextBlock}"
-                               d:Text="The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload."
+                               d:Text="Create optimized game packages, validate them, and upload releases to Microsoft Partner Center."
                                Style="{StaticResource PageSubtitleTextStyle}"
                                Visibility="Visible" />
                 </StackPanel>
