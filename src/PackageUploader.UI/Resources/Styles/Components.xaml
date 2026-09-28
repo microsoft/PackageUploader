@@ -196,12 +196,13 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="{DynamicResource ControlCornerRadius}">
                         <Grid>
-                            <TextBlock Text="{TemplateBinding Tag}"
+                            <TextBlock x:Name="Placeholder"
+                                       Text="{TemplateBinding Tag}"
                                        Foreground="{DynamicResource SecondaryTextBrush}"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
                                        IsHitTestVisible="False"
-                                       Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                       Visibility="Collapsed"
                                        Margin="12,2" />
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="10,2"
@@ -209,6 +210,9 @@
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="Text" Value="">
+                            <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                        </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="PathBorder"
                                     Property="Background"

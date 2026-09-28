@@ -124,6 +124,14 @@ public partial class App : System.Windows.Application
                 });
             })
             .Build();
+
+        DispatcherUnhandledException += App_DispatcherUnhandledException;
+    }
+
+    private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    {
+        var logger = _host.Services.GetRequiredService<ILogger<App>>();
+        logger.LogCritical(e.Exception, "An unhandled UI exception occurred.");
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -282,6 +290,7 @@ public partial class App : System.Windows.Application
     protected override void OnExit(ExitEventArgs e)
     {
         SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+        DispatcherUnhandledException -= App_DispatcherUnhandledException;
         _host.Dispose();
         base.OnExit(e);
     }

@@ -25,7 +25,7 @@
 
                     <Button Grid.Column="0"
                             Command="{Binding CancelButtonCommand}"
-                            Style="{StaticResource WorkflowBackButtonStyle}"
+                            Style="{DynamicResource WorkflowBackButtonStyle}"
                             AutomationProperties.HelpText="Back to home">
                         <Path Data="M16,8 L4,8 M4,8 L8,4 M4,8 L8,12"
                               Stroke="{DynamicResource PrimaryTextBrush}"
@@ -63,8 +63,14 @@
                     <!-- Preview moves below the steps in compact mode. -->
                     <Border DockPanel.Dock="Right">
                         <Border.Style>
-                            <Style TargetType="Border"
-                                   BasedOn="{StaticResource WorkflowPreviewCardStyle}">
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+                                <Setter Property="BorderThickness" Value="{DynamicResource CardBorderThickness}" />
+                                <Setter Property="CornerRadius" Value="{DynamicResource CardCornerRadius}" />
+                                <Setter Property="Padding" Value="20" />
+                                <Setter Property="Width" Value="360" />
+                                <Setter Property="Margin" Value="24,0,0,0" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsCompactMode}" Value="True">
                                         <Setter Property="DockPanel.Dock" Value="Bottom" />
@@ -78,7 +84,7 @@
                         <StackPanel>
                             <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewTitleText}"
                                        d:Text="Preview"
-                                       Style="{StaticResource WorkflowPreviewTitleStyle}" />
+                                       Style="{DynamicResource WorkflowPreviewTitleStyle}" />
 
                             <!-- Empty preview -->
                             <StackPanel HorizontalAlignment="Center"
@@ -119,9 +125,9 @@
 
                                 <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewPackageIdText}"
                                            d:Text="Package Identity Name"
-                                           Style="{StaticResource WorkflowMetadataLabelStyle}" />
+                                           Style="{DynamicResource WorkflowMetadataLabelStyle}" />
                                 <TextBlock Text="{Binding PackageId}"
-                                           Style="{StaticResource WorkflowMetadataValueStyle}"
+                                           Style="{DynamicResource WorkflowMetadataValueStyle}"
                                            Margin="0,0,0,18" />
 
                                 <Grid Visibility="{Binding StoreIdNotAvailable, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
@@ -134,23 +140,23 @@
                                     <StackPanel Grid.Column="0" Margin="0,0,10,0">
                                         <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewStoreIdText}"
                                                    d:Text="StoreId"
-                                                   Style="{StaticResource WorkflowMetadataLabelStyle}" />
+                                                   Style="{DynamicResource WorkflowMetadataLabelStyle}" />
                                         <TextBlock Text="{Binding BigId}"
-                                                   Style="{StaticResource WorkflowMetadataValueStyle}" />
+                                                   Style="{DynamicResource WorkflowMetadataValueStyle}" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Margin="0,0,10,0">
                                         <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewSizeEstimate}"
                                                    d:Text="Size estimate"
-                                                   Style="{StaticResource WorkflowMetadataLabelStyle}" />
+                                                   Style="{DynamicResource WorkflowMetadataLabelStyle}" />
                                         <TextBlock Text="{Binding PackageSize}"
-                                                   Style="{StaticResource WorkflowMetadataValueStyle}" />
+                                                   Style="{DynamicResource WorkflowMetadataValueStyle}" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="{x:Static strings:PackageCreation.PackagePreviewFamilyText}"
                                                    d:Text="Family"
-                                                   Style="{StaticResource WorkflowMetadataLabelStyle}" />
+                                                   Style="{DynamicResource WorkflowMetadataLabelStyle}" />
                                         <TextBlock Text="{Binding PackageType}"
-                                                   Style="{StaticResource WorkflowMetadataValueStyle}" />
+                                                   Style="{DynamicResource WorkflowMetadataValueStyle}" />
                                     </StackPanel>
                                 </Grid>
 
@@ -171,7 +177,7 @@
                     <!-- Form steps -->
                     <StackPanel>
                         <!-- Step 1 -->
-                        <Border Style="{StaticResource WorkflowStepCardStyle}">
+                        <Border Style="{DynamicResource WorkflowStepCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -179,18 +185,18 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Border Grid.Column="0"
-                                        Style="{StaticResource WorkflowStepIndicatorStyle}">
+                                        Style="{DynamicResource WorkflowStepIndicatorStyle}">
                                     <TextBlock Text="1"
-                                               Style="{StaticResource WorkflowStepNumberStyle}" />
+                                               Style="{DynamicResource WorkflowStepNumberStyle}" />
                                 </Border>
 
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="{x:Static strings:PackageCreation.BuildLocationTitle}"
                                                d:Text="Build location"
-                                               Style="{StaticResource WorkflowStepTitleStyle}" />
+                                               Style="{DynamicResource WorkflowStepTitleStyle}" />
                                     <TextBlock Text="{x:Static strings:PackageCreation.BuildLocationText}"
                                                d:Text="Locate your game files to package. Add a layout file under Additional Details."
-                                               Style="{StaticResource WorkflowStepDescriptionStyle}"
+                                               Style="{DynamicResource WorkflowStepDescriptionStyle}"
                                                Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
 
                                     <Grid>
@@ -201,11 +207,11 @@
                                         <TextBlock Grid.Column="0"
                                                    Text="{x:Static strings:PackageCreation.GamePathTitleText}"
                                                    d:Text="Game path"
-                                                   Style="{StaticResource WorkflowFieldLabelStyle}" />
+                                                   Style="{DynamicResource WorkflowFieldLabelStyle}" />
                                         <TextBlock Grid.Column="1"
                                                    Text="{x:Static strings:PackageCreation.RequiredText}"
                                                    d:Text="Required"
-                                                   Style="{StaticResource WorkflowRequirementTextStyle}" />
+                                                   Style="{DynamicResource WorkflowRequirementTextStyle}" />
                                     </Grid>
 
                                     <Grid>
@@ -213,28 +219,23 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBox Grid.Column="0"
-                                                 x:Name="GamePathTextBox"
-                                                 AutomationProperties.HelpText="Path to game files"
-                                                 Text="{Binding GameDataPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Tag="{x:Static strings:PackageCreation.GamePathBoxDefaultText}">
-                                            <TextBox.Style>
-                                                <Style TargetType="TextBox"
-                                                       BasedOn="{StaticResource WorkflowPathTextBoxStyle}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding GameConfigLoadError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
-                                                                     Value="Visible">
-                                                            <Setter Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
+                                        <Grid Grid.Column="0">
+                                            <TextBox x:Name="GamePathTextBox"
+                                                     AutomationProperties.HelpText="Path to game files"
+                                                     Text="{Binding GameDataPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     Tag="{x:Static strings:PackageCreation.GamePathBoxDefaultText}"
+                                                     Style="{DynamicResource WorkflowPathTextBoxStyle}" />
+                                            <Border BorderBrush="{DynamicResource ErrorRedBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="{DynamicResource ControlCornerRadius}"
+                                                    IsHitTestVisible="False"
+                                                    Visibility="{Binding GameConfigLoadError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
+                                        </Grid>
                                         <Button Grid.Column="1"
                                                 Content="{x:Static strings:PackageCreation.BrowseText}"
                                                 d:Content="Browse"
                                                 Command="{Binding BrowseGameDataPathCommand}"
-                                                Style="{StaticResource WorkflowBrowseButtonStyle}"
+                                                Style="{DynamicResource WorkflowBrowseButtonStyle}"
                                                 AutomationProperties.HelpText="Browse to game files" />
                                     </Grid>
 
@@ -246,7 +247,7 @@
                                                Height="16"
                                                VerticalAlignment="Top" />
                                         <TextBlock Text="{Binding GameConfigLoadError}"
-                                                   Style="{StaticResource WorkflowValidationTextStyle}" />
+                                                   Style="{DynamicResource WorkflowValidationTextStyle}" />
                                     </StackPanel>
 
                                     <Expander Style="{StaticResource CustomExpanderStyle}"
@@ -268,11 +269,11 @@
                                                 <TextBlock Grid.Column="0"
                                                            Text="{x:Static strings:PackageCreation.LayoutFileMapTitle}"
                                                            d:Text="Layout file/content map"
-                                                           Style="{StaticResource WorkflowFieldLabelStyle}" />
+                                                           Style="{DynamicResource WorkflowFieldLabelStyle}" />
                                                 <TextBlock Grid.Column="1"
                                                            Text="{x:Static strings:PackageCreation.OptionalText}"
                                                            d:Text="Optional"
-                                                           Style="{StaticResource WorkflowRequirementTextStyle}" />
+                                                           Style="{DynamicResource WorkflowRequirementTextStyle}" />
                                             </Grid>
 
                                             <Grid>
@@ -280,28 +281,23 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0"
-                                                         x:Name="MappingDataTextBox"
-                                                         AutomationProperties.HelpText="Path to layout file"
-                                                         Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                         Tag="{x:Static strings:PackageCreation.ContentMapPathBoxDefaultText}">
-                                                    <TextBox.Style>
-                                                        <Style TargetType="TextBox"
-                                                               BasedOn="{StaticResource WorkflowPathTextBoxStyle}">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding LayoutParseError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
-                                                                             Value="Visible">
-                                                                    <Setter Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Style>
-                                                </TextBox>
+                                                <Grid Grid.Column="0">
+                                                    <TextBox x:Name="MappingDataTextBox"
+                                                             AutomationProperties.HelpText="Path to layout file"
+                                                             Text="{Binding MappingDataXmlPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                             Tag="{x:Static strings:PackageCreation.ContentMapPathBoxDefaultText}"
+                                                             Style="{DynamicResource WorkflowPathTextBoxStyle}" />
+                                                    <Border BorderBrush="{DynamicResource ErrorRedBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="{DynamicResource ControlCornerRadius}"
+                                                            IsHitTestVisible="False"
+                                                            Visibility="{Binding LayoutParseError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
+                                                </Grid>
                                                 <Button Grid.Column="1"
                                                         Content="{x:Static strings:PackageCreation.BrowseText}"
                                                         d:Content="Browse"
                                                         Command="{Binding BrowseMappingDataXmlPathCommand}"
-                                                        Style="{StaticResource WorkflowBrowseButtonStyle}"
+                                                        Style="{DynamicResource WorkflowBrowseButtonStyle}"
                                                         AutomationProperties.HelpText="Browse to layout file" />
                                             </Grid>
 
@@ -313,7 +309,7 @@
                                                        Height="16"
                                                        VerticalAlignment="Top" />
                                                 <TextBlock Text="{Binding LayoutParseError}"
-                                                           Style="{StaticResource WorkflowValidationTextStyle}" />
+                                                           Style="{DynamicResource WorkflowValidationTextStyle}" />
                                             </StackPanel>
 
                                             <StackPanel Margin="0,14,0,0"
@@ -326,11 +322,11 @@
                                                     <TextBlock Grid.Column="0"
                                                                Text="{x:Static strings:PackageCreation.ValidatorPathTitleText}"
                                                                d:Text="Folder path for SubmissionValidator.dll"
-                                                               Style="{StaticResource WorkflowFieldLabelStyle}" />
+                                                               Style="{DynamicResource WorkflowFieldLabelStyle}" />
                                                     <TextBlock Grid.Column="1"
                                                                Text="{x:Static strings:PackageCreation.OptionalText}"
                                                                d:Text="Optional"
-                                                               Style="{StaticResource WorkflowRequirementTextStyle}" />
+                                                               Style="{DynamicResource WorkflowRequirementTextStyle}" />
                                                 </Grid>
 
                                                 <Grid>
@@ -338,28 +334,23 @@
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBox Grid.Column="0"
-                                                             x:Name="SubValPathTextBox"
-                                                             AutomationProperties.HelpText="Submission Validator folder path"
-                                                             Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                             Tag="{x:Static strings:PackageCreation.ValidatorPathBoxDefaultText}">
-                                                        <TextBox.Style>
-                                                            <Style TargetType="TextBox"
-                                                                   BasedOn="{StaticResource WorkflowPathTextBoxStyle}">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding SubValDllError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
-                                                                                 Value="Visible">
-                                                                        <Setter Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBox.Style>
-                                                    </TextBox>
+                                                    <Grid Grid.Column="0">
+                                                        <TextBox x:Name="SubValPathTextBox"
+                                                                 AutomationProperties.HelpText="Submission Validator folder path"
+                                                                 Text="{Binding SubValPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Tag="{x:Static strings:PackageCreation.ValidatorPathBoxDefaultText}"
+                                                                 Style="{DynamicResource WorkflowPathTextBoxStyle}" />
+                                                        <Border BorderBrush="{DynamicResource ErrorRedBrush}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="{DynamicResource ControlCornerRadius}"
+                                                                IsHitTestVisible="False"
+                                                                Visibility="{Binding SubValDllError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
+                                                    </Grid>
                                                     <Button Grid.Column="1"
                                                             Content="{x:Static strings:PackageCreation.BrowseText}"
                                                             d:Content="Browse"
                                                             Command="{Binding BrowseSubValPathCommand}"
-                                                            Style="{StaticResource WorkflowBrowseButtonStyle}"
+                                                            Style="{DynamicResource WorkflowBrowseButtonStyle}"
                                                             AutomationProperties.HelpText="Browse to Submission Validator folder path" />
                                                 </Grid>
 
@@ -371,7 +362,7 @@
                                                            Height="16"
                                                            VerticalAlignment="Top" />
                                                     <TextBlock Text="{Binding SubValDllError}"
-                                                               Style="{StaticResource WorkflowValidationTextStyle}" />
+                                                               Style="{DynamicResource WorkflowValidationTextStyle}" />
                                                 </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
@@ -381,7 +372,7 @@
                         </Border>
 
                         <!-- Step 2 -->
-                        <Border Style="{StaticResource WorkflowStepCardStyle}">
+                        <Border Style="{DynamicResource WorkflowStepCardStyle}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -389,18 +380,18 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Border Grid.Column="0"
-                                        Style="{StaticResource WorkflowStepIndicatorStyle}">
+                                        Style="{DynamicResource WorkflowStepIndicatorStyle}">
                                     <TextBlock Text="2"
-                                               Style="{StaticResource WorkflowStepNumberStyle}" />
+                                               Style="{DynamicResource WorkflowStepNumberStyle}" />
                                 </Border>
 
                                 <StackPanel Grid.Column="1">
                                     <TextBlock Text="{x:Static strings:PackageCreation.PackageOutputTitleText}"
                                                d:Text="Package output location"
-                                               Style="{StaticResource WorkflowStepTitleStyle}" />
+                                               Style="{DynamicResource WorkflowStepTitleStyle}" />
                                     <TextBlock Text="{x:Static strings:PackageCreation.PackageOutputBoxText}"
                                                d:Text="Select or enter the package output location."
-                                               Style="{StaticResource WorkflowStepDescriptionStyle}"
+                                               Style="{DynamicResource WorkflowStepDescriptionStyle}"
                                                Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
 
                                     <Grid>
@@ -411,11 +402,11 @@
                                         <TextBlock Grid.Column="0"
                                                    Text="{x:Static strings:PackageCreation.PackagePathTitleText}"
                                                    d:Text="Package path"
-                                                   Style="{StaticResource WorkflowFieldLabelStyle}" />
+                                                   Style="{DynamicResource WorkflowFieldLabelStyle}" />
                                         <TextBlock Grid.Column="1"
                                                    Text="{x:Static strings:PackageCreation.OptionalText}"
                                                    d:Text="Optional"
-                                                   Style="{StaticResource WorkflowRequirementTextStyle}" />
+                                                   Style="{DynamicResource WorkflowRequirementTextStyle}" />
                                     </Grid>
 
                                     <Grid>
@@ -423,28 +414,23 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBox Grid.Column="0"
-                                                 x:Name="PackagePathTextBox"
-                                                 AutomationProperties.HelpText="Output folder"
-                                                 Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                 Tag="{x:Static strings:PackageCreation.PackageOutputBoxText}">
-                                            <TextBox.Style>
-                                                <Style TargetType="TextBox"
-                                                       BasedOn="{StaticResource WorkflowPathTextBoxStyle}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding OutputDirectoryError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}"
-                                                                     Value="Visible">
-                                                            <Setter Property="BorderBrush" Value="{DynamicResource ErrorRedBrush}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Style>
-                                        </TextBox>
+                                        <Grid Grid.Column="0">
+                                            <TextBox x:Name="PackagePathTextBox"
+                                                     AutomationProperties.HelpText="Output folder"
+                                                     Text="{Binding PackageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     Tag="{x:Static strings:PackageCreation.PackageOutputBoxText}"
+                                                     Style="{DynamicResource WorkflowPathTextBoxStyle}" />
+                                            <Border BorderBrush="{DynamicResource ErrorRedBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="{DynamicResource ControlCornerRadius}"
+                                                    IsHitTestVisible="False"
+                                                    Visibility="{Binding OutputDirectoryError, Converter={StaticResource StringNotEmptyToVisibilityConverter}}" />
+                                        </Grid>
                                         <Button Grid.Column="1"
                                                 Content="{x:Static strings:PackageCreation.BrowseText}"
                                                 d:Content="Browse"
                                                 Command="{Binding BrowsePackageOutputPathCommand}"
-                                                Style="{StaticResource WorkflowBrowseButtonStyle}"
+                                                Style="{DynamicResource WorkflowBrowseButtonStyle}"
                                                 AutomationProperties.HelpText="Browse to output folder" />
                                     </Grid>
 
@@ -456,7 +442,7 @@
                                                Height="16"
                                                VerticalAlignment="Top" />
                                         <TextBlock Text="{Binding OutputDirectoryError}"
-                                                   Style="{StaticResource WorkflowValidationTextStyle}" />
+                                                   Style="{DynamicResource WorkflowValidationTextStyle}" />
                                     </StackPanel>
 
                                     <CheckBox Content="{x:Static strings:PackageCreation.UseMsixvc2Text}"
@@ -474,7 +460,7 @@
                 </DockPanel>
 
                 <!-- Actions -->
-                <Border Style="{StaticResource WorkflowActionBarStyle}">
+                <Border Style="{DynamicResource WorkflowActionBarStyle}">
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Right">
                         <Button Content="{x:Static strings:PackageCreation.CancelButtonText}"
