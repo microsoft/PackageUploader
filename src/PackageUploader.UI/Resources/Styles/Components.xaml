@@ -271,21 +271,6 @@
         <Setter Property="Margin" Value="24,0,0,0" />
     </Style>
 
-    <Style x:Key="WorkflowPreviewHeroStyle"
-           TargetType="Border">
-        <Setter Property="Height" Value="112" />
-        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
-        <Setter Property="Margin" Value="0,0,0,18" />
-        <Setter Property="Background">
-            <Setter.Value>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="{DynamicResource SuccessBackgroundColor}" Offset="0" />
-                    <GradientStop Color="{DynamicResource CardColor}" Offset="1" />
-                </LinearGradientBrush>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <Style x:Key="WorkflowPreviewTitleStyle"
            TargetType="TextBlock"
            BasedOn="{StaticResource SubHeadline}">
