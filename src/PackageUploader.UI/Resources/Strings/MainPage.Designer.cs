@@ -122,6 +122,33 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("GitHubIssues", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Help and feedback.
+        /// </summary>
+        public static string HelpAndFeedback {
+            get {
+                return ResourceManager.GetString("HelpAndFeedback", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Documentation.
+        /// </summary>
+        public static string DocumentationMenuItem {
+            get {
+                return ResourceManager.GetString("DocumentationMenuItem", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Report an issue.
+        /// </summary>
+        public static string ReportIssueMenuItem {
+            get {
+                return ResourceManager.GetString("ReportIssueMenuItem", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Game packages speed up uploads, ensure secure installations, and optimize Xbox performance. Just add build files and a config file .

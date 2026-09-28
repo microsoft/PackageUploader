@@ -177,10 +177,26 @@ namespace PackageUploader.UI
             _authenticationService.SignOut();
         }
 
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            HelpMenuPopup.IsOpen = !HelpMenuPopup.IsOpen;
+        }
+
+        private void DocumentationButton_Click(object sender, RoutedEventArgs e)
+        {
+            HelpMenuPopup.IsOpen = false;
+            OpenUrl("https://github.com/microsoft/PackageUploader#xbox-game-package-manager");
+        }
+
         private void GitHubIssuesButton_Click(object sender, RoutedEventArgs e)
         {
-            // Open the GitHub issues page
-            Process.Start(new ProcessStartInfo("https://github.com/microsoft/PackageUploader/issues/new")
+            HelpMenuPopup.IsOpen = false;
+            OpenUrl("https://github.com/microsoft/PackageUploader/issues/new");
+        }
+
+        private static void OpenUrl(string url)
+        {
+            Process.Start(new ProcessStartInfo(url)
             {
                 UseShellExecute = true
             });

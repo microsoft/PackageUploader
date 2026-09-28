@@ -138,6 +138,15 @@
   <data name="GitHubIssues" xml:space="preserve">
     <value>Send feedback...</value>
   </data>
+  <data name="HelpAndFeedback" xml:space="preserve">
+    <value>Help and feedback</value>
+  </data>
+  <data name="DocumentationMenuItem" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="ReportIssueMenuItem" xml:space="preserve">
+    <value>Report an issue</value>
+  </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
     <value>, and then upload.</value>
     <comment>The part of the string that comes after the hyperlink, if any.</comment>

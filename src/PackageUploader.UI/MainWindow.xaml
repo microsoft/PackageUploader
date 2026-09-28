@@ -117,15 +117,69 @@
                         <Button x:Name="HelpButton"
                                 Width="38" Height="48"
                                 WindowChrome.IsHitTestVisibleInChrome="True"
-                                Click="GitHubIssuesButton_Click"
+                                Click="HelpButton_Click"
                                 Style="{StaticResource WindowControlButtonStyle}"
-                                AutomationProperties.HelpText="Send feedback about the application"
-                                ToolTip="{x:Static strings:MainPage.GitHubIssues}">
+                                AutomationProperties.HelpText="{x:Static strings:MainPage.HelpAndFeedback}"
+                                ToolTip="{x:Static strings:MainPage.HelpAndFeedback}">
                             <TextBlock Text="?"
                                        Foreground="{DynamicResource SecondaryTextBrush}"
                                        FontSize="14"
                                        VerticalAlignment="Center"/>
                         </Button>
+                        <Popup x:Name="HelpMenuPopup"
+                               PlacementTarget="{Binding ElementName=HelpButton}"
+                               Placement="Bottom"
+                               HorizontalOffset="-142"
+                               StaysOpen="False"
+                               AllowsTransparency="True"
+                               PopupAnimation="Fade">
+                            <Border Width="180"
+                                    Padding="6"
+                                    Background="{DynamicResource LayerBrush}"
+                                    BorderBrush="{DynamicResource ControlStrokeBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{DynamicResource ControlCornerRadius}">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="{DynamicResource ShadowColor}"
+                                                      BlurRadius="14"
+                                                      ShadowDepth="3"
+                                                      Opacity="0.35"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <Button Click="DocumentationButton_Click"
+                                            Style="{StaticResource HelpMenuItemStyle}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Data="M3,3 H10 C12,3 13,4 13,6 V18 C13,16 12,15 10,15 H3 Z M21,3 H14 C12,3 11,4 11,6 V18 C11,16 12,15 14,15 H21 Z"
+                                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                  StrokeThickness="1.4"
+                                                  Width="16"
+                                                  Height="16"
+                                                  Stretch="Uniform"
+                                                  Margin="0,0,10,0"/>
+                                            <TextBlock Text="{x:Static strings:MainPage.DocumentationMenuItem}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                    <Border Height="1"
+                                            Background="{DynamicResource DividerBrush}"
+                                            Margin="8,4"/>
+                                    <Button Click="GitHubIssuesButton_Click"
+                                            Style="{StaticResource HelpMenuItemStyle}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Data="M4,4 H20 V16 H12 L7,21 V16 H4 Z"
+                                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                  StrokeThickness="1.4"
+                                                  Width="16"
+                                                  Height="16"
+                                                  Stretch="Uniform"
+                                                  Margin="0,0,10,0"/>
+                                            <TextBlock Text="{x:Static strings:MainPage.ReportIssueMenuItem}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
                     </Grid>
 
                     <Button x:Name="UserSignoutButton"
