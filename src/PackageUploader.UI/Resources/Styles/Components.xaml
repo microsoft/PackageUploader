@@ -110,4 +110,169 @@
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="MinWidth" Value="128" />
     </Style>
+
+    <!-- Workflow pages -->
+    <Style x:Key="WorkflowBackButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource WindowControlButtonStyle}">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Margin" Value="0,0,12,0" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="WorkflowStepCardStyle"
+           TargetType="Border"
+           BasedOn="{StaticResource CardContainerStyle}">
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="Margin" Value="0,0,0,16" />
+    </Style>
+
+    <Style x:Key="WorkflowStepIndicatorStyle"
+           TargetType="Border">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="CornerRadius" Value="{DynamicResource PillCornerRadius}" />
+        <Setter Property="Background" Value="{DynamicResource SuccessBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SuccessBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Margin" Value="0,0,14,0" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="WorkflowStepNumberStyle"
+           TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
+        <Setter Property="FontWeight" Value="{DynamicResource BoldFontWeight}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="WorkflowStepTitleStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource SubHeadline}">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="TextAlignment" Value="Left" />
+        <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+
+    <Style x:Key="WorkflowStepDescriptionStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource SecondaryTextStyle}">
+        <Setter Property="Margin" Value="0,6,0,18" />
+        <Setter Property="LineHeight" Value="20" />
+    </Style>
+
+    <Style x:Key="WorkflowFieldLabelStyle"
+           TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="FontWeight" Value="{DynamicResource SemiboldFontWeight}" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="WorkflowRequirementTextStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource SecondaryTextStyle}">
+        <Setter Property="FontSize" Value="{DynamicResource TinyFontSize}" />
+        <Setter Property="Margin" Value="12,0,0,6" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="WorkflowPathTextBoxStyle"
+           TargetType="TextBox"
+           BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Background" Value="{DynamicResource ControlFillBrush}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="PathBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{DynamicResource ControlCornerRadius}">
+                        <Grid>
+                            <TextBlock Text="{TemplateBinding Tag}"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       IsHitTestVisible="False"
+                                       Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                       Margin="12,2" />
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="10,2"
+                                          VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="PathBorder"
+                                    Property="Background"
+                                    Value="{DynamicResource TextEntryHighlightedBackgroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="PathBorder" Property="Opacity" Value="0.55" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="WorkflowBrowseButtonStyle"
+           TargetType="Button">
+        <Setter Property="MinWidth" Value="90" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Margin" Value="10,0,0,0" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="WorkflowValidationTextStyle"
+           TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource ErrorRedBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Margin" Value="8,0,0,0" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
+    <Style x:Key="WorkflowPreviewCardStyle"
+           TargetType="Border"
+           BasedOn="{StaticResource CardContainerStyle}">
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="Width" Value="360" />
+        <Setter Property="Margin" Value="24,0,0,0" />
+    </Style>
+
+    <Style x:Key="WorkflowPreviewTitleStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource SubHeadline}">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="TextAlignment" Value="Left" />
+        <Setter Property="Margin" Value="0,0,0,16" />
+    </Style>
+
+    <Style x:Key="WorkflowMetadataLabelStyle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource SecondaryTextStyle}">
+        <Setter Property="FontSize" Value="{DynamicResource TinyFontSize}" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <Style x:Key="WorkflowMetadataValueStyle"
+           TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="FontWeight" Value="{DynamicResource SemiboldFontWeight}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="WorkflowActionBarStyle"
+           TargetType="Border"
+           BasedOn="{StaticResource CardContainerStyle}">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="0,8,0,0" />
+    </Style>
 </ResourceDictionary>
