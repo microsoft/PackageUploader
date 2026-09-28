@@ -873,11 +873,20 @@ public partial class PackageCreationViewModel : BaseViewModel
         _makePackageProcess.StartInfo.CreateNoWindow = true;
         ProgressValue = 0;
 
+        string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_MakePkg_{DateTime.Now:yyyyMMddHHmmss}.log");
+        object logFileLock = new();
+        File.WriteAllText(logFilePath, string.Empty);
+        _packageModelService.PackagingLogFilepath = logFilePath;
+
         _makePackageProcess.OutputDataReceived += (sender, args) =>
         {
             if (!String.IsNullOrEmpty(args.Data))
             {
                 processOutput.Add(args.Data);
+                lock (logFileLock)
+                {
+                    File.AppendAllText(logFilePath, args.Data + Environment.NewLine);
+                }
 
                 // Check for encryption progress messages (makepkg legacy)
                 var match = EncryptionProgressRegex().Match(args.Data);
@@ -902,11 +911,17 @@ public partial class PackageCreationViewModel : BaseViewModel
             if (!String.IsNullOrEmpty(args.Data))
             {
                 processErrorOutput.Add(args.Data);
+                lock (logFileLock)
+                {
+                    File.AppendAllText(logFilePath, args.Data + Environment.NewLine);
+                }
             }
         };
 
         _makePackageProcess.Exited += (sender, args) =>
         {
+            _makePackageProcess.WaitForExit();
+
             string outputString = string.Join("\n", processOutput.ToArray());
 
             // Log error output as well
@@ -915,19 +930,14 @@ public partial class PackageCreationViewModel : BaseViewModel
             // Parse Make Package Output
             ProcessMakePackageOutput(outputString);
 
-            if (!_makePackageProcess.HasExited)
-            {
-                _makePackageProcess.WaitForExit();
-            }
             int exitCode = _makePackageProcess.ExitCode;
 
             IsCreationInProgress = false;
 
-            // Log the output to a file for debugging
-            string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_MakePkg_{DateTime.Now:yyyyMMddHHmmss}.log");
-            _packageModelService.PackagingLogFilepath = logFilePath;
-
-            File.WriteAllText(logFilePath, outputString);
+            lock (logFileLock)
+            {
+                File.WriteAllText(logFilePath, outputString);
+            }
 
             if (exitCode != 0)
             {
