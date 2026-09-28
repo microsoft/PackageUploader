@@ -19,8 +19,10 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
     private readonly ILogger<Msixvc2UploadingViewModel> _logger;
     private readonly ErrorModelProvider _errorModelProvider;
     private readonly PackageModelProvider _packageModelProvider;
+    private readonly IProcessStarterService _processStarterService;
 
     private Process? _makePkg2Process;
+    private readonly object _logFileLock = new();
     private string _operationLogOutput = string.Empty;
     private string _lastLogFilePath = string.Empty;
     private bool _isCancelled;
@@ -55,19 +57,23 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
     }
 
     public ICommand CancelUploadCommand { get; }
+    public ICommand ViewLogsCommand { get; }
 
     public Msixvc2UploadingViewModel(
         IWindowService windowService,
         ILogger<Msixvc2UploadingViewModel> logger,
         ErrorModelProvider errorModelProvider,
-        PackageModelProvider packageModelProvider)
+        PackageModelProvider packageModelProvider,
+        IProcessStarterService processStarterService)
     {
         _windowService = windowService;
         _logger = logger;
         _errorModelProvider = errorModelProvider;
         _packageModelProvider = packageModelProvider;
+        _processStarterService = processStarterService;
 
         CancelUploadCommand = new RelayCommand(CancelUpload);
+        ViewLogsCommand = new RelayCommand(ViewLogs);
     }
 
     public void OnAppearing()
@@ -88,6 +94,7 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
         UploadStage = Msixvc2UploadStage.Preparing;
         UploadStats = string.Empty;
         ShowUploadStats = false;
+        InitializeLogFile("Upload");
 
         StartUploadAsync();
     }
@@ -276,6 +283,7 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
             if (!string.IsNullOrEmpty(e.Data))
             {
                 processOutput.Add(e.Data);
+                AppendLogLine(e.Data);
                 _logger.LogTrace("[{Op}] {Data}", operationName, e.Data);
                 onOutputLine?.Invoke(e.Data);
             }
@@ -286,18 +294,18 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
             if (!string.IsNullOrEmpty(e.Data))
             {
                 processErrors.Add(e.Data);
+                AppendLogLine(e.Data);
                 _logger.LogWarning("[{Op}] stderr: {Data}", operationName, e.Data);
             }
         };
 
         _makePkg2Process.Exited += (s, e) =>
         {
+            _makePkg2Process.WaitForExit();
             _operationLogOutput = string.Join("\n", processOutput) + "\n" + string.Join("\n", processErrors);
-            WriteLogFile(operationName, _operationLogOutput);
-
-            if (!_makePkg2Process.HasExited)
+            lock (_logFileLock)
             {
-                _makePkg2Process.WaitForExit();
+                File.WriteAllText(_lastLogFilePath, _operationLogOutput);
             }
             tcs.TrySetResult(_makePkg2Process.ExitCode);
         };
@@ -322,6 +330,11 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
         {
             _windowService.NavigateTo(_packageModelProvider.Package.UploadOriginPage ?? typeof(Msixvc2UploadView));
         });
+    }
+
+    private void ViewLogs()
+    {
+        _processStarterService.Start("explorer.exe", $"/select, \"{_lastLogFilePath}\"");
     }
 
     private void UpdatePercentageOnUIThread(int pct)
@@ -382,10 +395,18 @@ public partial class Msixvc2UploadingViewModel : BaseViewModel
         });
     }
 
-    private void WriteLogFile(string operationName, string content)
+    private void InitializeLogFile(string operationName)
     {
         _lastLogFilePath = Path.Combine(Path.GetTempPath(),
             $"PackageUploader_UI_Msixvc2_{operationName}_{DateTime.Now:yyyyMMddHHmmss}.log");
-        File.WriteAllText(_lastLogFilePath, content);
+        File.WriteAllText(_lastLogFilePath, string.Empty);
+    }
+
+    private void AppendLogLine(string line)
+    {
+        lock (_logFileLock)
+        {
+            File.AppendAllText(_lastLogFilePath, line + Environment.NewLine);
+        }
     }
 }

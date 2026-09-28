@@ -14,6 +14,7 @@ namespace PackageUploader.UI.ViewModel
     {
         public readonly UploadingProgressPercentageProvider _uploadingProgressPercentageProvider;
         private readonly IWindowService _windowService;
+        private readonly IProcessStarterService _processStarterService;
 
         public int PackageUploadPercentage
         {
@@ -40,15 +41,20 @@ namespace PackageUploader.UI.ViewModel
         }
 
         public ICommand CancelUploadCommand { get; }
+        public ICommand ViewLogsCommand { get; }
 
 
-        public PackageUploadingViewModel(UploadingProgressPercentageProvider uploadingProgressPercentageProvider, IWindowService windowService)
+        public PackageUploadingViewModel(UploadingProgressPercentageProvider uploadingProgressPercentageProvider,
+                                         IWindowService windowService,
+                                         IProcessStarterService processStarterService)
         {
             _uploadingProgressPercentageProvider = uploadingProgressPercentageProvider;
             _uploadingProgressPercentageProvider.PropertyChanged += UploadingProgressUpdate;
             _windowService = windowService;
+            _processStarterService = processStarterService;
 
             CancelUploadCommand = new RelayCommand(CancelUpload);
+            ViewLogsCommand = new RelayCommand(ViewLogs);
         }
 
         public void UploadingProgressUpdate(object? sender, PropertyChangedEventArgs e)
@@ -75,6 +81,11 @@ namespace PackageUploader.UI.ViewModel
             //{
                 _windowService.NavigateTo(typeof(PackageUploadView));
             //});
+        }
+
+        private void ViewLogs()
+        {
+            _processStarterService.Start("explorer.exe", $"/select, \"{App.GetLogFilePath()}\"");
         }
     }
 }

@@ -15,6 +15,7 @@ namespace PackageUploader.UI.Test.ViewModel
     {
         private UploadingProgressPercentageProvider _uploadingProgressPercentageProvider;
         private Mock<IWindowService> _mockWindowService;
+        private Mock<IProcessStarterService> _mockProcessStarterService;
         private PackageUploadingViewModel _viewModel;
 
         [TestInitialize]
@@ -22,8 +23,10 @@ namespace PackageUploader.UI.Test.ViewModel
         {
             _uploadingProgressPercentageProvider = new ();
             _mockWindowService = new Mock<IWindowService>();
+            _mockProcessStarterService = new Mock<IProcessStarterService>();
             _viewModel = new PackageUploadingViewModel(_uploadingProgressPercentageProvider, 
-                                                       _mockWindowService.Object);
+                                                       _mockWindowService.Object,
+                                                       _mockProcessStarterService.Object);
         }
 
         [TestMethod]
@@ -31,8 +34,21 @@ namespace PackageUploader.UI.Test.ViewModel
         {
             // Assert
             Assert.IsNotNull(_viewModel.CancelUploadCommand);
+            Assert.IsNotNull(_viewModel.ViewLogsCommand);
             Assert.AreEqual(0, _viewModel.PackageUploadPercentage);
             Assert.AreEqual(PackageUploadingProgressStage.NotStarted, _viewModel.UploadStage);
+        }
+
+        [TestMethod]
+        public void ViewLogs_Should_SelectApplicationLog()
+        {
+            // Act
+            _viewModel.ViewLogsCommand.Execute(null);
+
+            // Assert
+            _mockProcessStarterService.Verify(
+                x => x.Start("explorer.exe", $"/select, \"{App.GetLogFilePath()}\""),
+                Times.Once);
         }
 
         [TestMethod]
