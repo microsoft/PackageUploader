@@ -184,6 +184,9 @@
   <data name="WorkspaceEyebrowText" xml:space="preserve">
     <value>PACKAGE WORKSPACE</value>
   </data>
+  <data name="DeveloperToolLabel" xml:space="preserve">
+    <value>Developer tool</value>
+  </data>
   <data name="UploadPackageBlockBody" xml:space="preserve">
     <value>Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account.</value>
   </data>

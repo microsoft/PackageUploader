@@ -75,19 +75,13 @@ namespace PackageUploader.UI
         {
             if (_userLoggedInProvider.UserLoggedIn)
             {
-                if (string.IsNullOrEmpty(_userLoggedInProvider.TenantName))
-                {
-                    UserDisplayText.Text = _userLoggedInProvider.UserName;
-                }
-                else if (!string.IsNullOrEmpty(_userLoggedInProvider.UserName))
-                {
-                    UserDisplayText.Text = _userLoggedInProvider.UserName + " - " + _userLoggedInProvider.TenantName;
-                }
+                UserInitialsText.Text = GetInitials(_userLoggedInProvider.UserName);
                 UserSignoutButton.Visibility = Visibility.Visible;
+                UpdateSignOutButtonState();
             }
             else
             {
-                // Not logged in, hide button
+                UserInitialsText.Text = string.Empty;
                 UserSignoutButton.Visibility = Visibility.Collapsed;
             }
         }
@@ -96,7 +90,32 @@ namespace PackageUploader.UI
         {
             bool isOnMainPage = (ContentArea.Content as FrameworkElement)?.DataContext is MainPageViewModel;
             UserSignoutButton.IsEnabled = isOnMainPage;
-            UserSignoutButton.ToolTip = isOnMainPage ? UI.Resources.Strings.MainPage.SignOutUser : null;
+
+            string displayName = _userLoggedInProvider.UserName;
+            if (!string.IsNullOrEmpty(_userLoggedInProvider.TenantName))
+            {
+                displayName += " - " + _userLoggedInProvider.TenantName;
+            }
+
+            UserSignoutButton.ToolTip = isOnMainPage
+                ? displayName + Environment.NewLine + UI.Resources.Strings.MainPage.SignOutUser
+                : displayName;
+        }
+
+        private static string GetInitials(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                return "U";
+            }
+
+            string[] nameParts = userName.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (nameParts.Length == 1)
+            {
+                return nameParts[0][..1].ToUpperInvariant();
+            }
+
+            return string.Concat(nameParts[0][0], nameParts[^1][0]).ToUpperInvariant();
         }
 
         private static string GetSimpleVersion()
@@ -222,6 +241,10 @@ namespace PackageUploader.UI
 
         private void UpdateCompactModeIcon()
         {
+            EnvironmentBadge.Visibility = _compactModeProvider.IsCompactMode
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+
             if (_compactModeProvider.IsCompactMode)
             {
                 // Expand icon (lines spread apart)
