@@ -53,40 +53,12 @@
                             Orientation="Horizontal"
                             Margin="16,0,0,0"
                             VerticalAlignment="Center">
-                    <Grid Width="24"
-                          Height="24"
-                          ToolTip="Xbox">
-                        <Ellipse>
-                            <Ellipse.Fill>
-                                <RadialGradientBrush Center="0.5,0.5"
-                                                     GradientOrigin="0.32,0.22"
-                                                     RadiusX="0.72"
-                                                     RadiusY="0.72">
-                                    <GradientStop Color="#D9FF97" Offset="0"/>
-                                    <GradientStop Color="#6DDB32" Offset="0.28"/>
-                                    <GradientStop Color="#107C10" Offset="0.7"/>
-                                    <GradientStop Color="#063C0B" Offset="1"/>
-                                </RadialGradientBrush>
-                            </Ellipse.Fill>
-                        </Ellipse>
-                        <Ellipse Stroke="#9BF00B"
-                                 StrokeThickness="0.8"
-                                 Opacity="0.7"/>
-                        <Path Data="M4.5,5 C7.8,5.9 10.2,8.3 12,11.3 C13.8,8.3 16.2,5.9 19.5,5 M4.8,19 C8.1,15.2 10.2,12.8 12,11.3 C13.8,12.8 15.9,15.2 19.2,19"
-                              Stroke="#07110A"
-                              StrokeThickness="2.6"
-                              StrokeStartLineCap="Round"
-                              StrokeEndLineCap="Round"
-                              StrokeLineJoin="Round"
-                              Stretch="None"/>
-                        <Ellipse Width="8"
-                                 Height="4"
-                                 Margin="4,2,0,0"
-                                 HorizontalAlignment="Left"
-                                 VerticalAlignment="Top"
-                                 Fill="#FFFFFF"
-                                 Opacity="0.18"/>
-                    </Grid>
+                    <Image Source="/Resources/AppIcon/XboxLogo.png"
+                           Width="24"
+                           Height="24"
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           ToolTip="Xbox"/>
                     <TextBlock Text="{x:Static strings:MainPage.ApplicationName}"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                FontSize="13"
