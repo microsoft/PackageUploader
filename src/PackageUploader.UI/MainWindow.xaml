@@ -182,24 +182,67 @@
                         </Popup>
                     </Grid>
 
-                    <Button x:Name="UserSignoutButton"
-                            WindowChrome.IsHitTestVisibleInChrome="True"
-                            Click="UserSignoutButton_Click"
-                            Style="{StaticResource UserSignoutButtonStyle}"
-                            Visibility="Collapsed"
-                            AutomationProperties.HelpText="{x:Static strings:MainPage.SignOutUser}">
-                        <Border Width="28"
-                                Height="28"
-                                CornerRadius="14"
-                                Background="{DynamicResource PrimaryButtonBrush}">
-                            <TextBlock x:Name="UserInitialsText"
-                                       Foreground="{DynamicResource AccentTextBrush}"
-                                       FontSize="11"
-                                       FontWeight="Bold"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-                    </Button>
+                    <Grid>
+                        <Button x:Name="UserProfileButton"
+                                WindowChrome.IsHitTestVisibleInChrome="True"
+                                Click="UserProfileButton_Click"
+                                Style="{StaticResource UserProfileButtonStyle}"
+                                Visibility="Collapsed">
+                            <Border Width="28"
+                                    Height="28"
+                                    CornerRadius="14"
+                                    Background="{DynamicResource PrimaryButtonBrush}">
+                                <TextBlock x:Name="UserInitialsText"
+                                           Foreground="{DynamicResource AccentTextBrush}"
+                                           FontSize="11"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                        </Button>
+                        <Popup x:Name="UserProfilePopup"
+                               PlacementTarget="{Binding ElementName=UserProfileButton}"
+                               Placement="Bottom"
+                               HorizontalOffset="-178"
+                               StaysOpen="False"
+                               AllowsTransparency="True"
+                               PopupAnimation="Fade">
+                            <Border Width="220"
+                                    Padding="8"
+                                    Background="{DynamicResource LayerBrush}"
+                                    BorderBrush="{DynamicResource ControlStrokeBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="{DynamicResource ControlCornerRadius}">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="{DynamicResource ShadowColor}"
+                                                      BlurRadius="14"
+                                                      ShadowDepth="3"
+                                                      Opacity="0.35"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <StackPanel Margin="10,8,10,10">
+                                        <TextBlock x:Name="ProfileDisplayNameText"
+                                                   Foreground="{DynamicResource PrimaryTextBrush}"
+                                                   FontSize="{DynamicResource BodyFontSize}"
+                                                   FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock x:Name="ProfileTenantText"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                                   FontSize="{DynamicResource SmallFontSize}"
+                                                   Margin="0,3,0,0"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                    <Border Height="1"
+                                            Background="{DynamicResource DividerBrush}"
+                                            Margin="8,0,8,4"/>
+                                    <Button x:Name="AccountSignOutButton"
+                                            Click="AccountSignOutButton_Click"
+                                            Content="{x:Static strings:MainPage.SignOutUser}"
+                                            Style="{StaticResource HelpMenuItemStyle}"/>
+                                </StackPanel>
+                            </Border>
+                        </Popup>
+                    </Grid>
 
                     <Button x:Name="MinimizeButton"
                             Width="46" Height="48"

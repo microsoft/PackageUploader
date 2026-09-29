@@ -76,20 +76,28 @@ namespace PackageUploader.UI
             if (_userLoggedInProvider.UserLoggedIn)
             {
                 UserInitialsText.Text = GetInitials(_userLoggedInProvider.UserName);
-                UserSignoutButton.Visibility = Visibility.Visible;
+                ProfileDisplayNameText.Text = _userLoggedInProvider.UserName;
+                ProfileTenantText.Text = _userLoggedInProvider.TenantName;
+                ProfileTenantText.Visibility = string.IsNullOrEmpty(_userLoggedInProvider.TenantName)
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+                UserProfileButton.Visibility = Visibility.Visible;
                 UpdateSignOutButtonState();
             }
             else
             {
+                UserProfilePopup.IsOpen = false;
                 UserInitialsText.Text = string.Empty;
-                UserSignoutButton.Visibility = Visibility.Collapsed;
+                ProfileDisplayNameText.Text = string.Empty;
+                ProfileTenantText.Text = string.Empty;
+                UserProfileButton.Visibility = Visibility.Collapsed;
             }
         }
 
         private void UpdateSignOutButtonState()
         {
             bool isOnMainPage = (ContentArea.Content as FrameworkElement)?.DataContext is MainPageViewModel;
-            UserSignoutButton.IsEnabled = isOnMainPage;
+            AccountSignOutButton.IsEnabled = isOnMainPage;
 
             string displayName = _userLoggedInProvider.UserName;
             if (!string.IsNullOrEmpty(_userLoggedInProvider.TenantName))
@@ -97,9 +105,7 @@ namespace PackageUploader.UI
                 displayName += " - " + _userLoggedInProvider.TenantName;
             }
 
-            UserSignoutButton.ToolTip = isOnMainPage
-                ? displayName + Environment.NewLine + UI.Resources.Strings.MainPage.SignOutUser
-                : displayName;
+            UserProfileButton.ToolTip = displayName;
         }
 
         private static string GetInitials(string userName)
@@ -171,14 +177,21 @@ namespace PackageUploader.UI
             this.Close();
         }
 
-        private void UserSignoutButton_Click(object sender, RoutedEventArgs e)
+        private void UserProfileButton_Click(object sender, RoutedEventArgs e)
         {
-            // Sign out the user
+            HelpMenuPopup.IsOpen = false;
+            UserProfilePopup.IsOpen = !UserProfilePopup.IsOpen;
+        }
+
+        private void AccountSignOutButton_Click(object sender, RoutedEventArgs e)
+        {
+            UserProfilePopup.IsOpen = false;
             _authenticationService.SignOut();
         }
 
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
+            UserProfilePopup.IsOpen = false;
             HelpMenuPopup.IsOpen = !HelpMenuPopup.IsOpen;
         }
 

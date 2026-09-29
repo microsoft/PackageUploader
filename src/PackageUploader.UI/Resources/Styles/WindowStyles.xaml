@@ -30,8 +30,8 @@
         </Style.Triggers>
     </Style>
     
-    <!-- User Signout Button Style -->
-    <Style x:Key="UserSignoutButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowControlButtonStyle}">
+    <!-- User Profile Button Style -->
+    <Style x:Key="UserProfileButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowControlButtonStyle}">
         <Setter Property="Width" Value="42"/>
         <Setter Property="Height" Value="48"/>
         <Setter Property="Padding" Value="7,0"/>
