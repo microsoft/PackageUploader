@@ -56,11 +56,13 @@
                     <Rectangle Width="24"
                                Height="24"
                                Fill="{DynamicResource PrimaryTextBrush}"
+                               SnapsToDevicePixels="False"
+                               UseLayoutRounding="False"
+                               RenderOptions.BitmapScalingMode="Fant"
                                ToolTip="Xbox">
                         <Rectangle.OpacityMask>
                             <ImageBrush ImageSource="/Resources/AppIcon/XboxLogo.png"
-                                        Stretch="Uniform"
-                                        RenderOptions.BitmapScalingMode="HighQuality"/>
+                                        Stretch="Uniform"/>
                         </Rectangle.OpacityMask>
                     </Rectangle>
                     <TextBlock Text="{x:Static strings:MainPage.ApplicationName}"
