@@ -32,6 +32,12 @@ public partial class PackageCreationViewModel : BaseViewModel
     private readonly IMsixvc2ToolResolver _msixvc2ToolResolver;
 
     private Process? _makePackageProcess;
+    private PackagingOperationState? _currentPackagingOperation;
+
+    private sealed class PackagingOperationState
+    {
+        public volatile bool CancellationRequested;
+    }
 
     private bool _isAdditionalDetailsExpanded = false;
     public bool IsAdditionalDetailsExpanded
@@ -732,6 +738,11 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         if (processId != 0)
         {
+            if (_currentPackagingOperation is not null)
+            {
+                _currentPackagingOperation.CancellationRequested = true;
+            }
+
             if (UseMsixvc2)
             {
                 try
@@ -865,12 +876,15 @@ public partial class PackageCreationViewModel : BaseViewModel
         SetConsoleCtrlHandler(null, false);
 
         _makePackageProcess = new Process();
+        PackagingOperationState operationState = new();
+        _currentPackagingOperation = operationState;
         _makePackageProcess.StartInfo.FileName = executablePath;
         _makePackageProcess.StartInfo.Arguments = arguments;
         _makePackageProcess.StartInfo.RedirectStandardOutput = true;
         _makePackageProcess.StartInfo.RedirectStandardError = true;
         _makePackageProcess.EnableRaisingEvents = true;
         _makePackageProcess.StartInfo.CreateNoWindow = true;
+        Process makePackageProcess = _makePackageProcess;
         ProgressValue = 0;
 
         string logFilePath = Path.Combine(Path.GetTempPath(), $"PackageUploader_UI_MakePkg_{DateTime.Now:yyyyMMddHHmmss}.log");
@@ -920,17 +934,15 @@ public partial class PackageCreationViewModel : BaseViewModel
 
         _makePackageProcess.Exited += (sender, args) =>
         {
-            _makePackageProcess.WaitForExit();
+            makePackageProcess.WaitForExit();
 
             string outputString = string.Join("\n", processOutput.ToArray());
 
             // Log error output as well
             outputString += "\n" + string.Join("\n", processErrorOutput.ToArray());
 
-            // Parse Make Package Output
-            ProcessMakePackageOutput(outputString);
-
-            int exitCode = _makePackageProcess.ExitCode;
+            int exitCode = makePackageProcess.ExitCode;
+            bool wasCancelled = IsCancellationExit(exitCode, operationState.CancellationRequested);
 
             IsCreationInProgress = false;
 
@@ -939,40 +951,48 @@ public partial class PackageCreationViewModel : BaseViewModel
                 File.WriteAllText(logFilePath, outputString);
             }
 
+            if (ReferenceEquals(_currentPackagingOperation, operationState))
+            {
+                _currentPackagingOperation = null;
+            }
+            if (ReferenceEquals(_makePackageProcess, makePackageProcess))
+            {
+                _makePackageProcess = null;
+            }
+
+            if (wasCancelled)
+            {
+                return;
+            }
+
+            // Parse Make Package Output only after cancellation has been ruled out.
+            ProcessMakePackageOutput(outputString);
+
             if (exitCode != 0)
             {
-                if ((uint)exitCode == CtrlCTerminationCode)
+                // Get the stderr output for our error message
+                string? errorString = string.Join("\n", processErrorOutput.ToArray());
+
+                // Add error message so progress screen can display it.
+                if (!string.IsNullOrEmpty(errorString))
                 {
-                    // User cancelled the process, progress screen
-                    // will already navigate back to this screen so
-                    // no work is needed.
+                    _errorModelProvider.Error.MainMessage = PackageUploader.UI.Resources.Strings.PackageCreation.ErrorCreatingPackageErrorMsg; //"Error creating package.";
+                    _errorModelProvider.Error.DetailMessage = errorString;
+                    _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
                 }
                 else
                 {
-                    // Get the stderr output for our error message
-                    string? errorString = string.Join("\n", processErrorOutput.ToArray());
-
-                    // Add error message so progress screen can display it.
-                    if (!string.IsNullOrEmpty(errorString))
-                    {
-                        _errorModelProvider.Error.MainMessage = PackageUploader.UI.Resources.Strings.PackageCreation.ErrorCreatingPackageErrorMsg; //"Error creating package.";
-                        _errorModelProvider.Error.DetailMessage = errorString;
-                        _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
-                    }
-                    else
-                    {
-                        _errorModelProvider.Error.MainMessage = PackageUploader.UI.Resources.Strings.PackageCreation.ErrorCreatingPackageErrorMsg; //"Error creating package.";
-                        _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
-                    }
-
-                    _errorModelProvider.Error.LogsPath = logFilePath;
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        _windowService.NavigateTo(typeof(ErrorPageView));
-                    });
-
-                    _logger.LogError("Package creation failed with exit code {ExitCode}.", exitCode);
+                    _errorModelProvider.Error.MainMessage = PackageUploader.UI.Resources.Strings.PackageCreation.ErrorCreatingPackageErrorMsg; //"Error creating package.";
+                    _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
                 }
+
+                _errorModelProvider.Error.LogsPath = logFilePath;
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _windowService.NavigateTo(typeof(ErrorPageView));
+                });
+
+                _logger.LogError("Package creation failed with exit code {ExitCode}.", exitCode);
                 return;
             }
             ProgressValue = 100;
@@ -1000,6 +1020,9 @@ public partial class PackageCreationViewModel : BaseViewModel
             _windowService.NavigateTo(typeof(PackagingProgressView));
         });
     }
+
+    internal static bool IsCancellationExit(int exitCode, bool cancellationRequested) =>
+        cancellationRequested || (uint)exitCode == CtrlCTerminationCode;
 
     private bool PopulateSubValArgs(string settingsFolder, ref string arguments)
     {

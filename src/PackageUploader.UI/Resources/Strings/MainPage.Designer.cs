@@ -132,6 +132,24 @@ namespace PackageUploader.UI.Resources.Strings {
             }
         }
 
+        public static string ThemeToggleAccessibleName {
+            get {
+                return ResourceManager.GetString("ThemeToggleAccessibleName", resourceCulture);
+            }
+        }
+
+        public static string AccountMenuAccessibleName {
+            get {
+                return ResourceManager.GetString("AccountMenuAccessibleName", resourceCulture);
+            }
+        }
+
+        public static string SignedInAccountFallback {
+            get {
+                return ResourceManager.GetString("SignedInAccountFallback", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Documentation.
         /// </summary>

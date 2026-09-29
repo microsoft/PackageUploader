@@ -18,7 +18,7 @@
             <StackPanel Margin="0,24,0,0">
                 <Border Style="{DynamicResource ErrorStatusTileStyle}">
                     <Path Data="M 6,6 L 18,18 M 18,6 L 6,18"
-                          Stroke="{DynamicResource ErrorBrush}"
+                          Stroke="{DynamicResource ErrorRedBrush}"
                           StrokeThickness="2.6"
                           StrokeStartLineCap="Round"
                           StrokeEndLineCap="Round"

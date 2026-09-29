@@ -8,6 +8,7 @@
     <FontWeight x:Key="RegularFontWeight">Normal</FontWeight>
     <FontWeight x:Key="MediumFontWeight">Medium</FontWeight>
     <FontWeight x:Key="SemiboldFontWeight">SemiBold</FontWeight>
+    <FontWeight x:Key="BoldFontWeight">Bold</FontWeight>
 
     <!-- Shape -->
     <CornerRadius x:Key="SmallCornerRadius">4</CornerRadius>

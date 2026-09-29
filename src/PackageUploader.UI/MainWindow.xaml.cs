@@ -11,6 +11,11 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
+using WpfButton = System.Windows.Controls.Button;
+using WpfKey = System.Windows.Input.Key;
+using WpfKeyboard = System.Windows.Input.Keyboard;
+using WpfKeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace PackageUploader.UI
 {
@@ -35,6 +40,8 @@ namespace PackageUploader.UI
 
             // Update maximize/restore icon when window state changes
             StateChanged += MainWindow_StateChanged;
+            SizeChanged += (_, _) => UpdateTitleBarLayout();
+            Loaded += (_, _) => UpdateTitleBarLayout();
 
             // Initial update of username display
             UpdateUsernameDisplay();
@@ -52,6 +59,10 @@ namespace PackageUploader.UI
             // Sync icons with initial state
             UpdateThemeToggleIcon();
             UpdateCompactModeIcon();
+
+#if !DEBUG
+            ThemeToggleButton.Visibility = Visibility.Collapsed;
+#endif
         }
 
         private void RegisterContentAreaChangeHandler()
@@ -75,10 +86,13 @@ namespace PackageUploader.UI
         {
             if (_userLoggedInProvider.UserLoggedIn)
             {
+                string accountName = GetAccountDisplayName(_userLoggedInProvider.UserName);
+                string tenantName = _userLoggedInProvider.TenantName?.Trim() ?? string.Empty;
+
                 UserInitialsText.Text = GetInitials(_userLoggedInProvider.UserName);
-                ProfileDisplayNameText.Text = _userLoggedInProvider.UserName;
-                ProfileTenantText.Text = _userLoggedInProvider.TenantName;
-                ProfileTenantText.Visibility = string.IsNullOrEmpty(_userLoggedInProvider.TenantName)
+                ProfileDisplayNameText.Text = accountName;
+                ProfileTenantText.Text = tenantName;
+                ProfileTenantText.Visibility = string.IsNullOrEmpty(tenantName)
                     ? Visibility.Collapsed
                     : Visibility.Visible;
                 UserProfileButton.Visibility = Visibility.Visible;
@@ -99,14 +113,17 @@ namespace PackageUploader.UI
             bool isOnMainPage = (ContentArea.Content as FrameworkElement)?.DataContext is MainPageViewModel;
             AccountSignOutButton.IsEnabled = isOnMainPage;
 
-            string displayName = _userLoggedInProvider.UserName;
-            if (!string.IsNullOrEmpty(_userLoggedInProvider.TenantName))
-            {
-                displayName += " - " + _userLoggedInProvider.TenantName;
-            }
-
-            UserProfileButton.ToolTip = displayName;
+            string accountName = GetAccountDisplayName(_userLoggedInProvider.UserName);
+            string tenantName = _userLoggedInProvider.TenantName?.Trim() ?? string.Empty;
+            UserProfileButton.ToolTip = string.IsNullOrEmpty(tenantName)
+                ? accountName
+                : $"{accountName} - {tenantName}";
         }
+
+        private static string GetAccountDisplayName(string? userName) =>
+            string.IsNullOrWhiteSpace(userName)
+                ? UI.Resources.Strings.MainPage.SignedInAccountFallback
+                : userName.Trim();
 
         private static string GetInitials(string userName)
         {
@@ -181,6 +198,10 @@ namespace PackageUploader.UI
         {
             HelpMenuPopup.IsOpen = false;
             UserProfilePopup.IsOpen = !UserProfilePopup.IsOpen;
+            if (UserProfilePopup.IsOpen)
+            {
+                FocusPopupAction(AccountSignOutButton);
+            }
         }
 
         private void AccountSignOutButton_Click(object sender, RoutedEventArgs e)
@@ -193,6 +214,57 @@ namespace PackageUploader.UI
         {
             UserProfilePopup.IsOpen = false;
             HelpMenuPopup.IsOpen = !HelpMenuPopup.IsOpen;
+            if (HelpMenuPopup.IsOpen)
+            {
+                FocusPopupAction(DocumentationButton);
+            }
+        }
+
+        private void FocusPopupAction(WpfButton button)
+        {
+            Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() => button.Focus()));
+        }
+
+        private void HelpMenuPopup_KeyDown(object sender, WpfKeyEventArgs e)
+        {
+            if (e.Key == WpfKey.Escape)
+            {
+                HelpMenuPopup.IsOpen = false;
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Key is WpfKey.Down or WpfKey.Up)
+            {
+                bool focusReportIssue = ReferenceEquals(WpfKeyboard.FocusedElement, DocumentationButton);
+                (focusReportIssue ? ReportIssueButton : DocumentationButton).Focus();
+                e.Handled = true;
+            }
+        }
+
+        private void UserProfilePopup_KeyDown(object sender, WpfKeyEventArgs e)
+        {
+            if (e.Key == WpfKey.Escape)
+            {
+                UserProfilePopup.IsOpen = false;
+                e.Handled = true;
+            }
+        }
+
+        private void HelpMenuPopup_Closed(object? sender, EventArgs e)
+        {
+            if (IsActive)
+            {
+                HelpButton.Focus();
+            }
+        }
+
+        private void UserProfilePopup_Closed(object? sender, EventArgs e)
+        {
+            if (IsActive && UserProfileButton.Visibility == Visibility.Visible)
+            {
+                UserProfileButton.Focus();
+            }
         }
 
         private void DocumentationButton_Click(object sender, RoutedEventArgs e)
@@ -270,9 +342,7 @@ namespace PackageUploader.UI
 
         private void UpdateCompactModeIcon()
         {
-            EnvironmentBadge.Visibility = _compactModeProvider.IsCompactMode
-                ? Visibility.Collapsed
-                : Visibility.Visible;
+            UpdateTitleBarLayout();
 
             if (_compactModeProvider.IsCompactMode)
             {
@@ -286,6 +356,16 @@ namespace PackageUploader.UI
                 CompactModeIcon.Data = Geometry.Parse("M3,5 H13 M3,8 H13 M3,11 H13");
                 CompactModeButton.ToolTip = UI.Resources.Strings.MainPage.CompactModeTooltipCompact;
             }
+        }
+
+        private void UpdateTitleBarLayout()
+        {
+            EnvironmentBadge.Visibility = _compactModeProvider.IsCompactMode || ActualWidth < 900
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            ApplicationTitleText.Visibility = ActualWidth > 0 && ActualWidth < 700
+                ? Visibility.Collapsed
+                : Visibility.Visible;
         }
     }
 }

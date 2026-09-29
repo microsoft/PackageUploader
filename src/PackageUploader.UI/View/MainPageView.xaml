@@ -297,11 +297,17 @@
                                       Height="18"
                                       Stretch="Uniform" />
                             </Border>
-                            <TextBlock Grid.Column="1"
-                                       Text="{x:Static strings:MainPage.MakeAPackageTextBlockTitle}"
-                                       Style="{StaticResource SubHeadline}"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static strings:MainPage.MakeAPackageTextBlockTitle}"
+                                           Style="{StaticResource SubHeadline}"
+                                           HorizontalAlignment="Left" />
+                                <TextBlock Text="{Binding MakePkgUnavailableErrorMessage}"
+                                           Foreground="{DynamicResource ErrorRedBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0"
+                                           Visibility="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" />
+                            </StackPanel>
                             <Button Grid.Column="2"
                                     Content="{x:Static strings:MainPage.MakeAPackageButtonText}"
                                     Command="{Binding NavigateToPackageCreationCommand}"
@@ -357,12 +363,18 @@
                                       Height="18"
                                       Stretch="Uniform" />
                             </Border>
-                            <TextBlock Grid.Column="1"
-                                       Text="{x:Static strings:MainPage.Msixvc2TextBlockTitle}"
-                                       Style="{StaticResource SubHeadline}"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis" />
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{x:Static strings:MainPage.Msixvc2TextBlockTitle}"
+                                           Style="{StaticResource SubHeadline}"
+                                           HorizontalAlignment="Left"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Msixvc2UnavailableErrorMessage}"
+                                           Foreground="{DynamicResource ErrorRedBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,4,0,0"
+                                           Visibility="{Binding IsMsixvc2Enabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" />
+                            </StackPanel>
                             <Button Grid.Column="2"
                                     Content="{x:Static strings:MainPage.Msixvc2ButtonText}"
                                     Command="{Binding NavigateToMsixvc2Command}"

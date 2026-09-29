@@ -504,6 +504,21 @@ namespace PackageUploader.UI.Test.ViewModel
             Assert.IsFalse(string.IsNullOrEmpty(_viewModel.GameConfigLoadError));
         }
 
+        [TestMethod]
+        [DataRow(-1, true, true)]
+        [DataRow(unchecked((int)0xC000013A), false, true)]
+        [DataRow(-1, false, false)]
+        [DataRow(1, false, false)]
+        public void IsCancellationExit_ClassifiesExplicitCancellation(
+            int exitCode,
+            bool cancellationRequested,
+            bool expected)
+        {
+            Assert.AreEqual(
+                expected,
+                PackageCreationViewModel.IsCancellationExit(exitCode, cancellationRequested));
+        }
+
         
 
         [TestMethod]

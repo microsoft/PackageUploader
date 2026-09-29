@@ -20,6 +20,7 @@ public partial class BaseViewModel : INotifyPropertyChanged
     public static void InitializeCompactMode(CompactModeProvider provider)
     {
         _compactModeProvider = provider;
+        NotifyAllInstances(nameof(IsCompactMode));
         provider.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(CompactModeProvider.IsCompactMode))

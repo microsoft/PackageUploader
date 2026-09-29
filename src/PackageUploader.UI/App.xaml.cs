@@ -146,16 +146,6 @@ public partial class App : System.Windows.Application
             DefaultValue = TryFindResource(typeof(Window)) ?? new Style()
         });
 
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-        mainWindow.Show();
-        
-        // Navigate to the initial view
-        var windowService = _host.Services.GetRequiredService<Utility.IWindowService>();
-        windowService.NavigateTo(typeof(MainPageView));
-
-        SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
-        ApplyTheme();
-
         // Apply compact mode from saved setting and subscribe to changes.
         // Both App and CompactModeProvider are singletons, so the lambda
         // subscription lives for the entire process — no unsubscribe needed.
@@ -167,6 +157,16 @@ public partial class App : System.Windows.Application
             if (e.PropertyName == nameof(CompactModeProvider.IsCompactMode))
                 Dispatcher.Invoke(() => ApplyCompactMode(compactProvider.IsCompactMode));
         };
+
+        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+
+        // Navigate to the initial view after density state is available to its ViewModel.
+        var windowService = _host.Services.GetRequiredService<Utility.IWindowService>();
+        windowService.NavigateTo(typeof(MainPageView));
+
+        SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+        ApplyTheme();
     }
 
     private void InitializeLanguage()
