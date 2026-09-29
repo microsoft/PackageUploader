@@ -53,12 +53,16 @@
                             Orientation="Horizontal"
                             Margin="16,0,0,0"
                             VerticalAlignment="Center">
-                    <Image Source="/Resources/AppIcon/XboxLogo.png"
-                           Width="24"
-                           Height="24"
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="HighQuality"
-                           ToolTip="Xbox"/>
+                    <Rectangle Width="24"
+                               Height="24"
+                               Fill="{DynamicResource PrimaryTextBrush}"
+                               ToolTip="Xbox">
+                        <Rectangle.OpacityMask>
+                            <ImageBrush ImageSource="/Resources/AppIcon/XboxLogo.png"
+                                        Stretch="Uniform"
+                                        RenderOptions.BitmapScalingMode="HighQuality"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
                     <TextBlock Text="{x:Static strings:MainPage.ApplicationName}"
                                Foreground="{DynamicResource PrimaryTextBrush}"
                                FontSize="13"
