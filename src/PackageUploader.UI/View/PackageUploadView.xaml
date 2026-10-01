@@ -23,12 +23,12 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   HorizontalContentAlignment="Stretch">
-        <Grid Margin="{DynamicResource PagePadding}"
+        <Grid Margin="{DynamicResource WorkflowPagePadding}"
               MaxWidth="1320"
               HorizontalAlignment="Stretch">
             <StackPanel>
                 <!-- Page heading -->
-                <Grid Margin="0,6,0,24">
+                <Grid Margin="0,4,0,18">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -306,14 +306,14 @@
                                     </StackPanel>
 
                                     <Expander Style="{StaticResource CustomExpanderStyle}"
-                                              Margin="0,18,0,0">
+                                              Margin="0,14,0,0">
                                         <Expander.Header>
                                             <TextBlock Text="{x:Static strings:PackageUpload.AditionalDetailsText}"
                                                        d:Text="Additional details"
                                                        Foreground="{DynamicResource PrimaryTextBrush}"
                                                        FontWeight="{DynamicResource SemiboldFontWeight}" />
                                         </Expander.Header>
-                                        <StackPanel Margin="0,14,0,0">
+                                        <StackPanel Margin="0,10,0,0">
                                             <TextBlock Text="{x:Static strings:PackageUpload.StoreIdTitleText}"
                                                        d:Text="StoreId"
                                                        Style="{DynamicResource WorkflowFieldLabelStyle}" />

@@ -134,8 +134,8 @@
     <Style x:Key="WorkflowStepCardStyle"
            TargetType="Border"
            BasedOn="{StaticResource CardContainerStyle}">
-        <Setter Property="Padding" Value="20" />
-        <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="Padding" Value="18" />
+        <Setter Property="Margin" Value="0,0,0,12" />
         <Setter Property="Effect" Value="{DynamicResource CardShadowEffect}" />
     </Style>
 
@@ -180,7 +180,7 @@
     <Style x:Key="WorkflowStepDescriptionStyle"
            TargetType="TextBlock"
            BasedOn="{StaticResource SecondaryTextStyle}">
-        <Setter Property="Margin" Value="0,6,0,18" />
+        <Setter Property="Margin" Value="0,4,0,14" />
         <Setter Property="LineHeight" Value="20" />
     </Style>
 
@@ -223,9 +223,9 @@
                                        TextTrimming="CharacterEllipsis"
                                        IsHitTestVisible="False"
                                        Visibility="Collapsed"
-                                       Margin="12,2" />
+                                       Margin="12,0" />
                             <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="10,2"
+                                          Margin="0"
                                           VerticalAlignment="Center" />
                         </Grid>
                     </Border>
@@ -297,8 +297,8 @@
     <Style x:Key="WorkflowActionBarStyle"
            TargetType="Border"
            BasedOn="{StaticResource CardContainerStyle}">
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="Margin" Value="0,8,0,0" />
+        <Setter Property="Padding" Value="14" />
+        <Setter Property="Margin" Value="0,4,0,0" />
     </Style>
 
     <!-- Progress and outcome pages -->

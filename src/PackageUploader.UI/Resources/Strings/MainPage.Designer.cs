@@ -257,7 +257,7 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("Msixvc2BodyText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Point to your loose file directory containing a MicrosoftGame.config for your PC game. Your files will be packaged and uploaded using the MSIXVC2 format — no pre-built package required.
         ///Learn more: https://aka.ms/MSIXVC2.

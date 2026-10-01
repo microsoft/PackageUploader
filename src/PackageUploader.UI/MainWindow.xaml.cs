@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -125,14 +126,23 @@ namespace PackageUploader.UI
                 ? UI.Resources.Strings.MainPage.SignedInAccountFallback
                 : userName.Trim();
 
-        private static string GetInitials(string userName)
+        internal static string GetInitials(string? userName)
         {
             if (string.IsNullOrWhiteSpace(userName))
             {
                 return "U";
             }
 
-            string[] nameParts = userName.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            string normalizedName = Regex.Replace(
+                userName.Trim(),
+                @"(?:\s*\([^()]*\))+\s*$",
+                string.Empty).Trim();
+            if (string.IsNullOrEmpty(normalizedName))
+            {
+                return "U";
+            }
+
+            string[] nameParts = normalizedName.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if (nameParts.Length == 1)
             {
                 return nameParts[0][..1].ToUpperInvariant();

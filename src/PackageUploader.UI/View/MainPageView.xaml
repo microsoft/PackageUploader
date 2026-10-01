@@ -219,7 +219,7 @@
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Top">
                                         <TextBlock Text="{x:Static strings:MainPage.Msixvc2SubtitleText}"
-                                                   d:Text="MSIXVC2 Preview"
+                                                   d:Text="MSIXVC2"
                                                    Style="{StaticResource BadgeTextStyle}" />
                                     </Border>
                                 </Grid>
@@ -228,9 +228,15 @@
                                            d:Text="Upload Loose Files (PC only)"
                                            Style="{StaticResource CardTitleTextStyle}" />
                                 <TextBlock Grid.Row="2"
-                                           Text="{x:Static strings:MainPage.Msixvc2BodyText}"
-                                           d:Text="Package and upload a loose PC content directory in one guided workflow."
-                                           Style="{StaticResource CardBodyTextStyle}" />
+                                           d:Text="Package and upload a loose PC content directory in one guided workflow. (learn more)"
+                                           Style="{StaticResource CardBodyTextStyle}">
+                                    <Run Text="{x:Static strings:MainPage.Msixvc2BodyText}" />
+                                    <Run Text=" " />
+                                    <Hyperlink Command="{Binding PackagingLearnMoreURL}"
+                                               CommandParameter="https://aka.ms/msixvc2">
+                                        <Run Text="{x:Static strings:MainPage.MakeAPackageBodyURLText}" />
+                                    </Hyperlink>
+                                </TextBlock>
                                 <StackPanel Grid.Row="3">
                                     <TextBlock Text="{Binding Msixvc2UnavailableErrorMessage}"
                                                Foreground="{DynamicResource ErrorRedBrush}"

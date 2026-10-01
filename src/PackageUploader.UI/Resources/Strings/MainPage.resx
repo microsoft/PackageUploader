@@ -231,7 +231,7 @@
     <value>Get started</value>
   </data>
   <data name="Msixvc2SubtitleText" xml:space="preserve">
-    <value>MSIXVC2 Preview</value>
+    <value>MSIXVC2</value>
   </data>
   <data name="Msixvc2BodyTextWithLink" xml:space="preserve">
     <value>Point to your loose file directory containing a MicrosoftGame.config for your PC game. Your files will be packaged and uploaded using the MSIXVC2 format — no pre-built package required.

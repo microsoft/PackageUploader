@@ -12,12 +12,12 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="{DynamicResource PagePadding}"
+        <Grid Margin="{DynamicResource WorkflowPagePadding}"
               MaxWidth="1320"
               HorizontalAlignment="Center">
             <StackPanel>
                 <!-- Page heading -->
-                <Grid Margin="0,6,0,24">
+                <Grid Margin="0,4,0,18">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -254,7 +254,7 @@
                                     </StackPanel>
 
                                     <Expander Style="{StaticResource CustomExpanderStyle}"
-                                              Margin="0,18,0,0"
+                                              Margin="0,14,0,0"
                                               IsExpanded="{Binding IsAdditionalDetailsExpanded, Mode=TwoWay}">
                                         <Expander.Header>
                                             <TextBlock Text="{x:Static strings:PackageCreation.AdditionalDetailsTitle}"
@@ -263,7 +263,7 @@
                                                        FontWeight="{DynamicResource SemiboldFontWeight}" />
                                         </Expander.Header>
 
-                                        <StackPanel Margin="0,14,0,0">
+                                        <StackPanel Margin="0,10,0,0">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -315,7 +315,7 @@
                                                            Style="{DynamicResource WorkflowValidationTextStyle}" />
                                             </StackPanel>
 
-                                            <StackPanel Margin="0,14,0,0"
+                                            <StackPanel Margin="0,12,0,0"
                                                         Visibility="{Binding SupportsCustomSubValPath, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
