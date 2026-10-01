@@ -18,8 +18,9 @@ public class MainWindowTest
     }
 
     [TestMethod]
-    [DataRow(1080, 840)]
-    [DataRow(900, 840)]
+    [DataRow(1080, 880)]
+    [DataRow(900, 880)]
+    [DataRow(850, 850)]
     [DataRow(800, 800)]
     public void GetStandardWindowHeight_ClampsToWorkingArea(double workAreaHeight, double expected)
     {

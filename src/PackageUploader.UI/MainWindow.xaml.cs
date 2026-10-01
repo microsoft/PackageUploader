@@ -23,7 +23,7 @@ namespace PackageUploader.UI
     public partial class MainWindow : Window
     {
         private const double StandardWindowWidth = 1200;
-        private const double StandardWindowHeight = 840;
+        private const double StandardWindowHeight = 880;
         private const double CompactWindowWidth = 600;
         private const double CompactWindowHeight = 420;
 

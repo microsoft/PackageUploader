@@ -10,7 +10,7 @@
         x:Class="PackageUploader.UI.MainWindow"
         mc:Ignorable="d"
         Title="{x:Static strings:MainPage.ApplicationName}"
-        Height="840"
+        Height="880"
         Width="1200"
         MinHeight="400"
         MinWidth="600"
