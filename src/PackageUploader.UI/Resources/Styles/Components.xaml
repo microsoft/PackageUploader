@@ -223,7 +223,7 @@
                                        TextTrimming="CharacterEllipsis"
                                        IsHitTestVisible="False"
                                        Visibility="Collapsed"
-                                       Margin="12,0" />
+                                       Margin="14,0,12,0" />
                             <ScrollViewer x:Name="PART_ContentHost"
                                           Margin="0"
                                           VerticalAlignment="Center" />
