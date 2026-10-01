@@ -22,6 +22,11 @@ namespace PackageUploader.UI
 {
     public partial class MainWindow : Window
     {
+        private const double StandardWindowWidth = 1200;
+        private const double StandardWindowHeight = 840;
+        private const double CompactWindowWidth = 600;
+        private const double CompactWindowHeight = 420;
+
         private readonly UserLoggedInProvider _userLoggedInProvider;
         private readonly IAuthenticationService _authenticationService;
         private readonly CompactModeProvider _compactModeProvider;
@@ -53,8 +58,11 @@ namespace PackageUploader.UI
             // Set initial window size before Show() so it opens at the correct dimensions
             if (_compactModeProvider.IsCompactMode)
             {
-                Width = 600;
-                Height = 420;
+                ApplyCompactWindowSize();
+            }
+            else
+            {
+                ApplyStandardWindowSize();
             }
 
             // Sync icons with initial state
@@ -306,16 +314,29 @@ namespace PackageUploader.UI
             {
                 if (_compactModeProvider.IsCompactMode)
                 {
-                    Width = 600;
-                    Height = 420;
+                    ApplyCompactWindowSize();
                 }
                 else
                 {
-                    Width = 1200;
-                    Height = 800;
+                    ApplyStandardWindowSize();
                 }
             }
         }
+
+        private void ApplyStandardWindowSize()
+        {
+            Width = StandardWindowWidth;
+            Height = GetStandardWindowHeight(SystemParameters.WorkArea.Height);
+        }
+
+        private void ApplyCompactWindowSize()
+        {
+            Width = CompactWindowWidth;
+            Height = Math.Min(CompactWindowHeight, SystemParameters.WorkArea.Height);
+        }
+
+        internal static double GetStandardWindowHeight(double workAreaHeight) =>
+            Math.Min(StandardWindowHeight, workAreaHeight);
 
         private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
         {

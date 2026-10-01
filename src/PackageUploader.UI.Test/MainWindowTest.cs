@@ -16,4 +16,13 @@ public class MainWindowTest
     {
         Assert.AreEqual(expected, MainWindow.GetInitials(userName));
     }
+
+    [TestMethod]
+    [DataRow(1080, 840)]
+    [DataRow(900, 840)]
+    [DataRow(800, 800)]
+    public void GetStandardWindowHeight_ClampsToWorkingArea(double workAreaHeight, double expected)
+    {
+        Assert.AreEqual(expected, MainWindow.GetStandardWindowHeight(workAreaHeight));
+    }
 }
