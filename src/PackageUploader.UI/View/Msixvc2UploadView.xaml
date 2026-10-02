@@ -109,7 +109,7 @@
                                         BorderBrush="{DynamicResource DividerBrush}"
                                         BorderThickness="1"
                                         HorizontalAlignment="Center">
-                                    <Path Data="M4,5 H20 V19 H4 Z M8,9 H16 M8,13 H14 M12,16 V8 M9,11 L12,8 L15,11"
+                                    <Path Data="M12,18 V5 M7,10 L12,5 L17,10 M4,15 V21 H20 V15"
                                           Stroke="{DynamicResource SecondaryTextBrush}"
                                           StrokeThickness="1.5"
                                           Width="30"
