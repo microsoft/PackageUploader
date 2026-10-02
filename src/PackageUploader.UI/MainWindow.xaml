@@ -83,23 +83,6 @@
 
                 <!-- Window Controls -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <!-- Temporary theme toggle for redesign testing. Production behavior remains system-driven. -->
-                    <Button x:Name="ThemeToggleButton"
-                            Width="38" Height="48"
-                            WindowChrome.IsHitTestVisibleInChrome="True"
-                            Click="ThemeToggleButton_Click"
-                            Style="{StaticResource WindowControlButtonStyle}"
-                            AutomationProperties.Name="{x:Static strings:MainPage.ThemeToggleAccessibleName}"
-                            AutomationProperties.HelpText="Temporarily toggle light and dark theme"
-                            ToolTip="Switch to light mode">
-                        <Path x:Name="ThemeToggleIcon"
-                              Data="M8,2 A6,6 0 1 0 14,8 A5,5 0 0 1 8,2"
-                              Stroke="{DynamicResource SecondaryTextBrush}"
-                              StrokeThickness="1"
-                              Width="14"
-                              Height="14"
-                              Stretch="Uniform"/>
-                    </Button>
                     <!-- Compact mode toggle -->
                     <Button x:Name="CompactModeButton"
                             Width="38" Height="48"

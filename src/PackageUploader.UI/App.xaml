@@ -7,7 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Default to Colors.Dark.xaml, will be swapped at runtime -->
+                <!-- Startup fallback; replaced with the Windows theme before the main window is created. -->
                 <ResourceDictionary Source="Resources/Styles/Colors.Dark.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Sizes.Normal.xaml" />
                 <ResourceDictionary Source="Resources/Styles/DesignTokens.xaml" />

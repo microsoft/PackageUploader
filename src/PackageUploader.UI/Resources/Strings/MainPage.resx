@@ -141,9 +141,6 @@
   <data name="HelpAndFeedback" xml:space="preserve">
     <value>Help and feedback</value>
   </data>
-  <data name="ThemeToggleAccessibleName" xml:space="preserve">
-    <value>Theme preview</value>
-  </data>
   <data name="AccountMenuAccessibleName" xml:space="preserve">
     <value>Account menu</value>
   </data>

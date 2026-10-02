@@ -66,12 +66,7 @@ namespace PackageUploader.UI
             }
 
             // Sync icons with initial state
-            UpdateThemeToggleIcon();
             UpdateCompactModeIcon();
-
-#if !DEBUG
-            ThemeToggleButton.Visibility = Visibility.Collapsed;
-#endif
         }
 
         private void RegisterContentAreaChangeHandler()
@@ -337,39 +332,6 @@ namespace PackageUploader.UI
 
         internal static double GetStandardWindowHeight(double workAreaHeight) =>
             Math.Min(StandardWindowHeight, workAreaHeight);
-
-        private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
-        {
-            ((App)System.Windows.Application.Current).ToggleThemeForTesting();
-            UpdateThemeToggleIcon();
-        }
-
-        internal void UpdateThemeToggleIcon()
-        {
-            var app = (App)System.Windows.Application.Current;
-
-            if (app.IsHighContrastThemeActive)
-            {
-                ThemeToggleButton.IsEnabled = false;
-                ThemeToggleButton.ToolTip = "Theme testing is unavailable while Windows High Contrast is active";
-                return;
-            }
-
-            ThemeToggleButton.IsEnabled = true;
-
-            if (app.IsDarkThemeActive)
-            {
-                // Sun icon indicates the theme that will be activated.
-                ThemeToggleIcon.Data = Geometry.Parse("M8,3 A5,5 0 1 0 8,13 A5,5 0 1 0 8,3 M8,0 V2 M8,14 V16 M0,8 H2 M14,8 H16 M2.3,2.3 L3.7,3.7 M12.3,12.3 L13.7,13.7 M13.7,2.3 L12.3,3.7 M3.7,12.3 L2.3,13.7");
-                ThemeToggleButton.ToolTip = "Switch to light mode (temporary testing override)";
-            }
-            else
-            {
-                // Moon icon indicates the theme that will be activated.
-                ThemeToggleIcon.Data = Geometry.Parse("M8,2 A6,6 0 1 0 14,8 A5,5 0 0 1 8,2");
-                ThemeToggleButton.ToolTip = "Switch to dark mode (temporary testing override)";
-            }
-        }
 
         private void UpdateCompactModeIcon()
         {

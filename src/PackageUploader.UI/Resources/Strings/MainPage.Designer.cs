@@ -132,12 +132,6 @@ namespace PackageUploader.UI.Resources.Strings {
             }
         }
 
-        public static string ThemeToggleAccessibleName {
-            get {
-                return ResourceManager.GetString("ThemeToggleAccessibleName", resourceCulture);
-            }
-        }
-
         public static string AccountMenuAccessibleName {
             get {
                 return ResourceManager.GetString("AccountMenuAccessibleName", resourceCulture);
