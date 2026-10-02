@@ -255,7 +255,8 @@
                 </StackPanel>
 
                 <!-- Compact layout -->
-                <StackPanel Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Grid.IsSharedSizeScope="True"
+                            Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border Style="{StaticResource CompactActionCardStyle}"
                             Visibility="{Binding IsUserLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}">
                         <Grid>
@@ -292,7 +293,8 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto"
+                                                  SharedSizeGroup="CompactActionButtonColumn" />
                             </Grid.ColumnDefinitions>
                             <Border Style="{StaticResource CompactIconTileStyle}"
                                     Margin="0,0,12,0">
@@ -312,7 +314,7 @@
                                            Foreground="{DynamicResource ErrorRedBrush}"
                                            TextWrapping="Wrap"
                                            Margin="0,4,0,0"
-                                           Visibility="{Binding IsMakePkgEnabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" />
+                                           Visibility="{Binding IsMakePkgEnabled, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
                             </StackPanel>
                             <Button Grid.Column="2"
                                     Content="{x:Static strings:MainPage.MakeAPackageButtonText}"
@@ -328,7 +330,8 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto"
+                                                  SharedSizeGroup="CompactActionButtonColumn" />
                             </Grid.ColumnDefinitions>
                             <Border Style="{StaticResource CompactIconTileStyle}"
                                     Margin="0,0,12,0">
@@ -358,7 +361,8 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto"
+                                                  SharedSizeGroup="CompactActionButtonColumn" />
                             </Grid.ColumnDefinitions>
                             <Border Style="{StaticResource CompactIconTileStyle}"
                                     Margin="0,0,12,0">
@@ -379,7 +383,7 @@
                                            Foreground="{DynamicResource ErrorRedBrush}"
                                            TextWrapping="Wrap"
                                            Margin="0,4,0,0"
-                                           Visibility="{Binding IsMsixvc2Enabled, Converter={StaticResource InverseBooleanConverter}, ConverterParameter=Visibility}" />
+                                           Visibility="{Binding IsMsixvc2Enabled, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
                             </StackPanel>
                             <Button Grid.Column="2"
                                     Content="{x:Static strings:MainPage.Msixvc2ButtonText}"
