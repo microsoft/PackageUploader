@@ -302,6 +302,15 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("PackagePreviewNoPreviewAvailable", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Your package preview will appear after a valid MicrosoftGame.config file is found.
+        /// </summary>
+        public static string PackagePreviewEmptyText {
+            get {
+                return ResourceManager.GetString("PackagePreviewEmptyText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Package Identity Name.

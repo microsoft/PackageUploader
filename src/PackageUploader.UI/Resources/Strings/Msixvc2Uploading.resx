@@ -61,6 +61,9 @@
   <data name="TitleText" xml:space="preserve">
     <value>Uploading package to Partner Center</value>
   </data>
+  <data name="SubtitleText" xml:space="preserve">
+    <value>Keep this window open while Xbox Game Package Manager prepares, validates, and uploads your game.</value>
+  </data>
   <data name="UploadingText" xml:space="preserve">
     <value>Uploading</value>
   </data>
@@ -81,5 +84,8 @@
   </data>
   <data name="CancelUploadButtonText" xml:space="preserve">
     <value>Cancel upload</value>
+  </data>
+  <data name="ViewLogsButtonText" xml:space="preserve">
+    <value>View logs</value>
   </data>
 </root>

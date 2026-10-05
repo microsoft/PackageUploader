@@ -3,248 +3,257 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             x:Class="PackageUploader.UI.View.PackagingProgressView"
              xmlns:viewmodel="clr-namespace:PackageUploader.UI.ViewModel"
              xmlns:converters="clr-namespace:PackageUploader.UI.Converters"
              xmlns:strings="clr-namespace:PackageUploader.UI.Resources.Strings"
+             x:Class="PackageUploader.UI.View.PackagingProgressView"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodel:PackagingProgressViewModel}"
-             Background="{DynamicResource AppBackgroundBrush}">                                       
+             Background="{DynamicResource CanvasBrush}">
+
     <UserControl.Resources>
         <converters:ProgressToVisibilityConverter x:Key="ProgressToVisibilityConverter" />
         <Storyboard x:Key="RotateAnimation">
-            <DoubleAnimation
-                Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                From="0"
-                To="360"
-                Duration="0:0:5"
-                RepeatBehavior="Forever" />
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                             From="0"
+                             To="360"
+                             Duration="0:0:5"
+                             RepeatBehavior="Forever" />
         </Storyboard>
     </UserControl.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-            <Image Margin="{DynamicResource ProgressImageMargin}"
-                   Source="/Resources/Images/InProgress.png"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Height="{DynamicResource StatusImageSize}"
-                   Width="{DynamicResource StatusImageSize}"/>
-            <TextBlock Margin="{DynamicResource ProgressHeadingMargin}"
-                       Style="{StaticResource SubHeadline}"
-                       Text="{x:Static strings:PackagingProgress.PackagingProgressTitleText}"
-                       d:Text="Getting your package ready..."
-                       HorizontalAlignment="Center"
-                       Foreground="{DynamicResource PrimaryTextBrush}" />
-            <!-- Loading Bar -->
-            <Grid Margin="{DynamicResource ProgressSectionMargin}"
-                  MaxWidth="{DynamicResource ProgressBarMaxWidth}"
-                  HorizontalAlignment="Center">
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Row="0"
-                           Grid.Column="0"
-                           Margin="0, 0, 0, 10"
-                           d:Text="Packaging..."
-                           Text="{x:Static strings:PackagingProgress.PackingText}"
-                           Foreground="{DynamicResource PrimaryTextBrush}" 
-                           HorizontalAlignment="Left"
-                           Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
-                <TextBlock Grid.Row="0"
-                           Grid.Column="0"
-                           Margin="0, 0, 0, 10"
-                           d:Text="Packaging using MSIXVC2..."
-                           Text="{x:Static strings:PackagingProgress.PackingMsixvc2Text}"
-                           Foreground="{DynamicResource PrimaryTextBrush}" 
-                           HorizontalAlignment="Left"
-                           Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                <StackPanel Grid.Row="0"
-                            Grid.Column="1"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            Margin="5, 0, 0, 0">
-                    <TextBlock Text="{Binding PackingProgressPercentage, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                               Foreground="{DynamicResource PrimaryTextBrush}"/>
-                    <TextBlock Text="{x:Static strings:PackagingProgress.PercentComplete}"
-                               d:Text="% complete"
-                               Foreground="{DynamicResource PrimaryTextBrush}" />
-                </StackPanel>
-                <ProgressBar Grid.Row="1"
-                             Grid.ColumnSpan="2"
-                             Margin="0, 0, 0, 23"
-                             Minimum="0"
-                             Maximum="100"
-                             Value="{Binding PackingProgressPercentage}"
-                             HorizontalAlignment="Stretch"
-                             VerticalAlignment="Stretch"
-                             Height="3"/>
-            </Grid>
-            <!-- Updating labels -->
-            <Grid HorizontalAlignment="Center">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="28" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <!-- Row 1 -->
-            <Grid Grid.Row="0"
-                  Grid.Column="0"
-                  Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-5}"
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Top"
-                  Height="16"
-                  Width="16">
-                <Image Source="/Resources/AppIcon/Settings.png">
-                    <Image.RenderTransform>
-                        <RotateTransform CenterX="8" CenterY="8" />
-                    </Image.RenderTransform>
-                    <Image.Triggers>
-                        <EventTrigger RoutedEvent="Image.Loaded">
-                            <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
-                        </EventTrigger>
-                    </Image.Triggers>
-                </Image>
-            </Grid>
-            <Image Grid.Row="0"
-                   Grid.Column="0"
-                   Source="/Resources/AppIcon/Accept.png"
-                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-100}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   Height="16"
-                   Width="16"/>
-            <TextBlock Grid.Row="0"
-                       Grid.Column="1"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Bottom"
-                       Text="{x:Static strings:PackagingProgress.ValidatingFilesText}"
-                       d:Text="Validating files..."
-                       Foreground="{DynamicResource PrimaryTextBrush}"/>
-            <!-- Row 2 -->
-            <ContentControl Grid.Row="1"
-                           Grid.Column="0"
-                           Template="{StaticResource ClockFaceWaitingTemplate}"
-                           Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-5}"
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  HorizontalContentAlignment="Stretch">
+        <Grid Margin="{DynamicResource PagePadding}"
+              MaxWidth="1000"
+              HorizontalAlignment="Stretch">
+            <StackPanel Margin="0,24,0,0">
+                <!-- Page status -->
+                <Border Style="{DynamicResource StatusTileStyle}">
+                    <Path Data="M 4,12 L 20,12 M 14,6 L 20,12 L 14,18"
+                          Stroke="{DynamicResource SuccessBrush}"
+                          StrokeThickness="2.4"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          StrokeLineJoin="Round"
+                          Width="32"
+                          Height="32"
+                          Stretch="Uniform" />
+                </Border>
+                <TextBlock Text="{x:Static strings:PackagingProgress.PackagingProgressTitleText}"
+                           d:Text="Getting your package ready..."
+                           Style="{StaticResource PageTitleTextStyle}"
+                           TextAlignment="Center"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="{x:Static strings:PackagingProgress.PackagingProgressSubtitleText}"
+                           d:Text="Keep this window open while Xbox Game Package Manager validates and packages your game."
+                           Style="{StaticResource PageSubtitleTextStyle}"
+                           TextAlignment="Center"
                            HorizontalAlignment="Center"
-                           VerticalAlignment="Top"
-                           Margin="0, 30, 0, 0"/>
-            <Grid Grid.Row="1"
-                  Grid.Column="0"
-                  Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-93}"
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Top"
-                  Height="16"
-                  Width="16"
-                  Margin="0, 30, 0, 0">
-                <Image Source="/Resources/AppIcon/Settings.png">
-                    <Image.RenderTransform>
-                        <RotateTransform CenterX="8" CenterY="8" />
-                    </Image.RenderTransform>
-                    <Image.Triggers>
-                        <EventTrigger RoutedEvent="Image.Loaded">
-                            <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
-                        </EventTrigger>
-                    </Image.Triggers>
-                </Image>
-            </Grid>
-            <Image Grid.Row="1"
-                   Grid.Column="0"
-                   Source="/Resources/AppIcon/Accept.png"
-                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=94-100}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   Height="16"
-                   Width="16"
-                   Margin="0, 30, 0, 0"/>
-            <TextBlock Grid.Row="1" Grid.Column="1"
-                       Text="{x:Static strings:PackagingProgress.CopyingAndEncryptingText}"
-                       d:Text="Copying and encrypting data..."
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Bottom"
-                       Margin="0, 30, 0, 0"
-                       Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"/>
-            <TextBlock Grid.Row="1" Grid.Column="1"
-                       Text="{x:Static strings:PackagingProgress.PackagingDataText}"
-                       d:Text="Packaging data..."
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Bottom"
-                       Margin="0, 30, 0, 0"
-                       Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <!-- Row 3 -->
-            <ContentControl Grid.Row="2"
-                           Grid.Column="0"
-                           Template="{StaticResource ClockFaceWaitingTemplate}"
-                           Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-94}"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Top"
-                           Margin="0, 30, 0, 0"/>
-            <Grid Grid.Row="2"
-                  Grid.Column="0"
-                  Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=95-99}"
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Top"
-                  Height="16"
-                  Width="16"
-                  Margin="0, 30, 0, 0">
-                <Image Source="/Resources/AppIcon/Settings.png">
-                    <Image.RenderTransform>
-                        <RotateTransform CenterX="8" CenterY="8" />
-                    </Image.RenderTransform>
-                    <Image.Triggers>
-                        <EventTrigger RoutedEvent="Image.Loaded">
-                            <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
-                        </EventTrigger>
-                    </Image.Triggers>
-                </Image>
-            </Grid>
-            <Image Grid.Row="2"
-                   Grid.Column="0"
-                   Source="/Resources/AppIcon/Accept.png"
-                   Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=100-100}"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   Height="16"
-                   Width="16"
-                   Margin="0, 30, 0, 0"/>
-            <TextBlock Grid.Row="2"
-                       Grid.Column="1"
-                       Text="{x:Static strings:PackagingProgress.VerifyingPackageContentsText}"
-                       d:Text="Verifying package contents..."
-                       Foreground="{DynamicResource PrimaryTextBrush}"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Bottom"
-                       Margin="0, 30, 0, 0"/>
-            </Grid>
-        </StackPanel>
-        <StackPanel Grid.Row="1"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right">
-            <Button Content="{x:Static strings:PackagingProgress.CancelPackagingButtonContentText}"
-                    d:Content="Cancel packaging"
-                    Command="{Binding CancelCreationCommand}"
-                    IsEnabled="True"
-                    Margin="0, 0, 50, 50"
-                    Width="141"
-                    Height="32"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"/>
-        </StackPanel>
-    </Grid>
+                           Margin="0,8,0,24"
+                           MaxWidth="680" />
+
+                <!-- Progress workspace -->
+                <Border Style="{DynamicResource ProgressPanelStyle}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="{x:Static strings:PackagingProgress.PackingText}"
+                                       d:Text="Packaging..."
+                                       Style="{StaticResource SubHeadline}"
+                                       HorizontalAlignment="Left"
+                                       TextAlignment="Left"
+                                       Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
+                            <TextBlock Grid.Column="0"
+                                       Text="{x:Static strings:PackagingProgress.PackingMsixvc2Text}"
+                                       d:Text="Packaging using MSIXVC2..."
+                                       Style="{StaticResource SubHeadline}"
+                                       HorizontalAlignment="Left"
+                                       TextAlignment="Left"
+                                       Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        Margin="16,0,0,0">
+                                <TextBlock Text="{Binding PackingProgressPercentage, Mode=OneWay}"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           FontWeight="{DynamicResource BoldFontWeight}"
+                                           FontSize="{DynamicResource SubHeadlineFontSize}" />
+                                <TextBlock Text="{x:Static strings:PackagingProgress.PercentComplete}"
+                                           d:Text="% complete"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           VerticalAlignment="Bottom"
+                                           Margin="3,0,0,1" />
+                            </StackPanel>
+                        </Grid>
+
+                        <ProgressBar Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding PackingProgressPercentage}"
+                                     Height="8"
+                                     Margin="0,14,0,24"
+                                     HorizontalAlignment="Stretch" />
+
+                        <!-- Stage 1: validation -->
+                        <Border Style="{DynamicResource ProgressStageRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0"
+                                      Width="18"
+                                      Height="18"
+                                      HorizontalAlignment="Left"
+                                      Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-5}">
+                                    <Image Source="/Resources/AppIcon/Settings.png">
+                                        <Image.RenderTransform>
+                                            <RotateTransform CenterX="9" CenterY="9" />
+                                        </Image.RenderTransform>
+                                        <Image.Triggers>
+                                            <EventTrigger RoutedEvent="Image.Loaded">
+                                                <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                                            </EventTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                                <Image Grid.Column="0"
+                                       Source="/Resources/AppIcon/Accept.png"
+                                       Width="18"
+                                       Height="18"
+                                       HorizontalAlignment="Left"
+                                       Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-100}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{x:Static strings:PackagingProgress.ValidatingFilesText}"
+                                           d:Text="Validating files..."
+                                           Style="{DynamicResource ProgressStageTitleStyle}" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Stage 2: packaging data -->
+                        <Border Style="{DynamicResource ProgressStageRowStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <ContentControl Grid.Column="0"
+                                                Template="{StaticResource ClockFaceWaitingTemplate}"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-5}" />
+                                <Grid Grid.Column="0"
+                                      Width="18"
+                                      Height="18"
+                                      HorizontalAlignment="Left"
+                                      Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=6-93}">
+                                    <Image Source="/Resources/AppIcon/Settings.png">
+                                        <Image.RenderTransform>
+                                            <RotateTransform CenterX="9" CenterY="9" />
+                                        </Image.RenderTransform>
+                                        <Image.Triggers>
+                                            <EventTrigger RoutedEvent="Image.Loaded">
+                                                <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                                            </EventTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                                <Image Grid.Column="0"
+                                       Source="/Resources/AppIcon/Accept.png"
+                                       Width="18"
+                                       Height="18"
+                                       HorizontalAlignment="Left"
+                                       Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=94-100}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{x:Static strings:PackagingProgress.CopyingAndEncryptingText}"
+                                           d:Text="Copying and encrypting data..."
+                                           Style="{DynamicResource ProgressStageTitleStyle}"
+                                           Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{x:Static strings:PackagingProgress.PackagingDataText}"
+                                           d:Text="Packaging data..."
+                                           Style="{DynamicResource ProgressStageTitleStyle}"
+                                           Visibility="{Binding IsMsixvc2, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Stage 3: verification -->
+                        <Border Style="{DynamicResource ProgressStageRowStyle}"
+                                Margin="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <ContentControl Grid.Column="0"
+                                                Template="{StaticResource ClockFaceWaitingTemplate}"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=0-94}" />
+                                <Grid Grid.Column="0"
+                                      Width="18"
+                                      Height="18"
+                                      HorizontalAlignment="Left"
+                                      Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=95-99}">
+                                    <Image Source="/Resources/AppIcon/Settings.png">
+                                        <Image.RenderTransform>
+                                            <RotateTransform CenterX="9" CenterY="9" />
+                                        </Image.RenderTransform>
+                                        <Image.Triggers>
+                                            <EventTrigger RoutedEvent="Image.Loaded">
+                                                <BeginStoryboard Storyboard="{StaticResource RotateAnimation}" />
+                                            </EventTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                </Grid>
+                                <Image Grid.Column="0"
+                                       Source="/Resources/AppIcon/Accept.png"
+                                       Width="18"
+                                       Height="18"
+                                       HorizontalAlignment="Left"
+                                       Visibility="{Binding PackingProgressPercentage, Converter={StaticResource ProgressToVisibilityConverter}, ConverterParameter=100-100}" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{x:Static strings:PackagingProgress.VerifyingPackageContentsText}"
+                                           d:Text="Verifying package contents..."
+                                           Style="{DynamicResource ProgressStageTitleStyle}" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Actions -->
+                <Border Style="{DynamicResource WorkflowActionBarStyle}"
+                        MaxWidth="760"
+                        HorizontalAlignment="Stretch">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0"
+                                Content="{x:Static strings:PackagingProgress.ViewLogsButtonContentText}"
+                                d:Content="View logs"
+                                Command="{Binding ViewLogsCommand}"
+                                HorizontalAlignment="Left"
+                                MinWidth="96" />
+                        <Button Grid.Column="1"
+                                Content="{x:Static strings:PackagingProgress.CancelPackagingButtonContentText}"
+                                d:Content="Cancel packaging"
+                                Command="{Binding CancelCreationCommand}"
+                                MinWidth="141" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

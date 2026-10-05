@@ -122,6 +122,45 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("GitHubIssues", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Help and feedback.
+        /// </summary>
+        public static string HelpAndFeedback {
+            get {
+                return ResourceManager.GetString("HelpAndFeedback", resourceCulture);
+            }
+        }
+
+        public static string AccountMenuAccessibleName {
+            get {
+                return ResourceManager.GetString("AccountMenuAccessibleName", resourceCulture);
+            }
+        }
+
+        public static string SignedInAccountFallback {
+            get {
+                return ResourceManager.GetString("SignedInAccountFallback", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Documentation.
+        /// </summary>
+        public static string DocumentationMenuItem {
+            get {
+                return ResourceManager.GetString("DocumentationMenuItem", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Report an issue.
+        /// </summary>
+        public static string ReportIssueMenuItem {
+            get {
+                return ResourceManager.GetString("ReportIssueMenuItem", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Game packages speed up uploads, ensure secure installations, and optimize Xbox performance. Just add build files and a config file .
@@ -212,7 +251,7 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("Msixvc2BodyText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Point to your loose file directory containing a MicrosoftGame.config for your PC game. Your files will be packaged and uploaded using the MSIXVC2 format — no pre-built package required.
         ///Learn more: https://aka.ms/MSIXVC2.
@@ -310,6 +349,24 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string TitleTextBlock {
             get {
                 return ResourceManager.GetString("TitleTextBlock", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to PACKAGE WORKSPACE.
+        /// </summary>
+        public static string WorkspaceEyebrowText {
+            get {
+                return ResourceManager.GetString("WorkspaceEyebrowText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Developer tool.
+        /// </summary>
+        public static string DeveloperToolLabel {
+            get {
+                return ResourceManager.GetString("DeveloperToolLabel", resourceCulture);
             }
         }
         

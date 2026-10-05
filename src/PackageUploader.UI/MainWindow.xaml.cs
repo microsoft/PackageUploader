@@ -8,14 +8,25 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
+using WpfButton = System.Windows.Controls.Button;
+using WpfKey = System.Windows.Input.Key;
+using WpfKeyboard = System.Windows.Input.Keyboard;
+using WpfKeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace PackageUploader.UI
 {
     public partial class MainWindow : Window
     {
+        private const double StandardWindowWidth = 1200;
+        private const double StandardWindowHeight = 880;
+        private const double CompactWindowWidth = 600;
+        private const double CompactWindowHeight = 420;
+
         private readonly UserLoggedInProvider _userLoggedInProvider;
         private readonly IAuthenticationService _authenticationService;
         private readonly CompactModeProvider _compactModeProvider;
@@ -35,6 +46,8 @@ namespace PackageUploader.UI
 
             // Update maximize/restore icon when window state changes
             StateChanged += MainWindow_StateChanged;
+            SizeChanged += (_, _) => UpdateTitleBarLayout();
+            Loaded += (_, _) => UpdateTitleBarLayout();
 
             // Initial update of username display
             UpdateUsernameDisplay();
@@ -45,8 +58,11 @@ namespace PackageUploader.UI
             // Set initial window size before Show() so it opens at the correct dimensions
             if (_compactModeProvider.IsCompactMode)
             {
-                Width = 600;
-                Height = 420;
+                ApplyCompactWindowSize();
+            }
+            else
+            {
+                ApplyStandardWindowSize();
             }
 
             // Sync icons with initial state
@@ -74,28 +90,68 @@ namespace PackageUploader.UI
         {
             if (_userLoggedInProvider.UserLoggedIn)
             {
-                if (string.IsNullOrEmpty(_userLoggedInProvider.TenantName))
-                {
-                    UserDisplayText.Text = _userLoggedInProvider.UserName;
-                }
-                else if (!string.IsNullOrEmpty(_userLoggedInProvider.UserName))
-                {
-                    UserDisplayText.Text = _userLoggedInProvider.UserName + " - " + _userLoggedInProvider.TenantName;
-                }
-                UserSignoutButton.Visibility = Visibility.Visible;
+                string accountName = GetAccountDisplayName(_userLoggedInProvider.UserName);
+                string tenantName = _userLoggedInProvider.TenantName?.Trim() ?? string.Empty;
+
+                UserInitialsText.Text = GetInitials(_userLoggedInProvider.UserName);
+                ProfileDisplayNameText.Text = accountName;
+                ProfileTenantText.Text = tenantName;
+                ProfileTenantText.Visibility = string.IsNullOrEmpty(tenantName)
+                    ? Visibility.Collapsed
+                    : Visibility.Visible;
+                UserProfileButton.Visibility = Visibility.Visible;
+                UpdateSignOutButtonState();
             }
             else
             {
-                // Not logged in, hide button
-                UserSignoutButton.Visibility = Visibility.Collapsed;
+                UserProfilePopup.IsOpen = false;
+                UserInitialsText.Text = string.Empty;
+                ProfileDisplayNameText.Text = string.Empty;
+                ProfileTenantText.Text = string.Empty;
+                UserProfileButton.Visibility = Visibility.Collapsed;
             }
         }
 
         private void UpdateSignOutButtonState()
         {
             bool isOnMainPage = (ContentArea.Content as FrameworkElement)?.DataContext is MainPageViewModel;
-            UserSignoutButton.IsEnabled = isOnMainPage;
-            UserSignoutButton.ToolTip = isOnMainPage ? UI.Resources.Strings.MainPage.SignOutUser : null;
+            AccountSignOutButton.IsEnabled = isOnMainPage;
+
+            string accountName = GetAccountDisplayName(_userLoggedInProvider.UserName);
+            string tenantName = _userLoggedInProvider.TenantName?.Trim() ?? string.Empty;
+            UserProfileButton.ToolTip = string.IsNullOrEmpty(tenantName)
+                ? accountName
+                : $"{accountName} - {tenantName}";
+        }
+
+        private static string GetAccountDisplayName(string? userName) =>
+            string.IsNullOrWhiteSpace(userName)
+                ? UI.Resources.Strings.MainPage.SignedInAccountFallback
+                : userName.Trim();
+
+        internal static string GetInitials(string? userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                return "U";
+            }
+
+            string normalizedName = Regex.Replace(
+                userName.Trim(),
+                @"(?:\s*\([^()]*\))+\s*$",
+                string.Empty).Trim();
+            if (string.IsNullOrEmpty(normalizedName))
+            {
+                return "U";
+            }
+
+            string[] nameParts = normalizedName.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (nameParts.Length == 1)
+            {
+                return nameParts[0][..1].ToUpperInvariant();
+            }
+
+            return string.Concat(nameParts[0][0], nameParts[^1][0]).ToUpperInvariant();
         }
 
         private static string GetSimpleVersion()
@@ -151,16 +207,94 @@ namespace PackageUploader.UI
             this.Close();
         }
 
-        private void UserSignoutButton_Click(object sender, RoutedEventArgs e)
+        private void UserProfileButton_Click(object sender, RoutedEventArgs e)
         {
-            // Sign out the user
+            HelpMenuPopup.IsOpen = false;
+            UserProfilePopup.IsOpen = !UserProfilePopup.IsOpen;
+            if (UserProfilePopup.IsOpen)
+            {
+                FocusPopupAction(AccountSignOutButton);
+            }
+        }
+
+        private void AccountSignOutButton_Click(object sender, RoutedEventArgs e)
+        {
+            UserProfilePopup.IsOpen = false;
             _authenticationService.SignOut();
+        }
+
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            UserProfilePopup.IsOpen = false;
+            HelpMenuPopup.IsOpen = !HelpMenuPopup.IsOpen;
+            if (HelpMenuPopup.IsOpen)
+            {
+                FocusPopupAction(DocumentationButton);
+            }
+        }
+
+        private void FocusPopupAction(WpfButton button)
+        {
+            Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() => button.Focus()));
+        }
+
+        private void HelpMenuPopup_KeyDown(object sender, WpfKeyEventArgs e)
+        {
+            if (e.Key == WpfKey.Escape)
+            {
+                HelpMenuPopup.IsOpen = false;
+                e.Handled = true;
+                return;
+            }
+
+            if (e.Key is WpfKey.Down or WpfKey.Up)
+            {
+                bool focusReportIssue = ReferenceEquals(WpfKeyboard.FocusedElement, DocumentationButton);
+                (focusReportIssue ? ReportIssueButton : DocumentationButton).Focus();
+                e.Handled = true;
+            }
+        }
+
+        private void UserProfilePopup_KeyDown(object sender, WpfKeyEventArgs e)
+        {
+            if (e.Key == WpfKey.Escape)
+            {
+                UserProfilePopup.IsOpen = false;
+                e.Handled = true;
+            }
+        }
+
+        private void HelpMenuPopup_Closed(object? sender, EventArgs e)
+        {
+            if (IsActive)
+            {
+                HelpButton.Focus();
+            }
+        }
+
+        private void UserProfilePopup_Closed(object? sender, EventArgs e)
+        {
+            if (IsActive && UserProfileButton.Visibility == Visibility.Visible)
+            {
+                UserProfileButton.Focus();
+            }
+        }
+
+        private void DocumentationButton_Click(object sender, RoutedEventArgs e)
+        {
+            HelpMenuPopup.IsOpen = false;
+            OpenUrl("https://github.com/microsoft/PackageUploader#xbox-game-package-manager");
         }
 
         private void GitHubIssuesButton_Click(object sender, RoutedEventArgs e)
         {
-            // Open the GitHub issues page
-            Process.Start(new ProcessStartInfo("https://github.com/microsoft/PackageUploader/issues/new")
+            HelpMenuPopup.IsOpen = false;
+            OpenUrl("https://github.com/microsoft/PackageUploader/issues/new");
+        }
+
+        private static void OpenUrl(string url)
+        {
+            Process.Start(new ProcessStartInfo(url)
             {
                 UseShellExecute = true
             });
@@ -175,19 +309,34 @@ namespace PackageUploader.UI
             {
                 if (_compactModeProvider.IsCompactMode)
                 {
-                    Width = 600;
-                    Height = 420;
+                    ApplyCompactWindowSize();
                 }
                 else
                 {
-                    Width = 1200;
-                    Height = 800;
+                    ApplyStandardWindowSize();
                 }
             }
         }
 
+        private void ApplyStandardWindowSize()
+        {
+            Width = StandardWindowWidth;
+            Height = GetStandardWindowHeight(SystemParameters.WorkArea.Height);
+        }
+
+        private void ApplyCompactWindowSize()
+        {
+            Width = CompactWindowWidth;
+            Height = Math.Min(CompactWindowHeight, SystemParameters.WorkArea.Height);
+        }
+
+        internal static double GetStandardWindowHeight(double workAreaHeight) =>
+            Math.Min(StandardWindowHeight, workAreaHeight);
+
         private void UpdateCompactModeIcon()
         {
+            UpdateTitleBarLayout();
+
             if (_compactModeProvider.IsCompactMode)
             {
                 // Expand icon (lines spread apart)
@@ -200,6 +349,16 @@ namespace PackageUploader.UI
                 CompactModeIcon.Data = Geometry.Parse("M3,5 H13 M3,8 H13 M3,11 H13");
                 CompactModeButton.ToolTip = UI.Resources.Strings.MainPage.CompactModeTooltipCompact;
             }
+        }
+
+        private void UpdateTitleBarLayout()
+        {
+            EnvironmentBadge.Visibility = _compactModeProvider.IsCompactMode || ActualWidth < 900
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            ApplicationTitleText.Visibility = ActualWidth > 0 && ActualWidth < 700
+                ? Visibility.Collapsed
+                : Visibility.Visible;
         }
     }
 }

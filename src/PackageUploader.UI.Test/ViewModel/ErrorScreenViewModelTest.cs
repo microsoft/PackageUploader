@@ -48,6 +48,9 @@ public class ErrorScreenViewModelTest
     {
         Assert.AreEqual(_errorScreenViewModel.ErrorTitle, _errorModelProvider.Error.MainMessage);
         Assert.AreEqual(_errorScreenViewModel.ErrorDescription, _errorModelProvider.Error.DetailMessage);
+        Assert.IsTrue(_errorScreenViewModel.HasLogs);
+        Assert.AreEqual(Resources.Strings.ErrorPage.GenericRecoveryGuidance, _errorScreenViewModel.RecoveryGuidance);
+        Assert.IsNotNull(_errorScreenViewModel.HomeCommand);
     }
 
     [TestMethod]
@@ -86,5 +89,38 @@ public class ErrorScreenViewModelTest
     {
         _errorScreenViewModel.ViewLogsCommand.Execute(null);
         _processStarterService.Verify(x => x.Start("explorer.exe", $"/select, \"{_errorModelProvider.Error.LogsPath}\""), Times.Once);
+    }
+
+    [TestMethod]
+    public void ViewLogsCommand_WithoutLogPath_DoesNotOpenExplorer()
+    {
+        _errorModelProvider.Error.LogsPath = string.Empty;
+
+        _errorScreenViewModel.ViewLogsCommand.Execute(null);
+
+        _processStarterService.Verify(
+            x => x.Start(It.IsAny<string>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
+    [TestMethod]
+    public void HomeCommand_NavigatesToMainPage()
+    {
+        _errorScreenViewModel.HomeCommand.Execute(null);
+
+        _windowService.Verify(x => x.NavigateTo(typeof(MainPageView)), Times.Once);
+    }
+
+    [TestMethod]
+    public void RecoveryGuidance_ReflectsOriginWorkflow()
+    {
+        _errorModelProvider.Error.OriginPage = typeof(PackageCreationView);
+        Assert.AreEqual(Resources.Strings.ErrorPage.PackagingRecoveryGuidance, _errorScreenViewModel.RecoveryGuidance);
+
+        _errorModelProvider.Error.OriginPage = typeof(PackageUploadView);
+        Assert.AreEqual(Resources.Strings.ErrorPage.UploadRecoveryGuidance, _errorScreenViewModel.RecoveryGuidance);
+
+        _errorModelProvider.Error.OriginPage = typeof(Msixvc2UploadView);
+        Assert.AreEqual(Resources.Strings.ErrorPage.UploadRecoveryGuidance, _errorScreenViewModel.RecoveryGuidance);
     }
 }

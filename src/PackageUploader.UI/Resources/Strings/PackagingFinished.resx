@@ -120,11 +120,14 @@
   <data name="PackagingCompletedTitleText" xml:space="preserve">
     <value>Packaging completed</value>
   </data>
+  <data name="PackagingCompletedSubtitleText" xml:space="preserve">
+    <value>Your game package is ready for testing or upload.</value>
+  </data>
   <data name="SizeTitleText" xml:space="preserve">
     <value>Size</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>StoreId</value>
+    <value>Store ID</value>
   </data>
   <data name="FileNameTitleText" xml:space="preserve">
     <value>File name</value>

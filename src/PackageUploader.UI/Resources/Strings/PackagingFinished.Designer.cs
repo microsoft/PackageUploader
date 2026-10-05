@@ -113,6 +113,15 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("PackagingCompletedTitleText", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Your game package is ready for testing or upload..
+        /// </summary>
+        public static string PackagingCompletedSubtitleText {
+            get {
+                return ResourceManager.GetString("PackagingCompletedSubtitleText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Size.

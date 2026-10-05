@@ -198,6 +198,9 @@
   <data name="PackagePreviewNoPreviewAvailable" xml:space="preserve">
     <value>Full preview isn't available because the provided MicrosoftGame.config file doesn't have a StoreId. Please add your StoreId to your MicrosoftGame.config file.</value>
   </data>
+  <data name="PackagePreviewEmptyText" xml:space="preserve">
+    <value>Your package preview will appear after a valid MicrosoftGame.config file is found.</value>
+  </data>
   <data name="PackagePreviewPackageIdText" xml:space="preserve">
     <value>Package Identity Name</value>
   </data>

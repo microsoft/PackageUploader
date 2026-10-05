@@ -77,6 +77,24 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("ErrorTitleString", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Review the details below, update the previous step, and try again..
+        /// </summary>
+        public static string ErrorSubtitleString {
+            get {
+                return ResourceManager.GetString("ErrorSubtitleString", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Return to the previous step, review your settings, and try again..
+        /// </summary>
+        public static string GenericRecoveryGuidance {
+            get {
+                return ResourceManager.GetString("GenericRecoveryGuidance", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Go back to update.
@@ -84,6 +102,42 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string GoBackAndFix {
             get {
                 return ResourceManager.GetString("GoBackAndFix", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Home.
+        /// </summary>
+        public static string Home {
+            get {
+                return ResourceManager.GetString("Home", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Review your source, layout, and output settings before trying to package again..
+        /// </summary>
+        public static string PackagingRecoveryGuidance {
+            get {
+                return ResourceManager.GetString("PackagingRecoveryGuidance", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Technical details.
+        /// </summary>
+        public static string TechnicalDetailsTitle {
+            get {
+                return ResourceManager.GetString("TechnicalDetailsTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Review the package and Partner Center destination settings before trying the upload again..
+        /// </summary>
+        public static string UploadRecoveryGuidance {
+            get {
+                return ResourceManager.GetString("UploadRecoveryGuidance", resourceCulture);
             }
         }
         

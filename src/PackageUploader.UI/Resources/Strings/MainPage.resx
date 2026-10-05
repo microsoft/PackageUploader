@@ -138,6 +138,21 @@
   <data name="GitHubIssues" xml:space="preserve">
     <value>Send feedback...</value>
   </data>
+  <data name="HelpAndFeedback" xml:space="preserve">
+    <value>Help and feedback</value>
+  </data>
+  <data name="AccountMenuAccessibleName" xml:space="preserve">
+    <value>Account menu</value>
+  </data>
+  <data name="SignedInAccountFallback" xml:space="preserve">
+    <value>Signed-in account</value>
+  </data>
+  <data name="DocumentationMenuItem" xml:space="preserve">
+    <value>Documentation</value>
+  </data>
+  <data name="ReportIssueMenuItem" xml:space="preserve">
+    <value>Report an issue</value>
+  </data>
   <data name="MakeAPackageBodyTextTwo" xml:space="preserve">
     <value>, and then upload.</value>
     <comment>The part of the string that comes after the hyperlink, if any.</comment>
@@ -176,10 +191,16 @@
     <value>Sign out user</value>
   </data>
   <data name="SubTitleTextBlock" xml:space="preserve">
-    <value>The Package Creation Tool bundles your game files, assets, and metadata into a structured package, ensuring consistency and compliance for a faster, more reliable upload.</value>
+    <value>Create optimized game packages, validate them, and upload releases to Microsoft Partner Center.</value>
   </data>
   <data name="TitleTextBlock" xml:space="preserve">
-    <value>Make a package and upload it to Microsoft Partner Center</value>
+    <value>Build and publish your Xbox game</value>
+  </data>
+  <data name="WorkspaceEyebrowText" xml:space="preserve">
+    <value>PACKAGE WORKSPACE</value>
+  </data>
+  <data name="DeveloperToolLabel" xml:space="preserve">
+    <value>Developer tool</value>
   </data>
   <data name="UploadPackageBlockBody" xml:space="preserve">
     <value>Upload your game package to Partner Center to distribute and manage it on Xbox. Get started with a completed package and a Microsoft account.</value>
@@ -207,7 +228,7 @@
     <value>Get started</value>
   </data>
   <data name="Msixvc2SubtitleText" xml:space="preserve">
-    <value>MSIXVC2 Preview</value>
+    <value>MSIXVC2</value>
   </data>
   <data name="Msixvc2BodyTextWithLink" xml:space="preserve">
     <value>Point to your loose file directory containing a MicrosoftGame.config for your PC game. Your files will be packaged and uploaded using the MSIXVC2 format — no pre-built package required.

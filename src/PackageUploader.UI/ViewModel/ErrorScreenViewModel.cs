@@ -18,10 +18,30 @@ namespace PackageUploader.UI.ViewModel
 
         public string ErrorTitle => _errorModelProvider.Error.MainMessage;
         public string ErrorDescription => _errorModelProvider.Error.DetailMessage;
+        public bool HasLogs => !string.IsNullOrWhiteSpace(_errorModelProvider.Error.LogsPath);
+        public string RecoveryGuidance
+        {
+            get
+            {
+                Type? originPage = _errorModelProvider.Error.OriginPage;
+                if (originPage == typeof(PackageCreationView))
+                {
+                    return Resources.Strings.ErrorPage.PackagingRecoveryGuidance;
+                }
+
+                if (originPage == typeof(PackageUploadView) || originPage == typeof(Msixvc2UploadView))
+                {
+                    return Resources.Strings.ErrorPage.UploadRecoveryGuidance;
+                }
+
+                return Resources.Strings.ErrorPage.GenericRecoveryGuidance;
+            }
+        }
 
         public ICommand CopyErrorCommand { get; }
         public ICommand GoBackAndFixCommand { get; }
         public ICommand ViewLogsCommand { get; }
+        public ICommand HomeCommand { get; }
 
         public ErrorScreenViewModel(IWindowService windowService, 
                                     ErrorModelProvider errorModelProvider, 
@@ -35,7 +55,8 @@ namespace PackageUploader.UI.ViewModel
 
             CopyErrorCommand = new RelayCommand(CopyError);
             GoBackAndFixCommand = new RelayCommand(GoBackAndFix);
-            ViewLogsCommand = new RelayCommand(ViewLogs);
+            ViewLogsCommand = new RelayCommand(ViewLogs, () => HasLogs);
+            HomeCommand = new RelayCommand(GoHome);
         }
 
         public void CopyError()
@@ -60,6 +81,11 @@ namespace PackageUploader.UI.ViewModel
         {
             string logPath = _errorModelProvider.Error.LogsPath;
             _processStarterService.Start("explorer.exe", $"/select, \"{logPath}\"");
+        }
+
+        public void GoHome()
+        {
+            _windowService.NavigateTo(typeof(MainPageView));
         }
     }
 }

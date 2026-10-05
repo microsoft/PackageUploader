@@ -374,6 +374,15 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("StoreIdTitleText", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Select a package with a StoreId or enter one manually.
+        /// </summary>
+        public static string StoreIdPlaceholderText {
+            get {
+                return ResourceManager.GetString("StoreIdPlaceholderText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to The Submission Validator log wasn&apos;t found: {0}.
@@ -399,6 +408,15 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string UploadButtonHelpText {
             get {
                 return ResourceManager.GetString("UploadButtonHelpText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Upload destination.
+        /// </summary>
+        public static string UploadDestinationTitleText {
+            get {
+                return ResourceManager.GetString("UploadDestinationTitleText", resourceCulture);
             }
         }
         
@@ -435,6 +453,15 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string UploadPreviewTitleText {
             get {
                 return ResourceManager.GetString("UploadPreviewTitleText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Package and destination details will appear after you select a valid package file.
+        /// </summary>
+        public static string UploadPreviewEmptyText {
+            get {
+                return ResourceManager.GetString("UploadPreviewEmptyText", resourceCulture);
             }
         }
     }

@@ -95,6 +95,15 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("ProcessingPackageText", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Keep this window open while Xbox Game Package Manager uploads and processes your package..
+        /// </summary>
+        public static string SubtitleText {
+            get {
+                return ResourceManager.GetString("SubtitleText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Uploading package to Partner Center.
@@ -129,6 +138,15 @@ namespace PackageUploader.UI.Resources.Strings {
         public static string UploadingText {
             get {
                 return ResourceManager.GetString("UploadingText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to View logs.
+        /// </summary>
+        public static string ViewLogsButtonText {
+            get {
+                return ResourceManager.GetString("ViewLogsButtonText", resourceCulture);
             }
         }
     }

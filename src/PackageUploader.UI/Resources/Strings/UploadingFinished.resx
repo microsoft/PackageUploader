@@ -148,10 +148,13 @@
     <value>Size</value>
   </data>
   <data name="StoreIdTitleText" xml:space="preserve">
-    <value>StoreId</value>
+    <value>Store ID</value>
   </data>
   <data name="UploadCompleteTitleText" xml:space="preserve">
     <value>Upload complete</value>
+  </data>
+  <data name="UploadCompleteSubtitleText" xml:space="preserve">
+    <value>Your package was uploaded successfully and is ready in Partner Center.</value>
   </data>
   <data name="UploadSizeTitleText" xml:space="preserve">
     <value>Upload Size</value>

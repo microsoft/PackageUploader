@@ -119,6 +119,14 @@ public partial class App : System.Windows.Application
                 });
             })
             .Build();
+
+        DispatcherUnhandledException += App_DispatcherUnhandledException;
+    }
+
+    private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    {
+        var logger = _host.Services.GetRequiredService<ILogger<App>>();
+        logger.LogCritical(e.Exception, "An unhandled UI exception occurred.");
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -133,16 +141,6 @@ public partial class App : System.Windows.Application
             DefaultValue = TryFindResource(typeof(Window)) ?? new Style()
         });
 
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-        mainWindow.Show();
-        
-        // Navigate to the initial view
-        var windowService = _host.Services.GetRequiredService<Utility.IWindowService>();
-        windowService.NavigateTo(typeof(MainPageView));
-
-        SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
-        ApplyTheme();
-
         // Apply compact mode from saved setting and subscribe to changes.
         // Both App and CompactModeProvider are singletons, so the lambda
         // subscription lives for the entire process — no unsubscribe needed.
@@ -154,6 +152,16 @@ public partial class App : System.Windows.Application
             if (e.PropertyName == nameof(CompactModeProvider.IsCompactMode))
                 Dispatcher.Invoke(() => ApplyCompactMode(compactProvider.IsCompactMode));
         };
+
+        SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+        ApplyTheme();
+
+        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+
+        // Navigate to the initial view after density state is available to its ViewModel.
+        var windowService = _host.Services.GetRequiredService<Utility.IWindowService>();
+        windowService.NavigateTo(typeof(MainPageView));
     }
 
     private void InitializeLanguage()
@@ -258,6 +266,7 @@ public partial class App : System.Windows.Application
     protected override void OnExit(ExitEventArgs e)
     {
         SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+        DispatcherUnhandledException -= App_DispatcherUnhandledException;
         _host.Dispose();
         base.OnExit(e);
     }

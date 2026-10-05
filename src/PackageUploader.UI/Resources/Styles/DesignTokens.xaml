@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Typography -->
+    <FontFamily x:Key="AppFontFamily">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontWeight x:Key="RegularFontWeight">Normal</FontWeight>
+    <FontWeight x:Key="MediumFontWeight">Medium</FontWeight>
+    <FontWeight x:Key="SemiboldFontWeight">SemiBold</FontWeight>
+    <FontWeight x:Key="BoldFontWeight">Bold</FontWeight>
+
+    <!-- Shape -->
+    <CornerRadius x:Key="SmallCornerRadius">4</CornerRadius>
+    <CornerRadius x:Key="ControlCornerRadius">7</CornerRadius>
+    <CornerRadius x:Key="CardCornerRadius">10</CornerRadius>
+    <CornerRadius x:Key="PillCornerRadius">999</CornerRadius>
+
+    <!-- Strokes -->
+    <Thickness x:Key="ControlBorderThickness">1</Thickness>
+    <Thickness x:Key="FocusBorderThickness">2</Thickness>
+    <Thickness x:Key="CardBorderThickness">1</Thickness>
+
+    <!-- Shared layout -->
+    <Thickness x:Key="ControlPadding">12,7</Thickness>
+    <Thickness x:Key="CardPadding">20</Thickness>
+    <Thickness x:Key="CompactCardPadding">14</Thickness>
+    <Thickness x:Key="InlineControlSpacing">8,0,0,0</Thickness>
+    <Thickness x:Key="FieldSpacing">0,0,0,14</Thickness>
+    <Thickness x:Key="SectionSpacing">0,0,0,20</Thickness>
+
+    <!-- Effects are opt-in so dense and high-contrast layouts can remain flat. -->
+    <DropShadowEffect x:Key="CardShadowEffect"
+                      x:Shared="False"
+                      Color="{DynamicResource ShadowColor}"
+                      BlurRadius="18"
+                      ShadowDepth="4"
+                      Opacity="0.16" />
+</ResourceDictionary>
