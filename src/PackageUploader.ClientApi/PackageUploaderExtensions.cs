@@ -14,6 +14,9 @@ public static class IngestionExtensions
     /// <summary>UploadSource value for the Xbox Game Package Manager (XGPM) UI.</summary>
     public const string XgpmUploadSource = UploadSourceConfig.XgpmSource;
 
+    /// <summary>UploadSource value for makepkg2 (via packaging services DLL).</summary>
+    public const string MakePkg2UploadSource = UploadSourceConfig.MakePkg2Source;
+
     public enum AuthenticationMethod 
     {
         AppSecret,

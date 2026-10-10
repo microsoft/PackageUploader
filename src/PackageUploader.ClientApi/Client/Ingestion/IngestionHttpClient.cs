@@ -92,7 +92,7 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         StringArgumentException.ThrowIfNullOrWhiteSpace(marketGroupId);
 
-        var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId, isXvc, xvcTargetPlatform).Build();
+        var body = new IngestionPackageCreationRequestBuilder(currentDraftInstanceId, fileName, marketGroupId, isXvc, xvcTargetPlatform, _uploadSource).Build();
 
         var ingestionGamePackage = await PostAsync($"products/{productId}/packages", body, IngestionJsonSerializerContext.Default.IngestionPackageCreationRequest, IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
 
