@@ -392,6 +392,15 @@ namespace PackageUploader.UI.Resources.Strings {
                 return ResourceManager.GetString("SubValLogNotFoundErrMsg", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string describing the required matching Submission Validator report.
+        /// </summary>
+        public static string SubValRequiredText {
+            get {
+                return ResourceManager.GetString("SubValRequiredText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Upload package.
