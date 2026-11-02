@@ -80,6 +80,8 @@ The Xbox Game Package Manager is a Windows desktop app that provides a user-frie
 - **Simplified authentication**: Uses browser-based authentication to eliminate the need for client secrets or certificates
 - **Error handling**: Provides clear error messages and troubleshooting guidance through the UI
 
+If Partner Center returns HTTP 409 when starting package processing, the shared upload client checks the package's current state. It continues processing and supplemental file uploads only if the server confirms the package is already `InProcessing` or `Processed`. Other states and failed state lookups remain errors; a package that subsequently reports `ProcessFailed` is not reported as a successful upload.
+
 To use Xbox Game Package Manager, download the latest version from the [Releases page](https://github.com/microsoft/PackageUploader/releases/latest) and then run the XboxGamePackageManager.exe application.
 
 <a id="service-creation-and-authentication"></a>
