@@ -812,12 +812,13 @@ public class PackageUploaderService : IPackageUploaderService
             _ => internalPackage.State,
         });
 
-        if(processingPackage.Id != internalPackage.Id)
+        if (internalPackage.State is GamePackageState.ProcessFailed)
         {
-            // Needed because 301 status returns what to query but not what we're currently uploading
-            processingPackage.State = internalPackage.State;
+            throw new IngestionClientException($"Processing failed for package '{processingPackage.Id}'.");
         }
 
+        // Keep the upload ID for supplemental assets when the lookup follows a package redirect.
+        processingPackage.State = internalPackage.State;
         return processingPackage;
     }
 

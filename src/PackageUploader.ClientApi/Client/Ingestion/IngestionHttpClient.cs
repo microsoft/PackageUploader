@@ -153,9 +153,25 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         gamePackage.State = GamePackageState.Uploaded;
         var body = gamePackage.Map();
 
-        var ingestionGamePackage = await PutAsync($"products/{productId}/packages/{gamePackage.Id}", body, IngestionJsonSerializerContext.Default.IngestionGamePackage, ct);
-        var newGamePackage = ingestionGamePackage.Map();
-        return newGamePackage;
+        try
+        {
+            var ingestionGamePackage = await PutAsync($"products/{productId}/packages/{gamePackage.Id}", body, IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
+            return ingestionGamePackage.Map();
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode is HttpStatusCode.Conflict)
+        {
+            var currentPackage = await GetPackageByIdAsync(productId, gamePackage.Id, ct).ConfigureAwait(false);
+            if (currentPackage?.State is not (GamePackageState.InProcessing or GamePackageState.Processed))
+            {
+                _logger.LogWarning("Processing conflict for package {packageId} could not be reconciled: server state is {packageState}.", gamePackage.Id, currentPackage?.State);
+                throw;
+            }
+
+            _logger.LogWarning("Recovered processing conflict for package {packageId}: server state is already {packageState}. Continuing the upload workflow.", gamePackage.Id, currentPackage.State);
+            // Keep the upload ID for supplemental assets even if the state lookup followed a package redirect.
+            gamePackage.State = currentPackage.State;
+            return gamePackage;
+        }
     }
 
     public async Task<GamePackageAsset> CommitPackageAssetAsync(string productId, string packageId, string packageAssetId, CancellationToken ct)
