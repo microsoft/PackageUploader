@@ -290,6 +290,11 @@
                                     </Grid>
 
                                     <StackPanel Margin="0,8,0,0">
+                                        <TextBlock Text="{x:Static strings:PackageUpload.SubValRequiredText}"
+                                                   Style="{StaticResource SecondaryTextStyle}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,0,0,6"
+                                                   Visibility="{Binding IsMsixvc2Package, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}" />
                                         <StackPanel Orientation="Horizontal"
                                                     Visibility="{Binding PackageErrorMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
                                             <Image Source="/Resources/AppIcon/ErrorIcon.png"

@@ -225,6 +225,9 @@
   <data name="SubValLogNotFoundErrMsg" xml:space="preserve">
     <value>The Submission Validator log wasn't found: {0}</value>
   </data>
+  <data name="SubValRequiredText" xml:space="preserve">
+    <value>Keep the matching Submission Validator report (Validator_&lt;package-name&gt;.xml) beside the package. It is required for this upload.</value>
+  </data>
   <data name="UploadButtonContentText" xml:space="preserve">
     <value>Upload package</value>
   </data>
