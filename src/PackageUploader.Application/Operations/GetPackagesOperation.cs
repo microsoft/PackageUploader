@@ -40,16 +40,6 @@ internal class GetPackagesOperation(IPackageUploaderService storeBrokerService, 
             Console.WriteLine(packagesJson);
     }
 
-    public static string PackagesToJson(IEnumerable<Package> packages)
-    {
-        try
-        {
-            var serializedObject = JsonSerializer.Serialize(packages, PackageUploaderJsonSerializerContext.Default.IEnumerablePackage);
-            return serializedObject;
-        }
-        catch (Exception ex)
-        {
-            return $"Could not serialize packages to json - {ex.Message}";
-        }
-    }
+    public static string PackagesToJson(IEnumerable<Package> packages) =>
+        JsonSerializer.Serialize(packages, PackageUploaderJsonSerializerContext.Default.IEnumerablePackage);
 }

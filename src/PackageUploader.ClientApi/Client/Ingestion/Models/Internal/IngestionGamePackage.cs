@@ -68,6 +68,21 @@ internal class IngestionGamePackage : IngestionResource
     public string XvcTargetPlatform { get; set; }
 
     /// <summary>
+    /// Authoritative package PDUID extracted by the service, when available.
+    /// </summary>
+    public string BuildId { get; set; }
+
+    /// <summary>
+    /// Extracted package content identifier, when available.
+    /// </summary>
+    public string ContentId { get; set; }
+
+    /// <summary>
+    /// Extracted package version text, when available.
+    /// </summary>
+    public string Version { get; set; }
+
+    /// <summary>
     /// client metadata, contains XvcTargetPlatform from input game packages
     /// </summary>
     public ClientExtractedMetaData ClientExtractedMetaData { get; set; }

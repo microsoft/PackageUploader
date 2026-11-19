@@ -13,7 +13,7 @@
 - **bigId**: *productId* or *bigId* required
 
 # GetPackages
-###### Returns list of game packages from a branch
+###### Returns list of game packages from a branch or flight
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/GetPackages.json))
 ##### Definition:
 - **operationName**: "GetPackages",
@@ -28,6 +28,50 @@
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
 - **flightName**: *flightName* or *branchFriendlyName* required
 - **marketGroupName**: optional - if not set, it will use *default* as the market group (case sensitive)
+
+#### Machine-readable output
+
+Use `GetPackages --ConfigFile GetPackages.json --Data` (or `-d`) to write a bare JSON array to standard output. Successful execution returns exit code 0; diagnostics go to standard error in data mode, even with `--Verbose`. Package lookup or serialization failures return a nonzero exit code, not a partial array or an empty-array fallback.
+
+The command reads the selected branch or flight's **current draft package configuration**, then fetches the packages in the selected, case-sensitive market group. It is not a product-wide or historical package search. An existing market group with no packages returns `[]`; a missing configuration or market group is an error.
+
+Each array item uses this explicit metadata allowlist. Null values are omitted, so consumers must tolerate missing fields and older server responses.
+
+| Field | JSON type | Meaning |
+| --- | --- | --- |
+| `fileName` | string | Package file name. |
+| `fileSize` | number | Package size in bytes, preserved as a 64-bit integer; may exceed 32-bit range. |
+| `id` | string | Package resource ID returned by the service, including the canonical ID after a redirect. This is not the build ID. |
+| `state` | string | Processing state: `Unknown`, `PendingUpload`, `Uploaded`, `InProcessing`, `Processed`, or `ProcessFailed`. Unrecognized or missing server states map to `Unknown`. |
+| `packageType` | string | Package type reported by the service, when available. |
+| `xvcTargetPlatform` | string | XVC target platform reported by the service, when available. |
+| `buildId` | string | Authoritative extracted package PDUID, when provided by the service. |
+| `contentId` | string | Extracted package content identifier, when provided by the service. |
+| `version` | string | Extracted package-version text, for example `1.0.0.0`; not normalized to SemVer or prefixed with `v`. |
+
+For example, a response with available identity metadata produces:
+
+```json
+[
+  {
+    "fileName": "example.msixvc",
+    "fileSize": 8589934592,
+    "id": "package-resource-1",
+    "state": "Processed",
+    "packageType": "Msixvc",
+    "xvcTargetPlatform": "PC",
+    "buildId": "11111111-2222-4333-8444-555555555555",
+    "contentId": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+    "version": "1.0.0.0"
+  }
+]
+```
+
+PackageUploader requests identity using `GET /products/{productId}/packages/{packageId}?$expand=PackageIdentity` on the existing API. It preserves this opt-in when rereading a package redirect and fetching its canonical resource, and on package-processing polls. The expansion is available to authorized callers; it is not restricted by caller identity or a tool-identification header and does not introduce a new API version. Unexpanded package details and package list/create/update responses retain their legacy shape.
+
+Identity fields may be absent on older servers, older packages, or packages whose metadata is not yet available. Older servers can ignore `$expand=PackageIdentity` and return a successful legacy response; this is treated as unavailable identity, not a package mismatch. The client does not retry without the expansion to hide lookup, authorization, timeout, or service failures; existing authentication refresh and transient retries are unchanged. Missing identity is never derived from resource IDs, filenames, or placeholder GUIDs. Upload information, tokens, SAS URLs, and ETags are not part of this output.
+
+Pipelines can use available identity as an advisory pre-upload check within the selected draft and market group. This is not transactional idempotency: another upload can race with the check, and missing metadata does not prove a package was never uploaded. The command does not automatically skip or deduplicate uploads.
 
 # UploadUwpPackage
 ###### Uploads Uwp game package

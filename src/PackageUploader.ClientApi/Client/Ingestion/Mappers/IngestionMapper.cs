@@ -82,6 +82,11 @@ internal static class IngestionMapper
             ODataETag = ingestionGamePackage.ODataETag,
             FileName = ingestionGamePackage.FileName,
             FileSize = ingestionGamePackage.FileSize,
+            PackageType = ingestionGamePackage.PackageType,
+            XvcTargetPlatform = ingestionGamePackage.XvcTargetPlatform,
+            BuildId = ingestionGamePackage.BuildId,
+            ContentId = ingestionGamePackage.ContentId,
+            Version = ingestionGamePackage.Version,
         };
 
     private static GamePackageState GetState(this IngestionGamePackage ingestionGamePackage) =>

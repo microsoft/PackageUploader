@@ -143,7 +143,11 @@ public class ProcessingConflictRecoveryTest
                     processingClient.ProcessPackageRequestAsync(productId, uploaded, ct));
             ingestion.Setup(client => client.GetPackageByIdAsync(
                     "test-product", "test-package", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GamePackage { Id = "canonical-package", State = finalState });
+                .Returns((string productId, string packageId, CancellationToken ct) =>
+                {
+                    handler.State = finalState;
+                    return processingClient.GetPackageByIdAsync(productId, packageId, ct);
+                });
             transfer.Setup(client => client.UploadFileToXfusAsync(
                     It.Is<FileInfo>(file => file.FullName == packagePath), null, false,
                     It.IsAny<IProgress<ulong>>(), It.IsAny<CancellationToken>()))
@@ -184,6 +188,7 @@ public class ProcessingConflictRecoveryTest
             ingestion.VerifyNoOtherCalls();
             transfer.VerifyAll();
             transfer.VerifyNoOtherCalls();
+            Assert.AreEqual(2, handler.GetCount, "Both conflict recovery and the processing poll must request package identity.");
         }
         finally
         {
@@ -199,6 +204,7 @@ public class ProcessingConflictRecoveryTest
 
     private sealed class ProcessingHandler(GamePackageState state) : HttpMessageHandler
     {
+        public GamePackageState State { get; set; } = state;
         public HttpStatusCode PutStatus { get; init; } = HttpStatusCode.Conflict;
         public HttpStatusCode GetStatus { get; init; } = HttpStatusCode.OK;
         public bool EmptyLookup { get; init; }
@@ -211,6 +217,7 @@ public class ProcessingConflictRecoveryTest
         {
             Assert.AreEqual("/products/test-product/packages/test-package", request.RequestUri.AbsolutePath);
             bool isGet = request.Method == HttpMethod.Get;
+            Assert.AreEqual(isGet ? "?$expand=PackageIdentity" : string.Empty, request.RequestUri.Query);
             if (isGet)
             {
                 GetCount++;
@@ -225,7 +232,7 @@ public class ProcessingConflictRecoveryTest
             return Task.FromResult(new HttpResponseMessage(isGet ? GetStatus : PutStatus)
             {
                 Content = new StringContent(isGet && EmptyLookup ? "null" : isGet || PutStatus == HttpStatusCode.OK
-                    ? $"{{\"id\":\"canonical-package\",\"state\":\"{state}\"}}"
+                    ? $"{{\"id\":\"canonical-package\",\"state\":\"{State}\"}}"
                     : "\"Package is being processed or already processed.\"")
             });
         }

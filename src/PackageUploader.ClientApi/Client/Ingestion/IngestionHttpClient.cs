@@ -112,19 +112,20 @@ internal sealed class IngestionHttpClient : HttpRestClient, IIngestionHttpClient
         StringArgumentException.ThrowIfNullOrWhiteSpace(productId);
         StringArgumentException.ThrowIfNullOrWhiteSpace(packageId);
 
+        var packageUrl = $"products/{productId}/packages/{packageId}?$expand=PackageIdentity";
         IngestionGamePackage ingestionGamePackage;
 
         try
         {
-            ingestionGamePackage = await GetAsync($"products/{productId}/packages/{packageId}", IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
+            ingestionGamePackage = await GetAsync(packageUrl, IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
         }
         catch(HttpRequestException e) when (e.StatusCode is HttpStatusCode.MovedPermanently)
         {
-            var redirectPackage = await GetAsyncWithErrors($"products/{productId}/packages/{packageId}", 
+            var redirectPackage = await GetAsyncWithErrors(packageUrl,
                                                             IngestionJsonSerializerContext.Default.IngestionRedirectPackage, 
                                                             new HashSet<HttpStatusCode>() {HttpStatusCode.MovedPermanently}, 
                                                             ct).ConfigureAwait(false);
-            ingestionGamePackage = await GetAsync($"products/{productId}/packages/{redirectPackage.ToId}", IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
+            ingestionGamePackage = await GetAsync($"products/{productId}/packages/{redirectPackage.ToId}?$expand=PackageIdentity", IngestionJsonSerializerContext.Default.IngestionGamePackage, ct).ConfigureAwait(false);
         }
 
         var gamePackage = ingestionGamePackage.Map();
