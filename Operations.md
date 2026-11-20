@@ -35,7 +35,7 @@ Use `GetPackages --ConfigFile GetPackages.json --Data` (or `-d`) to write a bare
 
 The command reads the selected branch or flight's **current draft package configuration**, then fetches the packages in the selected, case-sensitive market group. It is not a product-wide or historical package search. An existing market group with no packages returns `[]`; a missing configuration or market group is an error.
 
-Each array item uses this explicit metadata allowlist. Null values are omitted, so consumers must tolerate missing fields and older server responses.
+Each array item uses this explicit six-field metadata allowlist from the existing API response. Null values are omitted, so consumers must tolerate missing fields. This output does not require a backend rollout or change the API requests.
 
 | Field | JSON type | Meaning |
 | --- | --- | --- |
@@ -45,11 +45,8 @@ Each array item uses this explicit metadata allowlist. Null values are omitted, 
 | `state` | string | Processing state: `Unknown`, `PendingUpload`, `Uploaded`, `InProcessing`, `Processed`, or `ProcessFailed`. Unrecognized or missing server states map to `Unknown`. |
 | `packageType` | string | Package type reported by the service, when available. |
 | `xvcTargetPlatform` | string | XVC target platform reported by the service, when available. |
-| `buildId` | string | Authoritative extracted package PDUID, when provided by the service. |
-| `contentId` | string | Extracted package content identifier, when provided by the service. |
-| `version` | string | Extracted package-version text, for example `1.0.0.0`; not normalized to SemVer or prefixed with `v`. |
 
-For example, a response with available identity metadata produces:
+For example, a response with all six fields available produces:
 
 ```json
 [
@@ -59,19 +56,14 @@ For example, a response with available identity metadata produces:
     "id": "package-resource-1",
     "state": "Processed",
     "packageType": "Msixvc",
-    "xvcTargetPlatform": "PC",
-    "buildId": "11111111-2222-4333-8444-555555555555",
-    "contentId": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
-    "version": "1.0.0.0"
+    "xvcTargetPlatform": "PC"
   }
 ]
 ```
 
-PackageUploader requests identity using `GET /products/{productId}/packages/{packageId}?$expand=PackageIdentity` on the existing API. It preserves this opt-in when rereading a package redirect and fetching its canonical resource, and on package-processing polls. The expansion is available to authorized callers; it is not restricted by caller identity or a tool-identification header and does not introduce a new API version. Unexpanded package details and package list/create/update responses retain their legacy shape.
+Upload information, tokens, SAS URLs, and ETags are not part of this output. Missing optional metadata is not synthesized. BuildId, ContentId, and package version are not exposed by this command.
 
-Identity fields may be absent on older servers, older packages, or packages whose metadata is not yet available. Older servers can ignore `$expand=PackageIdentity` and return a successful legacy response; this is treated as unavailable identity, not a package mismatch. The client does not retry without the expansion to hide lookup, authorization, timeout, or service failures; existing authentication refresh and transient retries are unchanged. Missing identity is never derived from resource IDs, filenames, or placeholder GUIDs. Upload information, tokens, SAS URLs, and ETags are not part of this output.
-
-Pipelines can use available identity as an advisory pre-upload check within the selected draft and market group. This is not transactional idempotency: another upload can race with the check, and missing metadata does not prove a package was never uploaded. The command does not automatically skip or deduplicate uploads.
+The output describes the selected draft and market group; it does not identify a build or prove that local package bytes were previously uploaded. The command does not automatically skip or deduplicate uploads and does not provide transactional idempotency.
 
 # UploadUwpPackage
 ###### Uploads Uwp game package

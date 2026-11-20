@@ -22,9 +22,6 @@ public sealed class GetPackagesTest : IntegrationTestBase
           "fileSize": 8589934592,
           "packageType": "Msixvc",
           "xvcTargetPlatform": "PC",
-          "buildId": "11111111-2222-4333-8444-555555555555",
-          "contentId": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
-          "version": "1.0.0.0",
           "eTag": "private-etag",
           "@odata.etag": "private-odata-etag",
           "uploadInfo": {
@@ -54,7 +51,7 @@ public sealed class GetPackagesTest : IntegrationTestBase
         Assert.AreEqual(1, document.RootElement.GetArrayLength());
         var package = document.RootElement[0];
         CollectionAssert.AreEquivalent(
-            new[] { "fileName", "fileSize", "id", "state", "packageType", "xvcTargetPlatform", "buildId", "contentId", "version" },
+            new[] { "fileName", "fileSize", "id", "state", "packageType", "xvcTargetPlatform" },
             package.EnumerateObject().Select(property => property.Name).ToArray());
         Assert.AreEqual("example.msixvc", package.GetProperty("fileName").GetString());
         Assert.AreEqual(JsonValueKind.Number, package.GetProperty("fileSize").ValueKind);
@@ -63,31 +60,27 @@ public sealed class GetPackagesTest : IntegrationTestBase
         Assert.AreEqual("Processed", package.GetProperty("state").GetString());
         Assert.AreEqual("Msixvc", package.GetProperty("packageType").GetString());
         Assert.AreEqual("PC", package.GetProperty("xvcTargetPlatform").GetString());
-        Assert.AreEqual("11111111-2222-4333-8444-555555555555", package.GetProperty("buildId").GetString());
-        Assert.AreEqual("aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee", package.GetProperty("contentId").GetString());
-        Assert.AreEqual("1.0.0.0", package.GetProperty("version").GetString());
         Assert.IsFalse(result.Stdout.Contains("synthetic-", StringComparison.Ordinal));
         Assert.IsFalse(result.Stdout.Contains("private-", StringComparison.Ordinal));
         Assert.IsTrue(result.Requests.All(request => request.Method == HttpMethod.Get));
         Assert.IsTrue(result.Requests.Any(request =>
             request.Uri.AbsolutePath.EndsWith($"getByInstanceID(instanceID={(flight ? "flight-draft" : "branch-draft")})")));
         Assert.HasCount(1, result.Requests.Where(request => request.Uri.AbsolutePath.Contains("/packages/")));
-        AssertPackageIdentityQueries(result.Requests);
+        AssertUnchangedRequestQueries(result.Requests);
     }
 
     [TestMethod]
     [DataRow("")]
-    [DataRow(", \"buildId\": null, \"contentId\": null, \"version\": null")]
-    public async Task Data_OmitsUnavailableIdentity_WithoutDerivingItFromOtherFields(string identity)
+    [DataRow(", \"packageType\": null, \"xvcTargetPlatform\": null")]
+    public async Task Data_OmitsUnavailableOptionalMetadata(string metadata)
     {
         var result = await RunAsync(["package-1"], mock =>
             mock.WhenJson(HttpMethod.Get, "/packages/package-1", $$"""
                 {
-                  "id": "11111111-2222-4333-8444-555555555555",
-                  "uid": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+                  "id": "package-1",
                   "state": "PendingUpload",
-                  "fileName": "example_1.2.3.4.msixvc",
-                  "fileSize": null{{identity}}
+                  "fileName": "example.msixvc",
+                  "fileSize": null{{metadata}}
                 }
                 """));
 
@@ -99,7 +92,7 @@ public sealed class GetPackagesTest : IntegrationTestBase
             package.EnumerateObject().Select(property => property.Name).ToArray());
         Assert.AreEqual("PendingUpload", package.GetProperty("state").GetString());
         Assert.HasCount(1, result.Requests.Where(request => request.Uri.AbsolutePath.Contains("/packages/")));
-        AssertPackageIdentityQueries(result.Requests);
+        AssertUnchangedRequestQueries(result.Requests);
     }
 
     [TestMethod]
@@ -133,7 +126,7 @@ public sealed class GetPackagesTest : IntegrationTestBase
     [DataRow(HttpStatusCode.Unauthorized, "{}")]
     [DataRow(HttpStatusCode.Forbidden, "{}")]
     [DataRow(HttpStatusCode.InternalServerError, "{}")]
-    [DataRow(HttpStatusCode.OK, """{"buildId": {}}""")]
+    [DataRow(HttpStatusCode.OK, """{"packageType": {}}""")]
     public async Task Data_LaterLookupFails_ReturnsNonzeroWithoutPartialArray(HttpStatusCode status, string response)
     {
         var result = await RunAsync(["package-1", "package-2"], mock => mock
@@ -146,10 +139,10 @@ public sealed class GetPackagesTest : IntegrationTestBase
         CollectionAssert.AreEqual(new[] { "/products/test-product/packages/package-1", "/products/test-product/packages/package-2" },
             result.Requests.Where(request => request.Uri.AbsolutePath.Contains("/packages/"))
                 .Select(request => request.Uri.AbsolutePath).Distinct().ToArray());
-        // Only the existing authentication handler retries 401/403; no capability fallback is allowed.
+        // Only the existing authentication handler retries 401/403.
         Assert.HasCount(status is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden ? 3 : 2,
             result.Requests.Where(request => request.Uri.AbsolutePath.Contains("/packages/")));
-        AssertPackageIdentityQueries(result.Requests);
+        AssertUnchangedRequestQueries(result.Requests);
     }
 
     [TestMethod]
@@ -164,7 +157,7 @@ public sealed class GetPackagesTest : IntegrationTestBase
     }
 
     [TestMethod]
-    public async Task Data_RedirectedPackage_UsesCanonicalResourceAndIdentity()
+    public async Task Data_RedirectedPackage_UsesCanonicalResourceId()
     {
         var result = await RunAsync(["original-package"], mock => mock
             .WhenJson(HttpMethod.Get, "/packages/original-package", """{"toId":"canonical-package"}""", HttpStatusCode.MovedPermanently)
@@ -174,19 +167,18 @@ public sealed class GetPackagesTest : IntegrationTestBase
         using var document = JsonDocument.Parse(result.Stdout);
         var package = document.RootElement[0];
         Assert.AreEqual("canonical-package", package.GetProperty("id").GetString());
-        Assert.AreEqual("11111111-2222-4333-8444-555555555555", package.GetProperty("buildId").GetString());
+        Assert.AreEqual("Msixvc", package.GetProperty("packageType").GetString());
         CollectionAssert.AreEqual(new[] { "original-package", "original-package", "canonical-package" },
             result.Requests.Where(request => request.Uri.AbsolutePath.Contains("/packages/"))
                 .Select(request => request.Uri.Segments[^1]).ToArray());
-        AssertPackageIdentityQueries(result.Requests);
+        AssertUnchangedRequestQueries(result.Requests);
     }
 
-    private static void AssertPackageIdentityQueries(IReadOnlyList<RecordedRequest> requests)
+    private static void AssertUnchangedRequestQueries(IReadOnlyList<RecordedRequest> requests)
     {
         foreach (var request in requests)
         {
-            Assert.AreEqual(request.Uri.AbsolutePath.Contains("/packages/") ? "?$expand=PackageIdentity" : string.Empty,
-                request.Uri.Query, $"Unexpected query for {request.Uri.AbsolutePath}.");
+            Assert.AreEqual(string.Empty, request.Uri.Query, $"Unexpected query for {request.Uri.AbsolutePath}.");
         }
     }
 
