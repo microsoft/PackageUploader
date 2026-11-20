@@ -4,6 +4,7 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("PackageUploader.Application.Test")]
+[assembly: InternalsVisibleTo("PackageUploader.IntegrationTest")]
 
 // Allows Moq to create proxies for internal interfaces (IMsixvc2UploadToolProvider, IMsixvc2ProcessRunner) in tests.
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
