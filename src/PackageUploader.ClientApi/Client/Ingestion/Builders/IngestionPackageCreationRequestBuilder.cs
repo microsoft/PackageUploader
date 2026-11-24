@@ -15,7 +15,7 @@ internal class IngestionPackageCreationRequestBuilder : IBuilder<IngestionPackag
     private readonly ClientExtractedMetaData _clientExtractedMetaData;
     private const string ResourceType = "PackageCreationRequest";
 
-    public IngestionPackageCreationRequestBuilder(string currentDraftInstanceId, string fileName, string marketGroupId, bool ixXvc, XvcTargetPlatform xvcTargetPlatform)
+    public IngestionPackageCreationRequestBuilder(string currentDraftInstanceId, string fileName, string marketGroupId, bool ixXvc, XvcTargetPlatform xvcTargetPlatform, string uploadSource = null)
     {
         _currentDraftInstanceId = currentDraftInstanceId ?? throw new ArgumentNullException(nameof(currentDraftInstanceId));
         _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
@@ -23,7 +23,7 @@ internal class IngestionPackageCreationRequestBuilder : IBuilder<IngestionPackag
 
         if (ixXvc)
         {
-            _clientExtractedMetaData = CreateClientExtractedMetaData(xvcTargetPlatform);
+            _clientExtractedMetaData = CreateClientExtractedMetaData(xvcTargetPlatform, uploadSource);
         }
     }
 
@@ -37,7 +37,7 @@ internal class IngestionPackageCreationRequestBuilder : IBuilder<IngestionPackag
             ClientExtractedMetaData = _clientExtractedMetaData,
         };
 
-    private static ClientExtractedMetaData CreateClientExtractedMetaData(XvcTargetPlatform xvcTargetPlatform)
+    private static ClientExtractedMetaData CreateClientExtractedMetaData(XvcTargetPlatform xvcTargetPlatform, string uploadSource)
     {
         var xvcReader = new XvcReader
         {
@@ -48,6 +48,7 @@ internal class IngestionPackageCreationRequestBuilder : IBuilder<IngestionPackag
         var clientExtractedMetaData = new ClientExtractedMetaData
         {
             XvcReader = xvcReader,
+            UploadSource = uploadSource,
         };
 
         return clientExtractedMetaData;
