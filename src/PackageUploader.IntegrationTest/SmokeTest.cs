@@ -3,31 +3,35 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PackageUploader.IntegrationTest.Infrastructure;
-using System.Net.Http;
+using System.Linq;
 
 namespace PackageUploader.IntegrationTest;
 
 /// <summary>
-/// Smoke test that validates the integration project is discovered, builds, and that the mock
-/// harness routes a public service call through the real pipeline to the mock handler.
+/// Smoke test that validates the integration project is discovered, builds, and that the mock-server
+/// host routes a public service call over real HTTP to the WireMock Ingestion fake with the fake
+/// auth token attached.
 /// </summary>
 [TestClass]
 public sealed class SmokeTest : IntegrationTestBase
 {
     [TestMethod]
-    public async Task TestHost_RoutesProductLookup_ThroughMockHandlerWithFakeAuth()
+    public async Task TestHost_RoutesProductLookup_ThroughWireMockWithFakeAuth()
     {
-        using var host = CreateHost(mock =>
-            mock.WhenJson(HttpMethod.Get, "/products/", "{\"id\":\"smoke-test-product\"}"));
+        using var host = CreateMockServerHost();
+        host.Ingestion.StubGetProduct("smoke-test-product");
 
         var product = await host.Service.GetProductByProductIdAsync("smoke-test-product", TestContext.CancellationToken);
 
         Assert.IsNotNull(product);
-        Assert.AreEqual(1, host.IngestionHandler.ReceivedRequests.Count);
+        Assert.AreEqual("smoke-test-product", product.ProductId);
 
-        var request = host.IngestionHandler.ReceivedRequests[0];
-        Assert.IsTrue(request.Headers.ContainsKey("Authorization"));
-        StringAssert.Contains(request.Headers["Authorization"], FakeAccessTokenProvider.FakeToken);
+        var logs = host.Ingestion.Server.LogEntries.ToList();
+        Assert.AreEqual(1, logs.Count);
+
+        var headers = logs[0].RequestMessage!.Headers!;
+        Assert.IsTrue(headers.ContainsKey("Authorization"));
+        StringAssert.Contains(string.Join(" ", headers["Authorization"]!), FakeAccessTokenProvider.FakeToken);
     }
 
     public TestContext TestContext { get; set; } = null!;
