@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using PackageUploader.ClientApi.Client.Ingestion.Models;
+using System;
 
 namespace PackageUploader.Application.Models;
 
@@ -17,9 +18,27 @@ public class Package
     /// </summary>
     public long? FileSize { get; set; }
 
+    /// <summary>
+    /// Canonical package resource identifier.
+    /// </summary>
+    public string Id { get; set; }
+
+    /// <summary>
+    /// Textual processing state of the package.
+    /// </summary>
+    public string State { get; set; }
+
+    public string PackageType { get; set; }
+
+    public string XvcTargetPlatform { get; set; }
+
     public Package(GamePackage gamePackage)
     {
         FileName = gamePackage.FileName;
         FileSize = gamePackage.FileSize;
+        Id = gamePackage.Id;
+        State = Enum.GetName(gamePackage.State) ?? nameof(GamePackageState.Unknown);
+        PackageType = gamePackage.PackageType;
+        XvcTargetPlatform = gamePackage.XvcTargetPlatform;
     }
 }

@@ -13,7 +13,7 @@
 - **bigId**: *productId* or *bigId* required
 
 # GetPackages
-###### Returns list of game packages from a branch
+###### Returns list of game packages from a branch or flight
 #### Config file ([template](https://github.com/microsoft/GameStoreBroker/blob/main/templates/GetPackages.json))
 ##### Definition:
 - **operationName**: "GetPackages",
@@ -28,6 +28,42 @@
 - **branchFriendlyName**: *flightName* or *branchFriendlyName* required
 - **flightName**: *flightName* or *branchFriendlyName* required
 - **marketGroupName**: optional - if not set, it will use *default* as the market group (case sensitive)
+
+#### Machine-readable output
+
+Use `GetPackages --ConfigFile GetPackages.json --Data` (or `-d`) to write a bare JSON array to standard output. Successful execution returns exit code 0; diagnostics go to standard error in data mode, even with `--Verbose`. Package lookup or serialization failures return a nonzero exit code, not a partial array or an empty-array fallback.
+
+The command reads the selected branch or flight's **current draft package configuration**, then fetches the packages in the selected, case-sensitive market group. It is not a product-wide or historical package search. An existing market group with no packages returns `[]`; a missing configuration or market group is an error.
+
+Each array item uses this explicit six-field metadata allowlist from the existing API response. Null values are omitted, so consumers must tolerate missing fields. This output does not require a backend rollout or change the API requests.
+
+| Field | JSON type | Meaning |
+| --- | --- | --- |
+| `fileName` | string | Package file name. |
+| `fileSize` | number | Package size in bytes, preserved as a 64-bit integer; may exceed 32-bit range. |
+| `id` | string | Package resource ID returned by the service, including the canonical ID after a redirect. This is not the build ID. |
+| `state` | string | Processing state: `Unknown`, `PendingUpload`, `Uploaded`, `InProcessing`, `Processed`, or `ProcessFailed`. Unrecognized or missing server states map to `Unknown`. |
+| `packageType` | string | Package type reported by the service, when available. |
+| `xvcTargetPlatform` | string | XVC target platform reported by the service, when available. |
+
+For example, a response with all six fields available produces:
+
+```json
+[
+  {
+    "fileName": "example.msixvc",
+    "fileSize": 8589934592,
+    "id": "package-resource-1",
+    "state": "Processed",
+    "packageType": "Msixvc",
+    "xvcTargetPlatform": "PC"
+  }
+]
+```
+
+Upload information, tokens, SAS URLs, and ETags are not part of this output. Missing optional metadata is not synthesized. BuildId, ContentId, and package version are not exposed by this command.
+
+The output describes the selected draft and market group; it does not identify a build or prove that local package bytes were previously uploaded. The command does not automatically skip or deduplicate uploads and does not provide transactional idempotency.
 
 # UploadUwpPackage
 ###### Uploads Uwp game package

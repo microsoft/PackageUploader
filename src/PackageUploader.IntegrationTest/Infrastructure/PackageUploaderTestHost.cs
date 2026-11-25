@@ -4,10 +4,14 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using PackageUploader.Application.Extensions;
+using PackageUploader.Application.Operations;
 using PackageUploader.ClientApi;
 using PackageUploader.ClientApi.Client.Ingestion.TokenProvider;
+using System.CommandLine;
 
 namespace PackageUploader.IntegrationTest.Infrastructure;
 
@@ -25,23 +29,24 @@ internal sealed class PackageUploaderTestHost : IDisposable
 
     public PackageUploaderTestHost(
         Action<MockHttpMessageHandler>? configureIngestion = null,
-        string ingestionBaseAddress = "https://ingestion.test.local/")
+        string ingestionBaseAddress = "https://ingestion.test.local/",
+        ParseResult? parseResult = null)
     {
         IngestionHandler = new MockHttpMessageHandler();
         configureIngestion?.Invoke(IngestionHandler);
 
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
+        var builder = parseResult?.CreateHostApplicationBuilder() ?? Host.CreateEmptyApplicationBuilder(null);
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["IngestionConfig:BaseAddress"] = ingestionBaseAddress,
-            })
-            .Build();
+            });
 
-        var services = new ServiceCollection();
-        services.AddSingleton<IConfiguration>(configuration);
-        services.AddLogging(builder => builder.AddProvider(NullLoggerProvider.Instance));
-
-        services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.Default);
+        var services = builder.Services;
+        if (parseResult is null)
+        {
+            services.AddLogging(logging => logging.AddProvider(NullLoggerProvider.Instance));
+            services.AddPackageUploaderService(IngestionExtensions.AuthenticationMethod.Default);
+        }
 
         services.RemoveAll<IAccessTokenProvider>();
         services.AddScoped<IAccessTokenProvider, FakeAccessTokenProvider>();
@@ -55,6 +60,9 @@ internal sealed class PackageUploaderTestHost : IDisposable
         _scope = _provider.CreateScope();
         Service = _scope.ServiceProvider.GetRequiredService<IPackageUploaderService>();
     }
+
+    public Task<int> RunGetPackagesAsync(CancellationToken ct) =>
+        _scope.ServiceProvider.GetRequiredService<GetPackagesOperation>().RunAsync(ct);
 
     public void Dispose()
     {

@@ -26,4 +26,14 @@ public sealed class GamePackage : GamePackageResource
     /// File size of the package
     /// </summary>
     public long? FileSize { get; set; }
+
+    /// <summary>
+    /// Package type reported by the service, when available.
+    /// </summary>
+    public string PackageType { get; internal init; }
+
+    /// <summary>
+    /// XVC target platform reported by the service, when available.
+    /// </summary>
+    public string XvcTargetPlatform { get; internal init; }
 }
