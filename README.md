@@ -72,6 +72,8 @@ The Xbox Game Package Manager is a Windows desktop app that provides a user-frie
 - **Browser-based authentication**: Authenticate seamlessly using your default browser
 - **Multi-tenant support**: An advanced option to specify a tenant ID if your account has access to multiple tenants
 
+For legacy `.xvc` and `.msixvc` uploads, keep the matching `Validator_<package-name>.xml` report beside the package. XGPM requires this report before starting the upload and uploads it after package processing, before displaying **Upload complete**. MSIXVC2 uploads use the separate packaging-tool workflow. The shared client/CLI still permits explicitly omitted supplemental assets.
+
 ### Benefits
 
 - **Smart packaging**: Automatically analyzes your .config and loose files to optimize packaging and has manual override options when needed.

@@ -40,6 +40,7 @@ public partial class PackageUploadViewModel : BaseViewModel
     private GameProduct? _gameProduct = null;
     private IReadOnlyCollection<IGamePackageBranch>? _branchesAndFlights = null;
     private GamePackageConfiguration? _gamePackageConfiguration = null;
+    private int _productInfoRequestVersion;
 
     private OneTimeHolder<String>? _savedBranchOrFlightMemory = null;
     private OneTimeHolder<String>? _savedMarketGroupMemory = null;
@@ -282,6 +283,7 @@ public partial class PackageUploadViewModel : BaseViewModel
                 Package.SubValFilePath = value;
                 SetPropertyInApplicationPreferences(nameof(SubValFilePath), value);
                 OnPropertyChanged();
+                CheckCanExecuteUploadCommand();
             }
         }
     }
@@ -562,6 +564,11 @@ public partial class PackageUploadViewModel : BaseViewModel
             return false;
         }
 
+        if (!IsMsixvc2Package && !File.Exists(SubValFilePath))
+        {
+            return false;
+        }
+
         return File.Exists(PackageFilePath) && 
             _gameProduct != null &&
             !string.IsNullOrEmpty(MarketGroupName) &&
@@ -695,6 +702,8 @@ public partial class PackageUploadViewModel : BaseViewModel
     private void ResetProductInfo()
     {
         _gameProduct = null;
+        _branchesAndFlights = null;
+        _gamePackageConfiguration = null;
         OnPropertyChanged(nameof(ProductName));
 
         BranchAndFlightNames = [];
@@ -1051,6 +1060,7 @@ public partial class PackageUploadViewModel : BaseViewModel
 
     private async void GetProductInfoAsync()
     {
+        int requestVersion = ++_productInfoRequestVersion;
         if (string.IsNullOrEmpty(BigId) || BigId.Length < MinimumBigIdLength)
         {
             ResetProductInfo();
@@ -1062,17 +1072,30 @@ public partial class PackageUploadViewModel : BaseViewModel
             return;
         }
 
-        PackageErrorMessage = string.Empty;
+        if (IsMsixvc2Package || File.Exists(SubValFilePath))
+        {
+            PackageErrorMessage = string.Empty;
+        }
         IsLoadingBranchesAndFlights = true;
         BranchOrFlightErrorMessage = string.Empty;
 
         try
         {
-            _gameProduct = await _uploaderService.GetProductByBigIdAsync(BigId, CancellationToken.None);
+            var product = await _uploaderService.GetProductByBigIdAsync(BigId, CancellationToken.None);
+            if (requestVersion != _productInfoRequestVersion)
+            {
+                return;
+            }
 
+            var branches = await _uploaderService.GetPackageBranchesAsync(product, CancellationToken.None);
+            if (requestVersion != _productInfoRequestVersion)
+            {
+                return;
+            }
+
+            _gameProduct = product;
+            _branchesAndFlights = branches;
             OnPropertyChanged(nameof(ProductName));
-
-            _branchesAndFlights = await _uploaderService.GetPackageBranchesAsync(_gameProduct, CancellationToken.None);
 
             List<string> displayNames = [];
             foreach (var branch in _branchesAndFlights)
@@ -1099,16 +1122,26 @@ public partial class PackageUploadViewModel : BaseViewModel
         }
         catch (ProductNotFoundException)
         {
-            string formatString = Resources.Strings.PackageUpload.ProductWithStoreIdNotFoundConfigHereErrMsg;
-            BranchOrFlightErrorMessage = string.Format(formatString, BigId);
+            if (requestVersion == _productInfoRequestVersion)
+            {
+                string formatString = Resources.Strings.PackageUpload.ProductWithStoreIdNotFoundConfigHereErrMsg;
+                BranchOrFlightErrorMessage = string.Format(formatString, BigId);
+            }
         }
         catch (Exception ex)
         {
-            BranchOrFlightErrorMessage = $"{Resources.Strings.PackageUpload.ErrorGettingProdInfo} {ex.Message}"; //$"Error getting product information. {ex.Message}";
+            if (requestVersion == _productInfoRequestVersion)
+            {
+                BranchOrFlightErrorMessage = $"{Resources.Strings.PackageUpload.ErrorGettingProdInfo} {ex.Message}"; //$"Error getting product information. {ex.Message}";
+            }
         }
         finally
         {
-            IsLoadingBranchesAndFlights = false;
+            if (requestVersion == _productInfoRequestVersion)
+            {
+                IsLoadingBranchesAndFlights = false;
+                CheckCanExecuteUploadCommand();
+            }
         }
     }
 
@@ -1118,6 +1151,14 @@ public partial class PackageUploadViewModel : BaseViewModel
         if (IsMsixvc2Package)
         {
             StartMsixvc2Upload();
+            return;
+        }
+
+        if (!File.Exists(SubValFilePath))
+        {
+            PackageErrorMessage = string.Format(Resources.Strings.PackageUpload.SubValLogNotFoundErrMsg,
+                Path.Combine(Path.GetDirectoryName(PackageFilePath) ?? string.Empty,
+                    $"Validator_{Path.GetFileNameWithoutExtension(PackageFilePath)}.xml"));
             return;
         }
 
